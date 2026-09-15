@@ -28,7 +28,7 @@ packages:
     # Generation 10: HostServices.signals (gen 9) so Lore can report imports
     # and index failures into the notification feed, plus gen 10's
     # subscriptions and pane locators. MUST NOT be ahead of the host's pin.
-    revision: 91ed630a24dc187f8988c104d16a640d3ee7562c
+    revision: 7bb80e9f1d01d468949f6c776dd111c9d6b8d690
   GRDB:
     url: https://github.com/groue/GRDB.swift
     from: "6.29.3"
