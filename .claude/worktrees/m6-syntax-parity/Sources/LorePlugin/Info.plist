@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleIdentifier</key><string>com.ainkrad.plugin.lore</string>
+    <key>CFBundleName</key><string>LorePlugin</string>
+    <key>CFBundleExecutable</key><string>LorePlugin</string>
+    <key>CFBundlePackageType</key><string>BNDL</string>
+    <key>NSPrincipalClass</key><string>LoreEntryPoint</string>
+    <key>AinkradAppID</key><string>lore</string>
+    <key>AinkradDisplayName</key><string>Lore</string>
+    <key>AinkradIconSymbol</key><string>book.closed</string>
+    <key>AinkradAPIVersion</key><integer>7</integer>
+    <key>AinkradPresentation</key><string>pane</string>
+</dict>
+</plist>
