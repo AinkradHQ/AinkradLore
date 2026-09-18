@@ -77,7 +77,7 @@ public struct LoreApp: AinkradApp {
     }
 
     public static func makeRootView(host: HostServices) -> AnyView {
-        AnyView(LoreRootView(store: store(for: host), theme: host.theme))
+        makeRootView(host: host, mode: .advanced)
     }
     public static func makeSettingsView(host: HostServices) -> AnyView {
         AnyView(LoreSettingsView(store: store(for: host), theme: host.theme))
@@ -107,5 +107,22 @@ extension LoreApp: AinkradAppTeardown {
         // alive for the rest of the process and let the assistant keep calling
         // into a vault-less instance.
         mcpServers.remove(instance)
+    }
+}
+
+/// Generation 11: Lore's basic mode is one document, rendered and editable —
+/// and the mode a `.md` opened from Hoard or Rune lands in.
+extension LoreApp: AinkradAppModes {
+    public static func makeRootView(host: HostServices, mode: PluginMode) -> AnyView {
+        switch mode {
+        case .basic:
+            return AnyView(LoreBasicView(store: store(for: host), theme: host.theme))
+        case .advanced:
+            return AnyView(LoreRootView(store: store(for: host), theme: host.theme))
+        // Resilient enum: fall back to advanced, never to a stripped view for a
+        // mode this build does not understand.
+        @unknown default:
+            return AnyView(LoreRootView(store: store(for: host), theme: host.theme))
+        }
     }
 }
