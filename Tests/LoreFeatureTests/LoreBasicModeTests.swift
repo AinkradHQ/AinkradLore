@@ -32,7 +32,8 @@ final class LoreBasicModeTests: XCTestCase {
         // The state a deep link has not arrived in yet. It must offer a way
         // out rather than render an inert blank pane.
         let root = try tempVault()
-        _ = LoreBasicView(store: try makeStore(at: root), theme: HostTheme(TestTokens.make())).body
+        _ = LoreBasicView(store: try makeStore(at: root), theme: HostTheme(TestTokens.make()),
+                          launcher: StubLauncher()).body
     }
 
     func test_basicView_showsTheOpenDocument() throws {
@@ -43,7 +44,8 @@ final class LoreBasicModeTests: XCTestCase {
         store.open(url: root.appendingPathComponent("roadmap.md"))
 
         XCTAssertEqual(store.selectedTab?.url.lastPathComponent, "roadmap.md")
-        _ = LoreBasicView(store: store, theme: HostTheme(TestTokens.make())).body
+        _ = LoreBasicView(store: store, theme: HostTheme(TestTokens.make()),
+                          launcher: StubLauncher()).body
     }
 
     func test_openingByURLNeedsNoIndexQuery() throws {
@@ -83,5 +85,60 @@ final class LoreBasicModeTests: XCTestCase {
         // what an un-updated host renders.
         let root = try tempVault()
         _ = LoreRootView(store: try makeStore(at: root), theme: HostTheme(TestTokens.make()))
+    }
+}
+
+@MainActor
+private final class StubLauncher: PluginAppLauncher {
+    var pending: String?
+    private(set) var takeCount = 0
+    func open(appID: String, payload: String?) {}
+    func takePendingLaunch() -> String? {
+        takeCount += 1
+        defer { pending = nil }
+        return pending
+    }
+}
+
+/// Collecting a document handed over by Hoard or Rune.
+@MainActor
+final class LoreLaunchIntentTests: XCTestCase {
+
+    private func tempVault() throws -> URL {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("lore-intent-\(UUID())")
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        return root
+    }
+
+    func test_anOpenDocumentIntentOpensThatFile() throws {
+        let root = try tempVault()
+        let file = root.appendingPathComponent("handed-over.md")
+        try "# from Hoard".write(to: file, atomically: true, encoding: .utf8)
+
+        let store = LoreStore(documents: FakeDocs(),
+                              indexPath: root.appendingPathComponent(".idx.sqlite"))
+        try store.setVaultRootForTesting(root)
+
+        let intent = AinkradLaunchIntent(path: file.path, mode: .basic)
+        let decoded = try XCTUnwrap(AinkradLaunchIntent.decode(intent.json))
+        XCTAssertTrue(decoded.isOpenDocument)
+        store.open(url: URL(fileURLWithPath: decoded.path))
+
+        XCTAssertEqual(store.selectedTab?.url.lastPathComponent, "handed-over.md")
+        XCTAssertNil(store.openError)
+    }
+
+    func test_aForeignPayloadIsIgnoredRatherThanTreatedAsAnError() {
+        // Leyline sends SSH launches down the same channel. "Not mine" must not
+        // become "something went wrong", or one app launch breaks another.
+        let ssh = #"{"host":"example.com","port":22,"username":"a","identityFile":"/k"}"#
+        XCTAssertNil(AinkradLaunchIntent.decode(ssh))
+    }
+
+    func test_noPendingLaunchOpensNothing() {
+        // The ordinary case: opening Lore in basic with nothing handed over
+        // must not invent a document.
+        XCTAssertNil(AinkradLaunchIntent.decode(nil))
     }
 }

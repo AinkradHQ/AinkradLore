@@ -22,14 +22,17 @@ import AinkradAppKit
 struct LoreBasicView: View {
     @Bindable var store: LoreStore
     let theme: HostTheme
+    /// Read only to collect a document handed over by Hoard or Rune.
+    let launcher: PluginAppLauncher
 
     @Environment(\.ainkradSetPaneMode) private var setPaneMode
     @State private var ops: SidebarOperations
     @State private var showingActions = false
 
-    init(store: LoreStore, theme: HostTheme) {
+    init(store: LoreStore, theme: HostTheme, launcher: PluginAppLauncher) {
         self.store = store
         self.theme = theme
+        self.launcher = launcher
         _ops = State(initialValue: SidebarOperations(store: store))
     }
 
@@ -39,6 +42,20 @@ struct LoreBasicView: View {
                           subtitle: subtitle) {
             content
         }
+        // Collect a document handed over by Hoard or Rune.
+        //
+        // `takePendingLaunch()` CONSUMES, and the payload may not be ours —
+        // Leyline sends SSH launches down the same channel to Rune — so the
+        // kind is checked before the path is acted on. A payload that is not an
+        // open-document intent is simply not ours; treating it as an error is
+        // how one app's launch breaks another's.
+        .onAppear(perform: collectPendingDocument)
+    }
+
+    private func collectPendingDocument() {
+        guard let intent = AinkradLaunchIntent.decode(launcher.takePendingLaunch()),
+              intent.isOpenDocument else { return }
+        store.open(url: URL(fileURLWithPath: intent.path))
     }
 
     private var title: String {
