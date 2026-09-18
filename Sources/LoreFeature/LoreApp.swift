@@ -117,7 +117,8 @@ extension LoreApp: AinkradAppModes {
     public static func makeRootView(host: HostServices, mode: PluginMode) -> AnyView {
         switch mode {
         case .basic:
-            return AnyView(LoreBasicView(store: store(for: host), theme: host.theme))
+            return AnyView(LoreBasicView(store: store(for: host), theme: host.theme,
+                                         launcher: host.apps))
         case .advanced:
             return AnyView(LoreRootView(store: store(for: host), theme: host.theme))
         // Resilient enum: fall back to advanced, never to a stripped view for a
