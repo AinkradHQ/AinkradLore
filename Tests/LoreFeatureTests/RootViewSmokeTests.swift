@@ -22,7 +22,8 @@ final class RootViewSmokeTests: XCTestCase {
     }
 
     func test_settingsView_builds() {
-        _ = LoreSettingsView(store: makeStore(), theme: HostTheme(TestTokens.make()))
+        _ = LoreSettingsView(store: makeStore(), theme: HostTheme(TestTokens.make()),
+                             presentation: StubPresentation(), modeControl: StubMode())
     }
 
     func test_documentPane_buildsForEachOpenTab() throws {
@@ -288,4 +289,16 @@ enum TestTokens {
         HostThemeTokens(themeID: "t", background: .black, surface: .gray, surfaceElevated: .gray,
             accentPrimary: .blue, accentSecondary: .teal, accentTertiary: .green, foreground: .white)
     }
+}
+
+@MainActor private struct StubPresentation: PluginPresentationControl {
+    var current: PluginPresentation { .pane }
+    func set(_ presentation: PluginPresentation) {}
+    func reset() {}
+}
+
+@MainActor private struct StubMode: PluginModeControl {
+    var current: PluginMode { .advanced }
+    func set(_ mode: PluginMode) {}
+    func reset() {}
 }

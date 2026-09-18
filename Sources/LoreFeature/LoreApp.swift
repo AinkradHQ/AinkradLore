@@ -80,7 +80,8 @@ public struct LoreApp: AinkradApp {
         makeRootView(host: host, mode: .advanced)
     }
     public static func makeSettingsView(host: HostServices) -> AnyView {
-        AnyView(LoreSettingsView(store: store(for: host), theme: host.theme))
+        AnyView(LoreSettingsView(store: store(for: host), theme: host.theme,
+                                 presentation: host.presentation, modeControl: host.mode))
     }
     public static func chromeFill(host: HostServices) -> Color? { host.theme.tokens.background }
 }
