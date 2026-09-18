@@ -120,11 +120,29 @@ extension LoreApp: AinkradAppModes {
             return AnyView(LoreBasicView(store: store(for: host), theme: host.theme,
                                          launcher: host.apps))
         case .advanced:
-            return AnyView(LoreRootView(store: store(for: host), theme: host.theme))
+            return AnyView(advancedRoot(host: host))
         // Resilient enum: fall back to advanced, never to a stripped view for a
         // mode this build does not understand.
         @unknown default:
-            return AnyView(LoreRootView(store: store(for: host), theme: host.theme))
+            return AnyView(advancedRoot(host: host))
         }
+    }
+
+    /// Advanced, wrapped so it ALSO collects a document handed over by Hoard or
+    /// Rune.
+    ///
+    /// Only the basic root collected it at first, and Lore's declared default
+    /// is `advanced` — so the file was enqueued, Lore opened advanced, nothing
+    /// read the payload, and the document never appeared. Both roots collect
+    /// now: the sender asked for a document to be opened, and which mode the
+    /// user happens to prefer is not the sender's problem.
+    private static func advancedRoot(host: HostServices) -> some View {
+        let store = store(for: host)
+        return LoreRootView(store: store, theme: host.theme)
+            .onAppear {
+                guard let intent = AinkradLaunchIntent.decode(host.apps.takePendingLaunch()),
+                      intent.isOpenDocument else { return }
+                store.open(url: URL(fileURLWithPath: intent.path))
+            }
     }
 }
