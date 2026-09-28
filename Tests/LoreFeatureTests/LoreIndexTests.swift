@@ -27,6 +27,30 @@ final class LoreIndexTests: XCTestCase {
         XCTAssertEqual(try idx.search("Beta").map(\.id), ["b"])   // title is indexed too
     }
 
+    /// A note NAMED for the query outranks one that merely mentions it.
+    func test_search_ranksATitleHitAboveABodyHit() throws {
+        let index = try makeIndex()
+        try index.upsert(IndexEntry(url: URL(fileURLWithPath: "/v/body.md"), type: "markdown",
+            payload: IndexPayload(title: "Notes", plaintext: "about the raven and the raven"),
+            updated: Date()))
+        try index.upsert(IndexEntry(url: URL(fileURLWithPath: "/v/title.md"), type: "markdown",
+            payload: IndexPayload(title: "Raven", plaintext: "unrelated words here"),
+            updated: Date()))
+        XCTAssertEqual(try index.search("raven").map(\.title), ["Raven", "Notes"])
+    }
+
+    /// Among equally relevant notes, the recently edited one comes first.
+    func test_search_ranksTheNewerOfTwoEqualHitsFirst() throws {
+        let index = try makeIndex()
+        try index.upsert(IndexEntry(url: URL(fileURLWithPath: "/v/old.md"), type: "markdown",
+            payload: IndexPayload(title: "Old", plaintext: "quarterly planning"),
+            updated: Date().addingTimeInterval(-400 * 86_400)))
+        try index.upsert(IndexEntry(url: URL(fileURLWithPath: "/v/new.md"), type: "markdown",
+            payload: IndexPayload(title: "New", plaintext: "quarterly planning"),
+            updated: Date()))
+        XCTAssertEqual(try index.search("quarterly").map(\.title), ["New", "Old"])
+    }
+
     func test_remove_dropsRow() throws {
         let idx = try makeIndex()
         try idx.upsert(entry("a", title: "Alpha", body: "x"))

@@ -1,4 +1,5 @@
 import Foundation
+import NaturalLanguage
 import Observation
 
 /// Owns the vault's derived state: the SQLite index, the folder watcher, and
@@ -83,7 +84,7 @@ public final class VaultIndexCoordinator {
     public private(set) var directoryPaths: [String] = []
 
     private let indexPath: URL
-    private var index: LoreIndex?
+    private(set) var index: LoreIndex?
     private var watcher: FolderWatcher?
     /// `currentResolver()`'s cache. `LinkResolver.init` builds a dictionary
     /// from every row plus a `sortByPreference` sort per key — cheap once per
@@ -118,6 +119,15 @@ public final class VaultIndexCoordinator {
     /// (i.e. every time the unchanged-vault fast path did NOT fire). No
     /// production reader — it exists because there was no other clean way to
     /// assert "a rebuild was skipped" without asserting on timing.
+    // Semantic search state — see `VaultIndexCoordinator+Semantic.swift`.
+    // Ignored by Observation: search reads (and caches into) these while a
+    // view body is rendering, and a tracked write there would re-render it.
+    @ObservationIgnored var embeddings: [String: [Float]] = [:]
+    @ObservationIgnored var isEmbedding = false
+    @ObservationIgnored var embeddingModel: NLEmbedding?
+    @ObservationIgnored var vocabulary: NLEmbedding?
+    @ObservationIgnored var lastQueryNearest: (query: String, limit: Int, nearest: [(String, Float)])?
+
     var rebuildsPerformedForTesting = 0
     /// Rescans that took the edits-only path (`reindexEdited`) instead.
     var incrementalRebuildsForTesting = 0
@@ -210,6 +220,7 @@ public final class VaultIndexCoordinator {
         watcher = nil
         rebuildRequestedAgain = false
         index = nil
+        embeddings = [:]
         rows = []
         directoryPaths = []
         vaultRoot = nil
@@ -261,6 +272,7 @@ public final class VaultIndexCoordinator {
     private func performBackgroundRebuild() async {
         defer {
             isRebuilding = false
+            startEmbedding()
             if rebuildRequestedAgain {
                 rebuildRequestedAgain = false
                 startBackgroundRebuild()
@@ -624,12 +636,15 @@ public final class VaultIndexCoordinator {
     }
 
     public func search(_ query: String) -> [IndexRow] {
-        (try? index?.search(query)) ?? []
+        let keyword = (try? index?.search(query)) ?? []
+        return keyword + semanticRows(for: query, excluding: Set(keyword.map(\.path.path)))
     }
 
     /// Search with an excerpt per hit — see `LoreIndex.searchHits`.
     public func searchHits(_ query: String) -> [SearchHit] {
-        (try? index?.searchHits(query)) ?? []
+        let keyword = (try? index?.searchHits(query)) ?? []
+        return keyword + semanticRows(for: query, excluding: Set(keyword.map(\.row.path.path)))
+            .map { SearchHit(row: $0, snippet: nil) }
     }
 
     /// `FileManager`'s enumerator (in `scanVault`) hands back paths resolved
@@ -659,6 +674,10 @@ public final class VaultIndexCoordinator {
         var buffer = [Int8](repeating: 0, count: Int(PATH_MAX))
         guard realpath(url.path, &buffer) != nil else { return url }
         return URL(fileURLWithPath: String(cString: buffer))
+    }
+
+    func linkNeighbours(of url: URL) -> [String: Int] {
+        (try? index?.linkNeighbours(of: url)) ?? [:]
     }
 
     func backlinkRows(to url: URL) -> [IndexRow] {
@@ -816,6 +835,7 @@ public final class VaultIndexCoordinator {
         // first under `all()`'s `ORDER BY updated DESC`.
         rows.removeAll { $0.path == url }
         if let row = try index.row(at: url) { rows.insert(row, at: 0) }
+        startEmbedding()   // re-embeds just this note; the rest are current
         // The per-save path — the one that fires when the SAME file is open
         // (and saved) in another split pane, not only when an external tool
         // writes it behind the store's back. `url` is already known exactly,
