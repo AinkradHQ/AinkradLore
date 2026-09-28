@@ -148,7 +148,22 @@ public final class LoreIndex: @unchecked Sendable {
     /// 8: M6 added `blocks`, storing `^block-id` anchors so `[[Note#^id]]`
     /// can resolve. A v7 index has no such rows for any note. Discard and
     /// rebuild — the mechanism this constant exists for.
-    static let schemaVersion: Int32 = 8
+    /// 9: Enhancements E1 — the walk indexes only documents (plus name-only
+    /// media rows for embeds) and prunes `node_modules`/`build`/… and
+    /// `.gitignore`d paths. A v8 index holds every file under the vault root —
+    /// 5.9 GB on one machine. Discard and rebuild.
+    static let schemaVersion: Int32 = 9
+
+    /// Every Lore pane opens its own queue on the SAME file, and the embedding
+    /// pass writes in the background — so a read can meet another queue's
+    /// write lock. Without a busy timeout that read fails at once: the version
+    /// probe then counts the index as stale and DELETES it, and the fingerprint
+    /// fast path falls through to a full rescan. Wait for the write instead.
+    static var configuration: Configuration {
+        var config = Configuration()
+        config.busyMode = .timeout(5)
+        return config
+    }
 
     public init(path: URL) throws {
         // Probe the existing file's version in its own scope and CLOSE it
@@ -166,7 +181,7 @@ public final class LoreIndex: @unchecked Sendable {
         if FileManager.default.fileExists(atPath: path.path) {
             var stale = true
             do {
-                let probe = try DatabaseQueue(path: path.path)
+                let probe = try DatabaseQueue(path: path.path, configuration: Self.configuration)
                 let version = try probe.read { db in
                     try Int32.fetchOne(db, sql: "PRAGMA user_version") ?? 0
                 }
@@ -177,7 +192,7 @@ public final class LoreIndex: @unchecked Sendable {
             }
             if stale { Self.recreate(at: path) }
         }
-        dbQueue = try DatabaseQueue(path: path.path)
+        dbQueue = try DatabaseQueue(path: path.path, configuration: Self.configuration)
         try dbQueue.write { db in
             try db.execute(sql: """
                 CREATE TABLE IF NOT EXISTS documents(
@@ -431,6 +446,14 @@ public final class LoreIndex: @unchecked Sendable {
     public func all() throws -> [IndexRow] {
         try dbQueue.read { db in
             try Row.fetchAll(db, sql: "SELECT * FROM documents ORDER BY updated DESC").map(Self.row)
+        }
+    }
+
+    /// One document's row, or `nil` when it is not indexed.
+    public func row(at url: URL) throws -> IndexRow? {
+        try dbQueue.read { db in
+            try Row.fetchOne(db, sql: "SELECT * FROM documents WHERE path = ?",
+                             arguments: [Self.canonical(url)]).map(Self.row)
         }
     }
 

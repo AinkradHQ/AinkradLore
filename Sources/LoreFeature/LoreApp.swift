@@ -79,6 +79,10 @@ public struct LoreApp: AinkradApp {
     public static func makeRootView(host: HostServices) -> AnyView {
         makeRootView(host: host, mode: .advanced)
     }
+    public static func settingsCatalog(host: HostServices) -> SettingsPage? {
+        LoreSettingsCatalog.page(store: store(for: host), theme: host.theme)
+    }
+
     public static func makeSettingsView(host: HostServices) -> AnyView {
         AnyView(LoreSettingsView(store: store(for: host), theme: host.theme,
                                  presentation: host.presentation, modeControl: host.mode))

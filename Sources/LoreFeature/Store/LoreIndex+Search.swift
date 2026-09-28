@@ -12,14 +12,32 @@ import GRDB
 /// query being added that forgets it.
 extension LoreIndex {
 
+    /// Hits per query. FTS ranks best-first, so nobody reads past this — and
+    /// without it a one-letter query over a large vault materialised every row.
+    /// `ponytail:` a cap, not paging; add an offset when a list needs "more".
+    public static let searchLimit = 100
+
+    /// Best-first order for a MATCH. `bm25` is negative (more negative =
+    /// better); scaling it by a factor above 1 promotes a hit.
+    ///
+    /// - A title hit weighs 10× a body hit: a note NAMED for the query is
+    ///   almost always the one being looked for.
+    /// - Recency multiplies by 1–2: 2× for a note edited now, 1.5× at 30 days,
+    ///   fading toward 1× — so among equally relevant notes the fresh one wins,
+    ///   but an old note that matches far better still does.
+    static let rankOrder = """
+        ORDER BY bm25(documents_fts, 10.0, 1.0)
+            * (1.0 + 1.0 / (1.0 + max(0, strftime('%s','now') - n.updated) / 2592000.0))
+        """
+
     public func search(_ query: String) throws -> [IndexRow] {
         guard let expression = Self.ftsExpression(for: query) else { return try all() }
         return try dbQueue.read { db in
             try Row.fetchAll(db, sql: """
                 SELECT n.* FROM documents n
                 JOIN documents_fts f ON f.rowid = n.rowid
-                WHERE documents_fts MATCH ? ORDER BY rank;
-            """, arguments: [expression]).map(Self.row)
+                WHERE documents_fts MATCH ? \(Self.rankOrder) LIMIT ?;
+            """, arguments: [expression, Self.searchLimit]).map(Self.row)
         }
     }
 
@@ -52,8 +70,8 @@ extension LoreIndex {
                 SELECT n.*, snippet(documents_fts, 1, ?, ?, '…', 12) AS excerpt
                 FROM documents n
                 JOIN documents_fts f ON f.rowid = n.rowid
-                WHERE documents_fts MATCH ? ORDER BY rank;
-            """, arguments: [SearchSnippet.open, SearchSnippet.close, expression])
+                WHERE documents_fts MATCH ? \(Self.rankOrder) LIMIT ?;
+            """, arguments: [SearchSnippet.open, SearchSnippet.close, expression, Self.searchLimit])
             .map { row in
                 let marked: String = row["excerpt"] ?? ""
                 let parsed = SearchSnippet.parse(marked: marked)

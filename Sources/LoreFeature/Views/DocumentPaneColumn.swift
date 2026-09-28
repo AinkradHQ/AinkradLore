@@ -93,7 +93,7 @@ struct DocumentPaneColumn: View {
         guard let row = headerRow else { return [] }
         // "Linked mentions" leads: the one item that INSPECTS the document
         // rather than changing it.
-        return [AinkradMenuItem(title: "Linked mentions", systemName: "link",
+        return [AinkradMenuItem(title: "Connections", systemName: "link",
                                 shortcut: "\u{21E7}\u{2318}B",
                                 action: { mentionsRequest = true })]
             + loreRowMenuItems(row: row, ops: ops, store: store)

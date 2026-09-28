@@ -116,12 +116,14 @@ final class LoreStoreTests: XCTestCase {
         try "beta text".write(
             to: root.appendingPathComponent("b.txt"), atomically: true, encoding: .utf8)
         try "gamma".write(
-            to: root.appendingPathComponent("c.xlsx"), atomically: true, encoding: .utf8)
+            to: root.appendingPathComponent("c.png"), atomically: true, encoding: .utf8)
+        try "delta".write(
+            to: root.appendingPathComponent("d.xlsx"), atomically: true, encoding: .utf8)
 
         let entries = VaultIndexCoordinator.scanVault(at: root)
-        // `.xlsx` is indexed as an ATTACHMENT row rather than skipped: the list
-        // must not lie about what is in the vault (see `scanVault`). It carries
-        // no plaintext, so it is metadata only.
+        // Media (`.png`) is an ATTACHMENT row so embeds resolve; it carries no
+        // plaintext, so it is metadata only. `.xlsx` is neither a document nor
+        // media, so it is not part of the vault (`VaultWalk`).
         XCTAssertEqual(Set(entries.map(\.type)), ["markdown", "plaintext", AttachmentEngine.identifier])
         XCTAssertEqual(entries.first { $0.type == AttachmentEngine.identifier }?.payload.plaintext, "")
     }
@@ -162,7 +164,7 @@ final class LoreStoreTests: XCTestCase {
         let limit = VaultIndexCoordinator.maxIndexedPlaintextBytes
         // "needle" up front, then well past the cap.
         let big = "needle\n" + String(repeating: "x", count: limit + 5_000)
-        try big.write(to: root.appendingPathComponent("big.log"),
+        try big.write(to: root.appendingPathComponent("big.txt"),
                       atomically: true, encoding: .utf8)
 
         let entries = VaultIndexCoordinator.scanVault(at: root)
@@ -189,10 +191,10 @@ final class LoreStoreTests: XCTestCase {
 
     // MARK: - attachment file types
     //
-    // A vault full of `.xlsx` must not make the file list lie about what is
-    // there. Files no specific engine claims are indexed and opened as
-    // metadata-only `AttachmentEngine` rows so they list, and clicking one
-    // opens a read-only QuickLook preview.
+    // Media files beside the notes are indexed as metadata-only
+    // `AttachmentEngine` rows so embeds resolve and clicking one opens a
+    // read-only QuickLook preview. Code and other non-documents (`VaultWalk`)
+    // are not part of the vault at all.
 
     private func makeMixedVault() throws -> URL {
         let root = tempDir()
@@ -206,26 +208,28 @@ final class LoreStoreTests: XCTestCase {
             to: root.appendingPathComponent("paper.pdf"), atomically: true, encoding: .utf8)
         try "sheetstuff zorkmid".write(
             to: root.appendingPathComponent("book.xlsx"), atomically: true, encoding: .utf8)
+        try "pixels zorkmid".write(
+            to: root.appendingPathComponent("diagram.png"), atomically: true, encoding: .utf8)
         return root
     }
 
-    func test_mixedVault_listsEveryFileIncludingAttachmentTypes() throws {
+    func test_mixedVault_listsDocumentsAndMediaButNotCode() throws {
         let root = try makeMixedVault(); let s = try makeStore(root)
         try s.rebuild()
         XCTAssertEqual(Set(s.rows.map(\.path.lastPathComponent)),
-                       ["note.md", "log.txt", "code.swift", "paper.pdf", "book.xlsx"])
+                       ["note.md", "log.txt", "paper.pdf", "diagram.png"])
     }
 
     func test_attachmentRow_isMetadataOnlyAndTitledByFilename() throws {
         let root = try makeMixedVault(); let s = try makeStore(root)
         try s.rebuild()
-        let row = try XCTUnwrap(s.rows.first { $0.path.lastPathComponent == "book.xlsx" })
+        let row = try XCTUnwrap(s.rows.first { $0.path.lastPathComponent == "diagram.png" })
         XCTAssertEqual(row.type, AttachmentEngine.identifier)
-        XCTAssertEqual(row.title, "book.xlsx")
+        XCTAssertEqual(row.title, "diagram.png")
         XCTAssertTrue(row.tags.isEmpty)
         XCTAssertTrue(row.properties.isEmpty)
         let entry = try XCTUnwrap(VaultIndexCoordinator.scanVault(at: root)
-            .first { $0.url.lastPathComponent == "book.xlsx" })
+            .first { $0.url.lastPathComponent == "diagram.png" })
         XCTAssertEqual(entry.payload.plaintext, "")
     }
 
@@ -235,7 +239,7 @@ final class LoreStoreTests: XCTestCase {
         XCTAssertTrue(s.search("zorkmid").isEmpty,
                       "an attachment row matched body text that was never indexed")
         // The filename IS indexed as the title, so the row is still findable.
-        XCTAssertEqual(s.search("book").map(\.path.lastPathComponent), ["book.xlsx"])
+        XCTAssertEqual(s.search("diagram").map(\.path.lastPathComponent), ["diagram.png"])
     }
 
     /// Engine resolution is now TOTAL (Task 2): a file no specific engine
@@ -247,7 +251,7 @@ final class LoreStoreTests: XCTestCase {
     func test_openingAttachmentRow_opensAReadOnlyTab() throws {
         let root = try makeMixedVault(); let s = try makeStore(root)
         try s.rebuild()
-        let row = try XCTUnwrap(s.rows.first { $0.path.lastPathComponent == "book.xlsx" })
+        let row = try XCTUnwrap(s.rows.first { $0.path.lastPathComponent == "diagram.png" })
         s.open(row)
         XCTAssertNil(s.openError)
         let tab = try XCTUnwrap(s.selectedTab)
@@ -272,7 +276,9 @@ final class LoreStoreTests: XCTestCase {
         XCTAssertTrue(VaultIndexCoordinator.scanVault(at: root).isEmpty)
     }
 
-    func test_scanVault_indexesAPackageAsOneAttachmentRowNotItsInternals() throws {
+    /// A package that is not a document format (`.pages`) is not part of the
+    /// vault, and its internals — `preview.jpg` here — are never walked either.
+    func test_scanVault_skipsANonDocumentPackageAndItsInternals() throws {
         let root = tempDir()
         let pkg = root.appendingPathComponent("Report.pages", isDirectory: true)
         let contents = pkg.appendingPathComponent("Contents", isDirectory: true)
@@ -289,10 +295,7 @@ final class LoreStoreTests: XCTestCase {
         let isPackage = try pkg.resourceValues(forKeys: [.isPackageKey]).isPackage
         XCTAssertEqual(isPackage, true, "fixture is not recognized as a package on this system")
 
-        let entries = VaultIndexCoordinator.scanVault(at: root)
-        XCTAssertEqual(entries.count, 1)
-        XCTAssertEqual(entries.first?.type, AttachmentEngine.identifier)
-        XCTAssertEqual(entries.first?.payload.title, "Report.pages")
+        XCTAssertTrue(VaultIndexCoordinator.scanVault(at: root).isEmpty)
     }
 
     func test_scanVault_plainSubdirectoryYieldsNoRowButItsFilesAreStillIndexed() throws {
@@ -300,11 +303,11 @@ final class LoreStoreTests: XCTestCase {
         let folder = root.appendingPathComponent("Projects", isDirectory: true)
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         try "log line".write(
-            to: folder.appendingPathComponent("run.log"), atomically: true, encoding: .utf8)
+            to: folder.appendingPathComponent("run.txt"), atomically: true, encoding: .utf8)
 
         let entries = VaultIndexCoordinator.scanVault(at: root)
         XCTAssertEqual(entries.count, 1)
-        XCTAssertEqual(entries.first?.url.lastPathComponent, "run.log")
+        XCTAssertEqual(entries.first?.url.lastPathComponent, "run.txt")
         XCTAssertFalse(entries.contains { $0.url.lastPathComponent == "Projects" })
     }
 

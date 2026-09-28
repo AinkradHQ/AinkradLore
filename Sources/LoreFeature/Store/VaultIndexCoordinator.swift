@@ -1,4 +1,5 @@
 import Foundation
+import NaturalLanguage
 import Observation
 
 /// Owns the vault's derived state: the SQLite index, the folder watcher, and
@@ -83,7 +84,7 @@ public final class VaultIndexCoordinator {
     public private(set) var directoryPaths: [String] = []
 
     private let indexPath: URL
-    private var index: LoreIndex?
+    private(set) var index: LoreIndex?
     private var watcher: FolderWatcher?
     /// `currentResolver()`'s cache. `LinkResolver.init` builds a dictionary
     /// from every row plus a `sortByPreference` sort per key — cheap once per
@@ -118,7 +119,18 @@ public final class VaultIndexCoordinator {
     /// (i.e. every time the unchanged-vault fast path did NOT fire). No
     /// production reader — it exists because there was no other clean way to
     /// assert "a rebuild was skipped" without asserting on timing.
+    // Semantic search state — see `VaultIndexCoordinator+Semantic.swift`.
+    // Ignored by Observation: search reads (and caches into) these while a
+    // view body is rendering, and a tracked write there would re-render it.
+    @ObservationIgnored var embeddings: [String: [Float]] = [:]
+    @ObservationIgnored var isEmbedding = false
+    @ObservationIgnored var embeddingModel: NLEmbedding?
+    @ObservationIgnored var vocabulary: NLEmbedding?
+    @ObservationIgnored var lastQueryNearest: (query: String, limit: Int, nearest: [(String, Float)])?
+
     var rebuildsPerformedForTesting = 0
+    /// Rescans that took the edits-only path (`reindexEdited`) instead.
+    var incrementalRebuildsForTesting = 0
 
     /// Open editors' subscriptions to "a file changed on disk", keyed by the
     /// token `registerExternalChangeHandler` handed back — see that method.
@@ -191,7 +203,9 @@ public final class VaultIndexCoordinator {
         // inside `makeRootView` — i.e. inside a SwiftUI `body` evaluation. A
         // whole-vault scan there froze the UI on first open, for as long as the
         // user's vault was large.
-        rows = (try? index?.all()) ?? []
+        // The paint is the first thing the background rebuild does, off the
+        // main actor — reading every row here ran inside a SwiftUI `body`.
+        rows = []
         startBackgroundRebuild()
         watcher = FolderWatcher(url: root) { [weak self] in self?.handleVaultChange() }
     }
@@ -206,6 +220,7 @@ public final class VaultIndexCoordinator {
         watcher = nil
         rebuildRequestedAgain = false
         index = nil
+        embeddings = [:]
         rows = []
         directoryPaths = []
         vaultRoot = nil
@@ -257,6 +272,7 @@ public final class VaultIndexCoordinator {
     private func performBackgroundRebuild() async {
         defer {
             isRebuilding = false
+            startEmbedding()
             if rebuildRequestedAgain {
                 rebuildRequestedAgain = false
                 startBackgroundRebuild()
@@ -264,6 +280,15 @@ public final class VaultIndexCoordinator {
         }
         guard let root = vaultRoot, let index else { return }
         lastRebuildError = nil
+        // First rebuild after `activate`: paint from what the index already
+        // holds, so a reopen shows the vault before the disk is checked.
+        if rows.isEmpty {
+            let painted = await Task.detached(priority: .userInitiated) {
+                (try? index.all()) ?? []
+            }.value
+            guard self.index === index else { return }   // shut down meanwhile
+            if rows.isEmpty { rows = painted }
+        }
         // Cheap pass first: if the vault is identical to what is indexed, the
         // whole scan below is wasted work. Measured on a 1547-note vault: the
         // full rescan burns 50-105% CPU for 45-60s, on EVERY launch, and on a
@@ -302,6 +327,23 @@ public final class VaultIndexCoordinator {
                 // reads it.
                 directoryPaths = Array(indexedDirectories)
                 return
+            }
+            // Edits only — same files, same folders, some contents changed: the
+            // common case (an agent or editor rewriting notes). Re-index just
+            // those files instead of re-parsing the whole vault.
+            if Set(onDisk.keys) == Set(indexed.keys), onDiskDirectories == indexedDirectories {
+                let changed = onDisk.compactMap { indexed[$0.key] == $0.value ? nil : $0.key }
+                let known = rows
+                let updated = await Task.detached(priority: .utility) {
+                    Self.reindexEdited(changed, known: known, in: index)
+                }.value
+                if let updated {
+                    incrementalRebuildsForTesting += 1
+                    notifyChangedPaths(from: rows, to: updated)
+                    rows = updated
+                    directoryPaths = Array(indexedDirectories)
+                    return
+                }
             }
         }
         rebuildsPerformedForTesting += 1
@@ -400,44 +442,13 @@ public final class VaultIndexCoordinator {
     /// `scanVault` and `scanFingerprints`. Both need the exact same answer —
     /// a copy that drifts is exactly how the fast path fires when it should
     /// not (see `scanFingerprints`'s doc comment) — so this is the single
-    /// place the skip rules live: dot-prefixed path components below the
-    /// root, directories that are not packages, `.skipsPackageDescendants`.
+    /// place the skip rules are read from — see `VaultWalk`.
     /// Callers get back canonical URLs only; every per-file cost (loading,
     /// parsing, `attributesOfItem`) is theirs to pay or skip.
     nonisolated private static func walkDocumentFiles(at root: URL) -> [URL] {
-        var urls: [URL] = []
-        // Only components BELOW the root are ours to judge. Testing the
-        // absolute path would make a vault under any dot-prefixed ancestor —
-        // `~/.local/share/notes`, a `.worktrees/` checkout, a sandbox
-        // container — index zero files, silently, showing an empty vault with
-        // no error to explain it.
-        let rootDepth = root.standardizedFileURL.pathComponents.count
-        let enumerator = FileManager.default.enumerator(
-            at: root,
-            includingPropertiesForKeys: [
-                .contentModificationDateKey, .isDirectoryKey, .isPackageKey,
-            ],
-            options: [.skipsPackageDescendants])
-        while let url = enumerator?.nextObject() as? URL {
-            // Skip package internals and tool directories: `.obsidian`,
-            // `.git`, `.trash`, and (later) `.lore` package contents are not
-            // documents in their own right.
-            let relative = url.standardizedFileURL.pathComponents.dropFirst(rootDepth)
-            if relative.contains(where: { $0.hasPrefix(".") }) { continue }
-            // Directories are not documents. They were filtered out for free
-            // while unclaimed files were skipped; now that those are indexed,
-            // every folder would otherwise become a row. A PACKAGE is also a
-            // directory, but `.skipsPackageDescendants` above means its
-            // internals are never walked — so unlike a plain directory, the
-            // package itself must be indexed as a single `attachment` row
-            // (no engine claims a package as its own file type), or it
-            // (and everything a user would recognize as "the document")
-            // disappears from the vault entirely.
-            let values = try? url.resourceValues(forKeys: [.isDirectoryKey, .isPackageKey])
-            if values?.isDirectory == true && values?.isPackage != true { continue }
-            urls.append(url)
-        }
-        return urls
+        // The skip and allow rules live in `VaultWalk` — one place for files
+        // and directories alike, so the sidebar and the index never disagree.
+        VaultWalk.walk(root).files
     }
 
     nonisolated static func scanVault(at root: URL) -> [IndexEntry] {
@@ -449,49 +460,7 @@ public final class VaultIndexCoordinator {
         // `scanVault` is also called directly (tests, `rebuild()`) and the
         // invariant must not depend on which door the caller came through.
         let root = Self.canonical(root)
-        var entries: [IndexEntry] = []
-        for url in Self.walkDocumentFiles(at: root) {
-            // File mtime is DELIBERATELY authoritative for `updated`, and
-            // supersedes markdown's frontmatter `updated:` value, which the
-            // pre-M0 scan used. Two reasons: it is uniform across document
-            // types (plaintext has no frontmatter to read), and the
-            // frontmatter field is day-granularity, so a whole day's notes
-            // tie and `ORDER BY updated DESC` sorts them arbitrarily. This
-            // changes sidebar ordering for vaults where the two disagree.
-            let values = try? url.resourceValues(forKeys: [.contentModificationDateKey])
-            let updated = values?.contentModificationDate ?? Date()
-
-            // Resolution is total (`EngineRegistry.engine(for:)` never returns
-            // nil), so there is no unclaimed branch any more: a file no
-            // specific engine claims loads as an attachment, which indexes its
-            // filename and size and nothing else.
-            let engineType = EngineRegistry.engine(for: url)
-            // An engine that claims a file but fails to LOAD it is left out, as
-            // before: that is a real error, and this scan has nowhere to report
-            // it. `AttachmentEngine.load` cannot fail, so a load failure now
-            // means a specific engine rejected a file it claimed.
-            guard let engine = try? engineType.load(url) else { continue }
-            // Captured ONCE: `indexPayload` re-runs a full markdown parse plus
-            // link scan on markdown documents, so comparing before/after by
-            // calling it twice would double that cost for every document in
-            // the vault. See `DocumentEngine.indexTitle`'s comment on the same
-            // cost, and the `is_truncated` note on `LoreIndex.schemaVersion`.
-            var payload = engine.indexPayload
-            let uncappedByteCount = payload.plaintext.utf8.count
-            payload.plaintext = Self.capped(payload.plaintext)
-            // OR'd with the engine's own report: PDFEngine and RichTextEngine
-            // cap their text before `indexPayload` returns it, so the
-            // before/after comparison above cannot see their truncation — see
-            // `DocumentEngine.isContentTruncated`.
-            let isTruncated = payload.plaintext.utf8.count < uncappedByteCount
-                || engine.isContentTruncated
-            let attributes = try? FileManager.default.attributesOfItem(atPath: url.path)
-            let byteSize = (attributes?[.size] as? Int) ?? 0
-            entries.append(IndexEntry(url: url, type: engineType.identifier,
-                                      payload: payload, updated: updated,
-                                      isEditable: engine.isEditable, byteSize: byteSize,
-                                      isTruncated: isTruncated))
-        }
+        let entries = Self.walkDocumentFiles(at: root).compactMap(Self.loadEntry)
         // Resolution is a second pass because a link can point at any document
         // in the vault, including one the enumerator has not reached yet.
         //
@@ -500,9 +469,16 @@ public final class VaultIndexCoordinator {
         // `ResolvedLink.targetPath`, and therefore every `links.target_path`
         // row, is canonical too. That is what makes `backlinks`,
         // `inboundLinks` and `inboundLinkCount` truthful.
-        let resolver = LinkResolver(documents: entries.map {
+        return resolve(entries, against: entries.map {
             (url: $0.url, title: $0.payload.title, aliases: $0.payload.aliases)
         })
+    }
+
+    /// Links resolved against `documents` — the whole vault's titles and aliases.
+    nonisolated static func resolve(_ entries: [IndexEntry],
+                                    against documents: [(url: URL, title: String, aliases: [String])])
+        -> [IndexEntry] {
+        let resolver = LinkResolver(documents: documents)
         return entries.map { entry in
             IndexEntry(url: entry.url, type: entry.type, payload: entry.payload,
                        updated: entry.updated,
@@ -519,6 +495,77 @@ public final class VaultIndexCoordinator {
                        },
                        isEditable: entry.isEditable, byteSize: entry.byteSize,
                        isTruncated: entry.isTruncated)
+        }
+    }
+
+    /// One file, loaded and reduced to its index payload, links unresolved.
+    /// `nil` when a specific engine claims the file but fails to load it.
+    nonisolated static func loadEntry(_ url: URL) -> IndexEntry? {
+        // File mtime is DELIBERATELY authoritative for `updated`, and
+        // supersedes markdown's frontmatter `updated:` value, which the
+        // pre-M0 scan used. Two reasons: it is uniform across document
+        // types (plaintext has no frontmatter to read), and the
+        // frontmatter field is day-granularity, so a whole day's notes
+        // tie and `ORDER BY updated DESC` sorts them arbitrarily. This
+        // changes sidebar ordering for vaults where the two disagree.
+        let values = try? url.resourceValues(forKeys: [.contentModificationDateKey])
+        let updated = values?.contentModificationDate ?? Date()
+
+        // Resolution is total (`EngineRegistry.engine(for:)` never returns
+        // nil), so there is no unclaimed branch any more: a file no
+        // specific engine claims loads as an attachment, which indexes its
+        // filename and size and nothing else.
+        let engineType = EngineRegistry.engine(for: url)
+        // An engine that claims a file but fails to LOAD it is left out, as
+        // before: that is a real error, and this scan has nowhere to report
+        // it. `AttachmentEngine.load` cannot fail, so a load failure now
+        // means a specific engine rejected a file it claimed.
+        guard let engine = try? engineType.load(url) else { return nil }
+        // Captured ONCE: `indexPayload` re-runs a full markdown parse plus
+        // link scan on markdown documents, so comparing before/after by
+        // calling it twice would double that cost for every document in
+        // the vault. See `DocumentEngine.indexTitle`'s comment on the same
+        // cost, and the `is_truncated` note on `LoreIndex.schemaVersion`.
+        var payload = engine.indexPayload
+        let uncappedByteCount = payload.plaintext.utf8.count
+        payload.plaintext = Self.capped(payload.plaintext)
+        // OR'd with the engine's own report: PDFEngine and RichTextEngine
+        // cap their text before `indexPayload` returns it, so the
+        // before/after comparison above cannot see their truncation — see
+        // `DocumentEngine.isContentTruncated`.
+        let isTruncated = payload.plaintext.utf8.count < uncappedByteCount
+            || engine.isContentTruncated
+        let attributes = try? FileManager.default.attributesOfItem(atPath: url.path)
+        let byteSize = (attributes?[.size] as? Int) ?? 0
+        return IndexEntry(url: url, type: engineType.identifier,
+                          payload: payload, updated: updated,
+                          isEditable: engine.isEditable, byteSize: byteSize,
+                          isTruncated: isTruncated)
+    }
+
+    /// The edits-only rescan: re-index `paths` (canonical, all already in the
+    /// index) and return the refreshed rows — or `nil` to demand a full
+    /// rebuild. A changed title or alias can change how links in OTHER notes
+    /// resolve, so any such change (or a file that no longer loads) bails;
+    /// a pure content edit cannot, so only the edited files' own links need
+    /// resolving, against the vault as the index already knows it.
+    nonisolated static func reindexEdited(_ paths: [String], known: [IndexRow],
+                                          in index: LoreIndex) -> [IndexRow]? {
+        let byPath = Dictionary(known.map { ($0.path.path, $0) }, uniquingKeysWith: { a, _ in a })
+        var entries: [IndexEntry] = []
+        for path in paths {
+            guard let entry = loadEntry(URL(fileURLWithPath: path)),
+                  let old = byPath[path],
+                  old.title == entry.payload.title, old.aliases == entry.payload.aliases
+            else { return nil }
+            entries.append(entry)
+        }
+        let documents = known.map { (url: $0.path, title: $0.title, aliases: $0.aliases) }
+        do {
+            for entry in resolve(entries, against: documents) { try index.upsert(entry) }
+            return try index.all()
+        } catch {
+            return nil
         }
     }
 
@@ -589,12 +636,15 @@ public final class VaultIndexCoordinator {
     }
 
     public func search(_ query: String) -> [IndexRow] {
-        (try? index?.search(query)) ?? []
+        let keyword = (try? index?.search(query)) ?? []
+        return keyword + semanticRows(for: query, excluding: Set(keyword.map(\.path.path)))
     }
 
     /// Search with an excerpt per hit — see `LoreIndex.searchHits`.
     public func searchHits(_ query: String) -> [SearchHit] {
-        (try? index?.searchHits(query)) ?? []
+        let keyword = (try? index?.searchHits(query)) ?? []
+        return keyword + semanticRows(for: query, excluding: Set(keyword.map(\.row.path.path)))
+            .map { SearchHit(row: $0, snippet: nil) }
     }
 
     /// `FileManager`'s enumerator (in `scanVault`) hands back paths resolved
@@ -624,6 +674,10 @@ public final class VaultIndexCoordinator {
         var buffer = [Int8](repeating: 0, count: Int(PATH_MAX))
         guard realpath(url.path, &buffer) != nil else { return url }
         return URL(fileURLWithPath: String(cString: buffer))
+    }
+
+    func linkNeighbours(of url: URL) -> [String: Int] {
+        (try? index?.linkNeighbours(of: url)) ?? [:]
     }
 
     func backlinkRows(to url: URL) -> [IndexRow] {
@@ -718,27 +772,12 @@ public final class VaultIndexCoordinator {
     }
 
     /// Pure, off-actor-safe: every directory under `root`, vault-relative,
-    /// skipping dot-prefixed components and package internals — the same
-    /// rules `scanVault` applies to files. `nonisolated` so it can run inside
+    /// minus everything `VaultWalk` prunes — the same rules `scanVault`
+    /// applies to files. `nonisolated` so it can run inside
     /// `performBackgroundRebuild`'s detached task without a main-actor hop —
     /// see that method and `directoryPaths`'s own doc comment for why it must.
     nonisolated static func scanDirectories(under root: URL) -> [String] {
-        let root = Self.canonical(root)
-        let rootDepth = root.standardizedFileURL.pathComponents.count
-        guard let enumerator = FileManager.default.enumerator(
-            at: root,
-            includingPropertiesForKeys: [.isDirectoryKey, .isPackageKey],
-            options: [.skipsPackageDescendants])
-        else { return [] }
-        var result: [String] = []
-        while let url = enumerator.nextObject() as? URL {
-            let relative = url.standardizedFileURL.pathComponents.dropFirst(rootDepth)
-            if relative.contains(where: { $0.hasPrefix(".") }) { continue }
-            let values = try? url.resourceValues(forKeys: [.isDirectoryKey, .isPackageKey])
-            guard values?.isDirectory == true, values?.isPackage != true else { continue }
-            result.append(relative.joined(separator: "/"))
-        }
-        return result
+        VaultWalk.walk(Self.canonical(root)).directories
     }
 
     /// Index one document after a save, without a whole-vault rescan.
@@ -792,7 +831,11 @@ public final class VaultIndexCoordinator {
                                     updated: Date(), resolvedLinks: resolvedLinks,
                                     isEditable: engine.isEditable, byteSize: byteSize,
                                     isTruncated: isTruncated))
-        rows = try index.all()
+        // One row re-read, not the whole index: `updated` is now, so it sorts
+        // first under `all()`'s `ORDER BY updated DESC`.
+        rows.removeAll { $0.path == url }
+        if let row = try index.row(at: url) { rows.insert(row, at: 0) }
+        startEmbedding()   // re-embeds just this note; the rest are current
         // The per-save path — the one that fires when the SAME file is open
         // (and saved) in another split pane, not only when an external tool
         // writes it behind the store's back. `url` is already known exactly,
@@ -802,8 +845,9 @@ public final class VaultIndexCoordinator {
 
     func removeFromIndex(_ url: URL) throws {
         guard let index else { throw LoreError.noVault }
+        let canonical = Self.canonical(url)
         try index.remove(path: url)
-        rows = try index.all()
+        rows.removeAll { $0.path == canonical }
     }
 
     /// True once a vault is active — the store's `noVault` guard.
