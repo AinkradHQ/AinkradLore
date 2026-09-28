@@ -1,0 +1,131 @@
+name: AinkradLore
+options:
+  bundleIdPrefix: com.ainkrad
+  deploymentTarget: { macOS: "14.0" }
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    MACOSX_DEPLOYMENT_TARGET: "14.0"
+    CODE_SIGN_IDENTITY: "-"
+    CODE_SIGNING_REQUIRED: NO
+    CODE_SIGNING_ALLOWED: NO
+    EAGER_LINKING: NO
+packages:
+  AinkradAppKit:
+    url: https://github.com/AhmedMElhalaby/AinkradAppKit
+    # MUST equal the revision the HOST is pinned to, not merely a revision that
+    # stamps the same AinkradAPIVersion. The generation check compares integers,
+    # so a plugin built against a different revision of generation 8 passes
+    # validation and then fails at dlopen — silently, with no rejection logged,
+    # because the failure is below the layer that reports rejections.
+    #
+    # Lore sat at d5d994b, 28 commits behind the host's e4882ad, for three
+    # milestones. Every test passed the whole time; the plugin never once loaded.
+    # `make test` cannot detect this. `make devhost` plus the lsof check can:
+    #   lsof -p <pid> | grep LorePlugin   # a `txt` row means it really dlopen'd
+    # Host pin lives in Ainkrad's project.yml under the same package name.
+    revision: 60036ad9abe5d0ca4e84109bcc78a51f7b8578f0
+  GRDB:
+    url: https://github.com/groue/GRDB.swift
+    from: "6.29.3"
+  SwiftMarkdown:
+    # PINNED BY REVISION, not `branch: main`, and not `from:` — swift-markdown
+    # publishes no semver tags, so `revision:` is the only exact pin the package
+    # allows. It is also the idiom already used above for AinkradAppKit; GRDB's
+    # `from:` is reserved for packages that actually tag releases.
+    #
+    # The pin is a CORRECTNESS requirement, not hygiene. `MarkdownASTCollector`
+    # passes `SourceRange.upperBound.column` straight to
+    # `SourceOffsetMap.utf16Range`, which treats `toColumn` as EXCLUSIVE. That
+    # is only right because swift-markdown's `CommonMarkConverter.range(_:)`
+    # already converts cmark's INCLUSIVE end column by adding 1. If a future
+    # `main` drops or moves that +1, every span, every code region and therefore
+    # every link-suppression answer shifts by one unit — silently, on a real
+    # vault, with no test failing upstream to warn us.
+    #
+    # `build/` and `*.xcodeproj/` are gitignored, and SwiftPM only writes
+    # `Package.resolved` inside the generated project, so there is no lockfile
+    # to track. This line IS the lockfile for this dependency.
+    #
+    # NOT FULLY CLOSED, and deliberately so. swift-markdown's own manifest depends
+    # on swift-cmark by BRANCH (`gfm`), and cmark is what actually emits the
+    # line/column positions `SourceOffsetMap` converts — so one level down, the
+    # same assumption still floats. Pinning it here was TRIED and SwiftPM refuses:
+    # "swift-cmark is required using two different revision-based requirements
+    # (0101bf2c… and gfm), which is not supported". A root requirement does not
+    # override a transitive branch requirement; closing it needs a fork or a
+    # vendored checkout, which is a milestone of its own. The resolved revision as
+    # of this pin is 0101bf2c6ff6a218f93150f340fe5ccf76d9f3aa.
+    url: https://github.com/swiftlang/swift-markdown
+    revision: 27b7fc1a19068bcea3d2072db0ce86360d1400ed
+targets:
+  LoreFeature:
+    type: library.static
+    platform: macOS
+    sources: [Sources/LoreFeature]
+    settings:
+      base:
+        # Explicit-module builds cannot see the C modules behind these SwiftPM
+        # products, so their module maps are named directly — the same
+        # workaround CSQLite already needed. swift-markdown's `Markdown`
+        # module sits on cmark_gfm, cmark_gfm_extensions and CAtomic.
+        OTHER_SWIFT_FLAGS: "-Xcc -fmodule-map-file=$(SRCROOT)/build/SourcePackages/checkouts/GRDB.swift/Sources/CSQLite/module.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/build/SourcePackages/checkouts/swift-cmark/src/include/module.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/build/SourcePackages/checkouts/swift-cmark/extensions/include/module.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/build/SourcePackages/checkouts/swift-markdown/Sources/CAtomic/include/module.modulemap -Xcc -I$(SRCROOT)/build/SourcePackages/checkouts/swift-cmark/src/include"
+    dependencies:
+      - package: GRDB
+        product: GRDB
+      - package: SwiftMarkdown
+        product: Markdown
+      - package: AinkradAppKit
+        embed: false
+  LorePlugin:
+    type: bundle
+    platform: macOS
+    sources: [Sources/LorePlugin]
+    postBuildScripts:
+      # Generate AinkradAPIVersion from the SDK this build linked,
+      # rather than trusting the hand-typed Info.plist value.
+      - script: '"$SRCROOT/scripts/stamp-api-version.sh"'
+        name: Stamp AinkradAPIVersion
+        # The plist is an INPUT, not an output: declaring it makes the build
+        # system order this phase after the task that copies it into the
+        # bundle. Without it the script races that copy and finds nothing.
+        inputFiles:
+          - $(TARGET_BUILD_DIR)/$(INFOPLIST_PATH)
+        # No outputs, so keep it running every build: the linked SDK revision
+        # can change generation without any source file changing.
+        basedOnDependencyAnalysis: false
+    dependencies:
+      - target: LoreFeature
+      - package: GRDB
+        product: GRDB
+      - package: SwiftMarkdown
+        product: Markdown
+      - package: AinkradAppKit
+        embed: false
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.ainkrad.plugin.lore
+        GENERATE_INFOPLIST_FILE: NO
+        INFOPLIST_FILE: Sources/LorePlugin/Info.plist
+        MACH_O_TYPE: mh_bundle
+        LD_RUNPATH_SEARCH_PATHS: "@executable_path/../Frameworks"
+        OTHER_LDFLAGS: ["-lLoreFeature"]
+  LoreFeatureTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: Tests/LoreFeatureTests
+      - path: Tests/Fixtures
+        buildPhase: resources
+    dependencies:
+      - target: LoreFeature
+      - package: GRDB
+        product: GRDB
+      - package: SwiftMarkdown
+        product: Markdown
+      - package: AinkradAppKit
+schemes:
+  LorePlugin:
+    build: { targets: { LorePlugin: all, LoreFeatureTests: [test] } }
+    test:  { config: Debug, targets: [LoreFeatureTests] }

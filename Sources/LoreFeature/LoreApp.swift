@@ -77,10 +77,11 @@ public struct LoreApp: AinkradApp {
     }
 
     public static func makeRootView(host: HostServices) -> AnyView {
-        AnyView(LoreRootView(store: store(for: host), theme: host.theme))
+        makeRootView(host: host, mode: .advanced)
     }
     public static func makeSettingsView(host: HostServices) -> AnyView {
-        AnyView(LoreSettingsView(store: store(for: host), theme: host.theme))
+        AnyView(LoreSettingsView(store: store(for: host), theme: host.theme,
+                                 presentation: host.presentation, modeControl: host.mode))
     }
     public static func chromeFill(host: HostServices) -> Color? { host.theme.tokens.background }
 }
@@ -107,5 +108,41 @@ extension LoreApp: AinkradAppTeardown {
         // alive for the rest of the process and let the assistant keep calling
         // into a vault-less instance.
         mcpServers.remove(instance)
+    }
+}
+
+/// Generation 11: Lore's basic mode is one document, rendered and editable —
+/// and the mode a `.md` opened from Hoard or Rune lands in.
+extension LoreApp: AinkradAppModes {
+    public static func makeRootView(host: HostServices, mode: PluginMode) -> AnyView {
+        switch mode {
+        case .basic:
+            return AnyView(LoreBasicView(store: store(for: host), theme: host.theme,
+                                         launcher: host.apps))
+        case .advanced:
+            return AnyView(advancedRoot(host: host))
+        // Resilient enum: fall back to advanced, never to a stripped view for a
+        // mode this build does not understand.
+        @unknown default:
+            return AnyView(advancedRoot(host: host))
+        }
+    }
+
+    /// Advanced, wrapped so it ALSO collects a document handed over by Hoard or
+    /// Rune.
+    ///
+    /// Only the basic root collected it at first, and Lore's declared default
+    /// is `advanced` — so the file was enqueued, Lore opened advanced, nothing
+    /// read the payload, and the document never appeared. Both roots collect
+    /// now: the sender asked for a document to be opened, and which mode the
+    /// user happens to prefer is not the sender's problem.
+    private static func advancedRoot(host: HostServices) -> some View {
+        let store = store(for: host)
+        return LoreRootView(store: store, theme: host.theme)
+            .onAppear {
+                guard let intent = AinkradLaunchIntent.decode(host.apps.takePendingLaunch()),
+                      intent.isOpenDocument else { return }
+                store.open(url: URL(fileURLWithPath: intent.path))
+            }
     }
 }

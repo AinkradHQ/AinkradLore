@@ -5,6 +5,8 @@ import AinkradAppKit
 struct LoreSettingsView: View {
     @Bindable var store: LoreStore
     let theme: HostTheme
+    let presentation: any PluginPresentationControl
+    let modeControl: any PluginModeControl
     @Environment(\.ainkradTypography) private var typo
     /// Why the last vault choice did not take. Nil when nothing has failed.
     @State private var failure: String?
@@ -20,6 +22,15 @@ struct LoreSettingsView: View {
             // rows to eight over this milestone, and a flat list of eight
             // unrelated controls makes the reader scan all of them to find the
             // one they came for.
+            // Surface first: which mode Lore opens in decides whether you get
+            // one document or the whole vault browser, and that is a bigger
+            // question than which folder it reads.
+            AinkradSectionHeader(title: "Surface")
+
+            AinkradSurfaceSettings(appName: "Lore",
+                                   presentation: presentation,
+                                   mode: modeControl)
+
             AinkradSectionHeader(title: "Vault")
 
             AinkradFormRow(title: "Vault folder",
