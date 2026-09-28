@@ -104,6 +104,7 @@ struct DocumentPane: View {
     @State private var backlinks: [LoreStore.Backlink] = []
     @State private var unresolvedLinks: [UnresolvedLink] = []
     @State private var related: [IndexRow] = []
+    @State private var suggestedTags: [String] = []
     /// Whether the linked-mentions slideover is up.
     ///
     /// ON DEMAND, and closed by default. It began as a band below the document
@@ -450,6 +451,7 @@ struct DocumentPane: View {
         backlinks = store.backlinks(to: session.url)
         unresolvedLinks = store.unresolvedLinks(from: session.url)
         related = store.relatedNotes(to: session.url)
+        suggestedTags = session.engine is MarkdownEngine ? store.suggestedTags(for: session.url) : []
         backlinksCount = backlinks.count
     }
 
@@ -459,8 +461,17 @@ struct DocumentPane: View {
                 backlinks: backlinks,
                 unresolved: unresolvedLinks,
                 related: related,
+                suggestedTags: suggestedTags,
                 theme: theme,
                 onOpen: { store.open(url: $0) },
+                onAddTag: { tag in
+                    do {
+                        try store.addTag(tag, to: session.url)
+                        refreshBacklinksCount()
+                    } catch {
+                        createFailure = "Couldn't add #\(tag): " + error.localizedDescription
+                    }
+                },
             onCreate: { link in
                 do {
                     try store.createAndOpenNote(forLinkTarget: link.rawTarget,
