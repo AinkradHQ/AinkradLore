@@ -154,6 +154,17 @@ public final class LoreIndex: @unchecked Sendable {
     /// 5.9 GB on one machine. Discard and rebuild.
     static let schemaVersion: Int32 = 9
 
+    /// Every Lore pane opens its own queue on the SAME file, and the embedding
+    /// pass writes in the background — so a read can meet another queue's
+    /// write lock. Without a busy timeout that read fails at once: the version
+    /// probe then counts the index as stale and DELETES it, and the fingerprint
+    /// fast path falls through to a full rescan. Wait for the write instead.
+    static var configuration: Configuration {
+        var config = Configuration()
+        config.busyMode = .timeout(5)
+        return config
+    }
+
     public init(path: URL) throws {
         // Probe the existing file's version in its own scope and CLOSE it
         // before deleting: unlinking a database file while a connection is
@@ -170,7 +181,7 @@ public final class LoreIndex: @unchecked Sendable {
         if FileManager.default.fileExists(atPath: path.path) {
             var stale = true
             do {
-                let probe = try DatabaseQueue(path: path.path)
+                let probe = try DatabaseQueue(path: path.path, configuration: Self.configuration)
                 let version = try probe.read { db in
                     try Int32.fetchOne(db, sql: "PRAGMA user_version") ?? 0
                 }
@@ -181,7 +192,7 @@ public final class LoreIndex: @unchecked Sendable {
             }
             if stale { Self.recreate(at: path) }
         }
-        dbQueue = try DatabaseQueue(path: path.path)
+        dbQueue = try DatabaseQueue(path: path.path, configuration: Self.configuration)
         try dbQueue.write { db in
             try db.execute(sql: """
                 CREATE TABLE IF NOT EXISTS documents(

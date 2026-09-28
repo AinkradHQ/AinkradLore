@@ -25,6 +25,9 @@ final class RelatedNotesTests: XCTestCase {
         try store.setVaultRootForTesting(root)
         await store.settleForTesting()
         try store.rebuild()
+        // The link-and-tag half, deterministically: no meaning scores mixed in.
+        await store.coordinator.settleEmbeddingsForTesting()
+        store.coordinator.embeddings = [:]
 
         let me = try XCTUnwrap(store.rows.first { $0.title == "Me" })
         let titles = store.relatedNotes(to: me.path).map(\.title)
