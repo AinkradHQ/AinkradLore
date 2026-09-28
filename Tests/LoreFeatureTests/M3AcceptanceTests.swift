@@ -91,6 +91,7 @@ final class M3AcceptanceTests: XCTestCase {
         try makeRTF("This RTF mentions marmoset-cobalt uniquely.",
                     at: root.appendingPathComponent("report.rtf"))
         try onePixelPNG().write(to: root.appendingPathComponent("diagram.png"))
+        // Not a document or media: must NOT get a row (`VaultWalk`).
         try "sheet data".write(
             to: root.appendingPathComponent("sheet.xlsx"), atomically: true, encoding: .utf8)
 
@@ -102,7 +103,7 @@ final class M3AcceptanceTests: XCTestCase {
 
     func test_criterion1_everyFixtureFileHasAnIndexRowAndAResolvingEngine() async throws {
         let (root, store) = try await makeAcceptanceVault()
-        let expectedNames = ["note.md", "Contract.pdf", "report.rtf", "diagram.png", "sheet.xlsx"]
+        let expectedNames = ["note.md", "Contract.pdf", "report.rtf", "diagram.png"]
 
         XCTAssertEqual(Set(store.rows.map(\.path.lastPathComponent)), Set(expectedNames),
                        "every fixture must have an index row")

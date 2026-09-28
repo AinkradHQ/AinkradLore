@@ -400,44 +400,13 @@ public final class VaultIndexCoordinator {
     /// `scanVault` and `scanFingerprints`. Both need the exact same answer —
     /// a copy that drifts is exactly how the fast path fires when it should
     /// not (see `scanFingerprints`'s doc comment) — so this is the single
-    /// place the skip rules live: dot-prefixed path components below the
-    /// root, directories that are not packages, `.skipsPackageDescendants`.
+    /// place the skip rules are read from — see `VaultWalk`.
     /// Callers get back canonical URLs only; every per-file cost (loading,
     /// parsing, `attributesOfItem`) is theirs to pay or skip.
     nonisolated private static func walkDocumentFiles(at root: URL) -> [URL] {
-        var urls: [URL] = []
-        // Only components BELOW the root are ours to judge. Testing the
-        // absolute path would make a vault under any dot-prefixed ancestor —
-        // `~/.local/share/notes`, a `.worktrees/` checkout, a sandbox
-        // container — index zero files, silently, showing an empty vault with
-        // no error to explain it.
-        let rootDepth = root.standardizedFileURL.pathComponents.count
-        let enumerator = FileManager.default.enumerator(
-            at: root,
-            includingPropertiesForKeys: [
-                .contentModificationDateKey, .isDirectoryKey, .isPackageKey,
-            ],
-            options: [.skipsPackageDescendants])
-        while let url = enumerator?.nextObject() as? URL {
-            // Skip package internals and tool directories: `.obsidian`,
-            // `.git`, `.trash`, and (later) `.lore` package contents are not
-            // documents in their own right.
-            let relative = url.standardizedFileURL.pathComponents.dropFirst(rootDepth)
-            if relative.contains(where: { $0.hasPrefix(".") }) { continue }
-            // Directories are not documents. They were filtered out for free
-            // while unclaimed files were skipped; now that those are indexed,
-            // every folder would otherwise become a row. A PACKAGE is also a
-            // directory, but `.skipsPackageDescendants` above means its
-            // internals are never walked — so unlike a plain directory, the
-            // package itself must be indexed as a single `attachment` row
-            // (no engine claims a package as its own file type), or it
-            // (and everything a user would recognize as "the document")
-            // disappears from the vault entirely.
-            let values = try? url.resourceValues(forKeys: [.isDirectoryKey, .isPackageKey])
-            if values?.isDirectory == true && values?.isPackage != true { continue }
-            urls.append(url)
-        }
-        return urls
+        // The skip and allow rules live in `VaultWalk` — one place for files
+        // and directories alike, so the sidebar and the index never disagree.
+        VaultWalk.walk(root).files
     }
 
     nonisolated static func scanVault(at root: URL) -> [IndexEntry] {
@@ -718,27 +687,12 @@ public final class VaultIndexCoordinator {
     }
 
     /// Pure, off-actor-safe: every directory under `root`, vault-relative,
-    /// skipping dot-prefixed components and package internals — the same
-    /// rules `scanVault` applies to files. `nonisolated` so it can run inside
+    /// minus everything `VaultWalk` prunes — the same rules `scanVault`
+    /// applies to files. `nonisolated` so it can run inside
     /// `performBackgroundRebuild`'s detached task without a main-actor hop —
     /// see that method and `directoryPaths`'s own doc comment for why it must.
     nonisolated static func scanDirectories(under root: URL) -> [String] {
-        let root = Self.canonical(root)
-        let rootDepth = root.standardizedFileURL.pathComponents.count
-        guard let enumerator = FileManager.default.enumerator(
-            at: root,
-            includingPropertiesForKeys: [.isDirectoryKey, .isPackageKey],
-            options: [.skipsPackageDescendants])
-        else { return [] }
-        var result: [String] = []
-        while let url = enumerator.nextObject() as? URL {
-            let relative = url.standardizedFileURL.pathComponents.dropFirst(rootDepth)
-            if relative.contains(where: { $0.hasPrefix(".") }) { continue }
-            let values = try? url.resourceValues(forKeys: [.isDirectoryKey, .isPackageKey])
-            guard values?.isDirectory == true, values?.isPackage != true else { continue }
-            result.append(relative.joined(separator: "/"))
-        }
-        return result
+        VaultWalk.walk(Self.canonical(root)).directories
     }
 
     /// Index one document after a save, without a whole-vault rescan.

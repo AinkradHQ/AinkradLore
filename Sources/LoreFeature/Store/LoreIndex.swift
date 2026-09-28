@@ -148,7 +148,11 @@ public final class LoreIndex: @unchecked Sendable {
     /// 8: M6 added `blocks`, storing `^block-id` anchors so `[[Note#^id]]`
     /// can resolve. A v7 index has no such rows for any note. Discard and
     /// rebuild — the mechanism this constant exists for.
-    static let schemaVersion: Int32 = 8
+    /// 9: Enhancements E1 — the walk indexes only documents (plus name-only
+    /// media rows for embeds) and prunes `node_modules`/`build`/… and
+    /// `.gitignore`d paths. A v8 index holds every file under the vault root —
+    /// 5.9 GB on one machine. Discard and rebuild.
+    static let schemaVersion: Int32 = 9
 
     public init(path: URL) throws {
         // Probe the existing file's version in its own scope and CLOSE it

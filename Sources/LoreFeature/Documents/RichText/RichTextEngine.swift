@@ -13,7 +13,7 @@ import AinkradAppKit
 public final class RichTextEngine: DocumentEngine {
     public static let identifier = "richtext"
 
-    public static let extensions: Set<String> = ["docx", "rtf", "rtfd", "odt", "html", "htm"]
+    public static let extensions: Set<String> = ["doc", "docx", "rtf", "rtfd", "odt", "html", "htm"]
 
     public private(set) var sourceURL: URL
     public private(set) var attributed: NSAttributedString

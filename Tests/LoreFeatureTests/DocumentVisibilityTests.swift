@@ -128,9 +128,9 @@ final class DocumentVisibilityTests: XCTestCase {
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: root) }
 
-        try Data("PK\u{03}\u{04}fake zip bytes".utf8)
-            .write(to: root.appendingPathComponent("archive.zip"))
-        try "---\nid: a\ntitle: Alpha\n---\nsee [[archive.zip]]"
+        try Data("fake mp4 bytes".utf8)
+            .write(to: root.appendingPathComponent("clip.mp4"))
+        try "---\nid: a\ntitle: Alpha\n---\nsee [[clip.mp4]]"
             .write(to: root.appendingPathComponent("alpha.md"), atomically: true, encoding: .utf8)
 
         let store = LoreStore(documents: FakeDocs(),
@@ -141,16 +141,16 @@ final class DocumentVisibilityTests: XCTestCase {
 
         // Precondition: the row this test cares about is actually hidden by
         // default, or the assertions below would pass for the wrong reason.
-        let zipRow = try XCTUnwrap(store.rows.first { $0.path.lastPathComponent == "archive.zip" })
-        XCTAssertTrue(DocumentVisibility.isHiddenByDefault(zipRow))
+        let clipRow = try XCTUnwrap(store.rows.first { $0.path.lastPathComponent == "clip.mp4" })
+        XCTAssertTrue(DocumentVisibility.isHiddenByDefault(clipRow))
         XCTAssertFalse(DocumentVisibility.visibleRows(store.rows, showAllFiles: false)
-            .contains { $0.path == zipRow.path })
+            .contains { $0.path == clipRow.path })
 
         // The invariant: hidden from the browse list, but still a resolvable,
         // openable link target through the UNFILTERED path `LoreStore` itself
         // uses.
-        XCTAssertEqual(store.resolveLink("archive.zip")?.lastPathComponent, "archive.zip")
-        XCTAssertTrue(store.openLink("archive.zip"))
-        XCTAssertEqual(store.selectedTab?.url.lastPathComponent, "archive.zip")
+        XCTAssertEqual(store.resolveLink("clip.mp4")?.lastPathComponent, "clip.mp4")
+        XCTAssertTrue(store.openLink("clip.mp4"))
+        XCTAssertEqual(store.selectedTab?.url.lastPathComponent, "clip.mp4")
     }
 }

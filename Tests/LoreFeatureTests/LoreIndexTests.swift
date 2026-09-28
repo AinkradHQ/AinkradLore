@@ -181,8 +181,8 @@ final class LoreIndexTests: XCTestCase {
     // `schemaVersion`, so a bump is always a deliberate, acknowledged act —
     // changing this assertion means accepting a full index rebuild on next
     // launch for every existing vault, not an incidental edit.
-    func test_schemaVersion_isEight() {
-        XCTAssertEqual(LoreIndex.schemaVersion, 8)
+    func test_schemaVersion_isNine() {
+        XCTAssertEqual(LoreIndex.schemaVersion, 9)
     }
 
     func test_isTruncated_roundTrips() throws {
