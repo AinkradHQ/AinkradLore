@@ -147,6 +147,48 @@ struct VaultFingerprintTests {
                "an unchanged vault triggered a full rescan")
     }
 
+    /// A content-only edit re-indexes just that file: no full rescan, the new
+    /// text is searchable, and a link from the edited note still resolves.
+    @Test func aContentEditIsReindexedIncrementally() async throws {
+        let (root, store) = try await makeVault()
+        store.coordinator.suppressWatcher(for: 60)
+        try write(root, "a.md", "---\nid: a\ntitle: A\n---\nhello")
+        try write(root, "b.md", "---\nid: b\ntitle: B\n---\nsee [[A]]")
+        try store.rebuild()
+        let full = store.coordinator.rebuildsPerformedForTesting
+
+        try await Task.sleep(for: .milliseconds(20))   // a distinct mtime
+        try write(root, "b.md", "---\nid: b\ntitle: B\n---\nsee [[A]] zorkmid")
+        store.rebuildInBackground()
+        await store.settleForTesting()
+
+        #expect(store.coordinator.rebuildsPerformedForTesting == full,
+               "a content edit took the full rescan")
+        #expect(store.coordinator.incrementalRebuildsForTesting == 1)
+        #expect(store.search("zorkmid").map(\.title) == ["B"])
+        let a = try #require(store.rows.first { $0.title == "A" })
+        #expect(store.coordinator.backlinkRows(to: a.path).map(\.title) == ["B"])
+    }
+
+    /// A changed title can re-point links in OTHER notes, so it is not an
+    /// "edit only" — it must take the full rebuild.
+    @Test func aTitleChangeStillRebuildsFully() async throws {
+        let (root, store) = try await makeVault()
+        store.coordinator.suppressWatcher(for: 60)
+        try write(root, "a.md", "---\nid: a\ntitle: A\n---\nhello")
+        try store.rebuild()
+        let full = store.coordinator.rebuildsPerformedForTesting
+
+        try await Task.sleep(for: .milliseconds(20))
+        try write(root, "a.md", "---\nid: a\ntitle: Renamed\n---\nhello")
+        store.rebuildInBackground()
+        await store.settleForTesting()
+
+        #expect(store.coordinator.rebuildsPerformedForTesting == full + 1)
+        #expect(store.coordinator.incrementalRebuildsForTesting == 0)
+        #expect(store.rows.map(\.title) == ["Renamed"])
+    }
+
     /// A CHANGED vault must still take the full rebuild path.
     @Test func aChangedVaultStillRebuilds() async throws {
         let (root, store) = try await makeVault()

@@ -438,6 +438,14 @@ public final class LoreIndex: @unchecked Sendable {
         }
     }
 
+    /// One document's row, or `nil` when it is not indexed.
+    public func row(at url: URL) throws -> IndexRow? {
+        try dbQueue.read { db in
+            try Row.fetchOne(db, sql: "SELECT * FROM documents WHERE path = ?",
+                             arguments: [Self.canonical(url)]).map(Self.row)
+        }
+    }
+
     /// `(canonical path) -> (updatedEpoch, byteSize)` for every indexed
     /// document. Deliberately NOT `all()`: this reads two columns, not the
     /// full row set with tags/aliases/properties, because it runs on every
