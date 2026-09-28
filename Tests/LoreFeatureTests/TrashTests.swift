@@ -254,13 +254,13 @@ final class TrashTests: XCTestCase {
     /// `EngineRegistry` rather than assuming every restored file is markdown.
     func test_undoRestoresANonMarkdownFile() async throws {
         let (root, s) = try vault()
-        let url = root.appendingPathComponent("data.zip")
+        let url = root.appendingPathComponent("data.png")
         try Data([0x50, 0x4B, 0x03, 0x04]).write(to: url)
         await s.settleForTesting(); try s.rebuild()
 
-        _ = try s.trash(try XCTUnwrap(s.rows.first { $0.path.lastPathComponent == "data.zip" }))
+        _ = try s.trash(try XCTUnwrap(s.rows.first { $0.path.lastPathComponent == "data.png" }))
         try s.undoTrash()
         XCTAssertTrue(FileManager.default.fileExists(atPath: url.path))
-        XCTAssertTrue(s.rows.contains { $0.path.lastPathComponent == "data.zip" })
+        XCTAssertTrue(s.rows.contains { $0.path.lastPathComponent == "data.png" })
     }
 }
