@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-export DEVELOPER_DIR="${DEVELOPER_DIR:-/Applications/Xcode-beta.app/Contents/Developer}"
+export DEVELOPER_DIR="${DEVELOPER_DIR:-/Applications/Xcode.app/Contents/Developer}"
 VERSION="${1:?usage: release.sh vX.Y.Z}"
 ID="lore"; NAME="Lore"; ICON="book.closed"
 DESC="Markdown-native notes for Ainkrad."
