@@ -661,6 +661,10 @@ public final class VaultIndexCoordinator {
         return URL(fileURLWithPath: String(cString: buffer))
     }
 
+    func linkNeighbours(of url: URL) -> [String: Int] {
+        (try? index?.linkNeighbours(of: url)) ?? [:]
+    }
+
     func backlinkRows(to url: URL) -> [IndexRow] {
         (try? index?.backlinks(to: Self.canonical(url))) ?? []
     }

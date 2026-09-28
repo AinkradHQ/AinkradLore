@@ -19,6 +19,8 @@ import AinkradAppKit
 struct DocumentMentionsList: View {
     let backlinks: [LoreStore.Backlink]
     let unresolved: [UnresolvedLink]
+    /// Notes worth reading alongside this one — `LoreStore.relatedNotes`.
+    var related: [IndexRow] = []
     let theme: HostTheme
     let onOpen: (URL) -> Void
     let onCreate: (UnresolvedLink) -> Void
@@ -43,7 +45,7 @@ struct DocumentMentionsList: View {
         // "0 linked mentions" band at the foot of every new note is a permanent
         // reminder of an absence, and it would be the first thing a reader sees
         // under a document they just started.
-        if !backlinks.isEmpty || !unresolved.isEmpty {
+        if !backlinks.isEmpty || !unresolved.isEmpty || !related.isEmpty {
             // No inner disclosure: opening the slideover IS the disclosure,
             // and a second one inside it would be a click to reveal what the
             // first click asked for.
@@ -83,6 +85,20 @@ struct DocumentMentionsList: View {
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+            }
+
+            if !related.isEmpty {
+                AinkradSectionHeader(title: "Related notes")
+                ForEach(related, id: \.path) { row in
+                    Button { onOpen(row.path) } label: {
+                        Text(row.title)
+                            .font(AinkradFontResolver.font(.headline, typography: typo))
+                            .lineLimit(1)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                }
             }
 
             if !unresolved.isEmpty {
