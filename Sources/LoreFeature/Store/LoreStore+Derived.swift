@@ -26,7 +26,7 @@ extension LoreStore {
     /// Immediate subdirectories of the vault root (dotfiles excluded) — the
     /// choices offered for `defaultNoteFolder` in Settings.
     public var subfolders: [String] {
-        guard let root = vaultRoot else { return [] }
+        guard let root = configuredVaultRoot else { return [] }
         let urls = (try? FileManager.default.contentsOfDirectory(
             at: root, includingPropertiesForKeys: [.isDirectoryKey])) ?? []
         return urls

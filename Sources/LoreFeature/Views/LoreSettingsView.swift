@@ -36,7 +36,7 @@ struct LoreSettingsView: View {
             AinkradFormRow(title: "Vault folder",
                            help: "The folder of markdown files Lore reads and writes.") {
                 HStack(spacing: AinkradSpacing.sm) {
-                    Text(store.vaultRoot?.path ?? "None selected")
+                    Text(store.configuredVaultRoot?.path ?? "None selected")
                         .font(AinkradFontResolver.font(.mono, typography: typo))
                         .foregroundStyle(theme.tokens.foreground.opacity(0.8))
                         .lineLimit(1).truncationMode(.middle)

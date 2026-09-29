@@ -25,7 +25,7 @@ enum LoreSettingsCatalog {
         var fields = [SettingsField(
             path: group.appending("folder"),
             label: "Vault folder",
-            help: vaultFailure ?? store.vaultRoot?.path ?? "None selected — the folder of markdown files Lore reads and writes.",
+            help: vaultFailure ?? store.configuredVaultRoot?.path ?? "None selected — the folder of markdown files Lore reads and writes.",
             keywords: ["vault", "folder", "notes", "directory"],
             kind: .action(title: "Choose…") {
                 let ops = SidebarOperations(store: store)
