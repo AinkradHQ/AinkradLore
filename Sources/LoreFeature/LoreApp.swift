@@ -62,11 +62,15 @@ public struct LoreApp: AinkradApp {
 
     @MainActor static func mcpServer(for host: HostServices) -> MCPAppServer {
         mcpServers.value(for: instance(of: host)) {
-            let operations = LoreNoteOperations(store: store(for: host))
+            // The store is built on the first tool call, not here: the host
+            // lists every app's tools at launch, and building the store
+            // activates the vault — a full index rebuild plus a recursive
+            // watcher — for a user who may never open Lore.
+            let operations = { LoreNoteOperations(store: store(for: host)) }
             let (server, failures) = LoreMCPServer.make(
                 appID: id,
-                perform: { json in await operations.run(json) },
-                vaultSummary: { operations.vaultSummary() })
+                perform: { json in await operations().run(json) },
+                vaultSummary: { operations().vaultSummary() })
             // A dropped tool is a silently missing capability — say so rather
             // than let the assistant just never see it.
             if !failures.isEmpty {
