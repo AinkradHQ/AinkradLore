@@ -176,4 +176,17 @@ final class LinkResolverTests: XCTestCase {
         XCTAssertEqual(forward.resolve("Docs/Contract.pdf")?.path, "/v/Docs/Contract.pdf")
         XCTAssertEqual(reversed.resolve("Docs/Contract.pdf")?.path, "/v/Docs/Contract.pdf")
     }
+
+    /// The shape that pinned a daily host at 120% CPU and 17 GB: a ~9k
+    /// document vault with ~7k path links, nearly all unresolved. A full scan
+    /// per path link took minutes; the filename-keyed lookup is milliseconds.
+    func test_pathLinksOnALargeVaultDoNotScanEveryDocument() {
+        let r = resolver((0..<9000).map { ("/v/P\($0 % 50)/Note\($0).md", "Note\($0)", []) })
+        let start = Date()
+        for i in 0..<7000 { _ = r.resolve("Missing/Folder/Gone\(i).md") }
+        for i in 0..<7000 { _ = r.resolve("Missing/Folder/Gone\(i).pdf") }
+        XCTAssertLessThan(Date().timeIntervalSince(start), 2)
+        XCTAssertEqual(r.resolve("P7/Note7")?.path, "/v/P7/Note7.md")
+        XCTAssertNil(r.resolve("P8/Note7"))
+    }
 }

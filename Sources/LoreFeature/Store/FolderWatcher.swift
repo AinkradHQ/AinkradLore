@@ -275,10 +275,17 @@ final class FolderWatcher {
             if flags & FSEventStreamEventFlags(kFSEventStreamEventFlagMustScanSubDirs) != 0 {
                 mustRescan = true
             }
-            let path = pathsArray[i]
-            let components = URL(fileURLWithPath: path)
-                .standardizedFileURL.pathComponents.dropFirst(rootDepth)
-            if !components.contains(where: { $0.hasPrefix(".") }) {
+            let url = URL(fileURLWithPath: pathsArray[i])
+            let components = url.standardizedFileURL.pathComponents.dropFirst(rootDepth)
+            // The walk's own prune rules (`VaultWalk`): a vault holding code
+            // projects sees a constant stream of build output, dependency
+            // installs and source edits, and each one used to cost a full
+            // fingerprint walk of the vault. A FILE the walk would never
+            // index is ignored too; a directory, or a degraded event with no
+            // item-type flag, still counts.
+            let isFile = flags & FSEventStreamEventFlags(kFSEventStreamEventFlagItemIsFile) != 0
+            if !components.contains(where: { $0.hasPrefix(".") || VaultWalk.ignoredFolderNames.contains($0) }),
+               !isFile || VaultWalk.isIndexable(url) {
                 hasRelevantPath = true
             }
         }

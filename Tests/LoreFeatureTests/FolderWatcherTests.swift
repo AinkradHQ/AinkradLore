@@ -131,6 +131,27 @@ final class FolderWatcherTests: XCTestCase {
     /// yet), THEN tear it down and prove a second write produces silence
     /// (phase 2). A build that never fires at all now fails phase 1 instead
     /// of passing phase 2 by accident.
+    /// Build output and source edits in a vault that holds code projects
+    /// must not start a rescan: the walk would find nothing new.
+    func test_changeTheWalkWouldNeverIndexDoesNotFireOnChange() throws {
+        let root = try tempVault()
+        let build = root.appendingPathComponent("App/build")
+        try FileManager.default.createDirectory(at: build, withIntermediateDirectories: true)
+        Thread.sleep(forTimeInterval: 0.5)   // see the dot-directory test
+
+        let expectation = expectation(description: "onChange must not fire for unindexable changes")
+        expectation.isInverted = true
+        var watcher: FolderWatcher? = FolderWatcher(url: root) { expectation.fulfill() }
+        XCTAssertNotNil(watcher)
+
+        Thread.sleep(forTimeInterval: 0.2)
+        try "x".write(to: build.appendingPathComponent("out.md"), atomically: false, encoding: .utf8)
+        try "x".write(to: root.appendingPathComponent("App/main.swift"), atomically: false, encoding: .utf8)
+
+        wait(for: [expectation], timeout: 2)
+        watcher = nil
+    }
+
     func test_deallocatingStopsDeliveryToOwnOnChange() throws {
         let root = try tempVault()
 
