@@ -146,16 +146,26 @@ public struct LinkResolver: Sendable {
             // part of what the author named, so any spelling of the stem is
             // fair game — or as a fallback when the with-extension pass finds
             // nothing at all (a target whose exact extension isn't indexed).
+            //
+            // Candidates come from `byKey`, not `sortedDocuments`: a path
+            // ending in `/a/b.pdf` has `b.pdf` as its filename, and one whose
+            // stem ends in `/a/b` has `b` as its stem — both registered keys.
+            // Each key's list is sorted by the same `sortByPreference`, so the
+            // first match is the one a full scan would find. Scanning every
+            // document instead (a fresh `URL` per document, per link) was
+            // 62M allocations per rebuild on a 9k-document vault with 6.8k
+            // path links: minutes of CPU and 16 GB of autoreleased NSURLs.
             let lowered = target.lowercased()
             let withExtension = "/" + lowered
             let targetHasExtension = !(lowered as NSString).pathExtension.isEmpty
-            if targetHasExtension {
-                if let match = sortedDocuments.first(where: { $0.path.lowercased().hasSuffix(withExtension) }) {
-                    return match
-                }
+            if targetHasExtension,
+               let match = byKey[(lowered as NSString).lastPathComponent]?
+                   .first(where: { $0.path.lowercased().hasSuffix(withExtension) }) {
+                return match
             }
-            let withoutExtension = "/" + (lowered as NSString).deletingPathExtension
-            return sortedDocuments.first {
+            let stem = (lowered as NSString).deletingPathExtension
+            let withoutExtension = "/" + stem
+            return byKey[(stem as NSString).lastPathComponent]?.first {
                 $0.deletingPathExtension().path.lowercased().hasSuffix(withoutExtension)
             }
         }
