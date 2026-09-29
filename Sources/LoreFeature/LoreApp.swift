@@ -66,7 +66,11 @@ public struct LoreApp: AinkradApp {
             // lists every app's tools at launch, and building the store
             // activates the vault — a full index rebuild plus a recursive
             // watcher — for a user who may never open Lore.
-            let operations = { LoreNoteOperations(store: store(for: host)) }
+            let operations = {
+                let store = store(for: host)
+                store.activateVaultIfNeeded()
+                return LoreNoteOperations(store: store)
+            }
             let (server, failures) = LoreMCPServer.make(
                 appID: id,
                 perform: { json in await operations().run(json) },
@@ -125,7 +129,9 @@ extension LoreApp: AinkradAppModes {
     public static func makeRootView(host: HostServices, mode: PluginMode) -> AnyView {
         switch mode {
         case .basic:
-            return AnyView(LoreBasicView(store: store(for: host), theme: host.theme,
+            let store = store(for: host)
+            store.activateVaultIfNeeded()
+            return AnyView(LoreBasicView(store: store, theme: host.theme,
                                          launcher: host.apps))
         case .advanced:
             return AnyView(advancedRoot(host: host))
@@ -146,6 +152,7 @@ extension LoreApp: AinkradAppModes {
     /// user happens to prefer is not the sender's problem.
     private static func advancedRoot(host: HostServices) -> some View {
         let store = store(for: host)
+        store.activateVaultIfNeeded()
         return LoreRootView(store: store, theme: host.theme)
             .onAppear {
                 guard let intent = AinkradLaunchIntent.decode(host.apps.takePendingLaunch()),

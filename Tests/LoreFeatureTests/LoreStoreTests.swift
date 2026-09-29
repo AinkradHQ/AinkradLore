@@ -22,6 +22,22 @@ final class LoreStoreTests: XCTestCase {
         return s
     }
 
+    /// The host builds the store for Settings and for its tool listing, so
+    /// building it must not index the vault — only a Lore view or tool does.
+    func test_bookmarkedVaultIsNotActivatedUntilNeeded() throws {
+        let root = tempDir()
+        try "x".write(to: root.appendingPathComponent("Note.md"), atomically: true, encoding: .utf8)
+        let docs = FakeDocs()
+        try VaultBookmark.save(root, to: docs)
+        let s = LoreStore(documents: docs, indexPath: tempDir().appendingPathComponent("i.sqlite"))
+
+        XCTAssertNil(s.vaultRoot)
+        XCTAssertEqual(s.configuredVaultRoot?.resolvingSymlinksInPath(), root.resolvingSymlinksInPath())
+
+        s.activateVaultIfNeeded()
+        XCTAssertEqual(s.vaultRoot?.resolvingSymlinksInPath(), root.resolvingSymlinksInPath())
+    }
+
     func test_create_writesFileAndIndexes() throws {
         let root = tempDir(); let s = try makeStore(root)
         let note = try s.create(title: "First")
