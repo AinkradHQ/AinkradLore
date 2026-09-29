@@ -171,9 +171,26 @@ public final class LoreStore {
             sidebarWidth = LoreMetrics.clampSidebarWidth(CGFloat(width))
         }
         loadShortcutLists()
-        if let root = VaultBookmark.resolve(from: documents) {
-            try? coordinator.activate(root: root)
-        }
+        // Resolved, not activated: activating walks and indexes the vault and
+        // starts a recursive watcher on it. The host builds this store for
+        // Settings and for its tool listing too, and neither needs any of
+        // that — only a Lore view or a tool call does (`activateVaultIfNeeded`).
+        pendingVaultRoot = VaultBookmark.resolve(from: documents)
+    }
+
+    /// The bookmarked vault, until something actually needs it indexed.
+    private var pendingVaultRoot: URL?
+
+    /// The vault folder the user chose, whether or not it is indexed yet —
+    /// for display (Settings), never as a sign that the index is ready.
+    public var configuredVaultRoot: URL? { vaultRoot ?? pendingVaultRoot }
+
+    /// Activates the bookmarked vault the first time a Lore view or tool
+    /// needs it. A no-op once active, or when no vault was ever chosen.
+    public func activateVaultIfNeeded() {
+        guard let root = pendingVaultRoot else { return }
+        pendingVaultRoot = nil
+        try? coordinator.activate(root: root)
     }
 
     // MARK: - Index facade
@@ -219,7 +236,10 @@ public final class LoreStore {
     /// report of a failure. Same background path a vault change already takes;
     /// synchronous `rebuild()` stays for tests and callers that must observe
     /// the result immediately.
-    public func rebuildInBackground() { coordinator.startBackgroundRebuild() }
+    public func rebuildInBackground() {
+        activateVaultIfNeeded()
+        coordinator.startBackgroundRebuild()
+    }
 
     // MARK: - Links
 
@@ -411,6 +431,7 @@ public final class LoreStore {
     public func setVaultRoot(_ url: URL) throws {
         try VaultBookmark.save(url, to: documents)
         closeAllTabs()
+        pendingVaultRoot = nil
         try coordinator.activate(root: url)
     }
 
