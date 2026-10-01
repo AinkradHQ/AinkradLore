@@ -24,7 +24,7 @@ DEV_HOST := $(HOME)/Home/Projects/Ainkrad/Ainkrad/build/Build/Products/Debug/Ain
 # by the next build — which is the whole argument for the sibling repo's
 # `build` target passing `-derivedDataPath build` (fixed 2026-08-20) so that
 # there is one predictable place to point at.
-AINKRAD := $(HOME)/Home/Projects/Ainkrad/Ainkrad
+AINKRAD := $(abspath $(CURDIR)/../Ainkrad)
 DEBUG_APP := $(AINKRAD)/build/Build/Products/Debug/Ainkrad.app
 
 # EVERY target here is a verb, and none of them produces a file of its own
@@ -63,12 +63,12 @@ sideload: build
 # worse, occasional false positives that were then reported as verification.
 # `vmmap` lists the mappings themselves, which is the thing being asserted.
 run: sideload
-	@pkill -x Ainkrad 2>/dev/null; sleep 2
+	@pid=$$(scripts/debug-host-pid.sh "$(DEBUG_APP)"); [ -z "$$pid" ] || kill $$pid; sleep 2
 	open -n "$(DEBUG_APP)"
 	@echo "waiting for the plugin to be mapped…"
 	@for i in $$(seq 1 30); do \
 		sleep 2; \
-		pid=$$(pgrep -x Ainkrad | head -1); \
+		pid=$$(scripts/debug-host-pid.sh "$(DEBUG_APP)"); \
 		if [ -n "$$pid" ] && vmmap $$pid 2>/dev/null \
 		     | grep -q "DevPlugins/LorePlugin.bundle/Contents/MacOS"; then \
 			echo "LOADED pid=$$pid"; exit 0; \
