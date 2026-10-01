@@ -33,7 +33,7 @@ packages:
     # 43868c9: AinkradSurfaceSettings -- the shared Open as / Open in rows.
     # c465461: AinkradLaunchIntent -- the shared "open this there" payload.
     # 15b5799: PluginOverlaySize -- overlay size as a third per-app axis.
-    revision: 2d8c31d08fae964901904f5232b58c5c142d706e
+    revision: ebeeb02ad56fcb10902fd13f4c3ade1da42daa61
   GRDB:
     url: https://github.com/groue/GRDB.swift
     from: "6.29.3"
