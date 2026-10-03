@@ -42,7 +42,7 @@ DEBUG_APP := $(AINKRAD)/build/Build/Products/Debug/Ainkrad.app
 editor: ; cd Editor && npm install && npm run build
 
 generate: ; xcodegen generate
-build: generate ; xcodebuild -scheme LorePlugin -configuration Debug -derivedDataPath build -destination 'platform=macOS' build
+build: lint generate ; xcodebuild -scheme LorePlugin -configuration Debug -derivedDataPath build -destination 'platform=macOS' build
 # `ditto`, not `rm -rf` + `cp -R`: copying a bundle INTO a directory that
 # already contains one of the same name nests it
 # (LorePlugin.bundle/LorePlugin.bundle) and leaves the old binary in place,
@@ -85,5 +85,7 @@ devhost: build
 	cp -R build/Build/Products/Debug/LorePlugin.bundle "$(HOST_PLUGINS)/LorePlugin.bundle"
 	open -n "$(DEV_HOST)" --args --bundle "$(HOST_PLUGINS)/LorePlugin.bundle"
 
-test: generate ; xcodebuild -scheme LorePlugin -configuration Debug -derivedDataPath build -destination 'platform=macOS' test
+test: lint generate ; xcodebuild -scheme LorePlugin -configuration Debug -derivedDataPath build -destination 'platform=macOS' test
 release: ; ./scripts/release.sh $(V)
+
+include scripts/guardrails.mk
