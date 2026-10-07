@@ -1711,7 +1711,7 @@
   /* E2T5. An embedded image never widens the editor: `max-width` is the
      measure, and the height follows so nothing is squashed. */
   .cm-lore-embed-image {
-    max-width: 100%; height: auto; border-radius: 4px;
+    max-width: 100%; height: auto; border-radius: var(--ak-size-s4);
     display: inline-block; vertical-align: top;
   }
   /* The `[[` and `#` completion list. Positioned by the editor against the
@@ -1719,11 +1719,13 @@
      caret used to be. */
   .cm-lore-completion {
     position: absolute; z-index: 20;
-    min-width: 220px; max-width: 420px; max-height: 260px; overflow-y: auto;
+    min-width: var(--ak-size-s220); max-width: var(--ak-size-s420);
+    max-height: var(--ak-size-s260); overflow-y: auto;
     background: var(--ak-palette-surface-elevated);
-    border: 1px solid color-mix(in srgb, var(--ak-palette-foreground) 18%, transparent);
-    border-radius: 6px; padding: 4px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    border: var(--ak-size-s1) solid color-mix(in srgb, var(--ak-palette-foreground) calc(var(--ak-opacity-o18) * 100%), transparent);
+    border-radius: var(--ak-size-s6); padding: var(--ak-size-s4);
+    box-shadow: 0 var(--ak-size-s8) var(--ak-size-s24)
+                color-mix(in srgb, var(--ak-palette-black) calc(var(--ak-opacity-o35) * 100%), transparent);
     font-size: 0.95em;
     /* Explicit, not inherited: the list hangs off `.cm-editor`, and the text
        face is set on `.cm-content` — so without this it fell back to the
@@ -1731,17 +1733,18 @@
     font-family: var(--lore-font-text);
   }
   .cm-lore-completion-row {
-    display: flex; align-items: baseline; gap: 8px;
-    padding: 4px 8px; border-radius: 4px; cursor: pointer;
+    display: flex; align-items: baseline; gap: var(--ak-size-s8);
+    padding: var(--ak-size-s4) var(--ak-size-s8); border-radius: var(--ak-size-s4);
+    cursor: pointer;
     white-space: nowrap;
   }
   .cm-lore-completion-row.is-selected {
-    background: color-mix(in srgb, var(--ak-palette-accent-primary) 30%, transparent);
+    background: color-mix(in srgb, var(--ak-palette-accent-primary) calc(var(--ak-opacity-o30) * 100%), transparent);
   }
   .cm-lore-completion-label { color: var(--ak-palette-foreground); overflow: hidden;
                               text-overflow: ellipsis; }
   .cm-lore-completion-detail {
-    color: color-mix(in srgb, var(--ak-palette-foreground) 45%, transparent);
+    color: var(--ak-text-faint);
     font-size: 0.85em; margin-left: auto;
   }
 
@@ -1749,17 +1752,18 @@
      never trails the pointer. */
   .cm-lore-preview {
     position: absolute; z-index: 25;
-    max-width: 380px;
+    max-width: var(--ak-size-s380);
     background: var(--ak-palette-surface-elevated);
-    border: 1px solid color-mix(in srgb, var(--ak-palette-foreground) 18%, transparent);
-    border-radius: 6px; padding: 8px 10px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    border: var(--ak-size-s1) solid color-mix(in srgb, var(--ak-palette-foreground) calc(var(--ak-opacity-o18) * 100%), transparent);
+    border-radius: var(--ak-size-s6); padding: var(--ak-size-s8) var(--ak-size-s10);
+    box-shadow: 0 var(--ak-size-s8) var(--ak-size-s24)
+                color-mix(in srgb, var(--ak-palette-black) calc(var(--ak-opacity-o35) * 100%), transparent);
     font-family: var(--lore-font-text); font-size: 0.9em;
     pointer-events: none;
   }
-  .cm-lore-preview-title { font-weight: 600; margin-bottom: 4px; }
+  .cm-lore-preview-title { font-weight: 600; margin-bottom: var(--ak-size-s4); }
   .cm-lore-preview-body {
-    color: color-mix(in srgb, var(--ak-palette-foreground) 70%, transparent);
+    color: color-mix(in srgb, var(--ak-palette-foreground) calc(var(--ak-opacity-o70) * 100%), transparent);
     line-height: 1.4;
   }
 
@@ -1817,18 +1821,18 @@
      way. A left rule in the accent tint and a hairline frame — the same two
      signals `TransclusionStyling` draws natively. */
   .cm-lore-transclusion {
-    border: 1px solid color-mix(in srgb, var(--ak-palette-foreground) 18%, transparent);
-    border-left: 3px solid color-mix(in srgb, var(--ak-palette-accent-primary) 55%, transparent);
-    border-radius: 4px; padding: 6px 10px;
-    background: color-mix(in srgb, var(--ak-palette-foreground) 3%, transparent);
+    border: var(--ak-size-s1) solid color-mix(in srgb, var(--ak-palette-foreground) calc(var(--ak-opacity-o18) * 100%), transparent);
+    border-left: var(--ak-size-s3) solid color-mix(in srgb, var(--ak-palette-accent-primary) calc(var(--ak-opacity-o55) * 100%), transparent);
+    border-radius: var(--ak-size-s4); padding: var(--ak-size-s6) var(--ak-size-s10);
+    background: color-mix(in srgb, var(--ak-palette-foreground) calc(var(--ak-opacity-o03) * 100%), transparent);
   }
   .cm-lore-transclusion-title {
-    color: color-mix(in srgb, var(--ak-palette-foreground) 55%, transparent);
-    font-size: 0.85em; margin-bottom: 4px;
+    color: var(--ak-text-muted);
+    font-size: 0.85em; margin-bottom: var(--ak-size-s4);
   }
   .cm-lore-transclusion-waiting,
   .cm-lore-transclusion-problem {
-    color: color-mix(in srgb, var(--ak-palette-foreground) 45%, transparent); font-size: 0.9em;
+    color: var(--ak-text-faint); font-size: 0.9em;
   }
   /* The nested editor must not add its own padding or its own scrollbar: it is
      content inside a box, not a second editor. */
@@ -1842,9 +1846,9 @@
      "this file is missing" rather than as a browser error — WebKit draws a grey
      box with a `?` for a failed image and does not show the alt text. */
   .cm-lore-embed-missing {
-    color: color-mix(in srgb, var(--ak-palette-foreground) 45%, transparent);
+    color: var(--ak-text-faint);
     text-decoration: line-through;
-    text-decoration-color: color-mix(in srgb, var(--ak-palette-foreground) 30%, transparent);
+    text-decoration-color: color-mix(in srgb, var(--ak-palette-foreground) calc(var(--ak-opacity-o30) * 100%), transparent);
   }
 
   /* A PDF or a Word file: the same pill the native renderer draws, because
@@ -1853,7 +1857,7 @@
   .cm-lore-embed-chip {
     color: var(--ak-palette-accent-primary); cursor: pointer;
     background: var(--ak-palette-surface-elevated);
-    border-radius: 4px; padding: 1px 6px;
+    border-radius: var(--ak-size-s4); padding: var(--ak-size-s1) var(--ak-size-s6);
     text-decoration: underline;
   }
 
