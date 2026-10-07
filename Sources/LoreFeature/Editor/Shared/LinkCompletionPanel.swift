@@ -22,6 +22,7 @@ final class LinkCompletionPanel {
     private var host: NSHostingController<LinkCompletionView>?
     private var selection = LinkCompletionSelection()
     private var tokens: HostThemeTokens?
+    private var skin: AinkradSkin = .standard
 
     /// Called when the user picks a row, by click or by return.
     var onPick: ((LinkCompletionItem) -> Void)?
@@ -32,6 +33,7 @@ final class LinkCompletionPanel {
     ///   by `NSTextView.firstRect(forCharacterRange:actualRange:)`.
     func show(
         matches: [LinkCompletionItem], tokens: HostThemeTokens,
+        skin: AinkradSkin = .standard,
         caretRect: NSRect, over view: NSView
     ) {
         guard !matches.isEmpty, let window = view.window else {
@@ -40,6 +42,7 @@ final class LinkCompletionPanel {
         }
         selection.update(to: matches)
         self.tokens = tokens
+        self.skin = skin
 
         let panel = self.panel ?? makePanel(attachedTo: window)
         self.panel = panel
@@ -85,7 +88,8 @@ final class LinkCompletionPanel {
         let root = LinkCompletionView(
             matches: selection.matches,
             selected: selection.index,
-            tokens: tokens
+            tokens: tokens,
+            skin: skin
         ) { [weak self] row in self?.onPick?(row) }
         if let host {
             host.rootView = root

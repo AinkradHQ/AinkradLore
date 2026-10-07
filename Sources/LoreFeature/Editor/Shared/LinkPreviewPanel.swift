@@ -20,14 +20,15 @@ final class LinkPreviewPanel {
 
     func show(
         title: String, excerpt: String, target: String,
-        tokens: HostThemeTokens, near rect: NSRect, over view: NSView
+        tokens: HostThemeTokens, skin: AinkradSkin = .standard,
+        near rect: NSRect, over view: NSView
     ) {
         guard let window = view.window else {
             hide()
             return
         }
         shownTarget = target
-        let content = LinkPreviewView(title: title, excerpt: excerpt, tokens: tokens)
+        let content = LinkPreviewView(title: title, excerpt: excerpt, tokens: tokens, skin: skin)
         if let host {
             host.rootView = content
         } else {
@@ -85,6 +86,9 @@ private struct LinkPreviewView: View {
     let title: String
     let excerpt: String
     let tokens: HostThemeTokens
+    /// Passed in, not read from the environment: the preview is hosted in its
+    /// own panel window, which inherits no environment from the editor.
+    let skin: AinkradSkin
 
     @Environment(\.ainkradTypography) private var typo
 
@@ -99,22 +103,18 @@ private struct LinkPreviewView: View {
                 // blank panel is not.
                 Text("This note is empty.")
                     .font(AinkradFontResolver.font(.caption, typography: typo))
-                    .foregroundStyle(tokens.foreground.opacity(LoreMetrics.tertiaryText))
+                    .foregroundStyle(tokens.foreground.opacity(skin.opacity.o60))
             } else {
                 Text(excerpt)
                     .font(AinkradFontResolver.font(.caption, typography: typo))
-                    .foregroundStyle(tokens.foreground.opacity(LoreMetrics.secondaryText))
+                    .foregroundStyle(tokens.foreground.opacity(skin.opacity.o75))
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
         .padding(AinkradSpacing.sm)
-        .frame(width: 320, alignment: .leading)
-        .background(tokens.surfaceElevated)
-        .clipShape(ChamferShape(cut: LoreMetrics.chamfer))
-        .overlay(
-            ChamferShape(cut: LoreMetrics.chamfer)
-                .strokeBorder(tokens.foreground.opacity(0.15), lineWidth: 1)
-        )
+        .frame(width: CGFloat(skin.size.s320), alignment: .leading)
+        .ainkradPanel()
         .environment(\.ainkradTheme, tokens)
+        .environment(\.ainkradSkinStorage, skin)
     }
 }

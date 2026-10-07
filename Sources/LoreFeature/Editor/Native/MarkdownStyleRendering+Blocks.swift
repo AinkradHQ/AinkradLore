@@ -101,8 +101,8 @@ extension MarkdownStyleRenderer {
             }
 
         case .blockQuote:
-            // 0.85, not the 0.65 this used to be. `LoreMetrics.secondaryText`
-            // names 0.75 as the floor at which supporting text still meets
+            // 0.85, not the 0.65 this used to be. The skin's `o75` step is the
+            // secondary-text floor, 0.75, at which supporting text still meets
             // 4.5:1, and quote BODY is not supporting text — it is prose the
             // reader is meant to read. The bar and the indent already say
             // "quote"; dimming below the floor as well was saying it twice, the
@@ -248,7 +248,7 @@ extension MarkdownStyleRenderer {
             // 0.01 pt font on it, at which a foreground colour is unobservable.
             // So this only ever describes the revealed state.
             //
-            // 0.40 is below `LoreMetrics.secondaryText` (0.75) on purpose.
+            // 0.40 is below the `o75` secondary-text floor on purpose.
             // That floor is about TEXT — captions, hints, prose the reader
             // reads. These are syntax characters standing next to their own
             // content, and the same exemption `.blockID` (0.25) already takes

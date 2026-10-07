@@ -78,6 +78,7 @@ extension MarkdownEditor.Coordinator {
             excerpt: excerpt,
             target: target,
             tokens: tokens,
+            skin: theme.skin,
             near: rect,
             over: tv)
     }

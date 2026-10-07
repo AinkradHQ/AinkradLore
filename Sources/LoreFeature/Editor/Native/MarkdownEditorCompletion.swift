@@ -118,7 +118,7 @@ extension MarkdownEditor.Coordinator {
             return
         }
         completionPanel.show(
-            matches: items, tokens: tokens,
+            matches: items, tokens: tokens, skin: theme.skin,
             caretRect: caretRect(in: tv), over: tv)
     }
 
@@ -137,7 +137,7 @@ extension MarkdownEditor.Coordinator {
             return
         }
         completionPanel.show(
-            matches: items, tokens: tokens,
+            matches: items, tokens: tokens, skin: theme.skin,
             caretRect: caretRect(in: tv), over: tv)
     }
 

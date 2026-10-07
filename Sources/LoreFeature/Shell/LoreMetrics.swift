@@ -33,15 +33,6 @@ enum LoreMetrics {
     /// bar), so the editor's chrome lines up column-to-column.
     static let gutter: CGFloat = AinkradSpacing.md
 
-    /// The one chamfer cut Lore draws — `skin.cut.c6` in a view. Kept only for
-    /// `LinkPreviewPanel`, which moves to the kit panel in 5B.8.
-    ///
-    /// There were two — `ChamferShape(cut: 6)` on tabs and `cut: 4` on the
-    /// panel-bar buttons — with no rule distinguishing them; they were simply
-    /// written at different times. Two chamfer radii in one window read as a
-    /// mistake rather than a hierarchy, so there is now one.
-    static let chamfer: CGFloat = 6
-
     // MARK: - Contrast floors
     //
     // Lore draws de-emphasised text and glyphs by fading the theme's
@@ -55,12 +46,8 @@ enum LoreMetrics {
     // minimums in the guidance, and collapsing them would either wash out the
     // glyphs or over-darken the captions.
     //
-    // Views read these as `skin.opacity.o75` / `.o60` / `.o55`. The two left
-    // here are read only by the native editor (`MarkdownStyleRendering`,
-    // `LinkPreviewPanel`), which is tokenised in 5B.8.
-
-    /// Supporting text — captions, hints, the save-state label.
-    static let secondaryText: Double = 0.75
-    /// The faintest text should ever go: shortcut hints, placeholder detail.
-    static let tertiaryText: Double = 0.6
+    // Read as `skin.opacity.o75` (supporting text — captions, hints, the
+    // save-state label), `.o60` (the faintest text should ever go) and `.o55`
+    // (indicator glyphs). The native editor and its link preview read them
+    // from the skin too since 5B.8, so no Lore constant is left.
 }

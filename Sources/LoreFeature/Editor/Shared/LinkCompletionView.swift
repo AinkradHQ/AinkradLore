@@ -427,6 +427,9 @@ struct LinkCompletionView: View {
     let matches: [LinkCompletionItem]
     let selected: Int
     let tokens: HostThemeTokens
+    /// Passed in rather than read from the environment: the list is hosted in
+    /// its own panel window, which inherits no environment from the editor.
+    var skin: AinkradSkin = .standard
     let onPick: (LinkCompletionItem) -> Void
 
     static let maxRows = 8
@@ -445,20 +448,22 @@ struct LinkCompletionView: View {
                     }
                     .contentShape(Rectangle())
                     .padding(.horizontal, AinkradSpacing.sm)
-                    .padding(.vertical, 4)
+                    .padding(.vertical, AinkradSpacing.xs)
                     .background(
                         pair.offset == selected
-                            ? tokens.accentPrimary.opacity(0.25) : Color.clear)
+                            ? tokens.accentPrimary.opacity(skin.opacity.o25) : Color.clear)
                 }
                 .buttonStyle(.plain)
             }
         }
-        .padding(.vertical, 4)
-        .frame(width: 260)
-        .background(tokens.background)
+        .padding(.vertical, AinkradSpacing.xs)
+        .frame(width: CGFloat(skin.size.s260))
+        // `shape.popover`: chamfered like every other floating surface in
+        // Lore. It was the one rounded popover in a chamfered app.
+        .background(tokens.background, in: AinkradSkinShape(token: skin.roles.popover.shape))
         .overlay(
-            RoundedRectangle(cornerRadius: 6)
-                .stroke(tokens.foreground.opacity(0.2)))
+            AinkradSkinShape(token: skin.roles.popover.shape)
+                .stroke(tokens.foreground.opacity(skin.opacity.o20)))
     }
 
 }
