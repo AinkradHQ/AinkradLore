@@ -24,8 +24,10 @@ enum ImportLinkRewriting {
     /// frontmatter value is left alone, because the parser already knows those
     /// are not links. Hand-rolled substitution is how you rewrite the word
     /// "Plan" inside someone's code sample.
-    static func rewritten(_ markdown: String, in file: URL,
-                          renames: [(from: String, to: String)]) -> String {
+    static func rewritten(
+        _ markdown: String, in file: URL,
+        renames: [(from: String, to: String)]
+    ) -> String {
         let edits = self.edits(in: file, renames: renames)
         guard !edits.isEmpty else { return markdown }
         return LinkRewriter.replacingLinkTargets(in: markdown, edits: edits)
@@ -44,12 +46,16 @@ enum ImportLinkRewriting {
     /// the vault, not by path, so a path-qualified rewrite would be a
     /// different link rather than the same one relocated. The cost of that is
     /// stated plainly in `KnownAmbiguity` below.
-    static func edits(in file: URL,
-                      renames: [(from: String, to: String)]) -> [LinkEdit] {
+    static func edits(
+        in file: URL,
+        renames: [(from: String, to: String)]
+    ) -> [LinkEdit] {
         var edits: [LinkEdit] = []
         for rename in renames where rename.from != rename.to {
-            edits.append(LinkEdit(file: file, oldTarget: rename.from,
-                                  newTarget: rename.to))
+            edits.append(
+                LinkEdit(
+                    file: file, oldTarget: rename.from,
+                    newTarget: rename.to))
             guard (rename.from as NSString).pathExtension.lowercased() == "md" else { continue }
             let oldStem = (rename.from as NSString).deletingPathExtension
             let newStem = (rename.to as NSString).deletingPathExtension

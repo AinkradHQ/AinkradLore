@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 /// Percent-encoding in link targets: when it is applied, when it is NOT, and
@@ -19,8 +20,9 @@ final class LinkEncodingTests: XCTestCase {
     }
 
     private func makeStore(_ root: URL) throws -> LoreStore {
-        let s = LoreStore(documents: FakeDocs(),
-                          indexPath: root.appendingPathComponent(".index.sqlite"))
+        let s = LoreStore(
+            documents: FakeDocs(),
+            indexPath: root.appendingPathComponent(".index.sqlite"))
         try s.setVaultRootForTesting(root)
         return s
     }
@@ -43,7 +45,8 @@ final class LinkEncodingTests: XCTestCase {
         let source = root.appendingPathComponent("a.md")
         try "---\nid: a\ntitle: A\n---\nsee [t](Design.md)"
             .write(to: source, atomically: true, encoding: .utf8)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
 
         let row = s.rows.first { $0.path.lastPathComponent == "Design.md" }!
         let report = s.apply(s.plan(rename: row.path, to: "New Name"))
@@ -57,7 +60,8 @@ final class LinkEncodingTests: XCTestCase {
 
         // (a) Lore still resolves it — the whole point of encoding rather than
         // leaving the link broken in both readers.
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
         let renamed = root.appendingPathComponent("New Name.md")
         XCTAssertEqual(s.inboundLinkCount(to: renamed), 1)
     }
@@ -103,10 +107,12 @@ final class LinkEncodingTests: XCTestCase {
         XCTAssertEqual(LinkRewriter.markdownDestination("f(x).md"), "f%28x%29.md")
         XCTAssertEqual(LinkRewriter.markdownDestination("100% off"), "100%25%20off")
         XCTAssertEqual(LinkRewriter.markdownDestination("a\tb"), "a%09b")
-        XCTAssertEqual(LinkRewriter.markdownDestination("Notes/Ideas-2024_v2.md"),
-                       "Notes/Ideas-2024_v2.md")
-        XCTAssertEqual(LinkRewriter.markdownDestination("Café&Bar[1].md"),
-                       "Café&Bar[1].md")
+        XCTAssertEqual(
+            LinkRewriter.markdownDestination("Notes/Ideas-2024_v2.md"),
+            "Notes/Ideas-2024_v2.md")
+        XCTAssertEqual(
+            LinkRewriter.markdownDestination("Café&Bar[1].md"),
+            "Café&Bar[1].md")
     }
 
     /// A `#Heading` is a DELIMITER, not part of the name: encoding it to `%23`
@@ -117,12 +123,16 @@ final class LinkEncodingTests: XCTestCase {
         try "[t](Design.md#Overview)".write(to: file, atomically: true, encoding: .utf8)
 
         _ = try LinkRewriter.applyEdits(
-            [LinkEdit(file: file, oldTarget: "Design.md#Overview",
-                      newTarget: "New Name.md#Overview")],
+            [
+                LinkEdit(
+                    file: file, oldTarget: "Design.md#Overview",
+                    newTarget: "New Name.md#Overview")
+            ],
             to: file, baseline: try mtime(of: file))
 
-        XCTAssertEqual(try String(contentsOf: file, encoding: .utf8),
-                       "[t](New%20Name.md#Overview)")
+        XCTAssertEqual(
+            try String(contentsOf: file, encoding: .utf8),
+            "[t](New%20Name.md#Overview)")
     }
 
     // MARK: - Finding 9: decoding is conditional on syntax
@@ -185,8 +195,9 @@ final class LinkEncodingTests: XCTestCase {
     func test_creatingFromAnEncodedMarkdownTargetMakesTheNoteTheLinkNames() throws {
         let root = tempDir()
         let s = try makeStore(root)
-        let note = try s.createAndOpenNote(forLinkTarget: "Design%20Doc.md",
-                                           syntax: .markdown)
+        let note = try s.createAndOpenNote(
+            forLinkTarget: "Design%20Doc.md",
+            syntax: .markdown)
         // `create(title:)` slugs the space to a hyphen, as it does for every
         // title — but the note is TITLED `Design Doc`, so the link resolves.
         // The junk-file symptom was `design%20doc.md`, resolving nothing.
@@ -213,20 +224,25 @@ final class LinkEncodingTests: XCTestCase {
         let source = root.appendingPathComponent("a.md")
         try "---\nid: a\ntitle: A\n---\nsee [t](Design%20Doc.md) and [[100%20off]]"
             .write(to: source, atomically: true, encoding: .utf8)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
 
         let unresolved = s.unresolvedLinks(from: source)
-        XCTAssertEqual(Set(unresolved), [
-            UnresolvedLink(rawTarget: "Design%20Doc.md", syntax: .markdown),
-            UnresolvedLink(rawTarget: "100%20off", syntax: .wikilink)
-        ])
+        XCTAssertEqual(
+            Set(unresolved),
+            [
+                UnresolvedLink(rawTarget: "Design%20Doc.md", syntax: .markdown),
+                UnresolvedLink(rawTarget: "100%20off", syntax: .wikilink),
+            ])
 
         let link = unresolved.first { $0.syntax == .markdown }!
-        let note = try s.createAndOpenNote(forLinkTarget: link.rawTarget,
-                                           syntax: link.syntax)
+        let note = try s.createAndOpenNote(
+            forLinkTarget: link.rawTarget,
+            syntax: link.syntax)
         XCTAssertEqual(note.path.lastPathComponent, "design-doc.md")
         // The link it was created for now resolves.
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
         XCTAssertTrue(s.unresolvedLinks(from: source).allSatisfy { $0.syntax == .wikilink })
     }
 

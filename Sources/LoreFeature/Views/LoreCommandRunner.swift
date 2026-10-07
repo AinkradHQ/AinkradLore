@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// Performs what `LoreCommand` merely describes.
 ///
@@ -34,11 +34,12 @@ struct LoreCommandRunner {
     /// The context the palette and the shortcut bindings both judge
     /// availability against.
     var context: LoreCommands.Context {
-        LoreCommands.Context(hasVault: store.vaultRoot != nil,
-                             hasDocument: store.selectedTab != nil,
-                             canUndoDelete: store.canUndoTrash,
-                             canGoBack: store.canGoBack,
-                             canGoForward: store.canGoForward)
+        LoreCommands.Context(
+            hasVault: store.vaultRoot != nil,
+            hasDocument: store.selectedTab != nil,
+            canUndoDelete: store.canUndoTrash,
+            canGoBack: store.canGoBack,
+            canGoForward: store.canGoForward)
     }
 
     /// Runs `id`, or does nothing if it is not currently available.
@@ -50,7 +51,8 @@ struct LoreCommandRunner {
     /// "the command ran when it could not".
     func run(_ id: LoreCommand.ID) {
         guard let command = LoreCommands.all.first(where: { $0.id == id }),
-              LoreCommands.isAvailable(command, in: context) else { return }
+            LoreCommands.isAvailable(command, in: context)
+        else { return }
         dismissPalette()
         switch id {
         case .newNote:
@@ -103,8 +105,7 @@ struct LoreCommandRunner {
             // Toggle, not "open": pressing it again with a split up is the
             // obvious way to close one, and the alternative is a command that
             // only ever adds a pane.
-            if store.isSplit { store.closeSecondaryPane() }
-            else { store.splitCurrentDocument() }
+            if store.isSplit { store.closeSecondaryPane() } else { store.splitCurrentDocument() }
         // Routed through the responder chain rather than a held reference —
         // see `LoreFind`. A no-op when focus is not in a text view, which is
         // the right answer: ⌘F in the sidebar is not a request to search a

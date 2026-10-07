@@ -1,6 +1,6 @@
+import AinkradAppKit
 import AppKit
 import SwiftUI
-import AinkradAppKit
 
 /// Every size and every gap in the markdown editor, in one value.
 ///
@@ -104,12 +104,13 @@ struct MarkdownTheme: Equatable {
         maxMeasure = settings.maxMeasure
         renderTagsAsChips = settings.renderTagsAsChips
         bodyFont = .systemFont(ofSize: settings.bodySize)
-        monoFont = .monospacedSystemFont(ofSize: settings.bodySize * Self.monoRatio,
-                                         weight: .regular)
-        spaceAdvance = (" " as NSString)
+        monoFont = .monospacedSystemFont(
+            ofSize: settings.bodySize * Self.monoRatio,
+            weight: .regular)
+        spaceAdvance =
+            (" " as NSString)
             .size(withAttributes: [.font: bodyFont]).width
     }
-
 
     /// h1…h6. Clamped so an out-of-range level from a malformed document
     /// cannot produce a negative or absurd size.

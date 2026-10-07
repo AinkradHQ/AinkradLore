@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 /// Task 5's HALF that can be verified today.
@@ -14,10 +15,10 @@ import XCTest
 /// embeds" failure from M3, which must not repeat.
 final class NotesBodyDecoderTests: XCTestCase {
     private let expected = """
-    The quick brown fox jumps over the lazy dog.
-    Second line with UTF-8: café — naïve.
+        The quick brown fox jumps over the lazy dog.
+        Second line with UTF-8: café — naïve.
 
-    """
+        """
 
     private func fixture(_ name: String) throws -> Data {
         let url = try XCTUnwrap(
@@ -35,15 +36,17 @@ final class NotesBodyDecoderTests: XCTestCase {
     func testInflatesAGzipStreamCarryingAStoredFilename() throws {
         let data = try fixture("withname")
         XCTAssertEqual(data[3] & 0x08, 0x08, "this fixture must have FNAME set")
-        XCTAssertEqual(String(data: try NotesBodyDecoder.inflate(data), encoding: .utf8),
-                       expected)
+        XCTAssertEqual(
+            String(data: try NotesBodyDecoder.inflate(data), encoding: .utf8),
+            expected)
     }
 
     func testInflatesAGzipStreamWithNoOptionalHeaderFields() throws {
         let data = try fixture("noname")
         XCTAssertEqual(data[3], 0, "this fixture must have no header flags set")
-        XCTAssertEqual(String(data: try NotesBodyDecoder.inflate(data), encoding: .utf8),
-                       expected)
+        XCTAssertEqual(
+            String(data: try NotesBodyDecoder.inflate(data), encoding: .utf8),
+            expected)
     }
 
     func testRejectsDataThatIsNotGzip() {
@@ -60,7 +63,7 @@ final class NotesBodyDecoderTests: XCTestCase {
     /// of the buffer looking for one.
     func testRejectsAHeaderWhoseFilenameIsNeverTerminated() {
         var data = Data([0x1f, 0x8b, 0x08, 0x08, 0, 0, 0, 0, 0, 3])
-        data.append(Data(repeating: 0x41, count: 40))   // 'A's, no NUL, no trailer
+        data.append(Data(repeating: 0x41, count: 40))  // 'A's, no NUL, no trailer
         XCTAssertThrowsError(try NotesBodyDecoder.inflate(data))
     }
 
@@ -69,8 +72,9 @@ final class NotesBodyDecoderTests: XCTestCase {
     func testInflatesCorrectlyEvenWhenTheTrailerSizeIsWrong() throws {
         var data = try fixture("noname")
         data.replaceSubrange((data.count - 4)..., with: [0x01, 0x00, 0x00, 0x00])
-        XCTAssertEqual(String(data: try NotesBodyDecoder.inflate(data), encoding: .utf8),
-                       expected)
+        XCTAssertEqual(
+            String(data: try NotesBodyDecoder.inflate(data), encoding: .utf8),
+            expected)
     }
 
     // MARK: - protobuf wire walk, against blobs encoded from the spec
@@ -91,16 +95,19 @@ final class NotesBodyDecoderTests: XCTestCase {
     }
 
     func testFindsTheOnlyStringField() throws {
-        XCTAssertEqual(try NotesBodyDecoder.extractText(lengthDelimited(field: 2, "hello")),
-                       "hello")
+        XCTAssertEqual(
+            try NotesBodyDecoder.extractText(lengthDelimited(field: 2, "hello")),
+            "hello")
     }
 
     func testPrefersTheLongestStringField() throws {
-        let proto = lengthDelimited(field: 1, "short")
+        let proto =
+            lengthDelimited(field: 1, "short")
             + lengthDelimited(field: 2, "a much longer run of body text")
             + lengthDelimited(field: 3, "tiny")
-        XCTAssertEqual(try NotesBodyDecoder.extractText(proto),
-                       "a much longer run of body text")
+        XCTAssertEqual(
+            try NotesBodyDecoder.extractText(proto),
+            "a much longer run of body text")
     }
 
     /// A body longer than 127 bytes needs a multi-byte varint length. Getting
@@ -114,16 +121,17 @@ final class NotesBodyDecoderTests: XCTestCase {
     /// Varint (0), 64-bit (1) and 32-bit (5) fields must be skipped by their
     /// own rules, or every field after one of them is read at the wrong offset.
     func testSkipsNonStringFieldsWithoutLosingAlignment() throws {
-        var proto = Data([1 << 3 | 0, 0x96, 0x01])            // varint field 1 = 150
-        proto += Data([3 << 3 | 5, 0, 0, 0, 0])               // 32-bit field 3
-        proto += Data([4 << 3 | 1, 0, 0, 0, 0, 0, 0, 0, 0])   // 64-bit field 4
+        var proto = Data([1 << 3 | 0, 0x96, 0x01])  // varint field 1 = 150
+        proto += Data([3 << 3 | 5, 0, 0, 0, 0])  // 32-bit field 3
+        proto += Data([4 << 3 | 1, 0, 0, 0, 0, 0, 0, 0, 0])  // 64-bit field 4
         proto += lengthDelimited(field: 5, "the body")
         XCTAssertEqual(try NotesBodyDecoder.extractText(proto), "the body")
     }
 
     func testKeepsWhatItFoundWhenTheBlobIsTruncatedMidField() throws {
-        let proto = lengthDelimited(field: 2, "found this first")
-            + Data([3 << 3 | 2, 0x40])                        // claims 64 bytes, has none
+        let proto =
+            lengthDelimited(field: 2, "found this first")
+            + Data([3 << 3 | 2, 0x40])  // claims 64 bytes, has none
         XCTAssertEqual(try NotesBodyDecoder.extractText(proto), "found this first")
     }
 

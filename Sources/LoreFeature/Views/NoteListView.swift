@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 struct NoteListView: View {
     @Bindable var store: LoreStore
@@ -48,7 +48,8 @@ struct NoteListView: View {
         // attachment would be far more surprising than showing it. Browsing
         // is where a `.zip` reads as clutter; searching is where it reads as
         // "found it".
-        var base = query.isEmpty
+        var base =
+            query.isEmpty
             ? DocumentVisibility.visibleRows(store.rows, showAllFiles: store.showAllFiles)
             : store.search(query)
         if let tag = activeTag { base = base.filter { $0.tags.contains(tag) } }
@@ -96,9 +97,11 @@ struct NoteListView: View {
                 // Wrapping, not horizontally scrolling — see `TagChipRow`. The
                 // separate "Clear" chip went with the scroll: an active tag is
                 // now always visible, so clearing it means clicking it again.
-                TagChipRow(tags: store.allTags, counts: store.tagCounts,
-                           activeTag: $activeTag, theme: theme)
-                    .padding(.vertical, 2)
+                TagChipRow(
+                    tags: store.allTags, counts: store.tagCounts,
+                    activeTag: $activeTag, theme: theme
+                )
+                .padding(.vertical, 2)
             }
 
             if visible.isEmpty && NoteListView.isStillIndexing(store) {
@@ -117,18 +120,22 @@ struct NoteListView: View {
                 .accessibilityLabel("Indexing vault")
             } else if visible.isEmpty {
                 AinkradEmptyState(
-                    icon: store.rows.isEmpty ? "tray"
+                    icon: store.rows.isEmpty
+                        ? "tray"
                         : allVisibleRowsAreHiddenByDefault ? "eye.slash" : "magnifyingglass",
-                    title: store.rows.isEmpty ? "No notes yet"
+                    title: store.rows.isEmpty
+                        ? "No notes yet"
                         : allVisibleRowsAreHiddenByDefault ? "Files are hidden" : "No matches",
                     message: store.rows.isEmpty
                         ? "Press ⌘N to capture your first note."
                         : allVisibleRowsAreHiddenByDefault
                             ? "Every file here is hidden by \"Show all files\" in Settings."
                             : "Try a different search or tag filter.",
-                    actionTitle: store.rows.isEmpty ? "New note"
+                    actionTitle: store.rows.isEmpty
+                        ? "New note"
                         : allVisibleRowsAreHiddenByDefault ? "Show all files" : nil,
-                    action: store.rows.isEmpty ? onNew
+                    action: store.rows.isEmpty
+                        ? onNew
                         : allVisibleRowsAreHiddenByDefault ? { store.setShowAllFiles(true) } : nil)
             } else {
                 ScrollViewReader { proxy in
@@ -139,14 +146,17 @@ struct NoteListView: View {
                             // answer — and a count is also the only signal
                             // that a query narrowed anything at all.
                             if !query.isEmpty {
-                                Text(visible.count == 1 ? "1 result"
-                                                        : "\(visible.count) results")
-                                    .font(AinkradFontResolver.font(.caption, typography: typo))
-                                    .foregroundStyle(theme.tokens.foreground.opacity(LoreMetrics.secondaryText))
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .padding(.bottom, 2)
-                                    .accessibilityLabel(
-                                        "\(visible.count) results for \(query)")
+                                Text(
+                                    visible.count == 1
+                                        ? "1 result"
+                                        : "\(visible.count) results"
+                                )
+                                .font(AinkradFontResolver.font(.caption, typography: typo))
+                                .foregroundStyle(theme.tokens.foreground.opacity(LoreMetrics.secondaryText))
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.bottom, 2)
+                                .accessibilityLabel(
+                                    "\(visible.count) results for \(query)")
                             }
                             ForEach(Array(visible.enumerated()), id: \.element.path) { index, row in
                                 LoreSidebarRow.document(
@@ -155,23 +165,28 @@ struct NoteListView: View {
                                     subtitle: subtitle(for: row),
                                     attributedSubtitle: snippet(for: row),
                                     emptyTitleFallback: "Untitled",
-                                    onTap: { selected = row; onSelect(row) })
-                                    .loreDraggableDocument(row)
-                                    // A focus ring DISTINCT from selection.
-                                    // They mean different things — "the
-                                    // keyboard is here" versus "this is the
-                                    // open document" — and drawing them the
-                                    // same way makes ↓ look like it is opening
-                                    // documents it has not opened.
-                                    .overlay {
-                                        if focusedIndex == index {
-                                            ChamferShape(cut: LoreMetrics.chamfer)
-                                                .strokeBorder(theme.tokens.accentPrimary,
-                                                              lineWidth: 1.5)
-                                        }
+                                    onTap: {
+                                        selected = row
+                                        onSelect(row)
                                     }
-                                    .id(row.path)
-                                    .ainkradContextMenu(loreRowMenuItems(row: row, ops: ops, store: store))
+                                )
+                                .loreDraggableDocument(row)
+                                // A focus ring DISTINCT from selection.
+                                // They mean different things — "the
+                                // keyboard is here" versus "this is the
+                                // open document" — and drawing them the
+                                // same way makes ↓ look like it is opening
+                                // documents it has not opened.
+                                .overlay {
+                                    if focusedIndex == index {
+                                        ChamferShape(cut: LoreMetrics.chamfer)
+                                            .strokeBorder(
+                                                theme.tokens.accentPrimary,
+                                                lineWidth: 1.5)
+                                    }
+                                }
+                                .id(row.path)
+                                .ainkradContextMenu(loreRowMenuItems(row: row, ops: ops, store: store))
                             }
                         }
                     }
@@ -254,7 +269,8 @@ struct NoteListView: View {
     }
 
     private func moveFocus(_ direction: LoreListNavigation.Direction) {
-        focusedIndex = LoreListNavigation.move(direction, from: focusedIndex,
-                                               count: visible.count)
+        focusedIndex = LoreListNavigation.move(
+            direction, from: focusedIndex,
+            count: visible.count)
     }
 }

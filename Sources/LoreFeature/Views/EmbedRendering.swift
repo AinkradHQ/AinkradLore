@@ -1,6 +1,6 @@
+import AinkradAppKit
 import AppKit
 import SwiftUI
-import AinkradAppKit
 
 /// How an `![[target]]` embed is drawn.
 ///
@@ -68,14 +68,18 @@ public enum EmbedRendering {
     /// that reservation is not achievable without an attachment character.
     /// Left out rather than drawn with a real risk of overlapping the
     /// preceding character; flagged as a follow-up in the task report.
-    static func applyChipStyling(over range: NSRange, to storage: NSTextStorage,
-                                 tokens: HostThemeTokens) {
-        storage.addAttribute(.backgroundColor,
-                             value: NSColor(tokens.surfaceElevated).withAlphaComponent(0.6),
-                             range: range)
+    static func applyChipStyling(
+        over range: NSRange, to storage: NSTextStorage,
+        tokens: HostThemeTokens
+    ) {
+        storage.addAttribute(
+            .backgroundColor,
+            value: NSColor(tokens.surfaceElevated).withAlphaComponent(0.6),
+            range: range)
         storage.addAttribute(.foregroundColor, value: NSColor(tokens.accentPrimary), range: range)
-        storage.addAttribute(.underlineStyle,
-                             value: NSUnderlineStyle.single.rawValue, range: range)
+        storage.addAttribute(
+            .underlineStyle,
+            value: NSUnderlineStyle.single.rawValue, range: range)
     }
 
     /// True when `fullRange`, trimmed of the whitespace `MarkdownReveal.
@@ -92,7 +96,8 @@ public enum EmbedRendering {
         }
         var end = paragraphEnd
         while end > NSMaxRange(fullRange), end > start,
-              isTrimmable(text.character(at: end - 1)) {
+            isTrimmable(text.character(at: end - 1))
+        {
             end -= 1
         }
         return start == fullRange.location && end == NSMaxRange(fullRange)
@@ -147,7 +152,8 @@ final class EmbedImageCache: @unchecked Sendable {
         // and holding a lock across it would serialize every embed's decode.
         let decoded = NSImage(contentsOf: url)
 
-        lock.lock(); defer { lock.unlock() }
+        lock.lock()
+        defer { lock.unlock() }
         if storage[key] == nil {
             storage[key] = decoded
             order.append(key)
@@ -160,8 +166,8 @@ final class EmbedImageCache: @unchecked Sendable {
 
     private static func key(for url: URL) -> Key? {
         guard let attrs = try? FileManager.default.attributesOfItem(atPath: url.path),
-              let mtime = attrs[.modificationDate] as? Date,
-              let size = attrs[.size] as? Int
+            let mtime = attrs[.modificationDate] as? Date,
+            let size = attrs[.size] as? Int
         else { return nil }
         return Key(path: url.path, mtime: mtime.timeIntervalSince1970, size: size)
     }
@@ -240,9 +246,11 @@ extension MarkdownEditor.Coordinator {
     /// No inline image is drawn above the hard/viewport cap: `window` already
     /// limits which spans this reaches, matching how the rest of `renderStyles`
     /// treats an over-cap or off-screen document.
-    func applyEmbeds(to storage: NSTextStorage, window: NSRange?,
-                     restrictTo blockRange: NSRange? = nil,
-                     spanIndices: [Int]? = nil) {
+    func applyEmbeds(
+        to storage: NSTextStorage, window: NSRange?,
+        restrictTo blockRange: NSRange? = nil,
+        spanIndices: [Int]? = nil
+    ) {
         guard let tv = textView else { return }
         let full = NSRange(location: 0, length: storage.length)
         let resolve = resolveEmbedTarget
@@ -250,9 +258,10 @@ extension MarkdownEditor.Coordinator {
         let text = storage.string as NSString
         var regions: [EmbedImageRegion] = []
 
-        let candidates = spanIndices.map { indices in
-            indices.compactMap { $0 < styleCache.spans.count ? styleCache.spans[$0] : nil }
-        } ?? styleCache.spans
+        let candidates =
+            spanIndices.map { indices in
+                indices.compactMap { $0 < styleCache.spans.count ? styleCache.spans[$0] : nil }
+            } ?? styleCache.spans
 
         for span in candidates {
             guard case .embed(let target, let fullRange) = span.kind else { continue }
@@ -267,7 +276,7 @@ extension MarkdownEditor.Coordinator {
 
             switch EmbedRendering.kind(for: resolve(target)) {
             case .unresolved:
-                continue   // Fallback colour already applied by `add(.embed:)`.
+                continue  // Fallback colour already applied by `add(.embed:)`.
 
             case .chip:
                 EmbedRendering.applyChipStyling(over: r, to: storage, tokens: tokens)
@@ -329,11 +338,15 @@ extension MarkdownEditor.Coordinator {
                     continue
                 }
                 let maxWidth = max(1, containerWidth - 32)
-                let maxHeight: CGFloat = 480   // a tall screenshot must not swallow the viewport
-                let scale = min(1, min(maxWidth / max(image.size.width, 1),
-                                       maxHeight / max(image.size.height, 1)))
-                let size = NSSize(width: image.size.width * scale,
-                                  height: image.size.height * scale)
+                let maxHeight: CGFloat = 480  // a tall screenshot must not swallow the viewport
+                let scale = min(
+                    1,
+                    min(
+                        maxWidth / max(image.size.width, 1),
+                        maxHeight / max(image.size.height, 1)))
+                let size = NSSize(
+                    width: image.size.width * scale,
+                    height: image.size.height * scale)
                 // The source text is never deleted or replaced — only made
                 // visually near-zero, the SAME trick `MarkdownStyleRenderer.
                 // collapse` uses for hidden syntax markers — so every offset
@@ -356,9 +369,10 @@ extension MarkdownEditor.Coordinator {
                 // BEFORE it is overwritten below, so `embedImageStyle` can
                 // preserve its indent rather than resetting to `.body`. See
                 // that function's doc comment.
-                let existingStyle = storage.attribute(
-                    .paragraphStyle, at: paragraph.location, effectiveRange: nil
-                ) as? NSParagraphStyle
+                let existingStyle =
+                    storage.attribute(
+                        .paragraphStyle, at: paragraph.location, effectiveRange: nil
+                    ) as? NSParagraphStyle
                 let style = MarkdownParagraphStyles.embedImageStyle(
                     basedOn: existingStyle, height: size.height,
                     theme: theme)
@@ -374,9 +388,11 @@ extension MarkdownEditor.Coordinator {
                     paragraph: paragraph, in: text,
                     documentFallback: documentWritingDirection)
                 let indent = existingStyle?.firstLineHeadIndent ?? 0
-                regions.append(EmbedImageRegion(range: full_, image: image, size: size,
-                                                writingDirection: writingDirection,
-                                                indent: indent))
+                regions.append(
+                    EmbedImageRegion(
+                        range: full_, image: image, size: size,
+                        writingDirection: writingDirection,
+                        indent: indent))
             }
         }
 
@@ -430,8 +446,10 @@ extension MarkdownEditor.Coordinator {
         embedIndex = styleCache.spans.compactMap { span in
             guard case .embed(_, let fullRange) = span.kind else { return nil }
             let ns = NSRange(location: fullRange.lowerBound, length: fullRange.count)
-            guard let block = MarkdownEditorReveal.blockIndex(of: ns.location,
-                                                              in: revealIndex.blocks)
+            guard
+                let block = MarkdownEditorReveal.blockIndex(
+                    of: ns.location,
+                    in: revealIndex.blocks)
             else { return nil }
             return (fullRange: ns, block: block)
         }
@@ -470,9 +488,10 @@ extension MarkdownEditor.Coordinator {
         // Exactly the embeds whose reveal state flipped, mapped to the blocks
         // that have to be re-attributed for the change to become visible.
         let changed = now.symmetricDifference(was)
-        let blocks = Set(changed.compactMap { offset -> Int? in
-            offset < embedIndex.count ? embedIndex[offset].block : nil
-        })
+        let blocks = Set(
+            changed.compactMap { offset -> Int? in
+                offset < embedIndex.count ? embedIndex[offset].block : nil
+            })
         for block in blocks.sorted() {
             restyleBlock(block, revealed: revealedRange, in: storage)
         }

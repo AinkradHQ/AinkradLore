@@ -1,6 +1,7 @@
 import AppKit
 import WebKit
 import XCTest
+
 @testable import LoreFeature
 
 /// E2T2, E2T3, E2T4: tags, callouts and task checkboxes on the CM6 surface.
@@ -15,13 +16,17 @@ final class CM6SyntaxTests: XCTestCase {
 
     private var windows: [NSWindow] = []
     private var webView: WKWebView!
-    override func tearDown() { windows.removeAll(); super.tearDown() }
+    override func tearDown() {
+        windows.removeAll()
+        super.tearDown()
+    }
 
     @MainActor
     private func boot(_ text: String) throws {
         webView = WKWebView(frame: NSRect(x: 0, y: 0, width: 900, height: 700))
-        let window = NSWindow(contentRect: webView.frame, styleMask: [.titled],
-                              backing: .buffered, defer: false)
+        let window = NSWindow(
+            contentRect: webView.frame, styleMask: [.titled],
+            backing: .buffered, defer: false)
         window.contentView = webView
         windows.append(window)
         let index = try XCTUnwrap(CM6EditorView.Coordinator.bundledIndexURL)
@@ -35,8 +40,14 @@ final class CM6SyntaxTests: XCTestCase {
 
     @MainActor @discardableResult
     private func js(_ source: String) throws -> Any? {
-        var result: Any?; var failure: Error?; var done = false
-        webView.evaluateJavaScript(source) { v, e in result = v; failure = e; done = true }
+        var result: Any?
+        var failure: Error?
+        var done = false
+        webView.evaluateJavaScript(source) { v, e in
+            result = v
+            failure = e
+            done = true
+        }
         let deadline = Date().addingTimeInterval(20)
         while !done, Date() < deadline {
             RunLoop.current.run(mode: .default, before: Date().addingTimeInterval(0.01))
@@ -57,13 +68,14 @@ final class CM6SyntaxTests: XCTestCase {
 
     @MainActor
     private func captureBridge() throws {
-        _ = try js("""
-        (() => {
-          window.__posted = [];
-          window.webkit = { messageHandlers: { lore: {
-            postMessage: m => window.__posted.push(m) } } };
-        })()
-        """)
+        _ = try js(
+            """
+            (() => {
+              window.__posted = [];
+              window.webkit = { messageHandlers: { lore: {
+                postMessage: m => window.__posted.push(m) } } };
+            })()
+            """)
     }
 
     // MARK: - E2T2, tags
@@ -73,10 +85,12 @@ final class CM6SyntaxTests: XCTestCase {
     @MainActor
     func test_aTagRendersAsAChipKeepingItsHash() throws {
         try boot("Tagged #project/ainkrad here.\n\n")
-        XCTAssertEqual(try js("window.loreEditor.tagNames()") as? [String],
-                       ["project/ainkrad"])
-        XCTAssertEqual(try js("window.loreEditor.tagTexts()") as? [String],
-                       ["#project/ainkrad"])
+        XCTAssertEqual(
+            try js("window.loreEditor.tagNames()") as? [String],
+            ["project/ainkrad"])
+        XCTAssertEqual(
+            try js("window.loreEditor.tagTexts()") as? [String],
+            ["#project/ainkrad"])
     }
 
     /// The disqualification list, transcribed from `MarkdownExtensions.scanTags`.
@@ -84,18 +98,19 @@ final class CM6SyntaxTests: XCTestCase {
     /// cannot click through to anything.
     @MainActor
     func test_everyThingThatLooksLikeATagAndIsNot() throws {
-        try boot("""
-        # A heading is not a tag
+        try boot(
+            """
+            # A heading is not a tag
 
-        Not #1234 an issue reference.
+            Not #1234 an issue reference.
 
-        Not `#incode` and not [a link](https://x.test/p#anchor).
+            Not `#incode` and not [a link](https://x.test/p#anchor).
 
-        Not [[Note#Heading]] either.
+            Not [[Note#Heading]] either.
 
-        But #real is.
+            But #real is.
 
-        """)
+            """)
         XCTAssertEqual(try js("window.loreEditor.tagNames()") as? [String], ["real"])
     }
 
@@ -130,8 +145,9 @@ final class CM6SyntaxTests: XCTestCase {
         let title = try js("window.loreEditor.calloutTitles()") as? [String] ?? []
         XCTAssertEqual(title.count, 1)
         XCTAssertTrue(title[0].contains("Do not do this"), "got \(title)")
-        XCTAssertFalse(title[0].contains("[!danger]"),
-                       "the notation must not be on screen: \(title)")
+        XCTAssertFalse(
+            title[0].contains("[!danger]"),
+            "the notation must not be on screen: \(title)")
     }
 
     /// Obsidian always shows a heading, so `> [!note]` alone renders as "Note".
@@ -142,27 +158,30 @@ final class CM6SyntaxTests: XCTestCase {
         try boot(source)
         let title = try js("window.loreEditor.calloutTitles()") as? [String] ?? []
         XCTAssertTrue(title.first?.contains("Warning") == true, "got \(title)")
-        XCTAssertEqual(try js("window.loreEditor.text()") as? String, source,
-                       "the drawn title must not have entered the document")
+        XCTAssertEqual(
+            try js("window.loreEditor.text()") as? String, source,
+            "the drawn title must not have entered the document")
     }
 
     /// Every spelling a vault written against Obsidian will actually contain.
     @MainActor
     func test_theAliasesObsidianAcceptsAllResolve() throws {
-        try boot("""
-        > [!tldr] a
-        
-        > [!caution] b
+        try boot(
+            """
+            > [!tldr] a
 
-        > [!hint] c
+            > [!caution] b
 
-        > [!error] d
+            > [!hint] c
 
-        > [!cite] e
+            > [!error] d
 
-        """)
-        XCTAssertEqual(try js("window.loreEditor.calloutKinds()") as? [String],
-                       ["abstract", "warning", "tip", "danger", "quote"])
+            > [!cite] e
+
+            """)
+        XCTAssertEqual(
+            try js("window.loreEditor.calloutKinds()") as? [String],
+            ["abstract", "warning", "tip", "danger", "quote"])
     }
 
     /// An unrecognised type is a plain quote, not stray punctuation.
@@ -213,24 +232,25 @@ final class CM6SyntaxTests: XCTestCase {
     @MainActor
     func test_renderingChangesNoByteOfTheDocument() throws {
         let source = """
-        Tagged #project/ainkrad and #editor.
+            Tagged #project/ainkrad and #editor.
 
-        - [ ] open
-        - [x] done
+            - [ ] open
+            - [x] done
 
-        > [!warning] Careful
-        > Body.
+            > [!warning] Careful
+            > Body.
 
-        A [link](https://x.test/p) and a #1234 reference.
+            A [link](https://x.test/p) and a #1234 reference.
 
-        """
+            """
         try boot(source)
         XCTAssertEqual(try js("window.loreEditor.text()") as? String, source)
         for needle in ["#project/ainkrad", "open", "done", "Careful", "link"] {
-            _ = try js("""
-            window.loreEditor.selectAt(
-              window.loreEditor.text().indexOf(\(CM6EditorView.Coordinator.jsString(needle))))
-            """)
+            _ = try js(
+                """
+                window.loreEditor.selectAt(
+                  window.loreEditor.text().indexOf(\(CM6EditorView.Coordinator.jsString(needle))))
+                """)
         }
         XCTAssertEqual(try js("window.loreEditor.text()") as? String, source)
     }

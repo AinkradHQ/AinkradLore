@@ -118,104 +118,139 @@ enum LoreCommands {
     /// comment warns against.
     static let all: [LoreCommand] = [
         // Document
-        .init(id: .newNote, title: "New Note", systemName: "plus",
-              shortcut: LoreShortcut("n"), requires: .vault, group: .document),
-        .init(id: .saveNow, title: "Save", systemName: "arrow.down.doc",
-              shortcut: LoreShortcut("s"), requires: .document, group: .document),
-        .init(id: .closeDocument, title: "Close Document", systemName: "xmark",
-              shortcut: LoreShortcut("w"), requires: .document, group: .document),
-        .init(id: .quickOpen, title: "Quick Open…", systemName: "doc.text.magnifyingglass",
-              shortcut: LoreShortcut("p"), requires: .vault, group: .document),
-        .init(id: .goBack, title: "Back", systemName: "chevron.left",
-              shortcut: LoreShortcut("["), requires: .backHistory, group: .document),
-        .init(id: .goForward, title: "Forward", systemName: "chevron.right",
-              shortcut: LoreShortcut("]"), requires: .forwardHistory, group: .document),
-        .init(id: .findInDocument, title: "Find…", systemName: "magnifyingglass",
-              shortcut: LoreShortcut("f"), requires: .document, group: .document),
-        .init(id: .findNext, title: "Find Next", systemName: "chevron.down",
-              shortcut: LoreShortcut("g"), requires: .document, group: .document),
-        .init(id: .findPrevious, title: "Find Previous", systemName: "chevron.up",
-              shortcut: LoreShortcut("g", shift: true), requires: .document,
-              group: .document),
-        .init(id: .replaceInDocument, title: "Find and Replace…",
-              systemName: "arrow.left.arrow.right",
-              shortcut: LoreShortcut("f", option: true), requires: .document,
-              group: .document),
+        .init(
+            id: .newNote, title: "New Note", systemName: "plus",
+            shortcut: LoreShortcut("n"), requires: .vault, group: .document),
+        .init(
+            id: .saveNow, title: "Save", systemName: "arrow.down.doc",
+            shortcut: LoreShortcut("s"), requires: .document, group: .document),
+        .init(
+            id: .closeDocument, title: "Close Document", systemName: "xmark",
+            shortcut: LoreShortcut("w"), requires: .document, group: .document),
+        .init(
+            id: .quickOpen, title: "Quick Open…", systemName: "doc.text.magnifyingglass",
+            shortcut: LoreShortcut("p"), requires: .vault, group: .document),
+        .init(
+            id: .goBack, title: "Back", systemName: "chevron.left",
+            shortcut: LoreShortcut("["), requires: .backHistory, group: .document),
+        .init(
+            id: .goForward, title: "Forward", systemName: "chevron.right",
+            shortcut: LoreShortcut("]"), requires: .forwardHistory, group: .document),
+        .init(
+            id: .findInDocument, title: "Find…", systemName: "magnifyingglass",
+            shortcut: LoreShortcut("f"), requires: .document, group: .document),
+        .init(
+            id: .findNext, title: "Find Next", systemName: "chevron.down",
+            shortcut: LoreShortcut("g"), requires: .document, group: .document),
+        .init(
+            id: .findPrevious, title: "Find Previous", systemName: "chevron.up",
+            shortcut: LoreShortcut("g", shift: true), requires: .document,
+            group: .document),
+        .init(
+            id: .replaceInDocument, title: "Find and Replace…",
+            systemName: "arrow.left.arrow.right",
+            shortcut: LoreShortcut("f", option: true), requires: .document,
+            group: .document),
         // Format. All `.document`, since there is nothing to format without
         // one — and the binding being absent is what keeps ⌘B out of the
         // sidebar's way.
-        .init(id: .formatBold, title: "Bold", systemName: "bold",
-              shortcut: LoreShortcut("b"), requires: .document, group: .format),
-        .init(id: .formatItalic, title: "Italic", systemName: "italic",
-              shortcut: LoreShortcut("i"), requires: .document, group: .format),
-        .init(id: .formatCode, title: "Inline Code",
-              systemName: "chevron.left.forwardslash.chevron.right",
-              shortcut: LoreShortcut("c", shift: true), requires: .document,
-              group: .format),
+        .init(
+            id: .formatBold, title: "Bold", systemName: "bold",
+            shortcut: LoreShortcut("b"), requires: .document, group: .format),
+        .init(
+            id: .formatItalic, title: "Italic", systemName: "italic",
+            shortcut: LoreShortcut("i"), requires: .document, group: .format),
+        .init(
+            id: .formatCode, title: "Inline Code",
+            systemName: "chevron.left.forwardslash.chevron.right",
+            shortcut: LoreShortcut("c", shift: true), requires: .document,
+            group: .format),
         // ⌘K belongs to the command palette, so the link key is ⇧⌘K. The
         // registry's collision test is what made that a decision rather than a
         // surprise discovered by pressing it.
-        .init(id: .formatLink, title: "Link", systemName: "link",
-              shortcut: LoreShortcut("k", shift: true), requires: .document,
-              group: .format),
-        .init(id: .formatBulletList, title: "Bullet List", systemName: "list.bullet",
-              shortcut: LoreShortcut("l", shift: true), requires: .document,
-              group: .format),
-        .init(id: .formatTaskList, title: "Task List", systemName: "checklist",
-              shortcut: LoreShortcut("t", shift: true), requires: .document,
-              group: .format),
-        .init(id: .formatQuote, title: "Blockquote", systemName: "text.quote",
-              shortcut: nil, requires: .document, group: .format),
+        .init(
+            id: .formatLink, title: "Link", systemName: "link",
+            shortcut: LoreShortcut("k", shift: true), requires: .document,
+            group: .format),
+        .init(
+            id: .formatBulletList, title: "Bullet List", systemName: "list.bullet",
+            shortcut: LoreShortcut("l", shift: true), requires: .document,
+            group: .format),
+        .init(
+            id: .formatTaskList, title: "Task List", systemName: "checklist",
+            shortcut: LoreShortcut("t", shift: true), requires: .document,
+            group: .format),
+        .init(
+            id: .formatQuote, title: "Blockquote", systemName: "text.quote",
+            shortcut: nil, requires: .document, group: .format),
         // ⌘1–3 were free only because the tab bar is gone; they used to be the
         // obvious home for "switch to tab N".
-        .init(id: .headingLevel1, title: "Heading 1", systemName: "textformat.size.larger",
-              shortcut: LoreShortcut("1"), requires: .document, group: .format),
-        .init(id: .headingLevel2, title: "Heading 2", systemName: "textformat.size",
-              shortcut: LoreShortcut("2"), requires: .document, group: .format),
-        .init(id: .headingLevel3, title: "Heading 3", systemName: "textformat.size.smaller",
-              shortcut: LoreShortcut("3"), requires: .document, group: .format),
-        .init(id: .headingBody, title: "Body Text", systemName: "text.alignleft",
-              shortcut: LoreShortcut("0", shift: true), requires: .document,
-              group: .format),
+        .init(
+            id: .headingLevel1, title: "Heading 1", systemName: "textformat.size.larger",
+            shortcut: LoreShortcut("1"), requires: .document, group: .format),
+        .init(
+            id: .headingLevel2, title: "Heading 2", systemName: "textformat.size",
+            shortcut: LoreShortcut("2"), requires: .document, group: .format),
+        .init(
+            id: .headingLevel3, title: "Heading 3", systemName: "textformat.size.smaller",
+            shortcut: LoreShortcut("3"), requires: .document, group: .format),
+        .init(
+            id: .headingBody, title: "Body Text", systemName: "text.alignleft",
+            shortcut: LoreShortcut("0", shift: true), requires: .document,
+            group: .format),
         // Vault
-        .init(id: .newFolder, title: "New Folder…", systemName: "folder.badge.plus",
-              shortcut: nil, requires: .vault, group: .vault),
-        .init(id: .importNotes, title: "Import…", systemName: "square.and.arrow.down",
-              shortcut: nil, requires: .vault, group: .vault),
-        .init(id: .chooseVault, title: "Choose Vault…", systemName: "folder",
-              shortcut: nil, requires: .always, group: .vault),
-        .init(id: .rebuildIndex, title: "Rebuild Index", systemName: "arrow.clockwise",
-              shortcut: LoreShortcut("r"), requires: .vault, group: .vault),
-        .init(id: .undoDelete, title: "Undo Delete", systemName: "arrow.uturn.backward",
-              shortcut: LoreShortcut("z"), requires: .undoableDelete, group: .vault),
+        .init(
+            id: .newFolder, title: "New Folder…", systemName: "folder.badge.plus",
+            shortcut: nil, requires: .vault, group: .vault),
+        .init(
+            id: .importNotes, title: "Import…", systemName: "square.and.arrow.down",
+            shortcut: nil, requires: .vault, group: .vault),
+        .init(
+            id: .chooseVault, title: "Choose Vault…", systemName: "folder",
+            shortcut: nil, requires: .always, group: .vault),
+        .init(
+            id: .rebuildIndex, title: "Rebuild Index", systemName: "arrow.clockwise",
+            shortcut: LoreShortcut("r"), requires: .vault, group: .vault),
+        .init(
+            id: .undoDelete, title: "Undo Delete", systemName: "arrow.uturn.backward",
+            shortcut: LoreShortcut("z"), requires: .undoableDelete, group: .vault),
         // View
-        .init(id: .toggleSidebar, title: "Toggle Sidebar", systemName: "sidebar.leading",
-              shortcut: LoreShortcut("\\"), requires: .always, group: .view),
+        .init(
+            id: .toggleSidebar, title: "Toggle Sidebar", systemName: "sidebar.leading",
+            shortcut: LoreShortcut("\\"), requires: .always, group: .view),
         // `.document`, not `.always`: splitting starts from what is open, so
         // with nothing open there is nothing to split on and the command has
         // no meaning rather than an empty second pane.
-        .init(id: .toggleSplit, title: "Split View",
-              systemName: "rectangle.split.2x1",
-              shortcut: LoreShortcut("\\", option: true), requires: .document,
-              group: .view),
-        .init(id: .toggleOutline, title: "Jump to Heading…",
-              systemName: "list.bullet.indent",
-              shortcut: LoreShortcut("o", shift: true), requires: .document, group: .view),
-        .init(id: .toggleBacklinks, title: "Linked Mentions", systemName: "link",
-              shortcut: LoreShortcut("b", shift: true), requires: .document, group: .view),
-        .init(id: .toggleShowAllFiles, title: "Show All Files", systemName: "eye",
-              shortcut: nil, requires: .vault, group: .view),
+        .init(
+            id: .toggleSplit, title: "Split View",
+            systemName: "rectangle.split.2x1",
+            shortcut: LoreShortcut("\\", option: true), requires: .document,
+            group: .view),
+        .init(
+            id: .toggleOutline, title: "Jump to Heading…",
+            systemName: "list.bullet.indent",
+            shortcut: LoreShortcut("o", shift: true), requires: .document, group: .view),
+        .init(
+            id: .toggleBacklinks, title: "Linked Mentions", systemName: "link",
+            shortcut: LoreShortcut("b", shift: true), requires: .document, group: .view),
+        .init(
+            id: .toggleShowAllFiles, title: "Show All Files", systemName: "eye",
+            shortcut: nil, requires: .vault, group: .view),
         // `.always`, not `.document`: the setting is a persisted preference,
         // so adjusting it with nothing open is meaningful — the next document
         // opens at the size you chose.
-        .init(id: .zoomIn, title: "Bigger Text", systemName: "textformat.size.larger",
-              shortcut: LoreShortcut("+"), requires: .always, group: .view),
-        .init(id: .zoomOut, title: "Smaller Text", systemName: "textformat.size.smaller",
-              shortcut: LoreShortcut("-"), requires: .always, group: .view),
-        .init(id: .zoomReset, title: "Actual Size", systemName: "textformat.size",
-              shortcut: LoreShortcut("0"), requires: .always, group: .view),
-        .init(id: .commandPalette, title: "Command Palette", systemName: "command",
-              shortcut: LoreShortcut("k"), requires: .always, group: .view),
+        .init(
+            id: .zoomIn, title: "Bigger Text", systemName: "textformat.size.larger",
+            shortcut: LoreShortcut("+"), requires: .always, group: .view),
+        .init(
+            id: .zoomOut, title: "Smaller Text", systemName: "textformat.size.smaller",
+            shortcut: LoreShortcut("-"), requires: .always, group: .view),
+        .init(
+            id: .zoomReset, title: "Actual Size", systemName: "textformat.size",
+            shortcut: LoreShortcut("0"), requires: .always, group: .view),
+        .init(
+            id: .commandPalette, title: "Command Palette", systemName: "command",
+            shortcut: LoreShortcut("k"), requires: .always, group: .view),
     ]
 
     /// The context a command is judged against — the four facts any command's
@@ -228,8 +263,9 @@ enum LoreCommands {
         var canGoBack: Bool = false
         var canGoForward: Bool = false
 
-        static let empty = Context(hasVault: false, hasDocument: false,
-                                   canUndoDelete: false)
+        static let empty = Context(
+            hasVault: false, hasDocument: false,
+            canUndoDelete: false)
     }
 
     /// Every command that can actually run right now.

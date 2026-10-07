@@ -22,7 +22,8 @@ extension LoreStore {
         }
         let backlinks = Set(coordinator.backlinkRows(to: path).map(\.path.path))
         let byPath = Dictionary(rows.map { ($0.path.path, $0) }, uniquingKeysWith: { a, _ in a })
-        return scores
+        return
+            scores
             .filter { $0.key != path.path && !backlinks.contains($0.key) }
             .sorted { $0.value != $1.value ? $0.value > $1.value : $0.key < $1.key }
             .prefix(limit)

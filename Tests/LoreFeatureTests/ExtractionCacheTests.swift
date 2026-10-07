@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 final class ExtractionCacheTests: XCTestCase {
@@ -16,8 +17,14 @@ final class ExtractionCacheTests: XCTestCase {
     func test_secondCallForAnUnchangedFile_doesNotReExtract() throws {
         let url = try tempFile("hello")
         var calls = 0
-        let first = ExtractionCache.shared.text(for: url) { calls += 1; return "extracted" }
-        let second = ExtractionCache.shared.text(for: url) { calls += 1; return "extracted" }
+        let first = ExtractionCache.shared.text(for: url) {
+            calls += 1
+            return "extracted"
+        }
+        let second = ExtractionCache.shared.text(for: url) {
+            calls += 1
+            return "extracted"
+        }
         XCTAssertEqual(first, "extracted")
         XCTAssertEqual(second, "extracted")
         XCTAssertEqual(calls, 1)
@@ -26,12 +33,18 @@ final class ExtractionCacheTests: XCTestCase {
     func test_changedFile_reExtracts() throws {
         let url = try tempFile("hello")
         var calls = 0
-        _ = ExtractionCache.shared.text(for: url) { calls += 1; return "one" }
+        _ = ExtractionCache.shared.text(for: url) {
+            calls += 1
+            return "one"
+        }
         // Rewrite with different content AND a later mtime.
         try "hello there".write(to: url, atomically: true, encoding: .utf8)
         try FileManager.default.setAttributes(
             [.modificationDate: Date().addingTimeInterval(5)], ofItemAtPath: url.path)
-        let again = ExtractionCache.shared.text(for: url) { calls += 1; return "two" }
+        let again = ExtractionCache.shared.text(for: url) {
+            calls += 1
+            return "two"
+        }
         XCTAssertEqual(again, "two")
         XCTAssertEqual(calls, 2)
     }

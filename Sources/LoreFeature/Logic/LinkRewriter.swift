@@ -6,7 +6,9 @@ public struct LinkEdit: Sendable, Equatable {
     public let oldTarget: String
     public let newTarget: String
     public init(file: URL, oldTarget: String, newTarget: String) {
-        self.file = file; self.oldTarget = oldTarget; self.newTarget = newTarget
+        self.file = file
+        self.oldTarget = oldTarget
+        self.newTarget = newTarget
     }
 }
 
@@ -18,7 +20,8 @@ public struct UnrewritableLink: Sendable, Equatable {
     public let sourceFile: URL
     public let rawTarget: String
     public init(sourceFile: URL, rawTarget: String) {
-        self.sourceFile = sourceFile; self.rawTarget = rawTarget
+        self.sourceFile = sourceFile
+        self.rawTarget = rawTarget
     }
 }
 
@@ -53,12 +56,17 @@ public struct RenamePlan: Sendable {
     /// `apply` writes NOTHING and creates NOTHING for a refused plan.
     public let refusal: String?
 
-    public init(source: URL, destination: URL, edits: [LinkEdit],
-                unrewritable: [UnrewritableLink] = [],
-                baselines: [String: Date] = [:],
-                refusal: String? = nil) {
-        self.source = source; self.destination = destination; self.edits = edits
-        self.unrewritable = unrewritable; self.baselines = baselines
+    public init(
+        source: URL, destination: URL, edits: [LinkEdit],
+        unrewritable: [UnrewritableLink] = [],
+        baselines: [String: Date] = [:],
+        refusal: String? = nil
+    ) {
+        self.source = source
+        self.destination = destination
+        self.edits = edits
+        self.unrewritable = unrewritable
+        self.baselines = baselines
         self.refusal = refusal
     }
 
@@ -66,9 +74,10 @@ public struct RenamePlan: Sendable {
     /// `LinkRewriter` while keeping the value on the plan, where `apply` needs
     /// it and where the preview UI (Task 10) can see it too.
     public func withBaselines(_ baselines: [String: Date]) -> RenamePlan {
-        RenamePlan(source: source, destination: destination, edits: edits,
-                   unrewritable: unrewritable, baselines: baselines,
-                   refusal: refusal)
+        RenamePlan(
+            source: source, destination: destination, edits: edits,
+            unrewritable: unrewritable, baselines: baselines,
+            refusal: refusal)
     }
 
     /// First-seen order, deduplicated, so the confirmation UI shows a stable
@@ -101,23 +110,32 @@ public enum LinkRewriter {
     /// count shown in the confirmation UI. This is also why a plain move
     /// (same basename, new folder) produces no edit for a bare link: a bare
     /// link resolves by basename, so it still resolves after the move.
-    public static func plan(renaming source: URL,
-                            to destination: URL,
-                            inboundLinks: [(sourceFile: URL, rawTarget: String,
-                                            syntax: LinkSyntax)],
-                            vaultRoot: URL) -> RenamePlan {
+    public static func plan(
+        renaming source: URL,
+        to destination: URL,
+        inboundLinks: [(
+            sourceFile: URL, rawTarget: String,
+            syntax: LinkSyntax
+        )],
+        vaultRoot: URL
+    ) -> RenamePlan {
         var edits: [LinkEdit] = []
         var unrewritable: [UnrewritableLink] = []
         for link in inboundLinks {
-            guard let newTarget = rewritten(link.rawTarget, syntax: link.syntax,
-                                            from: source,
-                                            to: destination,
-                                            vaultRoot: vaultRoot) else {
+            guard
+                let newTarget = rewritten(
+                    link.rawTarget, syntax: link.syntax,
+                    from: source,
+                    to: destination,
+                    vaultRoot: vaultRoot)
+            else {
                 // Not "no change needed" — no rewrite EXISTS. Recorded so the
                 // rename reports a link it cannot keep working, instead of
                 // returning a zero-edit plan that reads as success.
-                unrewritable.append(UnrewritableLink(sourceFile: link.sourceFile,
-                                                     rawTarget: link.rawTarget))
+                unrewritable.append(
+                    UnrewritableLink(
+                        sourceFile: link.sourceFile,
+                        rawTarget: link.rawTarget))
                 continue
             }
             // Compared DECODED on both sides: `rewritten` returns a decoded
@@ -126,11 +144,14 @@ public enum LinkRewriter {
             // an edit and be written back unencoded.
             guard newTarget != decodedTarget(link.rawTarget, syntax: link.syntax)
             else { continue }
-            edits.append(LinkEdit(file: link.sourceFile, oldTarget: link.rawTarget,
-                                  newTarget: newTarget))
+            edits.append(
+                LinkEdit(
+                    file: link.sourceFile, oldTarget: link.rawTarget,
+                    newTarget: newTarget))
         }
-        return RenamePlan(source: source, destination: destination,
-                          edits: edits, unrewritable: unrewritable)
+        return RenamePlan(
+            source: source, destination: destination,
+            edits: edits, unrewritable: unrewritable)
     }
 
     /// A raw target with its path part percent-decoded and its fragment left
@@ -158,10 +179,12 @@ public enum LinkRewriter {
     /// vault-relative path to produce, and inventing one (e.g. an absolute
     /// filesystem path) would hand the confirmation UI a corrupted-looking
     /// target that is worse than simply omitting the edit.
-    static func rewritten(_ rawTarget: String, syntax: LinkSyntax,
-                          from source: URL,
-                          to destination: URL,
-                          vaultRoot: URL) -> String? {
+    static func rewritten(
+        _ rawTarget: String, syntax: LinkSyntax,
+        from source: URL,
+        to destination: URL,
+        vaultRoot: URL
+    ) -> String? {
         // Split off the fragment; it is carried through untouched.
         let split = splitFragment(rawTarget)
         let fragment = split.fragment
@@ -173,7 +196,8 @@ public enum LinkRewriter {
         // see `decodedTarget`. The result is handed back decoded;
         // `written(_:like:)` re-encodes it at write time, where the link's
         // SYNTAX is known and a wikilink can be excluded from encoding.
-        let body = syntax == .markdown
+        let body =
+            syntax == .markdown
             ? (split.body.removingPercentEncoding ?? split.body) : split.body
         // ANY explicit extension names a location precisely enough that it
         // must track a move — not just `.md`. A bare `[[Contract.pdf]]` is as
@@ -196,9 +220,11 @@ public enum LinkRewriter {
         // `.tar.gz` matches that the same way).
         let bodyExtension = (body as NSString).pathExtension
         let sourceExtension = source.pathExtension
-        let hadExtension = !bodyExtension.isEmpty && !sourceExtension.isEmpty
+        let hadExtension =
+            !bodyExtension.isEmpty && !sourceExtension.isEmpty
             && bodyExtension.lowercased() == sourceExtension.lowercased()
-        let withoutExtension = hadExtension
+        let withoutExtension =
+            hadExtension
             ? String(body.dropLast(bodyExtension.count + 1)) : body
         let hadPath = withoutExtension.contains("/")
 
@@ -208,8 +234,11 @@ public enum LinkRewriter {
             // An explicit path, or an explicit extension, names a location
             // precisely enough that it must track a move — recompute it
             // against the vault root rather than only swapping the basename.
-            guard let relative = vaultRelativePath(of: destination.deletingPathExtension(),
-                                                    vaultRoot: vaultRoot) else {
+            guard
+                let relative = vaultRelativePath(
+                    of: destination.deletingPathExtension(),
+                    vaultRoot: vaultRoot)
+            else {
                 return nil
             }
             newBody = relative
@@ -259,7 +288,7 @@ public enum LinkRewriter {
         let rootComponents = vaultRoot.pathComponents
         let pathComponents = path.pathComponents
         guard pathComponents.count > rootComponents.count,
-              Array(pathComponents.prefix(rootComponents.count)) == rootComponents
+            Array(pathComponents.prefix(rootComponents.count)) == rootComponents
         else { return nil }
         return pathComponents.suffix(from: rootComponents.count).joined(separator: "/")
     }
@@ -302,7 +331,8 @@ public struct SkippedFile: Sendable, Equatable {
     public let url: URL
     public let reason: SkipReason
     public init(url: URL, reason: SkipReason) {
-        self.url = url; self.reason = reason
+        self.url = url
+        self.reason = reason
     }
 }
 
@@ -327,11 +357,15 @@ public struct RenameReport: Sendable {
     /// The new location, or nil if the file was not moved.
     public let movedTo: URL?
 
-    public init(rewritten: [URL], skipped: [SkippedFile], unchanged: [URL] = [],
-                failed: [(url: URL, reason: String)], movedTo: URL?) {
-        self.rewritten = rewritten; self.skipped = skipped
+    public init(
+        rewritten: [URL], skipped: [SkippedFile], unchanged: [URL] = [],
+        failed: [(url: URL, reason: String)], movedTo: URL?
+    ) {
+        self.rewritten = rewritten
+        self.skipped = skipped
         self.unchanged = unchanged
-        self.failed = failed; self.movedTo = movedTo
+        self.failed = failed
+        self.movedTo = movedTo
     }
 
     /// True when every file the plan named was handled and the move (if any)
@@ -362,13 +396,16 @@ extension LinkRewriter {
     /// A nil `baseline` is treated as "changed": we cannot prove the file is
     /// the one we planned against, and this operation edits files the user did
     /// not open. Failing closed costs a redo; failing open costs their text.
-    static func applyEdits(_ edits: [LinkEdit], to file: URL,
-                           baseline: Date?) throws -> EditOutcome {
+    static func applyEdits(
+        _ edits: [LinkEdit], to file: URL,
+        baseline: Date?
+    ) throws -> EditOutcome {
         guard let baseline else { return .skipped(.unverifiable) }
         // Split from the comparison so the two causes stay distinguishable in
         // the report: an unreadable mtime is "cannot verify", a newer one is
         // "somebody edited it". Same behaviour, honest wording.
-        guard let disk = try? FileManager.default
+        guard
+            let disk = try? FileManager.default
                 .attributesOfItem(atPath: file.path)[.modificationDate] as? Date
         else { return .skipped(.unverifiable) }
         guard disk <= baseline else { return .skipped(.changedOnDisk) }
@@ -418,8 +455,9 @@ extension LinkRewriter {
             let start = offset + span.targetRange.lowerBound
             let end = offset + span.targetRange.upperBound
             guard start <= end, end <= chars.count else { continue }
-            chars.replaceSubrange(start..<end,
-                                  with: written(edit.newTarget, like: span.link))
+            chars.replaceSubrange(
+                start..<end,
+                with: written(edit.newTarget, like: span.link))
         }
         return String(chars)
     }

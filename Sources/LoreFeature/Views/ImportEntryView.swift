@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// The import surface: pick a source, review what would land, then land it.
 ///
@@ -59,26 +59,32 @@ struct ImportEntryView: View {
             Text("Import into this vault")
                 .font(AinkradFontResolver.font(.headline, typography: typo))
                 .foregroundStyle(theme.tokens.foreground)
-            Text("Lore shows you everything it would write, and writes nothing until you "
-                 + "approve it. Anything you have already imported is skipped.")
-                .font(.callout)
-                .foregroundStyle(theme.tokens.foreground.opacity(0.7))
-                .fixedSize(horizontal: false, vertical: true)
+            Text(
+                "Lore shows you everything it would write, and writes nothing until you "
+                    + "approve it. Anything you have already imported is skipped."
+            )
+            .font(.callout)
+            .foregroundStyle(theme.tokens.foreground.opacity(0.7))
+            .fixedSize(horizontal: false, vertical: true)
             AinkradListRow(
                 onTap: coordinator.chooseObsidianVault,
                 leading: { AinkradIconGlyph(systemName: "folder") },
                 title: "Obsidian vault",
                 subtitle: "Copies the vault in and keeps your [[wikilinks]] working.",
-                trailing: { Image(systemName: "chevron.right")
-                    .foregroundStyle(theme.tokens.foreground.opacity(LoreMetrics.indicatorGlyph)) })
+                trailing: {
+                    Image(systemName: "chevron.right")
+                        .foregroundStyle(theme.tokens.foreground.opacity(LoreMetrics.indicatorGlyph))
+                })
             AinkradListRow(
                 onTap: coordinator.importAppleNotes,
                 leading: { AinkradIconGlyph(systemName: "note.text") },
                 title: "Apple Notes",
                 subtitle: "Asks Notes for every note in every account. Locked notes and "
                     + "the Recently Deleted folder are left alone.",
-                trailing: { Image(systemName: "chevron.right")
-                    .foregroundStyle(theme.tokens.foreground.opacity(LoreMetrics.indicatorGlyph)) })
+                trailing: {
+                    Image(systemName: "chevron.right")
+                        .foregroundStyle(theme.tokens.foreground.opacity(LoreMetrics.indicatorGlyph))
+                })
             Spacer()
         }
         .padding(AinkradSpacing.lg)
@@ -101,8 +107,9 @@ struct ImportEntryView: View {
                 // contradicts what the preview said, so burying it under the
                 // skips would defeat the point of reporting it at all.
                 ForEach(report.renamed, id: \.from) { _, from, to in
-                    line(from, "already existed — imported as “\(to)”",
-                         icon: "pencil", tint: theme.tokens.foreground.opacity(0.8))
+                    line(
+                        from, "already existed — imported as “\(to)”",
+                        icon: "pencil", tint: theme.tokens.foreground.opacity(0.8))
                 }
                 ForEach(report.skipped, id: \.0) { id, reason in
                     line(id, reason, icon: "arrow.turn.down.right", tint: theme.tokens.foreground.opacity(0.6))
@@ -112,8 +119,9 @@ struct ImportEntryView: View {
                 }
             }
             .listStyle(.plain)
-            .opacity(report.skipped.isEmpty && report.failed.isEmpty
-                     && report.renamed.isEmpty ? 0 : 1)
+            .opacity(
+                report.skipped.isEmpty && report.failed.isEmpty
+                    && report.renamed.isEmpty ? 0 : 1)
             HStack {
                 Spacer()
                 AinkradButton(title: "Done", style: .primary, action: onClose)

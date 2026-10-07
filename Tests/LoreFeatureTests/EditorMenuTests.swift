@@ -1,5 +1,6 @@
 import AppKit
 import XCTest
+
 @testable import LoreFeature
 
 @MainActor
@@ -75,9 +76,10 @@ final class EditorMenuTests: XCTestCase {
     /// With no selection, Cut and Copy are absent rather than present and
     /// dead. A menu that offers what it cannot do teaches the wrong thing.
     func test_withoutASelectionThereIsNoCutOrCopy() {
-        let items = EditorMenuItems.build(selection: NSRange(location: 3, length: 0),
-                                          suggestions: [],
-                                          actions: .noop)
+        let items = EditorMenuItems.build(
+            selection: NSRange(location: 3, length: 0),
+            suggestions: [],
+            actions: .noop)
         let titles = items.map(\.title)
         XCTAssertFalse(titles.contains("Cut"))
         XCTAssertFalse(titles.contains("Copy"))
@@ -86,9 +88,10 @@ final class EditorMenuTests: XCTestCase {
     }
 
     func test_withASelectionCutAndCopyAppear() {
-        let items = EditorMenuItems.build(selection: NSRange(location: 0, length: 4),
-                                          suggestions: [],
-                                          actions: .noop)
+        let items = EditorMenuItems.build(
+            selection: NSRange(location: 0, length: 4),
+            suggestions: [],
+            actions: .noop)
         let titles = items.map(\.title)
         XCTAssertTrue(titles.contains("Cut"))
         XCTAssertTrue(titles.contains("Copy"))
@@ -96,9 +99,10 @@ final class EditorMenuTests: XCTestCase {
 
     /// The markdown actions are the reason this menu exists at all.
     func test_theMarkdownActionsAreAlwaysOffered() {
-        let items = EditorMenuItems.build(selection: NSRange(location: 0, length: 4),
-                                          suggestions: [],
-                                          actions: .noop)
+        let items = EditorMenuItems.build(
+            selection: NSRange(location: 0, length: 4),
+            suggestions: [],
+            actions: .noop)
         let titles = items.map(\.title)
         XCTAssertTrue(titles.contains("Link"))
         XCTAssertTrue(titles.contains("Code"))
@@ -106,9 +110,10 @@ final class EditorMenuTests: XCTestCase {
     }
 
     func test_spellingSuggestionsAppearAboveEverythingElse() {
-        let items = EditorMenuItems.build(selection: NSRange(location: 4, length: 5),
-                                          suggestions: ["quick", "quick-fire"],
-                                          actions: .noop)
+        let items = EditorMenuItems.build(
+            selection: NSRange(location: 4, length: 5),
+            suggestions: ["quick", "quick-fire"],
+            actions: .noop)
         XCTAssertEqual(items.first?.title, "quick")
         XCTAssertTrue(items.map(\.title).contains("Ignore Spelling"))
         XCTAssertTrue(items.map(\.title).contains("Learn Spelling"))
@@ -117,9 +122,10 @@ final class EditorMenuTests: XCTestCase {
     /// A correctly spelled word yields no suggestions and must not leave an
     /// empty spelling group behind.
     func test_noSuggestionsMeansNoSpellingGroup() {
-        let items = EditorMenuItems.build(selection: NSRange(location: 0, length: 3),
-                                          suggestions: [],
-                                          actions: .noop)
+        let items = EditorMenuItems.build(
+            selection: NSRange(location: 0, length: 3),
+            suggestions: [],
+            actions: .noop)
         XCTAssertFalse(items.map(\.title).contains("Ignore Spelling"))
     }
 

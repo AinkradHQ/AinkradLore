@@ -34,8 +34,9 @@ enum MarkdownListDepth {
             // where the previous item ended closes it; a genuinely nested item
             // leaves it open.
             while let top = open.last,
-                  !(span.range.lowerBound >= top.lowerBound
-                    && span.range.upperBound <= top.upperBound) {
+                !(span.range.lowerBound >= top.lowerBound
+                    && span.range.upperBound <= top.upperBound)
+            {
                 open.removeLast()
             }
             result[index] = open.count
@@ -67,8 +68,10 @@ enum MarkdownParagraphStyles {
     ///   the item's bullet. Zero for a top-level item, where this degrades to
     ///   "wrapped lines align with the first line" — which, with the bullet
     ///   collapsed in the reading state, is exactly under the text.
-    static func listItemStyle(depth: Int, leadingIndent: CGFloat,
-                              theme: MarkdownTheme) -> NSParagraphStyle {
+    static func listItemStyle(
+        depth: Int, leadingIndent: CGFloat,
+        theme: MarkdownTheme
+    ) -> NSParagraphStyle {
         let base = style(for: .listItem(depth: depth), theme: theme)
         guard let s = base.mutableCopy() as? NSMutableParagraphStyle else { return base }
         s.headIndent = s.firstLineHeadIndent + max(0, leadingIndent)
@@ -97,8 +100,10 @@ enum MarkdownParagraphStyles {
     ///   one case fix round 1 never actually exercised. Preserving `base`
     ///   here is what makes an indented embed sit at its list/blockquote's
     ///   indent instead of resetting to zero, in EITHER writing direction.
-    static func embedImageStyle(basedOn base: NSParagraphStyle?, height: CGFloat,
-                                theme: MarkdownTheme) -> NSParagraphStyle {
+    static func embedImageStyle(
+        basedOn base: NSParagraphStyle?, height: CGFloat,
+        theme: MarkdownTheme
+    ) -> NSParagraphStyle {
         let base = base ?? style(for: .body, theme: theme)
         guard let s = base.mutableCopy() as? NSMutableParagraphStyle else { return base }
         s.minimumLineHeight = height
@@ -121,11 +126,14 @@ enum MarkdownParagraphStyles {
     /// Collapsed to the PREVIOUS heading's spacing-after, not to zero: two
     /// headings still need to be told apart, just by a normal gap rather than
     /// a section break.
-    static func headingStyle(level: Int, follows previousLevel: Int?,
-                             theme: MarkdownTheme) -> NSParagraphStyle {
+    static func headingStyle(
+        level: Int, follows previousLevel: Int?,
+        theme: MarkdownTheme
+    ) -> NSParagraphStyle {
         let base = style(for: .heading(level), theme: theme)
         guard let previousLevel,
-              let s = base.mutableCopy() as? NSMutableParagraphStyle else { return base }
+            let s = base.mutableCopy() as? NSMutableParagraphStyle
+        else { return base }
         s.paragraphSpacingBefore = theme.headingSpacingAfter(previousLevel)
         return s
     }
@@ -160,11 +168,18 @@ enum MarkdownParagraphStyles {
         let limit = min(NSMaxRange(previous), text.length)
         // Up to three spaces of indent are still a heading; four make it code.
         var indent = 0
-        while scan < limit, text.character(at: scan) == 0x20, indent < 3 { scan += 1; indent += 1 }
+        while scan < limit, text.character(at: scan) == 0x20, indent < 3 {
+            scan += 1
+            indent += 1
+        }
         var hashes = 0
-        while scan < limit, text.character(at: scan) == 0x23 { scan += 1; hashes += 1 }
+        while scan < limit, text.character(at: scan) == 0x23 {
+            scan += 1
+            hashes += 1
+        }
         guard hashes >= 1, hashes <= 6, scan < limit,
-              text.character(at: scan) == 0x20 else { return nil }
+            text.character(at: scan) == 0x20
+        else { return nil }
         return hashes
     }
 
@@ -248,7 +263,8 @@ enum MarkdownParagraphStyles {
             // Constant whether or not the icon is currently drawn: shrinking it
             // on reveal would shift every line of the callout sideways as the
             // caret entered it, trading a small gap for a visible jump.
-            let indent = MarkdownBlockBackgrounds
+            let indent =
+                MarkdownBlockBackgrounds
                 .calloutTextIndent(iconSize: theme.bodyFont.pointSize)
             s.firstLineHeadIndent = indent
             s.headIndent = indent

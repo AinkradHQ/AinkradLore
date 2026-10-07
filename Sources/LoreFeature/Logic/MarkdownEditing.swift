@@ -19,7 +19,7 @@ enum MarkdownEditing {
     /// bullet or number, and any task box.
     struct ListMarker: Equatable {
         let indent: String
-        let bullet: String       // "-", "*", or "3."
+        let bullet: String  // "-", "*", or "3."
         let task: Bool
         var continuation: String { indent + nextBullet + (task ? "[ ] " : "") }
         var isOrdered: Bool { Int(bullet.dropLast()) != nil }
@@ -61,16 +61,19 @@ enum MarkdownEditing {
         if line.count <= marker.prefixLength {
             let removal = NSRange(location: lineRange.location, length: line.count)
             let updated = ns.replacingCharacters(in: removal, with: "")
-            return EditResult(text: updated,
-                              selection: NSRange(location: lineRange.location, length: 0))
+            return EditResult(
+                text: updated,
+                selection: NSRange(location: lineRange.location, length: 0))
         }
 
         let insertion = "\n" + marker.continuation
         let updated = ns.replacingCharacters(
             in: NSRange(location: selection.location, length: 0), with: insertion)
-        return EditResult(text: updated,
-                          selection: NSRange(location: selection.location + insertion.count,
-                                             length: 0))
+        return EditResult(
+            text: updated,
+            selection: NSRange(
+                location: selection.location + insertion.count,
+                length: 0))
     }
 }
 
@@ -113,10 +116,13 @@ extension MarkdownEditing {
         let replaced = NSRange(location: lineRange.location, length: (line as NSString).length)
         let updated = ns.replacingCharacters(in: replaced, with: rebuilt)
         let shift = (rebuilt as NSString).length - (line as NSString).length
-        return EditResult(text: updated,
-                          selection: NSRange(location: max(lineRange.location,
-                                                           selection.location + shift),
-                                             length: 0))
+        return EditResult(
+            text: updated,
+            selection: NSRange(
+                location: max(
+                    lineRange.location,
+                    selection.location + shift),
+                length: 0))
     }
 }
 
@@ -135,13 +141,17 @@ extension MarkdownEditing {
         let before = NSRange(location: selection.location - d, length: d)
         let after = NSRange(location: selection.location + selection.length, length: d)
         if before.location >= 0, after.location + after.length <= ns.length,
-           ns.substring(with: before) == delimiter, ns.substring(with: after) == delimiter {
-            let whole = NSRange(location: before.location,
-                                length: d + selection.length + d)
+            ns.substring(with: before) == delimiter, ns.substring(with: after) == delimiter
+        {
+            let whole = NSRange(
+                location: before.location,
+                length: d + selection.length + d)
             let inner = ns.substring(with: selection)
-            return EditResult(text: ns.replacingCharacters(in: whole, with: inner),
-                              selection: NSRange(location: before.location,
-                                                 length: selection.length))
+            return EditResult(
+                text: ns.replacingCharacters(in: whole, with: inner),
+                selection: NSRange(
+                    location: before.location,
+                    length: selection.length))
         }
 
         // Selection INCLUDES the delimiters: "make |**bold**| now" — a
@@ -151,20 +161,25 @@ extension MarkdownEditing {
             let innerStart = NSRange(location: selection.location, length: d)
             let innerEnd = NSRange(location: selection.location + selection.length - d, length: d)
             if ns.substring(with: innerStart) == delimiter, ns.substring(with: innerEnd) == delimiter {
-                let innerRange = NSRange(location: selection.location + d,
-                                         length: selection.length - 2 * d)
+                let innerRange = NSRange(
+                    location: selection.location + d,
+                    length: selection.length - 2 * d)
                 let inner = ns.substring(with: innerRange)
-                return EditResult(text: ns.replacingCharacters(in: selection, with: inner),
-                                  selection: NSRange(location: selection.location,
-                                                     length: (inner as NSString).length))
+                return EditResult(
+                    text: ns.replacingCharacters(in: selection, with: inner),
+                    selection: NSRange(
+                        location: selection.location,
+                        length: (inner as NSString).length))
             }
         }
 
         let inner = ns.substring(with: selection)
         let wrapped = delimiter + inner + delimiter
-        return EditResult(text: ns.replacingCharacters(in: selection, with: wrapped),
-                          selection: NSRange(location: selection.location + d,
-                                             length: selection.length))
+        return EditResult(
+            text: ns.replacingCharacters(in: selection, with: wrapped),
+            selection: NSRange(
+                location: selection.location + d,
+                length: selection.length))
     }
 
     /// Auto-pairing. Returns nil for a character that is not a pair opener or
@@ -174,10 +189,12 @@ extension MarkdownEditing {
 
         // Typing a closer that is already there: step over it.
         if pairs.values.contains(typing), selection.length == 0,
-           selection.location < ns.length,
-           ns.substring(with: NSRange(location: selection.location, length: 1)) == typing {
-            return EditResult(text: text,
-                              selection: NSRange(location: selection.location + 1, length: 0))
+            selection.location < ns.length,
+            ns.substring(with: NSRange(location: selection.location, length: 1)) == typing
+        {
+            return EditResult(
+                text: text,
+                selection: NSRange(location: selection.location + 1, length: 0))
         }
 
         guard let closer = pairs[typing] else { return nil }
@@ -186,14 +203,18 @@ extension MarkdownEditing {
         // silently destroy text the user had chosen.
         if selection.length > 0 {
             let inner = ns.substring(with: selection)
-            return EditResult(text: ns.replacingCharacters(in: selection,
-                                                           with: typing + inner + closer),
-                              selection: NSRange(location: selection.location + 1,
-                                                 length: selection.length))
+            return EditResult(
+                text: ns.replacingCharacters(
+                    in: selection,
+                    with: typing + inner + closer),
+                selection: NSRange(
+                    location: selection.location + 1,
+                    length: selection.length))
         }
 
-        return EditResult(text: ns.replacingCharacters(in: selection, with: typing + closer),
-                          selection: NSRange(location: selection.location + 1, length: 0))
+        return EditResult(
+            text: ns.replacingCharacters(in: selection, with: typing + closer),
+            selection: NSRange(location: selection.location + 1, length: 0))
     }
 
     /// The edit that accepting a `[[…]]` completion makes.
@@ -212,15 +233,20 @@ extension MarkdownEditing {
     ///
     /// - Parameter prefixLength: the UTF-16 length of the typed prefix ending at
     ///   `caret`, which the target replaces.
-    static func linkInsertion(text: String, caret: Int, prefixLength: Int,
-                              target: String) -> EditResult {
+    static func linkInsertion(
+        text: String, caret: Int, prefixLength: Int,
+        target: String
+    ) -> EditResult {
         let replaced = linkInsertionRange(text: text, caret: caret, prefixLength: prefixLength)
         let insertion = target + "]]"
-        return EditResult(text: (text as NSString).replacingCharacters(in: replaced,
-                                                                       with: insertion),
-                          selection: NSRange(location: replaced.location
-                                                + (insertion as NSString).length,
-                                             length: 0))
+        return EditResult(
+            text: (text as NSString).replacingCharacters(
+                in: replaced,
+                with: insertion),
+            selection: NSRange(
+                location: replaced.location
+                    + (insertion as NSString).length,
+                length: 0))
     }
 
     /// The range `linkInsertion` replaces, for a caller that must make the edit

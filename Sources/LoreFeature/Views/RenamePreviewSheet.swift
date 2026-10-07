@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// Everything the confirmation sheet renders, derived from a plan and nothing
 /// else. A pure value, so the wording and — more importantly — the
@@ -32,16 +32,19 @@ struct RenamePreview {
         refusal = plan.refusal
         editCount = plan.edits.count
         files = plan.affectedFiles
-        let action = isMove
+        let action =
+            isMove
             ? "move it to \(plan.destination.deletingLastPathComponent().lastPathComponent)"
             : "rename it to “\(plan.destination.lastPathComponent)”"
         if plan.refusal != nil {
             summary = ""
         } else if plan.edits.isEmpty {
-            summary = "No other document links to this, so no links need updating. "
+            summary =
+                "No other document links to this, so no links need updating. "
                 + "Lore will \(action)."
         } else {
-            summary = "This will update \(Self.count(plan.edits.count, "link")) across "
+            summary =
+                "This will update \(Self.count(plan.edits.count, "link")) across "
                 + "\(Self.count(plan.affectedFiles.count, "file")), then \(action)."
         }
     }
@@ -58,14 +61,17 @@ struct RenamePreview {
             // NOT "nothing to do": the directory still moves, and every
             // unindexed file inside it travels along. Saying "no changes" here
             // would describe a real mutation as a no-op.
-            summary = "This folder holds no indexed documents. It will still be renamed "
+            summary =
+                "This folder holds no indexed documents. It will still be renamed "
                 + "to “\(plan.destination.lastPathComponent)”, and everything inside it — "
                 + "including files Lore does not index — moves with it."
         } else if plan.edits.isEmpty {
-            summary = "\(Self.count(plan.documentMoves.count, "document").capitalizedFirst) "
+            summary =
+                "\(Self.count(plan.documentMoves.count, "document").capitalizedFirst) "
                 + "will move with the folder. No inbound links need updating."
         } else {
-            summary = "\(Self.count(plan.documentMoves.count, "document").capitalizedFirst) "
+            summary =
+                "\(Self.count(plan.documentMoves.count, "document").capitalizedFirst) "
                 + "will move with the folder. This will update "
                 + "\(Self.count(plan.edits.count, "link")) across "
                 + "\(Self.count(plan.affectedFiles.count, "file"))."
@@ -85,17 +91,20 @@ struct RenamePreview {
         if plan.refusal != nil {
             summary = ""
         } else if plan.documents.isEmpty {
-            summary = "This folder holds no indexed documents. It will still be moved "
+            summary =
+                "This folder holds no indexed documents. It will still be moved "
                 + "to the Trash, along with everything inside it."
                 + Self.dirtyWarning(plan)
         } else if plan.inboundLinkCount > 0 {
-            summary = "\(Self.count(plan.documents.count, "document").capitalizedFirst) "
+            summary =
+                "\(Self.count(plan.documents.count, "document").capitalizedFirst) "
                 + "will move to the Trash with the folder. "
                 + "\(Self.count(plan.inboundLinkCount, "link")) from outside the folder "
                 + "point into it; those links are NOT rewritten and will stop resolving."
                 + Self.dirtyWarning(plan)
         } else {
-            summary = "\(Self.count(plan.documents.count, "document").capitalizedFirst) "
+            summary =
+                "\(Self.count(plan.documents.count, "document").capitalizedFirst) "
                 + "will move to the Trash with the folder."
                 + Self.dirtyWarning(plan)
         }
@@ -154,8 +163,9 @@ struct RenamePreviewSheet: View {
                     AinkradButton(title: "Close", style: .primary, action: onCancel)
                 } else if preview.canConfirm {
                     AinkradButton(title: "Cancel", style: .ghost, action: onCancel)
-                    AinkradButton(title: preview.confirmTitle, style: .primary,
-                                  action: onConfirm)
+                    AinkradButton(
+                        title: preview.confirmTitle, style: .primary,
+                        action: onConfirm)
                 } else {
                     // No confirm button at all for a refused plan.
                     AinkradButton(title: "OK", style: .primary, action: onCancel)

@@ -1,6 +1,6 @@
+import AinkradAppKit
 import AppKit
 import SwiftUI
-import AinkradAppKit
 
 /// Makes room for a transcluded note, and paints it.
 ///
@@ -48,11 +48,13 @@ enum TransclusionStyling {
     ///   draw pass paints across. Measuring at one width and painting at
     ///   another is the divergence this whole file exists to avoid.
     /// - Returns: one region per embed that was actually collapsed.
-    static func prepare(_ spans: [StyleSpan], selection: NSRange,
-                        width: CGFloat, theme: MarkdownTheme,
-                        resolve: (String) -> URL?,
-                        cache: TransclusionCache,
-                        in storage: NSTextStorage) -> [MarkdownBlockBackgrounds.Region] {
+    static func prepare(
+        _ spans: [StyleSpan], selection: NSRange,
+        width: CGFloat, theme: MarkdownTheme,
+        resolve: (String) -> URL?,
+        cache: TransclusionCache,
+        in storage: NSTextStorage
+    ) -> [MarkdownBlockBackgrounds.Region] {
         let text = storage.string as NSString
         let font = theme.bodyFont
         var out: [MarkdownBlockBackgrounds.Region] = []
@@ -79,8 +81,9 @@ enum TransclusionStyling {
                 continue
             }
 
-            let box = self.box(for: url, rawTarget: target, width: width,
-                               theme: theme, cache: cache, font: font)
+            let box = self.box(
+                for: url, rawTarget: target, width: width,
+                theme: theme, cache: cache, font: font)
 
             // Collapse LAST-but-one, and over `fullRange` rather than the
             // target text alone: a visible `![[note]]` floating above the
@@ -93,16 +96,21 @@ enum TransclusionStyling {
             // inside a list item or a quote keeps that block's indent. The
             // same care `MarkdownMathStyling.reserveSpace` documents.
             let paragraph = text.paragraphRange(for: full)
-            let existing = storage.attribute(.paragraphStyle, at: paragraph.location,
-                                             effectiveRange: nil) as? NSParagraphStyle
-            let style = (existing?.mutableCopy() as? NSMutableParagraphStyle)
+            let existing =
+                storage.attribute(
+                    .paragraphStyle, at: paragraph.location,
+                    effectiveRange: nil) as? NSParagraphStyle
+            let style =
+                (existing?.mutableCopy() as? NSMutableParagraphStyle)
                 ?? NSMutableParagraphStyle()
             style.minimumLineHeight = box.height
             style.maximumLineHeight = box.height
             storage.addAttribute(.paragraphStyle, value: style, range: paragraph)
 
-            out.append(MarkdownBlockBackgrounds.Region(kind: .transclusion(box),
-                                                       range: full))
+            out.append(
+                MarkdownBlockBackgrounds.Region(
+                    kind: .transclusion(box),
+                    range: full))
         }
         return out
     }
@@ -117,11 +125,14 @@ enum TransclusionStyling {
     /// first layout pass) reserves ONE LINE and stores NOTHING, so the next
     /// pass — at a real width — is the one that measures. Reserving zero there
     /// and filling it later is what makes an embed pop.
-    private static func box(for url: URL, rawTarget: String, width: CGFloat,
-                            theme: MarkdownTheme, cache: TransclusionCache,
-                            font: NSFont) -> TransclusionLayout.Box {
-        let key = TransclusionKey(path: url, mtime: modificationDate(of: url),
-                                  fragment: fragmentName(of: rawTarget))
+    private static func box(
+        for url: URL, rawTarget: String, width: CGFloat,
+        theme: MarkdownTheme, cache: TransclusionCache,
+        font: NSFont
+    ) -> TransclusionLayout.Box {
+        let key = TransclusionKey(
+            path: url, mtime: modificationDate(of: url),
+            fragment: fragmentName(of: rawTarget))
         let content = cache.content(for: key) {
             resolveContent(url: url, rawTarget: rawTarget)
         }
@@ -138,18 +149,22 @@ enum TransclusionStyling {
         // `TransclusionMeasurement`. This is what makes a window resize or a
         // font-size change self-correct on the very next render, without
         // depending on anything remembering to invalidate.
-        let geometry = TransclusionMeasurement(height: 0, width: width,
-                                               bodySize: theme.bodySize,
-                                               lineHeightMultiple: theme.lineHeightMultiple)
+        let geometry = TransclusionMeasurement(
+            height: 0, width: width,
+            bodySize: theme.bodySize,
+            lineHeightMultiple: theme.lineHeightMultiple)
         if let cached = cache.measuredHeight(for: key, matching: geometry) {
-            return TransclusionLayout.box(for: content, width: width, theme: theme,
-                                          measuredHeight: cached)
+            return TransclusionLayout.box(
+                for: content, width: width, theme: theme,
+                measuredHeight: cached)
         }
         let box = TransclusionLayout.box(for: content, width: width, theme: theme)
-        cache.setMeasurement(TransclusionMeasurement(height: box.height, width: width,
-                                                     bodySize: theme.bodySize,
-                                                     lineHeightMultiple: theme.lineHeightMultiple),
-                             for: key)
+        cache.setMeasurement(
+            TransclusionMeasurement(
+                height: box.height, width: width,
+                bodySize: theme.bodySize,
+                lineHeightMultiple: theme.lineHeightMultiple),
+            for: key)
         return box
     }
 
@@ -170,8 +185,10 @@ enum TransclusionStyling {
     private static func resolveContent(url: URL, rawTarget: String) -> TransclusionContent {
         let name = LinkResolver.basename(of: rawTarget)
         let resolver = LinkResolver(documents: [(url: url, title: name, aliases: [])])
-        return TransclusionResolver.resolve(rawTarget: rawTarget, resolver: resolver,
-                                            path: []) { target in
+        return TransclusionResolver.resolve(
+            rawTarget: rawTarget, resolver: resolver,
+            path: []
+        ) { target in
             try String(contentsOf: target, encoding: .utf8)
         }
     }
@@ -203,10 +220,12 @@ enum TransclusionStyling {
     ///   panel is drawn against. The collapsed run's own rect is 0.01 pt wide
     ///   and says nothing about how wide the note should be, so only its Y and
     ///   height are taken from it.
-    static func draw(_ box: TransclusionLayout.Box, at range: NSRange,
-                     columnX x: CGFloat, columnWidth width: CGFloat,
-                     rule: NSColor, frame: NSColor,
-                     in textView: NSTextView, origin: NSPoint, dirtyRect: NSRect) {
+    static func draw(
+        _ box: TransclusionLayout.Box, at range: NSRange,
+        columnX x: CGFloat, columnWidth width: CGFloat,
+        rule: NSColor, frame: NSColor,
+        in textView: NSTextView, origin: NSPoint, dirtyRect: NSRect
+    ) {
         var rect = MarkdownBlockBackgrounds.boundingRect(of: range, in: textView)
         guard !rect.isNull, !rect.isEmpty else { return }
         rect = rect.offsetBy(dx: origin.x, dy: origin.y)
@@ -214,26 +233,32 @@ enum TransclusionStyling {
         guard panel.intersects(dirtyRect.insetBy(dx: -400, dy: -400)) else { return }
 
         frame.setStroke()
-        let border = NSBezierPath(roundedRect: panel.insetBy(dx: 0.5, dy: 0.5),
-                                  xRadius: MarkdownBlockBackgrounds.cornerRadius,
-                                  yRadius: MarkdownBlockBackgrounds.cornerRadius)
+        let border = NSBezierPath(
+            roundedRect: panel.insetBy(dx: 0.5, dy: 0.5),
+            xRadius: MarkdownBlockBackgrounds.cornerRadius,
+            yRadius: MarkdownBlockBackgrounds.cornerRadius)
         border.lineWidth = 1
         border.stroke()
 
         rule.setFill()
-        NSBezierPath(roundedRect: NSRect(x: panel.minX, y: panel.minY,
-                                         width: MarkdownBlockBackgrounds.barWidth,
-                                         height: panel.height),
-                     xRadius: MarkdownBlockBackgrounds.barWidth / 2,
-                     yRadius: MarkdownBlockBackgrounds.barWidth / 2).fill()
+        NSBezierPath(
+            roundedRect: NSRect(
+                x: panel.minX, y: panel.minY,
+                width: MarkdownBlockBackgrounds.barWidth,
+                height: panel.height),
+            xRadius: MarkdownBlockBackgrounds.barWidth / 2,
+            yRadius: MarkdownBlockBackgrounds.barWidth / 2
+        ).fill()
 
         guard box.text.length > 0 else { return }
         let padding = TransclusionLayout.framePadding
         // Wrapped at `innerWidth`, which is the measure the height was taken
         // at — not at whatever the panel happens to be now.
-        box.text.draw(with: NSRect(x: panel.minX + padding, y: panel.minY + padding,
-                                   width: box.innerWidth,
-                                   height: max(1, panel.height - padding * 2)),
-                      options: [.usesLineFragmentOrigin, .usesFontLeading])
+        box.text.draw(
+            with: NSRect(
+                x: panel.minX + padding, y: panel.minY + padding,
+                width: box.innerWidth,
+                height: max(1, panel.height - padding * 2)),
+            options: [.usesLineFragmentOrigin, .usesFontLeading])
     }
 }

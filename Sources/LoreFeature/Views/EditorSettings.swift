@@ -149,16 +149,19 @@ public struct EditorSettings: Equatable, Sendable, Codable {
     /// `measure: .full` since the owner asked for the full width directly. One
     /// source of truth: the decoder falls back to `EditorSettings.default
     /// .measure`, so settings written before the key existed follow this too.
-    public static let `default` = EditorSettings(density: .standard, measure: .full,
-                                                 zoomStep: 0)
+    public static let `default` = EditorSettings(
+        density: .standard, measure: .full,
+        zoomStep: 0)
 
     /// Both writing modes default OFF. They are strong opinions about how a
     /// page should behave, and an editor that dims most of the document the
     /// first time it is opened reads as broken rather than as focused.
-    public init(density: Density, measure: Measure, zoomStep: Int,
-                focusMode: Bool = false, typewriterMode: Bool = false,
-                renderTagsAsChips: Bool = true,
-                usesCM6: Bool = true) {
+    public init(
+        density: Density, measure: Measure, zoomStep: Int,
+        focusMode: Bool = false, typewriterMode: Bool = false,
+        renderTagsAsChips: Bool = true,
+        usesCM6: Bool = true
+    ) {
         self.density = density
         self.measure = measure
         self.zoomStep = Self.clampZoom(zoomStep)
@@ -188,16 +191,19 @@ public struct EditorSettings: Equatable, Sendable, Codable {
 
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        density = try container.decodeIfPresent(Density.self, forKey: .density)
+        density =
+            try container.decodeIfPresent(Density.self, forKey: .density)
             ?? EditorSettings.default.density
-        measure = try container.decodeIfPresent(Measure.self, forKey: .measure)
+        measure =
+            try container.decodeIfPresent(Measure.self, forKey: .measure)
             ?? EditorSettings.default.measure
         zoomStep = Self.clampZoom(
             try container.decodeIfPresent(Int.self, forKey: .zoomStep)
                 ?? EditorSettings.default.zoomStep)
         focusMode = try container.decodeIfPresent(Bool.self, forKey: .focusMode) ?? false
         typewriterMode = try container.decodeIfPresent(Bool.self, forKey: .typewriterMode) ?? false
-        renderTagsAsChips = try container.decodeIfPresent(Bool.self, forKey: .renderTagsAsChips)
+        renderTagsAsChips =
+            try container.decodeIfPresent(Bool.self, forKey: .renderTagsAsChips)
             ?? true
         // An ABSENT key means on, matching the property default. Settings
         // stored before E4T3 have no `usesCM6` at all, and reading those as
@@ -239,22 +245,24 @@ public struct EditorSettings: Equatable, Sendable, Codable {
 
     /// Zoom applied to `step`, clamped.
     public func zoomed(by step: Int) -> EditorSettings {
-        EditorSettings(density: density, measure: measure,
-                       zoomStep: Self.clampZoom(zoomStep + step),
-                       focusMode: focusMode, typewriterMode: typewriterMode,
-                       renderTagsAsChips: renderTagsAsChips, usesCM6: usesCM6)
+        EditorSettings(
+            density: density, measure: measure,
+            zoomStep: Self.clampZoom(zoomStep + step),
+            focusMode: focusMode, typewriterMode: typewriterMode,
+            renderTagsAsChips: renderTagsAsChips, usesCM6: usesCM6)
     }
 
     /// Zoom reset to the density's own size (⌘0).
     public func zoomReset() -> EditorSettings {
-        EditorSettings(density: density, measure: measure, zoomStep: 0,
-                       focusMode: focusMode, typewriterMode: typewriterMode,
-                       renderTagsAsChips: renderTagsAsChips, usesCM6: usesCM6)
+        EditorSettings(
+            density: density, measure: measure, zoomStep: 0,
+            focusMode: focusMode, typewriterMode: typewriterMode,
+            renderTagsAsChips: renderTagsAsChips, usesCM6: usesCM6)
     }
 }
 
-private extension EditorSettings.Density {
-    func measure(_ measure: EditorSettings.Measure, zoomFactor: CGFloat) -> CGFloat? {
+extension EditorSettings.Density {
+    fileprivate func measure(_ measure: EditorSettings.Measure, zoomFactor: CGFloat) -> CGFloat? {
         measure.points.map { $0 * zoomFactor }
     }
 }

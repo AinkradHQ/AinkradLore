@@ -56,8 +56,10 @@ enum WritingModes {
     /// Clamped to the document: without this, the top of a short document
     /// scrolls into negative space (a band of nothing above the first line)
     /// and the end of one scrolls past its last line.
-    static func typewriterOrigin(caretY: CGFloat, viewportHeight: CGFloat,
-                                 documentHeight: CGFloat) -> CGFloat {
+    static func typewriterOrigin(
+        caretY: CGFloat, viewportHeight: CGFloat,
+        documentHeight: CGFloat
+    ) -> CGFloat {
         let target = caretY - viewportHeight * typewriterAnchor
         let maximum = max(0, documentHeight - viewportHeight)
         return min(max(target, 0), maximum)

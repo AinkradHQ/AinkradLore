@@ -1,10 +1,12 @@
 import XCTest
+
 @testable import LoreFeature
 
 final class DocumentVisibilityTests: XCTestCase {
     private func row(_ path: String, type: String) -> IndexRow {
-        IndexRow(path: URL(fileURLWithPath: path), id: path, title: path, tags: [],
-                 aliases: [], updated: Date(), type: type, properties: [])
+        IndexRow(
+            path: URL(fileURLWithPath: path), id: path, title: path, tags: [],
+            aliases: [], updated: Date(), type: type, properties: [])
     }
 
     /// Derives the engine identity the same way PRODUCTION does — through
@@ -42,8 +44,10 @@ final class DocumentVisibilityTests: XCTestCase {
     }
 
     func test_richTextAndOfficeDocumentsAreShown() {
-        for name in ["contract.docx", "letter.rtf", "page.html", "spreadsheet.xlsx",
-                     "deck.pptx", "doc.pages", "slides.key", "sheet.numbers"] {
+        for name in [
+            "contract.docx", "letter.rtf", "page.html", "spreadsheet.xlsx",
+            "deck.pptx", "doc.pages", "slides.key", "sheet.numbers",
+        ] {
             XCTAssertFalse(isHidden(name), name)
         }
     }
@@ -61,8 +65,10 @@ final class DocumentVisibilityTests: XCTestCase {
     }
 
     func test_developerTextExtensionsAreHidden() {
-        for ext in ["json", "yaml", "yml", "toml", "log", "csv", "sh",
-                    "swift", "py", "js", "ts", "rb", "go", "rs", "c", "h", "cpp"] {
+        for ext in [
+            "json", "yaml", "yml", "toml", "log", "csv", "sh",
+            "swift", "py", "js", "ts", "rb", "go", "rs", "c", "h", "cpp",
+        ] {
             XCTAssertTrue(isHidden("file.\(ext)"), ext)
         }
     }
@@ -133,8 +139,9 @@ final class DocumentVisibilityTests: XCTestCase {
         try "---\nid: a\ntitle: Alpha\n---\nsee [[clip.mp4]]"
             .write(to: root.appendingPathComponent("alpha.md"), atomically: true, encoding: .utf8)
 
-        let store = LoreStore(documents: FakeDocs(),
-                              indexPath: root.appendingPathComponent(".index.sqlite"))
+        let store = LoreStore(
+            documents: FakeDocs(),
+            indexPath: root.appendingPathComponent(".index.sqlite"))
         try store.setVaultRootForTesting(root)
         await store.settleForTesting()
         try store.rebuild()
@@ -143,8 +150,9 @@ final class DocumentVisibilityTests: XCTestCase {
         // default, or the assertions below would pass for the wrong reason.
         let clipRow = try XCTUnwrap(store.rows.first { $0.path.lastPathComponent == "clip.mp4" })
         XCTAssertTrue(DocumentVisibility.isHiddenByDefault(clipRow))
-        XCTAssertFalse(DocumentVisibility.visibleRows(store.rows, showAllFiles: false)
-            .contains { $0.path == clipRow.path })
+        XCTAssertFalse(
+            DocumentVisibility.visibleRows(store.rows, showAllFiles: false)
+                .contains { $0.path == clipRow.path })
 
         // The invariant: hidden from the browse list, but still a resolvable,
         // openable link target through the UNFILTERED path `LoreStore` itself

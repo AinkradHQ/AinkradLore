@@ -56,22 +56,25 @@ extension LoreStore {
     /// Persist which folders are expanded in `FolderTreeView`.
     public func setExpandedFolders(_ folders: Set<String>) {
         expandedFolders = folders
-        documents.setData(folders.sorted().joined(separator: "\n").data(using: .utf8),
-                          forKey: Self.expandedFoldersKey)
+        documents.setData(
+            folders.sorted().joined(separator: "\n").data(using: .utf8),
+            forKey: Self.expandedFoldersKey)
     }
 
     /// Persist the backlinks panel's collapsed/expanded state.
     public func setBacklinksPanelExpanded(_ expanded: Bool) {
         backlinksPanelExpanded = expanded
-        documents.setData((expanded ? "true" : "false").data(using: .utf8),
-                          forKey: Self.backlinksPanelExpandedKey)
+        documents.setData(
+            (expanded ? "true" : "false").data(using: .utf8),
+            forKey: Self.backlinksPanelExpandedKey)
     }
 
     /// Persist the outline panel's collapsed/expanded state.
     public func setOutlinePanelExpanded(_ expanded: Bool) {
         outlinePanelExpanded = expanded
-        documents.setData((expanded ? "true" : "false").data(using: .utf8),
-                          forKey: Self.outlinePanelExpandedKey)
+        documents.setData(
+            (expanded ? "true" : "false").data(using: .utf8),
+            forKey: Self.outlinePanelExpandedKey)
     }
 
     /// Persist the "Show all files" setting. Takes effect immediately: both
@@ -81,14 +84,16 @@ extension LoreStore {
     /// what of it gets drawn.
     public func setShowAllFiles(_ show: Bool) {
         showAllFiles = show
-        documents.setData((show ? "true" : "false").data(using: .utf8),
-                          forKey: Self.showAllFilesKey)
+        documents.setData(
+            (show ? "true" : "false").data(using: .utf8),
+            forKey: Self.showAllFilesKey)
     }
 
     public func setSidebarCollapsed(_ collapsed: Bool) {
         sidebarCollapsed = collapsed
-        documents.setData((collapsed ? "1" : "0").data(using: .utf8),
-                          forKey: Self.sidebarCollapsedKey)
+        documents.setData(
+            (collapsed ? "1" : "0").data(using: .utf8),
+            forKey: Self.sidebarCollapsedKey)
     }
     /// Persist the default new-note subfolder (relative to the vault root).
     public func setDefaultNoteFolder(_ relative: String) {

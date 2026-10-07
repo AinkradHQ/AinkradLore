@@ -1,6 +1,7 @@
-import XCTest
 import AppKit
 import SwiftUI
+import XCTest
+
 @testable import LoreFeature
 
 /// Task 10, Part 1: the single-block edit path must be INVISIBLE.
@@ -46,8 +47,9 @@ final class MarkdownEditFastPathTests: XCTestCase {
         tv.isRichText = false
         tv.allowsUndo = true
         tv.delegate = coordinator
-        let window = NSWindow(contentRect: tv.frame, styleMask: [.titled],
-                              backing: .buffered, defer: false)
+        let window = NSWindow(
+            contentRect: tv.frame, styleMask: [.titled],
+            backing: .buffered, defer: false)
         window.contentView = tv
         window.makeFirstResponder(tv)
         windows.append(window)
@@ -86,8 +88,10 @@ final class MarkdownEditFastPathTests: XCTestCase {
                     return "font=\(font.fontName)@\(font.pointSize)"
                         + "/\(font.fontDescriptor.symbolicTraits.rawValue)"
                 case .foregroundColor, .backgroundColor:
-                    guard let color = (value as? NSColor)?
-                        .usingColorSpace(.sRGB) else { return "\(key.rawValue)=?" }
+                    guard
+                        let color = (value as? NSColor)?
+                            .usingColorSpace(.sRGB)
+                    else { return "\(key.rawValue)=?" }
                     return "\(key.rawValue)=\(color.redComponent),\(color.greenComponent),"
                         + "\(color.blueComponent),\(color.alphaComponent)"
                 case .paragraphStyle:
@@ -133,9 +137,11 @@ final class MarkdownEditFastPathTests: XCTestCase {
     /// Applies `edit` to a fresh editor via the real delegate path, then
     /// returns its attribute dump — once with the fast path allowed to run,
     /// once forced through the full render, so the two can be compared.
-    private func dumpAfterEdit(insert: String, at location: Int,
-                               deleting length: Int,
-                               forceFullRender: Bool) throws -> (dump: [String], usedFast: Bool) {
+    private func dumpAfterEdit(
+        insert: String, at location: Int,
+        deleting length: Int,
+        forceFullRender: Bool
+    ) throws -> (dump: [String], usedFast: Bool) {
         let (coordinator, tv) = makeEditor(Self.fixture())
         return try withExtendedLifetime(coordinator) {
             let storage = try XCTUnwrap(tv.textStorage)
@@ -146,8 +152,9 @@ final class MarkdownEditFastPathTests: XCTestCase {
             // the whole document or one block.
             let usedFast = coordinator.lastEditTookFastPath
             if forceFullRender { coordinator.renderStyles() }
-            XCTAssertGreaterThan(coordinator.revealIndexBuilds, before,
-                                 "the edit must have re-rendered something")
+            XCTAssertGreaterThan(
+                coordinator.revealIndexBuilds, before,
+                "the edit must have re-rendered something")
             return (attributeDump(storage), usedFast)
         }
     }
@@ -156,20 +163,24 @@ final class MarkdownEditFastPathTests: XCTestCase {
     /// dumps in full — a 40-section fixture produces hundreds of runs, and an
     /// `XCTAssertEqual` on the arrays prints all of them truncated, which says
     /// nothing about what actually differs.
-    private func assertSameAttributes(_ fast: [String], _ full: [String],
-                                      site: String, file: StaticString = #filePath,
-                                      line: UInt = #line) {
+    private func assertSameAttributes(
+        _ fast: [String], _ full: [String],
+        site: String, file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
         for index in 0..<min(fast.count, full.count) where fast[index] != full[index] {
-            XCTFail("""
+            XCTFail(
+                """
                 typing inside "\(site)" produced different attributes at run \(index):
                   fast: \(fast[index])
                   full: \(full[index])
                 """, file: file, line: line)
             return
         }
-        XCTAssertEqual(fast.count, full.count,
-                       "typing inside \"\(site)\" produced a different number of "
-                       + "attribute runs", file: file, line: line)
+        XCTAssertEqual(
+            fast.count, full.count,
+            "typing inside \"\(site)\" produced a different number of "
+                + "attribute runs", file: file, line: line)
     }
 
     /// THE test. A realistic single-character edit inside a block must leave
@@ -179,19 +190,24 @@ final class MarkdownEditFastPathTests: XCTestCase {
         // Deliberately varied landing sites, found in the fixture rather than
         // guessed at: inside prose, inside a bold run, inside a wikilink,
         // inside a list item, inside a heading, inside a quote.
-        let sites = ["prose with", "**bold**", "[[Link 5]]", "- a second item",
-                     "## Section 7", "> a quoted line", "let x3 = 3"]
+        let sites = [
+            "prose with", "**bold**", "[[Link 5]]", "- a second item",
+            "## Section 7", "> a quoted line", "let x3 = 3",
+        ]
         for site in sites {
             let found = text.range(of: site)
             XCTAssertNotEqual(found.location, NSNotFound, "fixture must contain \(site)")
             let caret = found.location + found.length / 2
 
-            let fast = try dumpAfterEdit(insert: "x", at: caret, deleting: 0,
-                                         forceFullRender: false)
-            let full = try dumpAfterEdit(insert: "x", at: caret, deleting: 0,
-                                         forceFullRender: true)
-            XCTAssertTrue(fast.usedFast,
-                          "typing inside \"\(site)\" must take the fast path")
+            let fast = try dumpAfterEdit(
+                insert: "x", at: caret, deleting: 0,
+                forceFullRender: false)
+            let full = try dumpAfterEdit(
+                insert: "x", at: caret, deleting: 0,
+                forceFullRender: true)
+            XCTAssertTrue(
+                fast.usedFast,
+                "typing inside \"\(site)\" must take the fast path")
             assertSameAttributes(fast.dump, full.dump, site: site)
         }
     }
@@ -203,10 +219,12 @@ final class MarkdownEditFastPathTests: XCTestCase {
         let found = text.range(of: "prose with")
         XCTAssertNotEqual(found.location, NSNotFound)
 
-        let fast = try dumpAfterEdit(insert: "", at: found.location, deleting: 5,
-                                     forceFullRender: false)
-        let full = try dumpAfterEdit(insert: "", at: found.location, deleting: 5,
-                                     forceFullRender: true)
+        let fast = try dumpAfterEdit(
+            insert: "", at: found.location, deleting: 5,
+            forceFullRender: false)
+        let full = try dumpAfterEdit(
+            insert: "", at: found.location, deleting: 5,
+            forceFullRender: true)
         assertSameAttributes(fast.dump, full.dump, site: "a deletion")
     }
 
@@ -232,9 +250,12 @@ final class MarkdownEditFastPathTests: XCTestCase {
         let (probe, _) = makeEditor(text)
         let boundary = try XCTUnwrap(
             probe.revealIndex.blocks.dropFirst().first(where: { block in
-                (text as NSString).substring(with: NSRange(location: block.lowerBound,
-                                                           length: min(5, block.count)))
-                    .hasPrefix("Some ")
+                (text as NSString).substring(
+                    with: NSRange(
+                        location: block.lowerBound,
+                        length: min(5, block.count))
+                )
+                .hasPrefix("Some ")
             })?.lowerBound,
             "the fixture must contain a prose block that is not the first")
 
@@ -255,8 +276,9 @@ final class MarkdownEditFastPathTests: XCTestCase {
         XCTAssertNotNil(was, "a focused editor with a caret must reveal something")
         fastView.insertText("x", replacementRange: NSRange(location: boundary, length: 0))
         XCTAssertTrue(fast.lastEditTookFastPath)
-        XCTAssertNotEqual(fast.revealedRange, was,
-                          "typing at a boundary must move the revealed range")
+        XCTAssertNotEqual(
+            fast.revealedRange, was,
+            "typing at a boundary must move the revealed range")
 
         // FULL: the same edit, then a whole-document render on top.
         let (full, fullView) = makeEditor(text)
@@ -265,8 +287,9 @@ final class MarkdownEditFastPathTests: XCTestCase {
         fullView.insertText("x", replacementRange: NSRange(location: boundary, length: 0))
         full.renderStyles()
 
-        assertSameAttributes(attributeDump(fastStorage), attributeDump(fullStorage),
-                             site: "a block boundary")
+        assertSameAttributes(
+            attributeDump(fastStorage), attributeDump(fullStorage),
+            site: "a block boundary")
     }
 
     /// Whole-branch review, MINOR 6: AppKit posts `textViewDidChangeSelection`
@@ -286,9 +309,12 @@ final class MarkdownEditFastPathTests: XCTestCase {
         let (probe, _) = makeEditor(text)
         let boundary = try XCTUnwrap(
             probe.revealIndex.blocks.first(where: { block in
-                (text as NSString).substring(with: NSRange(location: block.lowerBound,
-                                                           length: min(5, block.count)))
-                    .hasPrefix("## Se")
+                (text as NSString).substring(
+                    with: NSRange(
+                        location: block.lowerBound,
+                        length: min(5, block.count))
+                )
+                .hasPrefix("## Se")
             })?.upperBound,
             "the fixture must contain a heading block to find the end of")
 
@@ -297,8 +323,9 @@ final class MarkdownEditFastPathTests: XCTestCase {
         let fastStorage = try XCTUnwrap(fastView.textStorage)
         fastView.setSelectedRange(NSRange(location: boundary, length: 0))
         fastView.insertText("x", replacementRange: NSRange(location: boundary, length: 0))
-        XCTAssertTrue(fast.lastEditTookFastPath,
-                      "an insertion at a block's last offset should still be a single-block edit")
+        XCTAssertTrue(
+            fast.lastEditTookFastPath,
+            "an insertion at a block's last offset should still be a single-block edit")
 
         // FULL: the same edit, then a whole-document render on top — also
         // with no settle, so both sides are compared at the same instant.
@@ -308,16 +335,19 @@ final class MarkdownEditFastPathTests: XCTestCase {
         fullView.insertText("x", replacementRange: NSRange(location: boundary, length: 0))
         full.renderStyles()
 
-        assertSameAttributes(attributeDump(fastStorage), attributeDump(fullStorage),
-                             site: "a block's exact last offset")
+        assertSameAttributes(
+            attributeDump(fastStorage), attributeDump(fullStorage),
+            site: "a block's exact last offset")
     }
 
     // MARK: - The bail-outs
 
     /// Each listed case must fall back to the full render rather than take the
     /// fast path. Asserted on the flag, not inferred from timing.
-    private func assertBails(insert: String, at site: String, deleting: Int = 0,
-                             _ why: String) throws {
+    private func assertBails(
+        insert: String, at site: String, deleting: Int = 0,
+        _ why: String
+    ) throws {
         let (coordinator, tv) = makeEditor(Self.fixture())
         try withExtendedLifetime(coordinator) {
             let text = tv.string as NSString
@@ -330,18 +360,21 @@ final class MarkdownEditFastPathTests: XCTestCase {
     }
 
     func test_bails_whenTheEditContainsANewline() throws {
-        try assertBails(insert: "\n", at: "prose with",
-                        "a newline moves block boundaries")
+        try assertBails(
+            insert: "\n", at: "prose with",
+            "a newline moves block boundaries")
     }
 
     func test_bails_whenTheEditContainsAFenceCharacter() throws {
-        try assertBails(insert: "`", at: "prose with",
-                        "a backtick can open or close a fence")
+        try assertBails(
+            insert: "`", at: "prose with",
+            "a backtick can open or close a fence")
     }
 
     func test_bails_whenTheEditContainsATilde() throws {
-        try assertBails(insert: "~", at: "prose with",
-                        "a tilde can open or close a fence")
+        try assertBails(
+            insert: "~", at: "prose with",
+            "a tilde can open or close a fence")
     }
 
     /// A fence containing a BLANK LINE is the case `restyleBlock`'s
@@ -363,8 +396,9 @@ final class MarkdownEditFastPathTests: XCTestCase {
             let found = (tv.string as NSString).range(of: "let b = 2")
             XCTAssertNotEqual(found.location, NSNotFound)
             tv.insertText("y", replacementRange: NSRange(location: found.location + 4, length: 0))
-            XCTAssertFalse(coordinator.lastEditTookFastPath,
-                           "a code span reaching past this block's ends bars the fast path")
+            XCTAssertFalse(
+                coordinator.lastEditTookFastPath,
+                "a code span reaching past this block's ends bars the fast path")
         }
     }
 
@@ -375,8 +409,9 @@ final class MarkdownEditFastPathTests: XCTestCase {
             let found = (tv.string as NSString).range(of: "\n\n- a list item")
             XCTAssertNotEqual(found.location, NSNotFound)
             tv.insertText("", replacementRange: NSRange(location: found.location, length: 2))
-            XCTAssertFalse(coordinator.lastEditTookFastPath,
-                           "removing a blank line merges two blocks")
+            XCTAssertFalse(
+                coordinator.lastEditTookFastPath,
+                "removing a blank line merges two blocks")
         }
     }
 
@@ -389,8 +424,9 @@ final class MarkdownEditFastPathTests: XCTestCase {
         withExtendedLifetime(coordinator) {
             // Onto the whitespace-only line, which currently ENDS a block.
             tv.insertText("z", replacementRange: NSRange(location: 7, length: 0))
-            XCTAssertFalse(coordinator.lastEditTookFastPath,
-                           "the blank line stopped being blank, so the blocks moved")
+            XCTAssertFalse(
+                coordinator.lastEditTookFastPath,
+                "the blank line stopped being blank, so the blocks moved")
         }
     }
 
@@ -404,8 +440,9 @@ final class MarkdownEditFastPathTests: XCTestCase {
             tv.string = "# Title\n\ndifferent prose entirely\n"
             tv.setSelectedRange(NSRange(location: 12, length: 0))
             tv.insertText("x", replacementRange: tv.selectedRange())
-            XCTAssertFalse(coordinator.lastEditTookFastPath,
-                           "spans that did not describe the pre-edit text cannot be shifted")
+            XCTAssertFalse(
+                coordinator.lastEditTookFastPath,
+                "spans that did not describe the pre-edit text cannot be shifted")
         }
     }
 
@@ -430,9 +467,10 @@ final class MarkdownEditFastPathTests: XCTestCase {
                 tv.insertText(String(character), replacementRange: tv.selectedRange())
             }
             XCTAssertTrue(coordinator.lastEditTookFastPath)
-            XCTAssertEqual(MarkdownParseCounter.count, typed.count,
-                           "exactly one block parse per keystroke — no more, and "
-                           + "no fewer, since fewer means stale kinds on screen")
+            XCTAssertEqual(
+                MarkdownParseCounter.count, typed.count,
+                "exactly one block parse per keystroke — no more, and "
+                    + "no fewer, since fewer means stale kinds on screen")
         }
     }
 
@@ -459,10 +497,12 @@ final class MarkdownEditFastPathTests: XCTestCase {
             }
         }
         let small = parsesForTyping(in: Self.fixture(), at: "prose with")
-        let large = parsesForTyping(in: Self.fixture() + Self.fixture() + Self.fixture(),
-                                    at: "prose with")
-        XCTAssertEqual(small, large,
-                       "a three-times-larger document must cost the same per keystroke")
+        let large = parsesForTyping(
+            in: Self.fixture() + Self.fixture() + Self.fixture(),
+            at: "prose with")
+        XCTAssertEqual(
+            small, large,
+            "a three-times-larger document must cost the same per keystroke")
     }
 
     // MARK: - The defect this path exists to fix
@@ -485,11 +525,14 @@ final class MarkdownEditFastPathTests: XCTestCase {
             }
             XCTAssertTrue(coordinator.lastEditTookFastPath)
             let word = (tv.string as NSString).range(of: "bold")
-            let font = try XCTUnwrap(storage.attribute(.font, at: word.location,
-                                                       effectiveRange: nil) as? NSFont)
-            XCTAssertTrue(font.fontDescriptor.symbolicTraits.contains(.bold),
-                          "the word must be bold on the keystroke that closed the "
-                          + "emphasis, not one debounce later")
+            let font = try XCTUnwrap(
+                storage.attribute(
+                    .font, at: word.location,
+                    effectiveRange: nil) as? NSFont)
+            XCTAssertTrue(
+                font.fontDescriptor.symbolicTraits.contains(.bold),
+                "the word must be bold on the keystroke that closed the "
+                    + "emphasis, not one debounce later")
         }
     }
 
@@ -500,19 +543,25 @@ final class MarkdownEditFastPathTests: XCTestCase {
         try withExtendedLifetime(coordinator) {
             let storage = try XCTUnwrap(tv.textStorage)
             let line = (tv.string as NSString).range(of: "plain line")
-            let bodySize = try XCTUnwrap(storage.attribute(.font, at: line.location,
-                                                           effectiveRange: nil) as? NSFont)
-                .pointSize
+            let bodySize = try XCTUnwrap(
+                storage.attribute(
+                    .font, at: line.location,
+                    effectiveRange: nil) as? NSFont
+            )
+            .pointSize
             tv.setSelectedRange(NSRange(location: line.location, length: 0))
             for character in "## " {
                 tv.insertText(String(character), replacementRange: tv.selectedRange())
             }
             let heading = (tv.string as NSString).range(of: "plain line")
-            let font = try XCTUnwrap(storage.attribute(.font, at: heading.location,
-                                                       effectiveRange: nil) as? NSFont)
-            XCTAssertGreaterThan(font.pointSize, bodySize,
-                                 "the line must render as a heading as soon as the "
-                                 + "marker is complete")
+            let font = try XCTUnwrap(
+                storage.attribute(
+                    .font, at: heading.location,
+                    effectiveRange: nil) as? NSFont)
+            XCTAssertGreaterThan(
+                font.pointSize, bodySize,
+                "the line must render as a heading as soon as the "
+                    + "marker is complete")
         }
     }
 
@@ -525,14 +574,20 @@ final class MarkdownEditFastPathTests: XCTestCase {
             let storage = try XCTUnwrap(tv.textStorage)
             let opener = (tv.string as NSString).range(of: "*slanted*")
             // Remove the CLOSING marker, so what remains is not emphasis.
-            tv.insertText("", replacementRange: NSRange(location: NSMaxRange(opener) - 1,
-                                                        length: 1))
+            tv.insertText(
+                "",
+                replacementRange: NSRange(
+                    location: NSMaxRange(opener) - 1,
+                    length: 1))
             XCTAssertTrue(coordinator.lastEditTookFastPath)
             let word = (tv.string as NSString).range(of: "slanted")
-            let font = try XCTUnwrap(storage.attribute(.font, at: word.location,
-                                                       effectiveRange: nil) as? NSFont)
-            XCTAssertFalse(font.fontDescriptor.symbolicTraits.contains(.italic),
-                           "with the closing marker gone the word is not emphasis")
+            let font = try XCTUnwrap(
+                storage.attribute(
+                    .font, at: word.location,
+                    effectiveRange: nil) as? NSFont)
+            XCTAssertFalse(
+                font.fontDescriptor.symbolicTraits.contains(.italic),
+                "with the closing marker gone the word is not emphasis")
         }
     }
 
@@ -551,11 +606,15 @@ final class MarkdownEditFastPathTests: XCTestCase {
         let (coordinator, tv) = makeEditor(body)
         withExtendedLifetime(coordinator) {
             let found = (tv.string as NSString).range(of: "see [label] for more")
-            tv.insertText("x", replacementRange: NSRange(location: found.location + 2,
-                                                        length: 0))
-            XCTAssertFalse(coordinator.lastEditTookFastPath,
-                           "this block contains a bracket and the document holds a "
-                           + "definition, so it cannot be parsed in isolation")
+            tv.insertText(
+                "x",
+                replacementRange: NSRange(
+                    location: found.location + 2,
+                    length: 0))
+            XCTAssertFalse(
+                coordinator.lastEditTookFastPath,
+                "this block contains a bracket and the document holds a "
+                    + "definition, so it cannot be parsed in isolation")
         }
     }
 
@@ -565,10 +624,14 @@ final class MarkdownEditFastPathTests: XCTestCase {
         let (coordinator, tv) = makeEditor("intro\n\nsee [a] and [b] here\n\ntail\n")
         withExtendedLifetime(coordinator) {
             let found = (tv.string as NSString).range(of: "tail")
-            tv.insertText("x", replacementRange: NSRange(location: found.location + 2,
-                                                        length: 0))
-            XCTAssertTrue(coordinator.lastEditTookFastPath,
-                          "`[a]` on its own is not a reference definition")
+            tv.insertText(
+                "x",
+                replacementRange: NSRange(
+                    location: found.location + 2,
+                    length: 0))
+            XCTAssertTrue(
+                coordinator.lastEditTookFastPath,
+                "`[a]` on its own is not a reference definition")
         }
     }
 
@@ -581,8 +644,9 @@ final class MarkdownEditFastPathTests: XCTestCase {
             tv.setSelectedRange(NSRange(location: 15, length: 0))
             tv.insertText("x", replacementRange: tv.selectedRange())
             settle()
-            XCTAssertTrue(coordinator.styleCache.describes(tv.string),
-                          "the debounced parse must have refreshed the cache")
+            XCTAssertTrue(
+                coordinator.styleCache.describes(tv.string),
+                "the debounced parse must have refreshed the cache")
             XCTAssertEqual(attributeDump(storage).isEmpty, false)
         }
     }

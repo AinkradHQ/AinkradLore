@@ -3,7 +3,10 @@ import Foundation
 public struct FrontmatterPair: Equatable, Sendable {
     public let key: String
     public let rawValue: String
-    public init(key: String, rawValue: String) { self.key = key; self.rawValue = rawValue }
+    public init(key: String, rawValue: String) {
+        self.key = key
+        self.rawValue = rawValue
+    }
 }
 
 public struct Note: Identifiable, Equatable, Sendable {
@@ -64,15 +67,24 @@ public struct Note: Identifiable, Equatable, Sendable {
     /// The exact prefix `serialize` must put back before the opening fence.
     public var leadingMark: String { hasByteOrderMark ? "\u{FEFF}" : "" }
 
-    public init(path: URL, id: String, title: String, tags: [String],
-                aliases: [String] = [],
-                created: Date, updated: Date, body: String, extra: [FrontmatterPair] = [],
-                rawFrontmatter: String? = nil, lineEnding: String = "\n",
-                hasByteOrderMark: Bool = false) {
-        self.path = path; self.id = id; self.title = title; self.tags = tags
+    public init(
+        path: URL, id: String, title: String, tags: [String],
+        aliases: [String] = [],
+        created: Date, updated: Date, body: String, extra: [FrontmatterPair] = [],
+        rawFrontmatter: String? = nil, lineEnding: String = "\n",
+        hasByteOrderMark: Bool = false
+    ) {
+        self.path = path
+        self.id = id
+        self.title = title
+        self.tags = tags
         self.aliases = aliases
-        self.created = created; self.updated = updated; self.body = body
-        self.extra = extra; self.rawFrontmatter = rawFrontmatter
-        self.lineEnding = lineEnding; self.hasByteOrderMark = hasByteOrderMark
+        self.created = created
+        self.updated = updated
+        self.body = body
+        self.extra = extra
+        self.rawFrontmatter = rawFrontmatter
+        self.lineEnding = lineEnding
+        self.hasByteOrderMark = hasByteOrderMark
     }
 }

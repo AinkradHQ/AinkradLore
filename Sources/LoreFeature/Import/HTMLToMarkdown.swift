@@ -9,8 +9,10 @@ public enum HTMLToMarkdown {
         "table", "tr", "td", "th", "img", "input", "code", "pre", "body", "html", "font",
     ]
 
-    public static func convert(_ html: String) -> (markdown: String,
-                                                     warnings: [FidelityWarning]) {
+    public static func convert(_ html: String) -> (
+        markdown: String,
+        warnings: [FidelityWarning]
+    ) {
         var warnings: [FidelityWarning] = []
         var out = ""
         var listDepth = 0
@@ -23,8 +25,10 @@ public enum HTMLToMarkdown {
                 out += decodeEntities(raw)
             case .open(let name, let attributes):
                 if !known.contains(name) {
-                    warnings.append(FidelityWarning(kind: .unsupportedElement,
-                                                    detail: "<\(name)> not converted"))
+                    warnings.append(
+                        FidelityWarning(
+                            kind: .unsupportedElement,
+                            detail: "<\(name)> not converted"))
                     continue
                 }
                 switch name {
@@ -32,13 +36,19 @@ public enum HTMLToMarkdown {
                 case "i", "em": out += "*"
                 case "s", "strike", "del": out += "~~"
                 case "h1", "h2", "h3", "h4", "h5", "h6":
-                    out += "\n" + String(repeating: "#",
-                                         count: Int(name.dropFirst())!) + " "
+                    out +=
+                        "\n"
+                        + String(
+                            repeating: "#",
+                            count: Int(name.dropFirst())!) + " "
                 case "ul": listDepth += 1
-                case "ol": listDepth += 1; ordinal = 0
+                case "ol":
+                    listDepth += 1
+                    ordinal = 0
                 case "li":
                     ordinal += 1
-                    out += "\n" + String(repeating: "  ", count: max(listDepth - 1, 0))
+                    out +=
+                        "\n" + String(repeating: "  ", count: max(listDepth - 1, 0))
                         + "- "
                 case "input" where attributes["type"] == "checkbox":
                     out += attributes["checked"] == nil ? "[ ] " : "[x] "
@@ -56,7 +66,9 @@ public enum HTMLToMarkdown {
                 case "b", "strong": out += "**"
                 case "i", "em": out += "*"
                 case "s", "strike", "del": out += "~~"
-                case "ul", "ol": listDepth = max(listDepth - 1, 0); out += "\n"
+                case "ul", "ol":
+                    listDepth = max(listDepth - 1, 0)
+                    out += "\n"
                 case "p", "div", "h1", "h2", "h3", "h4", "h5", "h6": out += "\n"
                 case "a":
                     // An unmatched </a> with no prior <a> is a no-op, not a stray "]()"
@@ -176,11 +188,12 @@ struct TokenizerIterator: IteratorProtocol {
     }
 
     private mutating func parseTag() -> Tokenizer.Token? {
-        i += 1 // consume '<'
+        i += 1  // consume '<'
 
         if i < chars.count, chars[i] == "!", i + 1 < chars.count,
-           chars[i + 1] == "-", i + 2 < chars.count, chars[i + 2] == "-" {
-            i += 3 // consume '!--'
+            chars[i + 1] == "-", i + 2 < chars.count, chars[i + 2] == "-"
+        {
+            i += 3  // consume '!--'
             skipUntilAndConsume("-->")
             return next()
         }
@@ -277,8 +290,9 @@ struct TokenizerIterator: IteratorProtocol {
 
     private mutating func readAttributeName() -> String {
         var name = ""
-        while i < chars.count, chars[i] != "=" , chars[i] != ">", chars[i] != "/",
-              !chars[i].isWhitespace {
+        while i < chars.count, chars[i] != "=", chars[i] != ">", chars[i] != "/",
+            !chars[i].isWhitespace
+        {
             name.append(chars[i])
             i += 1
         }
@@ -295,7 +309,7 @@ struct TokenizerIterator: IteratorProtocol {
                 value.append(chars[i])
                 i += 1
             }
-            if i < chars.count { i += 1 } // consume closing quote
+            if i < chars.count { i += 1 }  // consume closing quote
             return value
         }
         var value = ""

@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 /// Sidebar width, and the tag-chip counts beside it.
@@ -23,10 +24,12 @@ final class SidebarLayoutTests: XCTestCase {
     /// A sidebar dragged to 20pt is a sliver with no visible content and no
     /// grip wide enough to drag back.
     func test_widthIsClampedAtBothEnds() {
-        XCTAssertEqual(SidebarResize.width(start: 200, translation: -9999),
-                       LoreMetrics.minSidebarWidth)
-        XCTAssertEqual(SidebarResize.width(start: 200, translation: 9999),
-                       LoreMetrics.maxSidebarWidth)
+        XCTAssertEqual(
+            SidebarResize.width(start: 200, translation: -9999),
+            LoreMetrics.minSidebarWidth)
+        XCTAssertEqual(
+            SidebarResize.width(start: 200, translation: 9999),
+            LoreMetrics.maxSidebarWidth)
     }
 
     /// Clamped on WRITE too, so every path through the store agrees — not just
@@ -36,8 +39,9 @@ final class SidebarLayoutTests: XCTestCase {
             .appendingPathComponent("lore-width-\(UUID())")
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
         let docs = FakeDocs()
-        let store = LoreStore(documents: docs,
-                              indexPath: root.appendingPathComponent(".idx.sqlite"))
+        let store = LoreStore(
+            documents: docs,
+            indexPath: root.appendingPathComponent(".idx.sqlite"))
 
         store.setSidebarWidth(4000)
         XCTAssertEqual(store.sidebarWidth, LoreMetrics.maxSidebarWidth)
@@ -47,8 +51,9 @@ final class SidebarLayoutTests: XCTestCase {
         store.setSidebarWidth(340)
         // A relaunch must not lose it — and must not trust it blindly either:
         // the stored value comes from a file a user can edit.
-        let reopened = LoreStore(documents: docs,
-                                 indexPath: root.appendingPathComponent(".idx.sqlite"))
+        let reopened = LoreStore(
+            documents: docs,
+            indexPath: root.appendingPathComponent(".idx.sqlite"))
         XCTAssertEqual(reopened.sidebarWidth, 340)
     }
 
@@ -59,8 +64,9 @@ final class SidebarLayoutTests: XCTestCase {
         let docs = FakeDocs()
         docs.setData("9999".data(using: .utf8), forKey: "sidebarWidth")
 
-        let store = LoreStore(documents: docs,
-                              indexPath: root.appendingPathComponent(".idx.sqlite"))
+        let store = LoreStore(
+            documents: docs,
+            indexPath: root.appendingPathComponent(".idx.sqlite"))
         XCTAssertEqual(store.sidebarWidth, LoreMetrics.maxSidebarWidth)
     }
 
@@ -70,8 +76,9 @@ final class SidebarLayoutTests: XCTestCase {
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent("lore-tags-\(UUID())")
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
-        let store = LoreStore(documents: FakeDocs(),
-                              indexPath: root.appendingPathComponent(".idx.sqlite"))
+        let store = LoreStore(
+            documents: FakeDocs(),
+            indexPath: root.appendingPathComponent(".idx.sqlite"))
         try store.setVaultRootForTesting(root)
         try "---\nid: a\ntitle: A\ntags: [work, q1]\n---\nx".write(
             to: root.appendingPathComponent("a.md"), atomically: true, encoding: .utf8)
@@ -87,7 +94,10 @@ final class SidebarLayoutTests: XCTestCase {
 
     private func await_settle(_ store: LoreStore) {
         let expectation = XCTestExpectation(description: "settle")
-        Task { await store.settleForTesting(); expectation.fulfill() }
+        Task {
+            await store.settleForTesting()
+            expectation.fulfill()
+        }
         wait(for: [expectation], timeout: 5)
     }
 }

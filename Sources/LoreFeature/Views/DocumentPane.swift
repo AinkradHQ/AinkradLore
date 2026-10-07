@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// The result of attempting a paste/drop attachment write: embed syntax to
 /// insert on success, or a human-readable failure message to surface, never
@@ -33,8 +33,9 @@ func attemptAttachmentWrite(
         let written = try write()
         return AttachmentWriteResult(embedSyntax: embedSyntax(written), failureMessage: nil)
     } catch {
-        return AttachmentWriteResult(embedSyntax: nil,
-                                     failureMessage: SidebarOperations.describeAttachmentWrite(error))
+        return AttachmentWriteResult(
+            embedSyntax: nil,
+            failureMessage: SidebarOperations.describeAttachmentWrite(error))
     }
 }
 
@@ -150,7 +151,6 @@ struct DocumentPane: View {
 
             editor
 
-
         }
         .background(theme.tokens.background)
         // A banner appearing used to SNAP the editor down by its full height
@@ -158,100 +158,115 @@ struct DocumentPane: View {
         // save-failure path, i.e. exactly when the user was least in the mood
         // for a surprise. Animating the insertion keeps the text's movement
         // legible as "something arrived above you" rather than a jump cut.
-        .animation(reduceMotion ? nil : AinkradMotion.materialize,
-                   value: bannerSignature)
-        .onAppear { refreshOutline(); refreshBacklinksCount() }
+        .animation(
+            reduceMotion ? nil : AinkradMotion.materialize,
+            value: bannerSignature
+        )
+        .onAppear {
+            refreshOutline()
+            refreshBacklinksCount()
+        }
         // Same two triggers `BacklinksPanel` uses for the reasons it already
         // documents (a rename changes `url` without changing `session.id`),
         // plus `reloadGeneration`: "Reload from disk" replaces the engine's
         // note in place without either of those changing, and the outline
         // must not keep showing headings from the text that was just
         // discarded.
-        .onChange(of: session.url) { refreshOutline(); refreshBacklinksCount() }
-        .onChange(of: session.reloadGeneration) { refreshOutline(); refreshBacklinksCount() }
+        .onChange(of: session.url) {
+            refreshOutline()
+            refreshBacklinksCount()
+        }
+        .onChange(of: session.reloadGeneration) {
+            refreshOutline()
+            refreshBacklinksCount()
+        }
     }
 
     var body: some View {
         pane
-        // The ⋯ menu, with a scrim catching the click-away. IN-WINDOW, not a
-        // floating panel: a menu hung off a toolbar button has no reason to
-        // live in another window, and the panel-based attempt dismissed on
-        // click without running the item.
-        .overlay(alignment: .topTrailing) {
-            if showingActions {
-                ZStack(alignment: .topTrailing) {
-                    Color.black.opacity(0.001)
-                        .ignoresSafeArea()
-                        .contentShape(Rectangle())
-                        .onTapGesture { showingActions = false }
-                        .accessibilityHidden(true)
-                    DocumentActionsMenu(items: actionItems, theme: theme) {
-                        showingActions = false
+            // The ⋯ menu, with a scrim catching the click-away. IN-WINDOW, not a
+            // floating panel: a menu hung off a toolbar button has no reason to
+            // live in another window, and the panel-based attempt dismissed on
+            // click without running the item.
+            .overlay(alignment: .topTrailing) {
+                if showingActions {
+                    ZStack(alignment: .topTrailing) {
+                        Color.black.opacity(0.001)
+                            .ignoresSafeArea()
+                            .contentShape(Rectangle())
+                            .onTapGesture { showingActions = false }
+                            .accessibilityHidden(true)
+                        DocumentActionsMenu(items: actionItems, theme: theme) {
+                            showingActions = false
+                        }
+                        .padding(.trailing, LoreMetrics.gutter)
                     }
-                    .padding(.trailing, LoreMetrics.gutter)
                 }
             }
-        }
-        // Linked mentions, summoned from that menu or ⇧⌘B. Overlays the
-        // editor rather than narrowing it, so the text column never reflows.
-        .overlay(alignment: .topTrailing) {
-            if showingMentions {
-                DocumentSlideover(title: "Connections", theme: theme,
-                                  onClose: { showingMentions = false }) {
-                    mentionsList
+            // Linked mentions, summoned from that menu or ⇧⌘B. Overlays the
+            // editor rather than narrowing it, so the text column never reflows.
+            .overlay(alignment: .topTrailing) {
+                if showingMentions {
+                    DocumentSlideover(
+                        title: "Connections", theme: theme,
+                        onClose: { showingMentions = false }
+                    ) {
+                        mentionsList
+                    }
+                    .transition(reduceMotion ? .opacity : .move(edge: .trailing))
                 }
-                .transition(reduceMotion ? .opacity : .move(edge: .trailing))
             }
-        }
-        .animation(reduceMotion ? nil : AinkradMotion.hover, value: showingMentions)
-        // Esc closes whichever is up, claimed only while one is — the same
-        // gating that keeps it from stealing `cancelOperation` from the
-        // `[[`-completion popup.
-        .overlay {
-            if showingActions || showingMentions {
-                Button("Close") {
-                    showingActions = false
-                    showingMentions = false
+            .animation(reduceMotion ? nil : AinkradMotion.hover, value: showingMentions)
+            // Esc closes whichever is up, claimed only while one is — the same
+            // gating that keeps it from stealing `cancelOperation` from the
+            // `[[`-completion popup.
+            .overlay {
+                if showingActions || showingMentions {
+                    Button("Close") {
+                        showingActions = false
+                        showingMentions = false
+                    }
+                    .keyboardShortcut(.cancelAction)
+                    .opacity(0)
+                    .frame(width: 0, height: 0)
+                    .accessibilityHidden(true)
                 }
-                .keyboardShortcut(.cancelAction)
-                .opacity(0)
-                .frame(width: 0, height: 0)
-                .accessibilityHidden(true)
             }
-        }
-        .onChange(of: mentionsRequest) { _, requested in
-            guard requested else { return }
-            mentionsRequest = false
-            showingMentions.toggle()
-        }
-        .alert("Create this note?",
-               isPresented: Binding(get: { unresolved != nil },
-                                    set: { if !$0 { unresolved = nil } })) {
-            Button("Cancel", role: .cancel) { unresolved = nil }
-            Button("Create") {
-                if let target = unresolved { createUnresolved(target) }
-                unresolved = nil
+            .onChange(of: mentionsRequest) { _, requested in
+                guard requested else { return }
+                mentionsRequest = false
+                showingMentions.toggle()
             }
-        } message: {
-            Text("\"\(unresolved ?? "")\" doesn't exist in this vault yet.")
-        }
-        // A TOAST, not the "Not done" sheet this used to raise.
-        //
-        // The sentences are unchanged and still shown — the point of the
-        // original fix (a failed write that silently did nothing is worse than
-        // no affordance) is intact. What changed is the weight: a refused
-        // paste or drop leaves the document exactly as it was and asks nothing
-        // of the user, so a modal that must be dismissed before typing can
-        // continue is out of proportion to it. The sidebar's refused TRASH
-        // keeps the sheet, because that one names a condition the user has to
-        // resolve before the delete can happen at all.
-        .onChange(of: createFailure) { _, failure in
-            guard let failure else { return }
-            createFailure = nil
-            toasts.show(failure, status: .danger)
-        }
+            .alert(
+                "Create this note?",
+                isPresented: Binding(
+                    get: { unresolved != nil },
+                    set: { if !$0 { unresolved = nil } })
+            ) {
+                Button("Cancel", role: .cancel) { unresolved = nil }
+                Button("Create") {
+                    if let target = unresolved { createUnresolved(target) }
+                    unresolved = nil
+                }
+            } message: {
+                Text("\"\(unresolved ?? "")\" doesn't exist in this vault yet.")
+            }
+            // A TOAST, not the "Not done" sheet this used to raise.
+            //
+            // The sentences are unchanged and still shown — the point of the
+            // original fix (a failed write that silently did nothing is worse than
+            // no affordance) is intact. What changed is the weight: a refused
+            // paste or drop leaves the document exactly as it was and asks nothing
+            // of the user, so a modal that must be dismissed before typing can
+            // continue is out of proportion to it. The sidebar's refused TRASH
+            // keeps the sheet, because that one names a condition the user has to
+            // resolve before the delete can happen at all.
+            .onChange(of: createFailure) { _, failure in
+                guard let failure else { return }
+                createFailure = nil
+                toasts.show(failure, status: .danger)
+            }
     }
-
 
     /// The engine's editor, plus the rail drawn over its margin.
     ///
@@ -261,151 +276,158 @@ struct DocumentPane: View {
     /// type-checker will attempt in reasonable time. Splitting it is not
     /// cosmetic — without it the file does not compile.
     @ViewBuilder private var editor: some View {
-            session.engine.makeEditor(
-                EditorContext(theme: theme,
-                              editorSettings: store.editorSettings,
-                              headingCompletions: { document, prefix in
-                                  store.headingCompletions(inDocumentNamed: document,
-                                                           matching: prefix)
-                              },
-                              createLinkedNote: { name in
-                                  // Creates WITHOUT opening: this fires
-                                  // mid-sentence, and navigating to the note
-                                  // just referenced is the opposite of what
-                                  // the writer asked for.
-                                  guard !session.isReadOnly else { return false }
-                                  do {
-                                      try store.createNote(forLinkTarget: name,
-                                                           syntax: .wikilink)
-                                      refreshBacklinksCount()
-                                      return true
-                                  } catch {
-                                      createFailure = "Couldn't create “\(name)”: "
-                                          + error.localizedDescription
-                                      return false
-                                  }
-                              },
-                              reportCaretOffset: { caretOffset = $0 },
-                              onChange: {
-                                  session.markChanged()
-                                  // Debounced — see `outlineDebouncer`'s doc
-                                  // comment. `refreshOutline` is cheap to call
-                                  // repeatedly; the debouncer just makes sure
-                                  // only the LAST call in a typing burst runs.
-                                  outlineDebouncer.schedule(after: 0.3) { refreshOutline() }
-                              },
-                              completions: { store.linkCompletions(matching: $0) },
-                              // Prefix-matched in Swift over `allTags` —
-                              // already in memory, deduplicated and sorted,
-                              // and (since inline `#tags` feed the same
-                              // pipeline) already including inline tags. No
-                              // new query, no SQL.
-                              tagCompletions: { prefix in
-                                  guard !prefix.isEmpty else { return store.allTags }
-                                  let needle = prefix.lowercased()
-                                  return store.allTags.filter {
-                                      $0.lowercased().hasPrefix(needle)
-                                  }
-                              },
-                              openLink: { target in
-                                  // `documentName` first: `openLink` funnels into
-                                  // `LinkResolver.basename`, which strips a
-                                  // `#fragment` but NOT an `|alias`, so
-                                  // `[[Design|why]]` would look up "Design|why"
-                                  // and never resolve.
-                                  let name = LinkCompletionContext.documentName(of: target)
-                                  if !store.openLink(name) { unresolved = name }
-                              },
-                              openLinkBeside: { target in
-                                  // Same target-resolution rule `openLink`
-                                  // above follows, then `openInSecondaryPane`
-                                  // — the exact path `LoreRootView.openRow`
-                                  // already uses for an ⌥-clicked sidebar
-                                  // row, so an ⌥-click means the same thing
-                                  // everywhere in this app.
-                                  let name = LinkCompletionContext.documentName(of: target)
-                                  guard let url = store.resolveLink(name) else {
-                                      unresolved = name
-                                      return
-                                  }
-                                  store.openInSecondaryPane(url: url)
-                              },
-                              onTagClick: onTagClick,
-                              resolveEmbedTarget: { store.resolveLink($0) },
-                              linkTarget: { store.linkTarget(for: $0) },
-                              registerScrollHandler: { handler in
-                                  scrollHandler = handler
-                                  onScrollHandler(handler)
-                              },
-                              isReadOnly: session.isReadOnly,
-                              // Beside `session.url`, never in a vault-wide
-                              // folder — see `LoreStore.writeAttachment`'s doc
-                              // comment. A failed write (no vault, permission
-                              // denied, outside-vault guard, or — since the
-                              // directory-drop guard — a Finder folder) means
-                              // "insert nothing" into the document, same as
-                              // before, but is no longer swallowed silently:
-                              // it now surfaces through `createFailure`, the
-                              // same "Not done" sheet an unresolved-link
-                              // create failure already uses below, so a
-                              // refused drop is visible rather than a drop
-                              // that just does nothing with no explanation.
-                              // Gated on `session.isReadOnly` FIRST — same
-                              // reasoning as `allowsTaskToggle: !ctx.isReadOnly`
-                              // below: a read-only session's `saveNow()`
-                              // refuses to write, so letting these two
-                              // closures write a real file into the vault and
-                              // insert an embed `saveNow()` will then never
-                              // persist is exactly the affordance
-                              // `EditorContext.isReadOnly` exists to withhold
-                              // — read-only stays a silent no-op, not an
-                              // error, since it is not a failure but the
-                              // expected behavior of a read-only tab.
-                              writePastedImage: { data, name in
-                                  guard !session.isReadOnly else { return nil }
-                                  let result = attemptAttachmentWrite(write: {
-                                      try store.writeAttachment(
-                                          data: data, preferredName: name, besideNote: session.url)
-                                  }, embedSyntax: { store.embedSyntax(for: $0) })
-                                  if let failure = result.failureMessage {
-                                      createFailure = "Couldn't paste that image: \(failure)"
-                                  }
-                                  return result.embedSyntax
-                              },
-                              writeDroppedFile: { url in
-                                  guard !session.isReadOnly else { return nil }
-                                  let result = attemptAttachmentWrite(write: {
-                                      try store.writeAttachment(copying: url, besideNote: session.url)
-                                  }, embedSyntax: { store.embedSyntax(for: $0) })
-                                  if let failure = result.failureMessage {
-                                      createFailure = "Couldn't add \"\(url.lastPathComponent)\": \(failure)"
-                                  }
-                                  return result.embedSyntax
-                              },
-                              commitTitle: { newTitle in
-                                  store.commitTitleChange(for: session, to: newTitle)
-                              },
-                              registerExternalChangeHandler: { handler in
-                                  store.registerExternalChangeHandler(handler)
-                              },
-                              unregisterExternalChangeHandler: { token in
-                                  store.unregisterExternalChangeHandler(token)
-                              }))
-                // The engines' editors seed their `@State` in `.onAppear` only,
-                // and `resolveByReloading()` mutates the engine in place — so
-                // without the generation in the identity the user clicks
-                // "Reload" and the OLD text stays on screen. Changing the id
-                // tears the editor down and builds a fresh one, which re-runs
-                // `.onAppear` against the reloaded engine.
-                .id("\(session.id)-\(session.reloadGeneration)")
-                // The heading rail is NOT drawn — see `LoreSpineRail`, which
-                // still holds the reasoning and the one line that restores it.
-                // The owner read the ticks as marks at the edge of the panel
-                // rather than as texture, and asked for them gone.
-                //
-                // `outline`, `documentLength` and `caretOffset` are kept: the
-                // outline is published upward for the ⌘⇧O jump palette, which is
-                // untouched and remains the way to move between headings.
+        session.engine.makeEditor(
+            EditorContext(
+                theme: theme,
+                editorSettings: store.editorSettings,
+                headingCompletions: { document, prefix in
+                    store.headingCompletions(
+                        inDocumentNamed: document,
+                        matching: prefix)
+                },
+                createLinkedNote: { name in
+                    // Creates WITHOUT opening: this fires
+                    // mid-sentence, and navigating to the note
+                    // just referenced is the opposite of what
+                    // the writer asked for.
+                    guard !session.isReadOnly else { return false }
+                    do {
+                        try store.createNote(
+                            forLinkTarget: name,
+                            syntax: .wikilink)
+                        refreshBacklinksCount()
+                        return true
+                    } catch {
+                        createFailure =
+                            "Couldn't create “\(name)”: "
+                            + error.localizedDescription
+                        return false
+                    }
+                },
+                reportCaretOffset: { caretOffset = $0 },
+                onChange: {
+                    session.markChanged()
+                    // Debounced — see `outlineDebouncer`'s doc
+                    // comment. `refreshOutline` is cheap to call
+                    // repeatedly; the debouncer just makes sure
+                    // only the LAST call in a typing burst runs.
+                    outlineDebouncer.schedule(after: 0.3) { refreshOutline() }
+                },
+                completions: { store.linkCompletions(matching: $0) },
+                // Prefix-matched in Swift over `allTags` —
+                // already in memory, deduplicated and sorted,
+                // and (since inline `#tags` feed the same
+                // pipeline) already including inline tags. No
+                // new query, no SQL.
+                tagCompletions: { prefix in
+                    guard !prefix.isEmpty else { return store.allTags }
+                    let needle = prefix.lowercased()
+                    return store.allTags.filter {
+                        $0.lowercased().hasPrefix(needle)
+                    }
+                },
+                openLink: { target in
+                    // `documentName` first: `openLink` funnels into
+                    // `LinkResolver.basename`, which strips a
+                    // `#fragment` but NOT an `|alias`, so
+                    // `[[Design|why]]` would look up "Design|why"
+                    // and never resolve.
+                    let name = LinkCompletionContext.documentName(of: target)
+                    if !store.openLink(name) { unresolved = name }
+                },
+                openLinkBeside: { target in
+                    // Same target-resolution rule `openLink`
+                    // above follows, then `openInSecondaryPane`
+                    // — the exact path `LoreRootView.openRow`
+                    // already uses for an ⌥-clicked sidebar
+                    // row, so an ⌥-click means the same thing
+                    // everywhere in this app.
+                    let name = LinkCompletionContext.documentName(of: target)
+                    guard let url = store.resolveLink(name) else {
+                        unresolved = name
+                        return
+                    }
+                    store.openInSecondaryPane(url: url)
+                },
+                onTagClick: onTagClick,
+                resolveEmbedTarget: { store.resolveLink($0) },
+                linkTarget: { store.linkTarget(for: $0) },
+                registerScrollHandler: { handler in
+                    scrollHandler = handler
+                    onScrollHandler(handler)
+                },
+                isReadOnly: session.isReadOnly,
+                // Beside `session.url`, never in a vault-wide
+                // folder — see `LoreStore.writeAttachment`'s doc
+                // comment. A failed write (no vault, permission
+                // denied, outside-vault guard, or — since the
+                // directory-drop guard — a Finder folder) means
+                // "insert nothing" into the document, same as
+                // before, but is no longer swallowed silently:
+                // it now surfaces through `createFailure`, the
+                // same "Not done" sheet an unresolved-link
+                // create failure already uses below, so a
+                // refused drop is visible rather than a drop
+                // that just does nothing with no explanation.
+                // Gated on `session.isReadOnly` FIRST — same
+                // reasoning as `allowsTaskToggle: !ctx.isReadOnly`
+                // below: a read-only session's `saveNow()`
+                // refuses to write, so letting these two
+                // closures write a real file into the vault and
+                // insert an embed `saveNow()` will then never
+                // persist is exactly the affordance
+                // `EditorContext.isReadOnly` exists to withhold
+                // — read-only stays a silent no-op, not an
+                // error, since it is not a failure but the
+                // expected behavior of a read-only tab.
+                writePastedImage: { data, name in
+                    guard !session.isReadOnly else { return nil }
+                    let result = attemptAttachmentWrite(
+                        write: {
+                            try store.writeAttachment(
+                                data: data, preferredName: name, besideNote: session.url)
+                        }, embedSyntax: { store.embedSyntax(for: $0) })
+                    if let failure = result.failureMessage {
+                        createFailure = "Couldn't paste that image: \(failure)"
+                    }
+                    return result.embedSyntax
+                },
+                writeDroppedFile: { url in
+                    guard !session.isReadOnly else { return nil }
+                    let result = attemptAttachmentWrite(
+                        write: {
+                            try store.writeAttachment(copying: url, besideNote: session.url)
+                        }, embedSyntax: { store.embedSyntax(for: $0) })
+                    if let failure = result.failureMessage {
+                        createFailure = "Couldn't add \"\(url.lastPathComponent)\": \(failure)"
+                    }
+                    return result.embedSyntax
+                },
+                commitTitle: { newTitle in
+                    store.commitTitleChange(for: session, to: newTitle)
+                },
+                registerExternalChangeHandler: { handler in
+                    store.registerExternalChangeHandler(handler)
+                },
+                unregisterExternalChangeHandler: { token in
+                    store.unregisterExternalChangeHandler(token)
+                })
+        )
+        // The engines' editors seed their `@State` in `.onAppear` only,
+        // and `resolveByReloading()` mutates the engine in place — so
+        // without the generation in the identity the user clicks
+        // "Reload" and the OLD text stays on screen. Changing the id
+        // tears the editor down and builds a fresh one, which re-runs
+        // `.onAppear` against the reloaded engine.
+        .id("\(session.id)-\(session.reloadGeneration)")
+        // The heading rail is NOT drawn — see `LoreSpineRail`, which
+        // still holds the reasoning and the one line that restores it.
+        // The owner read the ticks as marks at the edge of the panel
+        // rather than as texture, and asked for them gone.
+        //
+        // `outline`, `documentLength` and `caretOffset` are kept: the
+        // outline is published upward for the ⌘⇧O jump palette, which is
+        // untouched and remains the way to move between headings.
     }
 
     /// Which banners are currently up, as a value `.animation(_:value:)` can
@@ -458,29 +480,31 @@ struct DocumentPane: View {
     /// The linked-mentions list, shown in a slideover on request.
     private var mentionsList: some View {
         DocumentMentionsList(
-                backlinks: backlinks,
-                unresolved: unresolvedLinks,
-                related: related,
-                suggestedTags: suggestedTags,
-                theme: theme,
-                onOpen: { store.open(url: $0) },
-                onAddTag: { tag in
-                    do {
-                        try store.addTag(tag, to: session.url)
-                        refreshBacklinksCount()
-                    } catch {
-                        createFailure = "Couldn't add #\(tag): " + error.localizedDescription
-                    }
-                },
+            backlinks: backlinks,
+            unresolved: unresolvedLinks,
+            related: related,
+            suggestedTags: suggestedTags,
+            theme: theme,
+            onOpen: { store.open(url: $0) },
+            onAddTag: { tag in
+                do {
+                    try store.addTag(tag, to: session.url)
+                    refreshBacklinksCount()
+                } catch {
+                    createFailure = "Couldn't add #\(tag): " + error.localizedDescription
+                }
+            },
             onCreate: { link in
                 do {
-                    try store.createAndOpenNote(forLinkTarget: link.rawTarget,
-                                                syntax: link.syntax)
+                    try store.createAndOpenNote(
+                        forLinkTarget: link.rawTarget,
+                        syntax: link.syntax)
                     // The target just created is no longer unresolved:
                     // re-querying is what keeps the list honest.
                     refreshBacklinksCount()
                 } catch {
-                    createFailure = "Couldn't create “\(link.rawTarget)”: "
+                    createFailure =
+                        "Couldn't create “\(link.rawTarget)”: "
                         + error.localizedDescription
                 }
             })

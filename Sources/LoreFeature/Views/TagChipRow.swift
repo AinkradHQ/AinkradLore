@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// The sidebar's tag filter chips.
 ///
@@ -41,9 +41,10 @@ struct TagChipRow: View {
         // An ACTIVE tag is always shown, even when it would fall past the cap:
         // a filter you cannot see is a filter you cannot turn off, and that is
         // the exact failure the horizontal scroll had.
-        let shown = activeTag.map { active in
-            visible.contains(active) ? visible : [active] + visible
-        } ?? visible
+        let shown =
+            activeTag.map { active in
+                visible.contains(active) ? visible : [active] + visible
+            } ?? visible
 
         LoreWrappingHStack(spacing: AinkradSpacing.xs) {
             ForEach(shown, id: \.self) { tag in chip(tag) }
@@ -61,15 +62,19 @@ struct TagChipRow: View {
         // The COUNT tells you whether a tag is worth filtering by before you
         // click it — a tag on two notes and one on two hundred look identical
         // otherwise.
-        AinkradSwatchChip(label: "#\(tag) \(counts[tag] ?? 0)",
-                          swatch: theme.tokens.accentSecondary,
-                          isOn: activeTag == tag) {
+        AinkradSwatchChip(
+            label: "#\(tag) \(counts[tag] ?? 0)",
+            swatch: theme.tokens.accentSecondary,
+            isOn: activeTag == tag
+        ) {
             activeTag = (activeTag == tag) ? nil : tag
         }
         // The chip's ON state is a fill and nothing else, so whether a filter
         // is active was carried by colour alone.
-        .accessibilityLabel(activeTag == tag
-                            ? "Tag \(tag), filtering" : "Filter by tag \(tag)")
+        .accessibilityLabel(
+            activeTag == tag
+                ? "Tag \(tag), filtering" : "Filter by tag \(tag)"
+        )
         .accessibilityAddTraits(activeTag == tag ? [.isButton, .isSelected] : .isButton)
     }
 }
@@ -83,17 +88,22 @@ struct TagChipRow: View {
 struct LoreWrappingHStack: Layout {
     var spacing: CGFloat = 4
 
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews,
-                      cache: inout ()) -> CGSize {
+    func sizeThatFits(
+        proposal: ProposedViewSize, subviews: Subviews,
+        cache: inout ()
+    ) -> CGSize {
         let width = proposal.width ?? .infinity
         let rows = arrange(subviews: subviews, width: width)
         let height = rows.reduce(0) { $0 + $1.height } + spacing * CGFloat(max(0, rows.count - 1))
-        return CGSize(width: width == .infinity ? rows.map(\.width).max() ?? 0 : width,
-                      height: height)
+        return CGSize(
+            width: width == .infinity ? rows.map(\.width).max() ?? 0 : width,
+            height: height)
     }
 
-    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize,
-                       subviews: Subviews, cache: inout ()) {
+    func placeSubviews(
+        in bounds: CGRect, proposal: ProposedViewSize,
+        subviews: Subviews, cache: inout ()
+    ) {
         var y = bounds.minY
         for row in arrange(subviews: subviews, width: bounds.width) {
             var x = bounds.minX
@@ -117,8 +127,10 @@ struct LoreWrappingHStack: Layout {
         var current = Row()
         for index in subviews.indices {
             let size = subviews[index].sizeThatFits(.unspecified)
-            let projected = current.indices.isEmpty ? size.width
-                                                    : current.width + spacing + size.width
+            let projected =
+                current.indices.isEmpty
+                ? size.width
+                : current.width + spacing + size.width
             // A chip wider than the whole row still gets its own line rather
             // than being dropped: overflowing is visible, vanishing is not.
             if projected > width && !current.indices.isEmpty {

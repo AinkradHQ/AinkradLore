@@ -61,10 +61,12 @@ extension MarkdownEditor.Coordinator {
         //
         // Guarded on the document actually containing a table, so the ordinary
         // note pays nothing for this on every resize step.
-        guard widthChanged, styleCache.spans.contains(where: {
-            if case .table = $0.kind { return true }
-            return false
-        }) else { return }
+        guard widthChanged,
+            styleCache.spans.contains(where: {
+                if case .table = $0.kind { return true }
+                return false
+            })
+        else { return }
         // The snapshot has to be dropped first. `isRenderStale` compares the
         // TEXT and the TOKENS and nothing else — neither of which a resize
         // touches — so `applyStyles()` on its own returns immediately and the
@@ -238,10 +240,13 @@ extension MarkdownEditor.Coordinator {
         }
     }
 
-    private func applyParsed(_ derived: MarkdownStyleCache.Derived,
-                             of snapshot: String, generation: Int) {
+    private func applyParsed(
+        _ derived: MarkdownStyleCache.Derived,
+        of snapshot: String, generation: Int
+    ) {
         guard generation == parseGeneration,
-              let tv = textView, tv.string == snapshot else { return }
+            let tv = textView, tv.string == snapshot
+        else { return }
         styleCache.adopt(derived, for: snapshot)
         renderStyles()
     }

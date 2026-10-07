@@ -27,10 +27,12 @@ public struct ImportReport: Sendable {
     /// went, not to quietly write somewhere else.
     public var renamed: [(id: String, from: String, to: String)] = []
 
-    public init(imported: [URL] = [],
-                skipped: [(id: String, reason: String)] = [],
-                failed: [(id: String, reason: String)] = [],
-                renamed: [(id: String, from: String, to: String)] = []) {
+    public init(
+        imported: [URL] = [],
+        skipped: [(id: String, reason: String)] = [],
+        failed: [(id: String, reason: String)] = [],
+        renamed: [(id: String, from: String, to: String)] = []
+    ) {
         self.imported = imported
         self.skipped = skipped
         self.failed = failed

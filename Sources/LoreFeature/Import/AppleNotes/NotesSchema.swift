@@ -23,9 +23,11 @@ public enum NotesSchema {
     /// will not protect.
     static let required: [String: [String]] = [
         "ZICNOTEDATA": ["ZNOTE", "ZDATA"],
-        "ZICCLOUDSYNCINGOBJECT": ["Z_PK", "ZTITLE1", "ZIDENTIFIER", "ZFOLDER",
-                                  "ZCREATIONDATE1", "ZMODIFICATIONDATE1",
-                                  "ZMARKEDFORDELETION"],
+        "ZICCLOUDSYNCINGOBJECT": [
+            "Z_PK", "ZTITLE1", "ZIDENTIFIER", "ZFOLDER",
+            "ZCREATIONDATE1", "ZMODIFICATIONDATE1",
+            "ZMARKEDFORDELETION",
+        ],
     ]
 
     public static func check(_ queue: DatabaseQueue) throws -> Support {

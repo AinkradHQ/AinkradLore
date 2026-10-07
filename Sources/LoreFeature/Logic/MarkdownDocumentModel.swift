@@ -109,17 +109,20 @@ enum MarkdownParseCounter {
     nonisolated(unsafe) private static var stored = 0
 
     static var count: Int {
-        lock.lock(); defer { lock.unlock() }
+        lock.lock()
+        defer { lock.unlock() }
         return stored
     }
 
     static func reset() {
-        lock.lock(); defer { lock.unlock() }
+        lock.lock()
+        defer { lock.unlock() }
         stored = 0
     }
 
     static func record() {
-        lock.lock(); defer { lock.unlock() }
+        lock.lock()
+        defer { lock.unlock() }
         stored += 1
     }
 }
@@ -212,7 +215,7 @@ public struct MarkdownDocumentModel: Sendable {
     public var inlineTags: [String] {
         var seen = Set<String>()
         return extensionSpans.compactMap { span in
-            guard case let .tag(name) = span.kind, seen.insert(name).inserted
+            guard case .tag(let name) = span.kind, seen.insert(name).inserted
             else { return nil }
             return name
         }
@@ -221,7 +224,7 @@ public struct MarkdownDocumentModel: Sendable {
     /// `^block-id` anchors, derived from `extensionSpans` — not a rescan.
     public var blockAnchors: [BlockAnchor] {
         extensionSpans.compactMap { span in
-            guard case let .blockID(id) = span.kind else { return nil }
+            guard case .blockID(let id) = span.kind else { return nil }
             return BlockAnchor(id: id, offset: span.range.lowerBound)
         }
     }
@@ -262,21 +265,30 @@ public struct MarkdownDocumentModel: Sendable {
     /// emitted together or Live Preview collapses markers around text it has
     /// no span for.
     private static func styleSpans(
-        from extensions: [MarkdownExtensions.Span]) -> [StyleSpan] {
+        from extensions: [MarkdownExtensions.Span]
+    ) -> [StyleSpan] {
         extensions.flatMap { span -> [StyleSpan] in
             switch span.kind {
             case .highlight:
-                return [StyleSpan(range: span.content, kind: .highlight),
-                        StyleSpan(range: span.range.lowerBound..<span.content.lowerBound,
-                                  kind: .marker(of: .highlight)),
-                        StyleSpan(range: span.content.upperBound..<span.range.upperBound,
-                                  kind: .marker(of: .highlight))]
+                return [
+                    StyleSpan(range: span.content, kind: .highlight),
+                    StyleSpan(
+                        range: span.range.lowerBound..<span.content.lowerBound,
+                        kind: .marker(of: .highlight)),
+                    StyleSpan(
+                        range: span.content.upperBound..<span.range.upperBound,
+                        kind: .marker(of: .highlight)),
+                ]
             case .footnoteReference(let label):
-                return [StyleSpan(range: span.content, kind: .footnoteReference(label: label)),
-                        StyleSpan(range: span.range.lowerBound..<span.content.lowerBound,
-                                  kind: .marker(of: .footnote)),
-                        StyleSpan(range: span.content.upperBound..<span.range.upperBound,
-                                  kind: .marker(of: .footnote))]
+                return [
+                    StyleSpan(range: span.content, kind: .footnoteReference(label: label)),
+                    StyleSpan(
+                        range: span.range.lowerBound..<span.content.lowerBound,
+                        kind: .marker(of: .footnote)),
+                    StyleSpan(
+                        range: span.content.upperBound..<span.range.upperBound,
+                        kind: .marker(of: .footnote)),
+                ]
             case .footnoteDefinition(let label):
                 // The SAME two-marker-span shape as `.footnoteReference`
                 // above: one marker in front of the label, one after —
@@ -292,11 +304,15 @@ public struct MarkdownDocumentModel: Sendable {
                 // neither a reference's nor a definition's span can cross a
                 // line — noted here so the `true`/`false` split does not
                 // read as arbitrary.
-                return [StyleSpan(range: span.content, kind: .footnoteDefinition(label: label)),
-                        StyleSpan(range: span.range.lowerBound..<span.content.lowerBound,
-                                  kind: .marker(of: .footnote)),
-                        StyleSpan(range: span.content.upperBound..<span.range.upperBound,
-                                  kind: .marker(of: .footnote))]
+                return [
+                    StyleSpan(range: span.content, kind: .footnoteDefinition(label: label)),
+                    StyleSpan(
+                        range: span.range.lowerBound..<span.content.lowerBound,
+                        kind: .marker(of: .footnote)),
+                    StyleSpan(
+                        range: span.content.upperBound..<span.range.upperBound,
+                        kind: .marker(of: .footnote)),
+                ]
             case .tag(let name):
                 // The WHOLE range, `#` included, and NO marker span: Obsidian
                 // keeps the `#` visible (a tag chip without it would be
@@ -400,8 +416,9 @@ public struct MarkdownDocumentModel: Sendable {
         self.outline = collector.outline
         let allKindsIndex = CodeRegionIndex(regions: collector.regions, kinds: nil)
         self.allKindsIndex = allKindsIndex
-        self.linkSuppressionIndex = CodeRegionIndex(regions: collector.regions,
-                                                    kinds: Self.linkSuppressingKinds)
+        self.linkSuppressionIndex = CodeRegionIndex(
+            regions: collector.regions,
+            kinds: Self.linkSuppressingKinds)
 
         // Masked = code regions plus math expressions, from THIS same pass —
         // a second scan here would be a second parse. Computed via
@@ -444,15 +461,18 @@ public struct MarkdownDocumentModel: Sendable {
         // called here — same reason `mathRanges` above calls
         // `MarkdownMath.spans` directly instead of going through `self`.
         let markdownLinkRanges = astStyleSpans.compactMap { $0.kind == .link ? $0.range : nil }
-        let linkSuppression: CodeRegionIndex? = fullText.contains("\r\n")
+        let linkSuppression: CodeRegionIndex? =
+            fullText.contains("\r\n")
             ? nil : self.linkSuppressionIndex
         let linkScan = LinkParser.scan(fullText, suppression: linkSuppression)
-        let linkUTF16Offsets = linkScan.normalised
+        let linkUTF16Offsets =
+            linkScan.normalised
             ? CharacterOffsetMap.make(for: fullText) : linkScan.offsets
         let wikilinkTargetRanges: [Range<Int>] = linkScan.spans.compactMap { span in
             guard span.link.syntax == .wikilink,
-                  span.targetRange.lowerBound >= 0,
-                  span.targetRange.upperBound < linkUTF16Offsets.count else { return nil }
+                span.targetRange.lowerBound >= 0,
+                span.targetRange.upperBound < linkUTF16Offsets.count
+            else { return nil }
             let lower = linkUTF16Offsets[span.targetRange.lowerBound]
             let upper = linkUTF16Offsets[span.targetRange.upperBound]
             return lower..<upper
@@ -503,11 +523,15 @@ struct MarkdownASTCollector: MarkupWalker {
 
     mutating func visitCodeBlock(_ codeBlock: CodeBlock) {
         guard let ns = resolve(codeBlock.range) else { return }
-        regions.append(CodeRegion(range: ns,
-                                  kind: isFenced(at: ns, code: codeBlock.code)
-                                      ? .fencedCodeBlock : .indentedCodeBlock))
-        styleSpans.append(StyleSpan(range: swiftRange(ns),
-                                    kind: .codeBlock(language: codeBlock.language)))
+        regions.append(
+            CodeRegion(
+                range: ns,
+                kind: isFenced(at: ns, code: codeBlock.code)
+                    ? .fencedCodeBlock : .indentedCodeBlock))
+        styleSpans.append(
+            StyleSpan(
+                range: swiftRange(ns),
+                kind: .codeBlock(language: codeBlock.language)))
         // Only a FENCED block has fence lines; an indented one yields nothing.
         appendMarkers(MarkdownMarkers.fences(in: ns, text: text), .codeFence)
     }
@@ -588,9 +612,10 @@ struct MarkdownASTCollector: MarkupWalker {
         }
         for line in code.split(separator: "\n", omittingEmptySubsequences: false) {
             if let closer = leadingFenceRun(in: String(line)),
-               closer.character == marker.character,
-               closer.length >= marker.length,
-               closer.isBare {
+                closer.character == marker.character,
+                closer.length >= marker.length,
+                closer.isBare
+            {
                 return false
             }
         }
@@ -602,12 +627,15 @@ struct MarkdownASTCollector: MarkupWalker {
         var end = range.location
         while end < text.length, text.character(at: end) != 0x0A { end += 1 }
         guard end > range.location else { return "" }
-        return text.substring(with: NSRange(location: range.location,
-                                            length: end - range.location))
+        return text.substring(
+            with: NSRange(
+                location: range.location,
+                length: end - range.location))
     }
 
     private func leadingFenceRun(in line: String)
-        -> (character: Character, length: Int, isBare: Bool)? {
+        -> (character: Character, length: Int, isBare: Bool)?
+    {
         guard let first = line.first, first == "`" || first == "~" else { return nil }
         let run = line.prefix { $0 == first }
         guard run.count >= 3 else { return nil }
@@ -617,9 +645,10 @@ struct MarkdownASTCollector: MarkupWalker {
 
     func resolve(_ sourceRange: SourceRange?) -> NSRange? {
         guard let r = sourceRange else { return nil }
-        return map.utf16Range(fromLine: r.lowerBound.line,
-                              fromColumn: r.lowerBound.column,
-                              toLine: r.upperBound.line,
-                              toColumn: r.upperBound.column)
+        return map.utf16Range(
+            fromLine: r.lowerBound.line,
+            fromColumn: r.lowerBound.column,
+            toLine: r.upperBound.line,
+            toColumn: r.upperBound.column)
     }
 }

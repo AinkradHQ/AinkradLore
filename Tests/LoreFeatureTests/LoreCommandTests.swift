@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 /// The command catalog's rules.
@@ -12,8 +13,9 @@ import XCTest
 @MainActor
 final class LoreCommandTests: XCTestCase {
 
-    private let everything = LoreCommands.Context(hasVault: true, hasDocument: true,
-                                                  canUndoDelete: true)
+    private let everything = LoreCommands.Context(
+        hasVault: true, hasDocument: true,
+        canUndoDelete: true)
 
     // MARK: - Catalog integrity
 
@@ -46,8 +48,9 @@ final class LoreCommandTests: XCTestCase {
     func test_theCatalogCoversEveryIDExactlyOnce() {
         let ids = LoreCommands.all.map(\.id)
         XCTAssertEqual(Set(ids).count, ids.count, "a command is declared twice")
-        XCTAssertEqual(Set(ids), Set(LoreCommand.ID.allCases),
-                       "a declared ID has no catalog entry, or vice versa")
+        XCTAssertEqual(
+            Set(ids), Set(LoreCommand.ID.allCases),
+            "a declared ID has no catalog entry, or vice versa")
     }
 
     /// The display string is the one the binding is derived from, so a
@@ -66,8 +69,9 @@ final class LoreCommandTests: XCTestCase {
     /// being claimed when there is nothing to undo (and therefore stops it
     /// stealing undo from the text editor).
     func test_undoIsUnavailableWithNothingToUndo() {
-        let context = LoreCommands.Context(hasVault: true, hasDocument: true,
-                                           canUndoDelete: false)
+        let context = LoreCommands.Context(
+            hasVault: true, hasDocument: true,
+            canUndoDelete: false)
         XCTAssertFalse(LoreCommands.available(in: context).contains { $0.id == .undoDelete })
         XCTAssertTrue(LoreCommands.available(in: everything).contains { $0.id == .undoDelete })
     }
@@ -76,20 +80,24 @@ final class LoreCommandTests: XCTestCase {
     /// notably "Choose Vault…", which is the one way OUT of that state.
     func test_withNoVaultOnlyAlwaysCommandsAreOffered() {
         let available = LoreCommands.available(in: .empty)
-        XCTAssertTrue(available.contains { $0.id == .chooseVault },
-                      "the first-run state must still offer the way out of it")
-        XCTAssertFalse(available.contains { $0.id == .newNote },
-                       "a create that cannot succeed must not be offered")
+        XCTAssertTrue(
+            available.contains { $0.id == .chooseVault },
+            "the first-run state must still offer the way out of it")
+        XCTAssertFalse(
+            available.contains { $0.id == .newNote },
+            "a create that cannot succeed must not be offered")
         XCTAssertFalse(available.contains { $0.id == .rebuildIndex })
     }
 
     /// Document commands need a document.
     func test_documentCommandsRequireAnOpenDocument() {
-        let noDoc = LoreCommands.Context(hasVault: true, hasDocument: false,
-                                         canUndoDelete: false)
+        let noDoc = LoreCommands.Context(
+            hasVault: true, hasDocument: false,
+            canUndoDelete: false)
         for id in [LoreCommand.ID.saveNow, .closeDocument, .toggleOutline, .toggleBacklinks] {
-            XCTAssertFalse(LoreCommands.available(in: noDoc).contains { $0.id == id },
-                           "\(id) must not be offered with no document open")
+            XCTAssertFalse(
+                LoreCommands.available(in: noDoc).contains { $0.id == id },
+                "\(id) must not be offered with no document open")
         }
     }
 
@@ -102,10 +110,12 @@ final class LoreCommandTests: XCTestCase {
         // Replace…", which is declared EARLIER in the catalog — so this only
         // passes if match position outranks declaration order.
         let matches = LoreCommands.matching("re", in: everything)
-        XCTAssertEqual(matches.first?.id, .rebuildIndex,
-                       "a prefix match must beat a mid-string one")
-        XCTAssertTrue(matches.contains { $0.id == .replaceInDocument },
-                      "the substring match must still be offered, just lower")
+        XCTAssertEqual(
+            matches.first?.id, .rebuildIndex,
+            "a prefix match must beat a mid-string one")
+        XCTAssertTrue(
+            matches.contains { $0.id == .replaceInDocument },
+            "the substring match must still be offered, just lower")
     }
 
     /// Ties break on CATALOG order, not alphabetically. "New Note" and "New
@@ -113,13 +123,15 @@ final class LoreCommandTests: XCTestCase {
     /// Folder first purely because F precedes N, which is meaningless to the
     /// person typing. This test caught exactly that.
     func test_tiesBreakOnCuratedOrderNotTheAlphabet() {
-        XCTAssertEqual(LoreCommands.matching("n", in: everything).first?.id, .newNote,
-                       "typing “n” must reach New Note, not New Folder")
+        XCTAssertEqual(
+            LoreCommands.matching("n", in: everything).first?.id, .newNote,
+            "typing “n” must reach New Note, not New Folder")
     }
 
     func test_anEmptyQueryReturnsEverythingAvailable() {
-        XCTAssertEqual(LoreCommands.matching("  ", in: everything).count,
-                       LoreCommands.available(in: everything).count)
+        XCTAssertEqual(
+            LoreCommands.matching("  ", in: everything).count,
+            LoreCommands.available(in: everything).count)
     }
 
     /// Matching never offers an unavailable command, however well it matches.

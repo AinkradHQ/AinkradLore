@@ -1,7 +1,7 @@
+import Accelerate
 import Foundation
 import GRDB
 import NaturalLanguage
-import Accelerate
 
 /// Semantic search: one on-device sentence vector per note (Apple's
 /// `NaturalLanguage`, no network, no dependency), so a query finds notes that
@@ -54,7 +54,10 @@ enum LoreEmbeddings {
             for source in stale {
                 if Task.isCancelled { break }
                 if let v = vector(source.text, model: model) { batch.append((source.path, source.updated, v)) }
-                if batch.count == 64 { try? index.saveEmbeddings(batch); batch = [] }
+                if batch.count == 64 {
+                    try? index.saveEmbeddings(batch)
+                    batch = []
+                }
             }
             try? index.saveEmbeddings(batch)
         }
@@ -64,8 +67,14 @@ enum LoreEmbeddings {
 
     static func cosine(_ a: [Float], _ b: [Float]) -> Float {
         guard a.count == b.count else { return 0 }
-        var dot: Float = 0, na: Float = 0, nb: Float = 0
-        for i in a.indices { dot += a[i] * b[i]; na += a[i] * a[i]; nb += b[i] * b[i] }
+        var dot: Float = 0
+        var na: Float = 0
+        var nb: Float = 0
+        for i in a.indices {
+            dot += a[i] * b[i]
+            na += a[i] * a[i]
+            nb += b[i] * b[i]
+        }
         return na == 0 || nb == 0 ? 0 : dot / (na.squareRoot() * nb.squareRoot())
     }
 
@@ -86,21 +95,25 @@ enum LoreEmbeddings {
 extension LoreIndex {
     func ensureEmbeddingsTable() throws {
         try dbQueue.write { db in
-            try db.execute(sql: """
-                CREATE TABLE IF NOT EXISTS embeddings(
-                    path TEXT PRIMARY KEY, updated DOUBLE NOT NULL, vector BLOB NOT NULL);
-                """)
+            try db.execute(
+                sql: """
+                    CREATE TABLE IF NOT EXISTS embeddings(
+                        path TEXT PRIMARY KEY, updated DOUBLE NOT NULL, vector BLOB NOT NULL);
+                    """)
         }
     }
 
     /// Notes with text whose vector is missing or older than the note.
     func staleEmbeddingSources() throws -> [(path: String, updated: Double, text: String)] {
         try dbQueue.read { db in
-            try Row.fetchAll(db, sql: """
-                SELECT d.path, d.updated, d.title || '. ' || substr(d.plaintext, 1, 500) AS text
-                FROM documents d LEFT JOIN embeddings e ON e.path = d.path
-                WHERE length(d.plaintext) > 0 AND (e.path IS NULL OR e.updated != d.updated)
-                """).map { (path: $0["path"], updated: $0["updated"], text: $0["text"]) }
+            try Row.fetchAll(
+                db,
+                sql: """
+                    SELECT d.path, d.updated, d.title || '. ' || substr(d.plaintext, 1, 500) AS text
+                    FROM documents d LEFT JOIN embeddings e ON e.path = d.path
+                    WHERE length(d.plaintext) > 0 AND (e.path IS NULL OR e.updated != d.updated)
+                    """
+            ).map { (path: $0["path"], updated: $0["updated"], text: $0["text"]) }
         }
     }
 
@@ -109,8 +122,9 @@ extension LoreIndex {
         try dbQueue.write { db in
             for (path, updated, vector) in batch {
                 let blob = vector.withUnsafeBufferPointer { Data(buffer: $0) }
-                try db.execute(sql: "INSERT OR REPLACE INTO embeddings(path, updated, vector) VALUES (?, ?, ?)",
-                               arguments: [path, updated, blob])
+                try db.execute(
+                    sql: "INSERT OR REPLACE INTO embeddings(path, updated, vector) VALUES (?, ?, ?)",
+                    arguments: [path, updated, blob])
             }
         }
     }

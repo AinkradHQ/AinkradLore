@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 /// Back/forward navigation and the warm-session cache — the two mechanisms
@@ -10,8 +11,9 @@ final class DocumentHistoryTests: XCTestCase {
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent("lore-\(label)-\(UUID())")
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
-        let store = LoreStore(documents: FakeDocs(),
-                              indexPath: root.appendingPathComponent(".idx.sqlite"))
+        let store = LoreStore(
+            documents: FakeDocs(),
+            indexPath: root.appendingPathComponent(".idx.sqlite"))
         try store.setVaultRootForTesting(root)
         return (root, store)
     }
@@ -28,8 +30,12 @@ final class DocumentHistoryTests: XCTestCase {
 
     func test_backAndForwardWalkTheTrail() throws {
         let (root, store) = try vault()
-        let a = try note(root, "a.md"), b = try note(root, "b.md"), c = try note(root, "c.md")
-        store.open(url: a); store.open(url: b); store.open(url: c)
+        let a = try note(root, "a.md")
+        let b = try note(root, "b.md")
+        let c = try note(root, "c.md")
+        store.open(url: a)
+        store.open(url: b)
+        store.open(url: c)
 
         XCTAssertTrue(store.canGoBack)
         XCTAssertFalse(store.canGoForward)
@@ -51,8 +57,11 @@ final class DocumentHistoryTests: XCTestCase {
     /// leads to places the user has no memory of choosing.
     func test_openingSomethingNewTruncatesTheForwardTrail() throws {
         let (root, store) = try vault("truncate")
-        let a = try note(root, "a.md"), b = try note(root, "b.md"), c = try note(root, "c.md")
-        store.open(url: a); store.open(url: b)
+        let a = try note(root, "a.md")
+        let b = try note(root, "b.md")
+        let c = try note(root, "c.md")
+        store.open(url: a)
+        store.open(url: b)
         store.goBack()
         XCTAssertTrue(store.canGoForward)
 
@@ -67,11 +76,15 @@ final class DocumentHistoryTests: XCTestCase {
     /// every time it is used.
     func test_navigatingDoesNotRecordNewVisits() throws {
         let (root, store) = try vault("norecord")
-        let a = try note(root, "a.md"), b = try note(root, "b.md")
-        store.open(url: a); store.open(url: b)
+        let a = try note(root, "a.md")
+        let b = try note(root, "b.md")
+        store.open(url: a)
+        store.open(url: b)
         let depth = store.history.count
 
-        store.goBack(); store.goForward(); store.goBack()
+        store.goBack()
+        store.goForward()
+        store.goBack()
 
         XCTAssertEqual(store.history.count, depth, "history grew while merely walking it")
     }
@@ -94,13 +107,15 @@ final class DocumentHistoryTests: XCTestCase {
     /// position and undo stack across a round trip.
     func test_backReusesTheWarmSessionRatherThanReopening() throws {
         let (root, store) = try vault("warm")
-        let a = try note(root, "a.md"), b = try note(root, "b.md")
+        let a = try note(root, "a.md")
+        let b = try note(root, "b.md")
         store.open(url: a)
         let firstSession = store.selectedTab
         store.open(url: b)
         store.goBack()
-        XCTAssertTrue(store.selectedTab === firstSession,
-                      "Back rebuilt the session instead of reusing the warm one")
+        XCTAssertTrue(
+            store.selectedTab === firstSession,
+            "Back rebuilt the session instead of reusing the warm one")
     }
 
     func test_historyIsClearedWhenTheVaultChanges() throws {
@@ -127,9 +142,10 @@ final class DocumentHistoryTests: XCTestCase {
             store.open(url: try note(root, "n\(i).md"))
         }
         XCTAssertLessThanOrEqual(store.tabs.count, LoreStore.warmSessionLimit)
-        XCTAssertEqual(store.selectedTab?.url.lastPathComponent,
-                       "n\(LoreStore.warmSessionLimit + 3).md",
-                       "the open document must never be evicted")
+        XCTAssertEqual(
+            store.selectedTab?.url.lastPathComponent,
+            "n\(LoreStore.warmSessionLimit + 3).md",
+            "the open document must never be evicted")
     }
 
     /// The refusal that makes the cache safe: a document with unsaved edits is
@@ -147,8 +163,9 @@ final class DocumentHistoryTests: XCTestCase {
             store.open(url: try note(root, "filler\(i).md"))
         }
 
-        XCTAssertTrue(store.tabs.contains { $0 === precious },
-                      "a document with unsaved edits was evicted to honour the cache bound")
+        XCTAssertTrue(
+            store.tabs.contains { $0 === precious },
+            "a document with unsaved edits was evicted to honour the cache bound")
     }
 
     /// Eviction takes the COLDEST first, so the documents a user is moving
@@ -164,7 +181,8 @@ final class DocumentHistoryTests: XCTestCase {
         store.open(url: first)
         store.open(url: try note(root, "newest.md"))
 
-        XCTAssertTrue(store.tabs.contains { $0.url.lastPathComponent == "first.md" },
-                      "a recently revisited document was evicted as though it were cold")
+        XCTAssertTrue(
+            store.tabs.contains { $0.url.lastPathComponent == "first.md" },
+            "a recently revisited document was evicted as though it were cold")
     }
 }

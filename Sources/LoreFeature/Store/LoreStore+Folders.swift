@@ -33,11 +33,16 @@ public struct FolderTrashPlan: Sendable {
     /// INSTEAD of a preview, exactly like `FolderRenamePlan.refusal`.
     public let refusal: String?
 
-    public init(folder: URL, documents: [IndexRow] = [], inboundLinkCount: Int = 0,
-                referrers: [URL] = [], dirtySessionCount: Int = 0, refusal: String? = nil) {
-        self.folder = folder; self.documents = documents
-        self.inboundLinkCount = inboundLinkCount; self.referrers = referrers
-        self.dirtySessionCount = dirtySessionCount; self.refusal = refusal
+    public init(
+        folder: URL, documents: [IndexRow] = [], inboundLinkCount: Int = 0,
+        referrers: [URL] = [], dirtySessionCount: Int = 0, refusal: String? = nil
+    ) {
+        self.folder = folder
+        self.documents = documents
+        self.inboundLinkCount = inboundLinkCount
+        self.referrers = referrers
+        self.dirtySessionCount = dirtySessionCount
+        self.refusal = refusal
     }
 }
 
@@ -69,11 +74,11 @@ extension LoreStore {
             CharacterSet.controlCharacters.contains($0)
         }
         guard !trimmed.isEmpty,
-              !trimmed.contains("/"), !trimmed.contains(":"),
-              !trimmed.hasPrefix("."), !hasControlCharacter
+            !trimmed.contains("/"), !trimmed.contains(":"),
+            !trimmed.hasPrefix("."), !hasControlCharacter
         else { throw LoreError.invalidName(name) }
         guard let root = vaultRoot,
-              parent == root || Self.isContained(parent, in: root)
+            parent == root || Self.isContained(parent, in: root)
         else { throw LoreError.outsideVault(parent) }
 
         // CANONICAL ON WRITE, same discipline `VaultIndexCoordinator` uses
@@ -127,11 +132,13 @@ extension LoreStore {
             return FolderTrashPlan(folder: canonical, refusal: "No vault is open.")
         }
         guard canonical.path != root.path else {
-            return FolderTrashPlan(folder: canonical,
+            return FolderTrashPlan(
+                folder: canonical,
                 refusal: "The vault's own folder cannot be moved to the Trash.")
         }
         guard Self.isContained(canonical, in: root) else {
-            return FolderTrashPlan(folder: canonical,
+            return FolderTrashPlan(
+                folder: canonical,
                 refusal: "“\(folder.lastPathComponent)” is outside the vault, "
                     + "so nothing was planned.")
         }
@@ -161,9 +168,10 @@ extension LoreStore {
             return path.hasPrefix(prefix) && session.isDirty
         }.count
 
-        return FolderTrashPlan(folder: canonical, documents: documents,
-                               inboundLinkCount: inbound, referrers: referrerURLs,
-                               dirtySessionCount: dirtyCount)
+        return FolderTrashPlan(
+            folder: canonical, documents: documents,
+            inboundLinkCount: inbound, referrers: referrerURLs,
+            dirtySessionCount: dirtyCount)
     }
 
     /// Trashes the folder and everything under it.
@@ -247,11 +255,11 @@ extension LoreStore {
                     session.url,
                     session.conflict
                         ? "an open tab under this folder has unsaved edits that cannot be "
-                        + "saved because the file was also changed outside Lore. Resolve the "
-                        + "conflict in that tab (reload, overwrite, or save a copy), then "
-                        + "trash the folder again."
+                            + "saved because the file was also changed outside Lore. Resolve the "
+                            + "conflict in that tab (reload, overwrite, or save a copy), then "
+                            + "trash the folder again."
                         : "an open tab under this folder has unsaved edits that could not be "
-                        + "saved. Resolve that tab, then trash the folder again.")
+                            + "saved. Resolve that tab, then trash the folder again.")
             }
         }
 

@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// One column of the editor: a document's header and its pane.
 ///
@@ -36,23 +36,26 @@ struct DocumentPaneColumn: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            DocumentHeaderBar(session: session, store: store, theme: theme,
-                              row: headerRow, ops: ops,
-                              showingActions: $showingActions)
-            DocumentPane(store: store, session: session, theme: theme, ops: ops,
-                         onOutlineChange: { if isFocused { onOutlineChange($0) } },
-                         onScrollHandler: { if isFocused { onScrollHandler($0) } },
-                         // NOT gated on `isFocused` — a tag click is a direct
-                         // action in WHICHEVER column it landed in, not a
-                         // "what does the active pane show" question the way
-                         // the outline/scroll channels are.
-                         onTagClick: onTagClick,
-                         mentionsRequest: isFocused ? $mentionsRequest : .constant(false),
-                         showingActions: $showingActions,
-                         actionItems: actionItems)
-                // Identity is the session's stable id — NOT its url, which
-                // changes when the session adopts a "save a copy" resolution.
-                .id(session.id)
+            DocumentHeaderBar(
+                session: session, store: store, theme: theme,
+                row: headerRow, ops: ops,
+                showingActions: $showingActions)
+            DocumentPane(
+                store: store, session: session, theme: theme, ops: ops,
+                onOutlineChange: { if isFocused { onOutlineChange($0) } },
+                onScrollHandler: { if isFocused { onScrollHandler($0) } },
+                // NOT gated on `isFocused` — a tag click is a direct
+                // action in WHICHEVER column it landed in, not a
+                // "what does the active pane show" question the way
+                // the outline/scroll channels are.
+                onTagClick: onTagClick,
+                mentionsRequest: isFocused ? $mentionsRequest : .constant(false),
+                showingActions: $showingActions,
+                actionItems: actionItems
+            )
+            // Identity is the session's stable id — NOT its url, which
+            // changes when the session adopts a "save a copy" resolution.
+            .id(session.id)
         }
         // Focus follows a click anywhere in the column, including into the
         // text. `simultaneousGesture` rather than `onTapGesture`: the latter
@@ -93,9 +96,12 @@ struct DocumentPaneColumn: View {
         guard let row = headerRow else { return [] }
         // "Linked mentions" leads: the one item that INSPECTS the document
         // rather than changing it.
-        return [AinkradMenuItem(title: "Connections", systemName: "link",
-                                shortcut: "\u{21E7}\u{2318}B",
-                                action: { mentionsRequest = true })]
+        return [
+            AinkradMenuItem(
+                title: "Connections", systemName: "link",
+                shortcut: "\u{21E7}\u{2318}B",
+                action: { mentionsRequest = true })
+        ]
             + loreRowMenuItems(row: row, ops: ops, store: store)
     }
 }

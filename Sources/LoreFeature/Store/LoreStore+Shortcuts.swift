@@ -48,14 +48,16 @@ extension LoreStore {
     }
 
     private func persistPinned() {
-        documents.setData(pinnedPaths.sorted().joined(separator: "\n").data(using: .utf8),
-                          forKey: Self.pinnedKey)
+        documents.setData(
+            pinnedPaths.sorted().joined(separator: "\n").data(using: .utf8),
+            forKey: Self.pinnedKey)
     }
 
     /// Decodes the pinned set at startup.
     func loadShortcutLists() {
         if let data = documents.data(forKey: Self.pinnedKey),
-           let text = String(data: data, encoding: .utf8) {
+            let text = String(data: data, encoding: .utf8)
+        {
             pinnedPaths = Set(text.split(separator: "\n").map(String.init))
         }
     }

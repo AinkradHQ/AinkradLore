@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 @MainActor
@@ -11,11 +12,14 @@ final class ImportApplierTests: XCTestCase {
         return root
     }
 
-    private func item(_ id: String, _ title: String,
-                      body: ImportBody = .markdown("hello"),
-                      attachments: [ImportAttachment] = []) -> ImportItem {
-        ImportItem(sourceID: id, title: title, body: body, attachments: attachments,
-                   folderPath: [], created: Date(), modified: Date(), fidelity: [])
+    private func item(
+        _ id: String, _ title: String,
+        body: ImportBody = .markdown("hello"),
+        attachments: [ImportAttachment] = []
+    ) -> ImportItem {
+        ImportItem(
+            sourceID: id, title: title, body: body, attachments: attachments,
+            folderPath: [], created: Date(), modified: Date(), fidelity: [])
     }
 
     private func importID(_ note: Note) -> String? {
@@ -24,8 +28,9 @@ final class ImportApplierTests: XCTestCase {
 
     func testWritesTheNoteWithItsImportIDInFrontmatter() async throws {
         let vault = try makeVault()
-        let plan = ImportPlanner.plan(items: [item("apple-notes:N1", "Plan")],
-                                      vaultRoot: vault, existingImportIDs: [])
+        let plan = ImportPlanner.plan(
+            items: [item("apple-notes:N1", "Plan")],
+            vaultRoot: vault, existingImportIDs: [])
         let report = await ImportApplier(vaultRoot: vault).apply(plan)
         XCTAssertEqual(report.imported.count, 1)
         let text = try String(contentsOf: report.imported[0], encoding: .utf8)
@@ -49,47 +54,57 @@ final class ImportApplierTests: XCTestCase {
 
     func testSkipsAlreadyImportedItemsWithoutWriting() async throws {
         let vault = try makeVault()
-        let plan = ImportPlanner.plan(items: [item("apple-notes:N1", "Plan")],
-                                      vaultRoot: vault,
-                                      existingImportIDs: ["apple-notes:N1"])
+        let plan = ImportPlanner.plan(
+            items: [item("apple-notes:N1", "Plan")],
+            vaultRoot: vault,
+            existingImportIDs: ["apple-notes:N1"])
         let report = await ImportApplier(vaultRoot: vault).apply(plan)
         XCTAssertTrue(report.imported.isEmpty)
         XCTAssertEqual(report.skipped.count, 1)
-        XCTAssertFalse(FileManager.default.fileExists(
-            atPath: vault.appendingPathComponent("Plan.md").path))
+        XCTAssertFalse(
+            FileManager.default.fileExists(
+                atPath: vault.appendingPathComponent("Plan.md").path))
     }
 
     func testASecondApplyOfTheSameSourceCreatesNothing() async throws {
         let vault = try makeVault()
         let items = [item("apple-notes:N1", "Plan")]
         let applier = ImportApplier(vaultRoot: vault)
-        _ = await applier.apply(ImportPlanner.plan(items: items, vaultRoot: vault,
-                                                   existingImportIDs: []))
+        _ = await applier.apply(
+            ImportPlanner.plan(
+                items: items, vaultRoot: vault,
+                existingImportIDs: []))
         let before = try FileManager.default.contentsOfDirectory(atPath: vault.path).count
         // The second run is planned with the IDs the first run wrote — exactly what
         // the UI does by reading them back off disk.
-        let second = await applier.apply(ImportPlanner.plan(
-            items: items, vaultRoot: vault, existingImportIDs: ["apple-notes:N1"]))
+        let second = await applier.apply(
+            ImportPlanner.plan(
+                items: items, vaultRoot: vault, existingImportIDs: ["apple-notes:N1"]))
         XCTAssertTrue(second.imported.isEmpty)
-        XCTAssertEqual(try FileManager.default.contentsOfDirectory(atPath: vault.path).count,
-                       before)
+        XCTAssertEqual(
+            try FileManager.default.contentsOfDirectory(atPath: vault.path).count,
+            before)
     }
 
     func testOneFailedItemDoesNotAbortTheRun() async throws {
         let vault = try makeVault()
         let good = item("apple-notes:N1", "Good")
-        let bad = ImportItem(sourceID: "apple-notes:N2", title: "Bad",
-                             body: .markdown("x"),
-                             attachments: [ImportAttachment(
-                                sourceID: "a", preferredName: "missing.png",
-                                sourceURL: URL(fileURLWithPath: "/nope/missing.png"))],
-                             folderPath: [], created: Date(), modified: Date(),
-                             fidelity: [])
-        let plan = ImportPlanner.plan(items: [bad, good], vaultRoot: vault,
-                                      existingImportIDs: [])
+        let bad = ImportItem(
+            sourceID: "apple-notes:N2", title: "Bad",
+            body: .markdown("x"),
+            attachments: [
+                ImportAttachment(
+                    sourceID: "a", preferredName: "missing.png",
+                    sourceURL: URL(fileURLWithPath: "/nope/missing.png"))
+            ],
+            folderPath: [], created: Date(), modified: Date(),
+            fidelity: [])
+        let plan = ImportPlanner.plan(
+            items: [bad, good], vaultRoot: vault,
+            existingImportIDs: [])
         let report = await ImportApplier(vaultRoot: vault).apply(plan)
-        XCTAssertEqual(report.imported.count, 2)   // the note still lands
-        XCTAssertEqual(report.failed.count, 1)     // its attachment is reported
+        XCTAssertEqual(report.imported.count, 2)  // the note still lands
+        XCTAssertEqual(report.failed.count, 1)  // its attachment is reported
         // The counts alone don't prove the good item actually landed on
         // disk — assert the files themselves exist, and with the right body.
         for url in report.imported {
@@ -109,8 +124,9 @@ final class ImportApplierTests: XCTestCase {
         let existing = vault.appendingPathComponent("Plan.md")
         try "user's own note".write(to: existing, atomically: true, encoding: .utf8)
 
-        let plan = ImportPlanner.plan(items: [item("apple-notes:N1", "Plan")],
-                                      vaultRoot: vault, existingImportIDs: [])
+        let plan = ImportPlanner.plan(
+            items: [item("apple-notes:N1", "Plan")],
+            vaultRoot: vault, existingImportIDs: [])
         let report = await ImportApplier(vaultRoot: vault).apply(plan)
 
         XCTAssertEqual(report.imported.count, 1)
@@ -136,8 +152,9 @@ final class ImportApplierTests: XCTestCase {
         let report = await ImportApplier(vaultRoot: vault).apply(plan)
 
         XCTAssertEqual(report.imported.count, 1)
-        XCTAssertEqual(try String(contentsOf: existingSidecar, encoding: .utf8),
-                       "the user's own html, not ours")
+        XCTAssertEqual(
+            try String(contentsOf: existingSidecar, encoding: .utf8),
+            "the user's own html, not ours")
         // The real sidecar must exist somewhere else, under a different name
         // (`LoreStore.nonCollidingURL` splits on the LAST dot, so a
         // double-extension name like `Bold.original.html` gets its
@@ -162,14 +179,21 @@ final class ImportApplierTests: XCTestCase {
     func testAttachmentCollidingWithTheNotesOwnFilenameIsNotOverwritten() async throws {
         let vault = try makeVault()
         let attachmentSource = vault.appendingPathComponent("source-Plan.md")
-        try "attachment bytes, not the note".write(to: attachmentSource, atomically: true,
-                                                    encoding: .utf8)
+        try "attachment bytes, not the note".write(
+            to: attachmentSource, atomically: true,
+            encoding: .utf8)
 
         let plan = ImportPlanner.plan(
-            items: [item("apple-notes:N1", "Plan",
-                        attachments: [ImportAttachment(sourceID: "att-1",
-                                                       preferredName: "Plan.md",
-                                                       sourceURL: attachmentSource)])],
+            items: [
+                item(
+                    "apple-notes:N1", "Plan",
+                    attachments: [
+                        ImportAttachment(
+                            sourceID: "att-1",
+                            preferredName: "Plan.md",
+                            sourceURL: attachmentSource)
+                    ])
+            ],
             vaultRoot: vault, existingImportIDs: [])
         let report = await ImportApplier(vaultRoot: vault).apply(plan)
 
@@ -196,9 +220,10 @@ final class ImportApplierTests: XCTestCase {
     /// though it is left empty by the failure.
     func testAnItemThatFailsLeavesAPreexistingFolderAlone() async throws {
         let vault = try makeVault()
-        let bad = ImportItem(sourceID: "obsidian:bad", title: "Bad", body: .markdown("x"),
-                             attachments: [], folderPath: ["Sub"], created: Date(),
-                             modified: Date(), fidelity: [])
+        let bad = ImportItem(
+            sourceID: "obsidian:bad", title: "Bad", body: .markdown("x"),
+            attachments: [], folderPath: ["Sub"], created: Date(),
+            modified: Date(), fidelity: [])
         // `Sub` does not exist yet — this run alone would create it. Force
         // the note reservation itself to fail (permission denied) so
         // NOTHING real ever gets written, by pointing the vault root
@@ -208,8 +233,9 @@ final class ImportApplierTests: XCTestCase {
         // directory entry — i.e. on `vault` itself.
         try FileManager.default.createDirectory(
             at: vault.appendingPathComponent("Sub"), withIntermediateDirectories: true)
-        try FileManager.default.setAttributes([.posixPermissions: 0o555],
-                                              ofItemAtPath: vault.appendingPathComponent("Sub").path)
+        try FileManager.default.setAttributes(
+            [.posixPermissions: 0o555],
+            ofItemAtPath: vault.appendingPathComponent("Sub").path)
         addTeardownBlock {
             try? FileManager.default.setAttributes(
                 [.posixPermissions: 0o755],
@@ -250,9 +276,10 @@ final class ImportApplierTests: XCTestCase {
         let originalUmask = umask(0o222)
         addTeardownBlock { _ = umask(originalUmask) }
 
-        let bad = ImportItem(sourceID: "obsidian:bad", title: "Bad", body: .markdown("x"),
-                             attachments: [], folderPath: ["Sub"], created: Date(),
-                             modified: Date(), fidelity: [])
+        let bad = ImportItem(
+            sourceID: "obsidian:bad", title: "Bad", body: .markdown("x"),
+            attachments: [], folderPath: ["Sub"], created: Date(),
+            modified: Date(), fidelity: [])
         let plan = ImportPlanner.plan(items: [bad], vaultRoot: vault, existingImportIDs: [])
         let report = await ImportApplier(vaultRoot: vault).apply(plan)
         _ = umask(originalUmask)
@@ -278,12 +305,14 @@ final class ImportApplierTests: XCTestCase {
         let created = Date(timeIntervalSince1970: 1_700_000_123)
         let modified = Date(timeIntervalSince1970: 1_700_000_456)
 
-        let plannedItem = ImportItem(sourceID: hostileSourceID, title: hostileTitle,
-                                     body: .markdown("hello"), attachments: [],
-                                     folderPath: [], created: created, modified: modified,
-                                     fidelity: [])
-        let plan = ImportPlanner.plan(items: [plannedItem], vaultRoot: vault,
-                                      existingImportIDs: [])
+        let plannedItem = ImportItem(
+            sourceID: hostileSourceID, title: hostileTitle,
+            body: .markdown("hello"), attachments: [],
+            folderPath: [], created: created, modified: modified,
+            fidelity: [])
+        let plan = ImportPlanner.plan(
+            items: [plannedItem], vaultRoot: vault,
+            existingImportIDs: [])
         let report = await ImportApplier(vaultRoot: vault).apply(plan)
         XCTAssertEqual(report.imported.count, 1)
 
@@ -293,10 +322,12 @@ final class ImportApplierTests: XCTestCase {
         XCTAssertEqual(importID(note), hostileSourceID)
         // Time-of-day must survive, not just the day — a day-only formatter
         // truncates both of these to the same UTC midnight.
-        XCTAssertEqual(note.created.timeIntervalSince1970.rounded(),
-                       created.timeIntervalSince1970.rounded())
-        XCTAssertEqual(note.updated.timeIntervalSince1970.rounded(),
-                       modified.timeIntervalSince1970.rounded())
+        XCTAssertEqual(
+            note.created.timeIntervalSince1970.rounded(),
+            created.timeIntervalSince1970.rounded())
+        XCTAssertEqual(
+            note.updated.timeIntervalSince1970.rounded(),
+            modified.timeIntervalSince1970.rounded())
     }
 
     /// Finding 1 (important, whole-branch review): `ObsidianSource` emits
@@ -318,13 +349,17 @@ final class ImportApplierTests: XCTestCase {
         let source = sourceDir.appendingPathComponent("pic.png")
         try Data([0xDE, 0xAD, 0xBE, 0xEF]).write(to: source)
 
-        let bad = ImportItem(sourceID: "obsidian:pic.png", title: "pic.png",
-                             body: .markdown(""),
-                             attachments: [ImportAttachment(sourceID: "obsidian:pic.png",
-                                                            preferredName: "pic.png",
-                                                            sourceURL: source)],
-                             folderPath: [], created: Date(), modified: Date(), fidelity: [],
-                             kind: .file)
+        let bad = ImportItem(
+            sourceID: "obsidian:pic.png", title: "pic.png",
+            body: .markdown(""),
+            attachments: [
+                ImportAttachment(
+                    sourceID: "obsidian:pic.png",
+                    preferredName: "pic.png",
+                    sourceURL: source)
+            ],
+            folderPath: [], created: Date(), modified: Date(), fidelity: [],
+            kind: .file)
         let plan = ImportPlanner.plan(items: [bad], vaultRoot: vault, existingImportIDs: [])
         let report = await ImportApplier(vaultRoot: vault).apply(plan)
 
@@ -355,28 +390,35 @@ final class ImportApplierTests: XCTestCase {
         let photoNote = ImportItem(
             sourceID: "apple-notes:N1", title: "Sunset",
             body: .markdown(""),
-            attachments: [ImportAttachment(sourceID: "apple-notes:N1/1",
-                                           preferredName: "photo.jpg",
-                                           sourceURL: source)],
+            attachments: [
+                ImportAttachment(
+                    sourceID: "apple-notes:N1/1",
+                    preferredName: "photo.jpg",
+                    sourceURL: source)
+            ],
             folderPath: [], created: Date(timeIntervalSince1970: 1),
             modified: Date(timeIntervalSince1970: 2), fidelity: [],
             kind: .note)
-        let plan = ImportPlanner.plan(items: [photoNote], vaultRoot: vault,
-                                      existingImportIDs: [])
+        let plan = ImportPlanner.plan(
+            items: [photoNote], vaultRoot: vault,
+            existingImportIDs: [])
         let report = await ImportApplier(vaultRoot: vault).apply(plan)
 
         XCTAssertEqual(report.failed.count, 0)
         let note = vault.appendingPathComponent("Sunset.md")
         let landed = try FileManager.default.contentsOfDirectory(atPath: vault.path)
-        XCTAssertTrue(FileManager.default.fileExists(atPath: note.path),
-                      "the note must survive; got \(landed)")
+        XCTAssertTrue(
+            FileManager.default.fileExists(atPath: note.path),
+            "the note must survive; got \(landed)")
         let text = try String(contentsOf: note, encoding: .utf8)
         XCTAssertTrue(text.contains("title: Sunset"), "got \(text)")
-        XCTAssertTrue(text.contains("lore_import_id: apple-notes:N1")
-                      || text.contains("lore_import_id: \"apple-notes:N1\""), "got \(text)")
+        XCTAssertTrue(
+            text.contains("lore_import_id: apple-notes:N1")
+                || text.contains("lore_import_id: \"apple-notes:N1\""), "got \(text)")
         // And the photo landed beside it.
-        XCTAssertTrue(FileManager.default.fileExists(
-            atPath: vault.appendingPathComponent("photo.jpg").path))
+        XCTAssertTrue(
+            FileManager.default.fileExists(
+                atPath: vault.appendingPathComponent("photo.jpg").path))
     }
 
     /// A `.file` with no attachments would write nothing at all. It is
@@ -384,10 +426,11 @@ final class ImportApplierTests: XCTestCase {
     /// empty note rather than silently vanishing from the import.
     func testAFileItemWithNoAttachmentsStillProducesSomethingVisible() async throws {
         let vault = try makeVault()
-        let broken = ImportItem(sourceID: "obsidian:gone.png", title: "gone.png",
-                                body: .markdown(""), attachments: [], folderPath: [],
-                                created: Date(), modified: Date(), fidelity: [],
-                                kind: .file)
+        let broken = ImportItem(
+            sourceID: "obsidian:gone.png", title: "gone.png",
+            body: .markdown(""), attachments: [], folderPath: [],
+            created: Date(), modified: Date(), fidelity: [],
+            kind: .file)
         let plan = ImportPlanner.plan(items: [broken], vaultRoot: vault, existingImportIDs: [])
         let report = await ImportApplier(vaultRoot: vault).apply(plan)
 
@@ -405,10 +448,16 @@ final class ImportApplierTests: XCTestCase {
         try Data([0x01, 0x02]).write(to: source)
 
         let plan = ImportPlanner.plan(
-            items: [item("apple-notes:N1", "Plan", body: .markdown("hello"),
-                        attachments: [ImportAttachment(sourceID: "att-1",
-                                                       preferredName: "diagram.png",
-                                                       sourceURL: source)])],
+            items: [
+                item(
+                    "apple-notes:N1", "Plan", body: .markdown("hello"),
+                    attachments: [
+                        ImportAttachment(
+                            sourceID: "att-1",
+                            preferredName: "diagram.png",
+                            sourceURL: source)
+                    ])
+            ],
             vaultRoot: vault, existingImportIDs: [])
         let report = await ImportApplier(vaultRoot: vault).apply(plan)
 
@@ -417,11 +466,13 @@ final class ImportApplierTests: XCTestCase {
         let entries = try FileManager.default.contentsOfDirectory(atPath: vault.path)
         XCTAssertTrue(entries.contains("Plan.md"))
         XCTAssertTrue(entries.contains("diagram.png"))
-        let noteText = try String(contentsOf: vault.appendingPathComponent("Plan.md"),
-                                  encoding: .utf8)
+        let noteText = try String(
+            contentsOf: vault.appendingPathComponent("Plan.md"),
+            encoding: .utf8)
         XCTAssertTrue(noteText.contains("hello"))
-        XCTAssertEqual(try Data(contentsOf: vault.appendingPathComponent("diagram.png")),
-                       Data([0x01, 0x02]))
+        XCTAssertEqual(
+            try Data(contentsOf: vault.appendingPathComponent("diagram.png")),
+            Data([0x01, 0x02]))
     }
 
     /// Finding 1, the deliberate pin for the case the attachment-only guard
@@ -437,7 +488,8 @@ final class ImportApplierTests: XCTestCase {
         let report = await ImportApplier(vaultRoot: vault).apply(plan)
 
         XCTAssertEqual(report.imported.count, 1)
-        XCTAssertTrue(FileManager.default.fileExists(
-            atPath: vault.appendingPathComponent("Empty.md").path))
+        XCTAssertTrue(
+            FileManager.default.fileExists(
+                atPath: vault.appendingPathComponent("Empty.md").path))
     }
 }

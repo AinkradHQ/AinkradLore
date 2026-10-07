@@ -72,7 +72,7 @@ public struct SearchSnippet: Equatable, Sendable {
     }
 }
 
-public extension SearchSnippet {
+extension SearchSnippet {
     /// The excerpt as styled text, matches emphasised.
     ///
     /// Built by CONCATENATING runs — unmatched piece, matched piece, unmatched
@@ -84,7 +84,7 @@ public extension SearchSnippet {
     ///
     /// `styleMatch` is passed in rather than hard-coded so this stays free of
     /// SwiftUI colour and can be asserted on the plain string.
-    func attributed(styleMatch: (inout AttributedString) -> Void) -> AttributedString {
+    public func attributed(styleMatch: (inout AttributedString) -> Void) -> AttributedString {
         var out = AttributedString()
         var cursor = text.startIndex
         for match in matches where match.lowerBound >= cursor {

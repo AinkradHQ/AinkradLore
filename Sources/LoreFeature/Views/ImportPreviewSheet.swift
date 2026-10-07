@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// The selection behind the dry-run preview. An `ObservableObject` on purpose:
 /// it is testable without instantiating SwiftUI, which is deliberate after an
@@ -25,8 +25,9 @@ public final class ImportSelection: ObservableObject {
         self.items = items
         self.vaultRoot = vaultRoot
         self.existingImportIDs = existingImportIDs
-        self.plan = ImportPlanner.plan(items: items, vaultRoot: vaultRoot,
-                                       existingImportIDs: existingImportIDs)
+        self.plan = ImportPlanner.plan(
+            items: items, vaultRoot: vaultRoot,
+            existingImportIDs: existingImportIDs)
     }
 
     /// Whether `sourceID` will be handed to the planner. False for items
@@ -37,10 +38,10 @@ public final class ImportSelection: ObservableObject {
 
     public func toggle(_ sourceID: String) {
         guard !existingImportIDs.contains(sourceID) else { return }
-        if deselected.contains(sourceID) { deselected.remove(sourceID) }
-        else { deselected.insert(sourceID) }
-        plan = ImportPlanner.plan(items: items.filter { isSelected($0.sourceID) },
-                                  vaultRoot: vaultRoot, existingImportIDs: existingImportIDs)
+        if deselected.contains(sourceID) { deselected.remove(sourceID) } else { deselected.insert(sourceID) }
+        plan = ImportPlanner.plan(
+            items: items.filter { isSelected($0.sourceID) },
+            vaultRoot: vaultRoot, existingImportIDs: existingImportIDs)
     }
 }
 
@@ -56,8 +57,10 @@ public struct ImportPreviewSheet: View {
     @Environment(\.ainkradTheme) private var theme
     @Environment(\.ainkradTypography) private var typo
 
-    public init(selection: ImportSelection, onImport: @escaping (ImportPlan) -> Void,
-                onCancel: @escaping () -> Void) {
+    public init(
+        selection: ImportSelection, onImport: @escaping (ImportPlan) -> Void,
+        onCancel: @escaping () -> Void
+    ) {
         self.selection = selection
         self.onImport = onImport
         self.onCancel = onCancel

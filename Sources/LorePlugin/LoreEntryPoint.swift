@@ -1,5 +1,5 @@
-import Foundation
 import AinkradAppKit
+import Foundation
 import LoreFeature
 
 @objc(LoreEntryPoint)

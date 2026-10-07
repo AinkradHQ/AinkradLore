@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// A folder and everything directly inside it. Pure value built from index
 /// rows, so the grouping logic is testable without a view host.
@@ -40,14 +40,18 @@ struct FolderNode: Identifiable {
         return node(named: "", path: "", byFolder: byFolder)
     }
 
-    private static func node(named name: String, path: String,
-                             byFolder: [String: [IndexRow]]) -> FolderNode {
-        let childNames = Set(byFolder.keys.compactMap { key -> String? in
-            guard key != path else { return nil }
-            let prefix = path.isEmpty ? "" : path + "/"
-            guard key.hasPrefix(prefix) else { return nil }
-            return String(key.dropFirst(prefix.count)).split(separator: "/").first.map(String.init)
-        }).sorted()
+    private static func node(
+        named name: String, path: String,
+        byFolder: [String: [IndexRow]]
+    ) -> FolderNode {
+        let childNames = Set(
+            byFolder.keys.compactMap { key -> String? in
+                guard key != path else { return nil }
+                let prefix = path.isEmpty ? "" : path + "/"
+                guard key.hasPrefix(prefix) else { return nil }
+                return String(key.dropFirst(prefix.count)).split(separator: "/").first.map(String.init)
+            }
+        ).sorted()
 
         return FolderNode(
             id: path.isEmpty ? "/" : path,
@@ -72,8 +76,9 @@ private struct OptionalDropTarget: ViewModifier {
 
     func body(content: Content) -> some View {
         if let folder {
-            content.loreDocumentDropTarget(folder: folder, store: store,
-                                           ops: ops, theme: theme)
+            content.loreDocumentDropTarget(
+                folder: folder, store: store,
+                ops: ops, theme: theme)
         } else {
             content
         }
@@ -108,11 +113,13 @@ struct FolderTreeView: View {
                     // files' — a folder the owner remembers creating,
                     // vanishing with no explanation, is worse than an empty
                     // folder they can right-click and inspect.
-                    outline(FolderNode.tree(
-                        from: DocumentVisibility.visibleRows(store.rows,
-                                                             showAllFiles: store.showAllFiles),
-                        directories: store.directoryPaths,
-                        root: root), depth: 0)
+                    outline(
+                        FolderNode.tree(
+                            from: DocumentVisibility.visibleRows(
+                                store.rows,
+                                showAllFiles: store.showAllFiles),
+                            directories: store.directoryPaths,
+                            root: root), depth: 0)
                 }
                 // A filler BELOW every row, not an overlay across the whole
                 // ScrollView: `.ainkradContextMenu`'s catcher only lets a
@@ -134,8 +141,9 @@ struct FolderTreeView: View {
                         // drop target — otherwise moving a note back out to the
                         // root would have no gesture at all, since the root has
                         // no row of its own to drop onto.
-                        .loreDocumentDropTarget(folder: root, store: store,
-                                                ops: ops, theme: theme)
+                        .loreDocumentDropTarget(
+                            folder: root, store: store,
+                            ops: ops, theme: theme)
                 }
             }
         }
@@ -153,31 +161,39 @@ struct FolderTreeView: View {
                 name: node.name, depth: depth - 1,
                 isExpanded: expanded.contains(node.id),
                 onToggle: {
-                    if expanded.contains(node.id) { expanded.remove(node.id) }
-                    else { expanded.insert(node.id) }
+                    if expanded.contains(node.id) { expanded.remove(node.id) } else { expanded.insert(node.id) }
                     store.setExpandedFolders(expanded)
-                })
-                // Only a real folder gets a folder menu. `node.id` is a
-                // vault-RELATIVE path, so it is resolved against the live vault
-                // root rather than assumed absolute; with no vault there is no
-                // folder to rename and the menu is simply absent.
-                .ainkradContextMenu(folderURL(node).map {
+                }
+            )
+            // Only a real folder gets a folder menu. `node.id` is a
+            // vault-RELATIVE path, so it is resolved against the live vault
+            // root rather than assumed absolute; with no vault there is no
+            // folder to rename and the menu is simply absent.
+            .ainkradContextMenu(
+                folderURL(node).map {
                     loreFolderMenuItems(folder: $0, ops: ops)
-                } ?? [])
-                // Dropping a note on a folder moves it there — through the
-                // SAME `ops.move` the context menu uses, so the link-rewrite
-                // preview still appears. See `SidebarDragDrop`.
-                .modifier(OptionalDropTarget(folder: folderURL(node), store: store,
-                                             ops: ops, theme: theme))
+                } ?? []
+            )
+            // Dropping a note on a folder moves it there — through the
+            // SAME `ops.move` the context menu uses, so the link-rewrite
+            // preview still appears. See `SidebarDragDrop`.
+            .modifier(
+                OptionalDropTarget(
+                    folder: folderURL(node), store: store,
+                    ops: ops, theme: theme))
         }
         if depth == 0 || expanded.contains(node.id) {
             ForEach(node.documents, id: \.path) { row in
                 LoreSidebarRow.document(
                     row: row, depth: depth,
                     isSelected: selected?.path == row.path,
-                    onTap: { selected = row; onSelect(row) })
-                    .loreDraggableDocument(row)
-                    .ainkradContextMenu(loreRowMenuItems(row: row, ops: ops, store: store))
+                    onTap: {
+                        selected = row
+                        onSelect(row)
+                    }
+                )
+                .loreDraggableDocument(row)
+                .ainkradContextMenu(loreRowMenuItems(row: row, ops: ops, store: store))
             }
             ForEach(node.children) { child in outline(child, depth: depth + 1) }
         }

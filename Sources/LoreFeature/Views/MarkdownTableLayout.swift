@@ -92,8 +92,10 @@ enum MarkdownTableLayout {
     ///   height floor — the height an empty row still occupies. Every other
     ///   measurement here comes from the storage, and therefore already
     ///   reflects whatever font the renderer actually applied.
-    static func layout(_ table: MarkdownTable, in storage: NSTextStorage,
-                       maxWidth: CGFloat, bodyFont: NSFont) -> TableBox? {
+    static func layout(
+        _ table: MarkdownTable, in storage: NSTextStorage,
+        maxWidth: CGFloat, bodyFont: NSFont
+    ) -> TableBox? {
         let columnCount = table.columnCount
         guard columnCount > 0, maxWidth > 0 else { return nil }
         guard CGFloat(columnCount) * minimumColumnWidth <= maxWidth else { return nil }
@@ -124,22 +126,26 @@ enum MarkdownTableLayout {
             for (column, cell) in row.cells.enumerated() where column < columnCount {
                 let inner = max(1, widths[column] - cellPadding * 2)
                 height = max(height, measure(cell.range, in: storage, wrappingAt: inner).height)
-                cells.append(TableBox.Cell(text: attributed(cell.range, in: storage),
-                                           column: column))
+                cells.append(
+                    TableBox.Cell(
+                        text: attributed(cell.range, in: storage),
+                        column: column))
             }
-            rows.append(TableBox.Row(
-                sourceRange: NSRange(location: row.range.lowerBound, length: row.range.count),
-                cells: cells, height: height + rowPadding * 2, isHeader: index == 0))
+            rows.append(
+                TableBox.Row(
+                    sourceRange: NSRange(location: row.range.lowerBound, length: row.range.count),
+                    cells: cells, height: height + rowPadding * 2, isHeader: index == 0))
         }
         guard !rows.isEmpty else { return nil }
 
-        return TableBox(columnWidths: widths,
-                        measuredWidth: maxWidth,
-                        columnAlignments: table.columnAlignments,
-                        rows: rows,
-                        delimiterRange: table.delimiterRow.map {
-                            NSRange(location: $0.range.lowerBound, length: $0.range.count)
-                        })
+        return TableBox(
+            columnWidths: widths,
+            measuredWidth: maxWidth,
+            columnAlignments: table.columnAlignments,
+            rows: rows,
+            delimiterRange: table.delimiterRow.map {
+                NSRange(location: $0.range.lowerBound, length: $0.range.count)
+            })
     }
 
     /// Scales `natural` down to `maxWidth`, never below the floor.
@@ -168,8 +174,10 @@ enum MarkdownTableLayout {
     }
 
     /// One cell's content, with the attributes it currently carries.
-    private static func attributed(_ range: Range<Int>,
-                                   in storage: NSTextStorage) -> NSAttributedString {
+    private static func attributed(
+        _ range: Range<Int>,
+        in storage: NSTextStorage
+    ) -> NSAttributedString {
         let ns = NSRange(location: range.lowerBound, length: range.count)
         guard ns.length > 0, NSMaxRange(ns) <= storage.length else {
             return NSAttributedString()
@@ -180,9 +188,12 @@ enum MarkdownTableLayout {
     /// One cell's rendered size, taken from the STORAGE so every inline style
     /// already applied is accounted for — a bold cell measures as bold, and a
     /// collapsed `**` measures as nothing.
-    private static func measure(_ range: Range<Int>, in storage: NSTextStorage,
-                                wrappingAt width: CGFloat = .greatestFiniteMagnitude)
-        -> CGSize {
+    private static func measure(
+        _ range: Range<Int>, in storage: NSTextStorage,
+        wrappingAt width: CGFloat = .greatestFiniteMagnitude
+    )
+        -> CGSize
+    {
         let ns = NSRange(location: range.lowerBound, length: range.count)
         guard ns.length > 0, NSMaxRange(ns) <= storage.length else { return .zero }
         let text = storage.attributedSubstring(from: ns)

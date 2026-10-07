@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// A document-pane banner: one sentence, optionally followed by the actions
 /// that resolve it.

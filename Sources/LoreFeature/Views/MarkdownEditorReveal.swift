@@ -1,6 +1,6 @@
+import AinkradAppKit
 import AppKit
 import SwiftUI
-import AinkradAppKit
 
 /// The selection-driven half of Live Preview.
 ///
@@ -44,8 +44,9 @@ enum MarkdownEditorReveal {
     /// Builds the index for `text` and `spans`. O(text) once, on a text change
     /// — never on a caret move.
     static func index(text: String, spans: [StyleSpan]) -> Index {
-        index(blocks: MarkdownReveal.blocks(in: text), spans: spans,
-              wideSpans: MarkdownReveal.wideSpans(in: text, spans: spans))
+        index(
+            blocks: MarkdownReveal.blocks(in: text), spans: spans,
+            wideSpans: MarkdownReveal.wideSpans(in: text, spans: spans))
     }
 
     /// The same, for a caller that has ALREADY segmented the text.
@@ -54,28 +55,36 @@ enum MarkdownEditorReveal {
     /// segmentation did not move (`renderStylesForEdit`, check 4); having it
     /// then call `index(text:spans:)` would scan the document a second time for
     /// an answer it is holding.
-    static func index(blocks: [Range<Int>], spans: [StyleSpan],
-                      wideSpans: [Range<Int>]) -> Index {
+    static func index(
+        blocks: [Range<Int>], spans: [StyleSpan],
+        wideSpans: [Range<Int>]
+    ) -> Index {
         var buckets = [[Int]](repeating: [], count: blocks.count)
         for (position, span) in spans.enumerated() {
             guard let block = blockIndex(of: span.range.lowerBound, in: blocks) else { continue }
             buckets[block].append(position)
         }
-        return Index(blocks: blocks, spansByBlock: buckets,
-                     depths: MarkdownListDepth.depths(of: spans),
-                     wideSpans: wideSpans)
+        return Index(
+            blocks: blocks, spansByBlock: buckets,
+            depths: MarkdownListDepth.depths(of: spans),
+            wideSpans: wideSpans)
     }
 
     /// The block containing `offset`, by binary search. Blocks are sorted and
     /// contiguous, which is what makes this — and `revealedBlockIndices` —
     /// logarithmic rather than a scan.
     static func blockIndex(of offset: Int, in blocks: [Range<Int>]) -> Int? {
-        var low = 0, high = blocks.count - 1
+        var low = 0
+        var high = blocks.count - 1
         while low <= high {
             let mid = (low + high) / 2
-            if offset < blocks[mid].lowerBound { high = mid - 1 }
-            else if offset >= blocks[mid].upperBound { low = mid + 1 }
-            else { return mid }
+            if offset < blocks[mid].lowerBound {
+                high = mid - 1
+            } else if offset >= blocks[mid].upperBound {
+                low = mid + 1
+            } else {
+                return mid
+            }
         }
         // Past the last block's end — an offset at the very end of the
         // document belongs to the last block rather than to nothing.
@@ -88,12 +97,15 @@ enum MarkdownEditorReveal {
     /// it affects without walking the document — the property the caret path
     /// has always been held to. A line-scoped reveal overlaps one block almost
     /// always, and two only where a line sits across a block boundary.
-    static func blockIndices(touching range: Range<Int>?,
-                             in blocks: [Range<Int>]) -> Set<Int> {
+    static func blockIndices(
+        touching range: Range<Int>?,
+        in blocks: [Range<Int>]
+    ) -> Set<Int> {
         guard let range, !blocks.isEmpty,
-              let first = blockIndex(of: range.lowerBound, in: blocks),
-              let last = blockIndex(of: max(range.lowerBound, range.upperBound - 1),
-                                    in: blocks)
+            let first = blockIndex(of: range.lowerBound, in: blocks),
+            let last = blockIndex(
+                of: max(range.lowerBound, range.upperBound - 1),
+                in: blocks)
         else { return [] }
         return Set(min(first, last)...max(first, last))
     }
@@ -107,13 +119,16 @@ enum MarkdownEditorReveal {
     /// inclusive rule `MarkdownReveal.hiddenMarkers` uses — which this
     /// preserves by widening one step at a boundary rather than flickering
     /// between two answers.
-    static func revealedBlockIndices(_ blocks: [Range<Int>],
-                                     selection: NSRange) -> Range<Int> {
+    static func revealedBlockIndices(
+        _ blocks: [Range<Int>],
+        selection: NSRange
+    ) -> Range<Int> {
         guard !blocks.isEmpty else { return 0..<0 }
         let lower = selection.location
         let upper = lower + max(selection.length, 0)
         guard var first = blockIndex(of: lower, in: blocks),
-              var last = blockIndex(of: upper, in: blocks) else { return 0..<0 }
+            var last = blockIndex(of: upper, in: blocks)
+        else { return 0..<0 }
         if first > 0, blocks[first].lowerBound == lower { first -= 1 }
         if last < blocks.count - 1, blocks[last].upperBound == upper { last += 1 }
         return first..<(last + 1)
@@ -124,8 +139,10 @@ enum MarkdownEditorReveal {
     ///
     /// The value-level statement of the same rule, kept for tests and for
     /// callers that want the ranges rather than their positions.
-    static func revealedBlocks(_ blocks: [Range<Int>],
-                               selection: NSRange) -> [Range<Int>] {
+    static func revealedBlocks(
+        _ blocks: [Range<Int>],
+        selection: NSRange
+    ) -> [Range<Int>] {
         let lower = selection.location
         let upper = selection.location + max(selection.length, 0)
         return blocks.filter { lower <= $0.upperBound && $0.lowerBound <= upper }
@@ -193,12 +210,14 @@ extension MarkdownEditor.Coordinator {
     /// (every other caller) reads live, as before.
     func renderStyles(forcedFocus: Bool? = nil) {
         guard let tv = textView, let storage = tv.textStorage else { return }
-        let window = styleCache.isOverViewportCap
+        let window =
+            styleCache.isOverViewportCap
             ? MarkdownStyleRenderer.viewportWindow(of: tv) : nil
         lastViewportWindow = window
-        MarkdownStyleRenderer.apply(styleCache.spans, to: storage,
-                                    tokens: tokens, theme: theme,
-                                    limitedTo: window)
+        MarkdownStyleRenderer.apply(
+            styleCache.spans, to: storage,
+            tokens: tokens, theme: theme,
+            limitedTo: window)
         // Reveal rides the SAME pass as the attributes, and must come after
         // them: `apply` sets fonts over the whole string, so collapsing first
         // would be immediately overwritten.
@@ -218,7 +237,8 @@ extension MarkdownEditor.Coordinator {
         // and no worse than the `revealIndex`/`blockBackgrounds` scans this
         // same pass already does unconditionally). See `documentWritingDirection`'s
         // doc comment for who reads it and why a fresh scan per render is safe.
-        documentWritingDirection = EmbedGeometry.strongWritingDirection(of: tv.string)
+        documentWritingDirection =
+            EmbedGeometry.strongWritingDirection(of: tv.string)
             ?? .leftToRight
         collapseHiddenMarkers(in: storage, window: window, forcedFocus: forcedFocus)
         // AFTER marker collapsing: an embed's `![[`/`]]` markers are their
@@ -336,9 +356,10 @@ extension MarkdownEditor.Coordinator {
         // The CACHED wide spans, not the whole span array: this is the caret
         // path, and scanning every span here is what made an arrow key cost a
         // function of the document's length.
-        let now = MarkdownReveal.revealedRange(in: tv.string, selection: selection,
-                                               wideSpans: revealIndex.wideSpans,
-                                               isFocused: focused)
+        let now = MarkdownReveal.revealedRange(
+            in: tv.string, selection: selection,
+            wideSpans: revealIndex.wideSpans,
+            isFocused: focused)
         let was = revealedRange
         guard now != was else {
             // NOT a block flip — but an embed's reveal is a SPAN-level
@@ -375,10 +396,13 @@ extension MarkdownEditor.Coordinator {
         // the new one and still has to be restyled, because which of its
         // markers are hidden has changed. A symmetric difference would cancel
         // exactly that case out and leave the previous line's syntax showing.
-        var changed = MarkdownEditorReveal.blockIndices(touching: was,
-                                                        in: revealIndex.blocks)
-        changed.formUnion(MarkdownEditorReveal.blockIndices(touching: now,
-                                                            in: revealIndex.blocks))
+        var changed = MarkdownEditorReveal.blockIndices(
+            touching: was,
+            in: revealIndex.blocks)
+        changed.formUnion(
+            MarkdownEditorReveal.blockIndices(
+                touching: now,
+                in: revealIndex.blocks))
         for block in changed.sorted() {
             restyleBlock(block, revealed: now, in: storage)
         }
@@ -420,12 +444,13 @@ extension MarkdownEditor.Coordinator {
         restyledBlockCount += 1
         let range = revealIndex.blocks[block]
         let ns = NSRange(location: range.lowerBound, length: range.count)
-        MarkdownStyleRenderer.restyle(styleCache.spans,
-                                      at: revealIndex.spansByBlock[block],
-                                      depths: revealIndex.depths,
-                                      in: ns, to: storage,
-                                      tokens: tokens,
-                                      theme: theme)
+        MarkdownStyleRenderer.restyle(
+            styleCache.spans,
+            at: revealIndex.spansByBlock[block],
+            depths: revealIndex.depths,
+            in: ns, to: storage,
+            tokens: tokens,
+            theme: theme)
         // Re-run RIGHT AFTER `restyle`, scoped to this one block, so an
         // embed's collapse/paragraph-style/drawn-image never has a frame
         // where it looks wrong. `restyle` above just reset this block's
@@ -443,8 +468,9 @@ extension MarkdownEditor.Coordinator {
         // O(spans in the document) — fix round 2, NEW-1. It is the same
         // bucketed list `MarkdownStyleRenderer.restyle` just consumed, so the
         // two cannot disagree about which spans belong to this block.
-        applyEmbeds(to: storage, window: nil, restrictTo: ns,
-                    spanIndices: revealIndex.spansByBlock[block])
+        applyEmbeds(
+            to: storage, window: nil, restrictTo: ns,
+            spanIndices: revealIndex.spansByBlock[block])
         // Per MARKER rather than per block. The block is the unit that gets
         // re-attributed; which of its markers are hidden is now a line-scoped
         // question, so a block can be half revealed — the caret's line showing
@@ -452,7 +478,8 @@ extension MarkdownEditor.Coordinator {
         // the whole point of the change.
         let hidden = revealIndex.spansByBlock[block].compactMap { index -> Range<Int>? in
             guard index < styleCache.spans.count,
-                  case .marker = styleCache.spans[index].kind else { return nil }
+                case .marker = styleCache.spans[index].kind
+            else { return nil }
             let range = styleCache.spans[index].range
             return MarkdownReveal.isRevealed(range, in: revealed) ? nil : range
         }
@@ -470,15 +497,18 @@ extension MarkdownEditor.Coordinator {
         }
         if let tv = textView, holdsTable {
             let rowMarkers = MarkdownTableStyling.rowMarkerRanges(styleCache.spans)
-            MarkdownStyleRenderer.collapse(hidden.filter { !rowMarkers.contains($0) },
-                                           in: storage)
-            tableRegions = MarkdownTableStyling.prepare(styleCache.spans,
-                                                        revealed: revealed,
-                                                        maxWidth: textColumnWidth(of: tv),
-                                                        bodyFont: theme.bodyFont,
-                                                        in: storage)
-            MarkdownStyleRenderer.collapse(hidden.filter { rowMarkers.contains($0) },
-                                           in: storage)
+            MarkdownStyleRenderer.collapse(
+                hidden.filter { !rowMarkers.contains($0) },
+                in: storage)
+            tableRegions = MarkdownTableStyling.prepare(
+                styleCache.spans,
+                revealed: revealed,
+                maxWidth: textColumnWidth(of: tv),
+                bodyFont: theme.bodyFont,
+                in: storage)
+            MarkdownStyleRenderer.collapse(
+                hidden.filter { rowMarkers.contains($0) },
+                in: storage)
             refreshBlockBackgrounds(in: storage, window: nil)
         } else if !hidden.isEmpty {
             MarkdownStyleRenderer.collapse(hidden, in: storage)
@@ -486,9 +516,10 @@ extension MarkdownEditor.Coordinator {
         // Unconditional, unlike the collapse above: a row that just became
         // REVEALED hides nothing and still has to lose its padding, which is
         // this same call reaching the opposite answer.
-        MarkdownMathStyling.reserveSpace(blockSpans, revealed: revealed,
-                                         font: theme.bodyFont,
-                                         in: storage)
+        MarkdownMathStyling.reserveSpace(
+            blockSpans, revealed: revealed,
+            font: theme.bodyFont,
+            in: storage)
         // `restyle` above reset this block's paragraph styles, which pops a
         // transcluded embed's reserved gap shut and leaves a stale region
         // painting into a rect that no longer exists — the same failure fix

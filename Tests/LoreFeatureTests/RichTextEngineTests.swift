@@ -1,7 +1,8 @@
-import XCTest
+import AinkradAppKit
 import AppKit
 import SwiftUI
-import AinkradAppKit
+import XCTest
+
 @testable import LoreFeature
 
 final class RichTextEngineTests: XCTestCase {
@@ -56,7 +57,8 @@ final class RichTextEngineTests: XCTestCase {
     /// document: `hasNoExtractableText` is the flag `makeEditor` uses to
     /// swap in the QuickLook fallback instead of a blank `NSTextView`.
     func test_scriptOnlySPA_hasNoExtractableText() throws {
-        let html = Data("""
+        let html = Data(
+            """
             <html><body></body>
             <script>document.body.innerHTML = window.__APP__.render();</script>
             <script>console.log('boot');</script>
@@ -77,8 +79,9 @@ final class RichTextEngineTests: XCTestCase {
         let url = try tempFile("app.html", html)
         let engine = try RichTextEngine.load(url)
         XCTAssertTrue(engine.indexPayload.plaintext.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-        XCTAssertFalse(engine.indexPayload.plaintext.contains("SECRET_TOKEN_1"),
-                       "script source must never leak into the searchable index as invented text")
+        XCTAssertFalse(
+            engine.indexPayload.plaintext.contains("SECRET_TOKEN_1"),
+            "script source must never leak into the searchable index as invented text")
     }
 
     /// The negative case: ordinary HTML with real extractable text must NOT
@@ -110,8 +113,9 @@ final class RichTextEngineTests: XCTestCase {
 final class RenderGateTests: XCTestCase {
     func test_startsUnrendered() {
         let gate = RenderGate()
-        XCTAssertFalse(gate.isRendered,
-                       "nothing may execute merely because the document was opened")
+        XCTAssertFalse(
+            gate.isRendered,
+            "nothing may execute merely because the document was opened")
     }
 
     func test_renderFlipsItToRendered() {
@@ -128,8 +132,9 @@ final class RenderGateTests: XCTestCase {
         let second = RenderGate()
         first.render()
         XCTAssertTrue(first.isRendered)
-        XCTAssertFalse(second.isRendered,
-                       "rendering one document's fallback must not opt in a different one")
+        XCTAssertFalse(
+            second.isRendered,
+            "rendering one document's fallback must not opt in a different one")
     }
 }
 
@@ -177,8 +182,9 @@ final class EmptyExtractionFallbackViewLifecycleTests: XCTestCase {
     private func hostedWindow(_ view: some View) -> (NSWindow, NSHostingView<AnyView>) {
         let hosting = NSHostingView(rootView: AnyView(view))
         hosting.frame = NSRect(x: 0, y: 0, width: 400, height: 400)
-        let window = NSWindow(contentRect: hosting.frame, styleMask: [.borderless],
-                              backing: .buffered, defer: false)
+        let window = NSWindow(
+            contentRect: hosting.frame, styleMask: [.borderless],
+            backing: .buffered, defer: false)
         window.contentView = hosting
         hosting.layoutSubtreeIfNeeded()
         return (window, hosting)
@@ -195,14 +201,15 @@ final class EmptyExtractionFallbackViewLifecycleTests: XCTestCase {
         let url = URL(fileURLWithPath: "/tmp/lore-empty-extraction-test.html")
         let theme = HostTheme(TestTokens.make())
         let (window, hosting) = hostedWindow(Host(toggle: false, url: url, theme: theme, probe: probe))
-        _ = window   // kept alive for the hosting view's lifetime
+        _ = window  // kept alive for the hosting view's lifetime
 
         hosting.rootView = AnyView(Host(toggle: true, url: url, theme: theme, probe: probe))
         hosting.layoutSubtreeIfNeeded()
 
         XCTAssertEqual(probe.seen.count, 2, "precondition: body evaluated twice")
-        XCTAssertEqual(probe.seen[0], probe.seen[1],
-                       "an unrelated re-render must not construct a new RenderGate")
+        XCTAssertEqual(
+            probe.seen[0], probe.seen[1],
+            "an unrelated re-render must not construct a new RenderGate")
     }
 
     /// The other half of the same contract: a genuinely NEW identity (a
@@ -215,19 +222,22 @@ final class EmptyExtractionFallbackViewLifecycleTests: XCTestCase {
         let theme = HostTheme(TestTokens.make())
         let firstProbe = GateProbe()
         let (firstWindow, _) = hostedWindow(
-            Host(toggle: false, url: URL(fileURLWithPath: "/tmp/a.html"),
+            Host(
+                toggle: false, url: URL(fileURLWithPath: "/tmp/a.html"),
                 theme: theme, probe: firstProbe))
         _ = firstWindow
 
         let secondProbe = GateProbe()
         let (secondWindow, _) = hostedWindow(
-            Host(toggle: false, url: URL(fileURLWithPath: "/tmp/b.html"),
+            Host(
+                toggle: false, url: URL(fileURLWithPath: "/tmp/b.html"),
                 theme: theme, probe: secondProbe))
         _ = secondWindow
 
         XCTAssertEqual(firstProbe.seen.count, 1)
         XCTAssertEqual(secondProbe.seen.count, 1)
-        XCTAssertNotEqual(firstProbe.seen[0], secondProbe.seen[0],
-                          "two separate document opens must never share a gate")
+        XCTAssertNotEqual(
+            firstProbe.seen[0], secondProbe.seen[0],
+            "two separate document opens must never share a gate")
     }
 }

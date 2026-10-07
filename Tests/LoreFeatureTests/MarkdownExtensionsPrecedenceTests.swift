@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 /// One test per ADJACENT PAIR in `MarkdownExtensions.scan`'s stated order.

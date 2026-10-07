@@ -1,6 +1,6 @@
-import SwiftUI
-import AppKit
 import AinkradAppKit
+import AppKit
+import SwiftUI
 
 /// The draggable divider between the two editor panes.
 ///
@@ -29,8 +29,11 @@ struct SplitDivider: View {
     var body: some View {
         GeometryReader { geometry in
             Rectangle()
-                .fill(hovering ? theme.tokens.accentSecondary
-                               : theme.tokens.foreground.opacity(0.12))
+                .fill(
+                    hovering
+                        ? theme.tokens.accentSecondary
+                        : theme.tokens.foreground.opacity(0.12)
+                )
                 .frame(width: 1)
                 .frame(maxHeight: .infinity)
                 .contentShape(Rectangle().inset(by: -4))
@@ -53,7 +56,8 @@ struct SplitDivider: View {
                             let width = max(geometry.size.width, 1)
                             fraction = Self.clamped(start + value.translation.width / width)
                         }
-                        .onEnded { _ in dragStart = nil })
+                        .onEnded { _ in dragStart = nil }
+                )
                 .accessibilityLabel("Resize panes")
                 .accessibilityValue("\(Int(fraction * 100)) percent")
                 .accessibilityAdjustableAction { direction in

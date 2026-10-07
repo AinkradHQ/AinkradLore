@@ -49,8 +49,10 @@ enum MarkdownMath {
     ///   region. A `$` in a shell fence is a variable, not mathematics, and
     ///   `$PATH` would otherwise open an expression that runs to the next `$`
     ///   in the file.
-    static func spans(in text: NSString,
-                      isSuppressed: (Int) -> Bool = { _ in false }) -> [Span] {
+    static func spans(
+        in text: NSString,
+        isSuppressed: (Int) -> Bool = { _ in false }
+    ) -> [Span] {
         var out: [Span] = []
         var index = 0
         while index < text.length {
@@ -60,17 +62,24 @@ enum MarkdownMath {
             }
             let isBlock = index + 1 < text.length && text.character(at: index + 1) == 0x24
             let width = isBlock ? 2 : 1
-            guard let close = closingDelimiter(from: index + width, width: width,
-                                               isBlock: isBlock, in: text) else {
+            guard
+                let close = closingDelimiter(
+                    from: index + width, width: width,
+                    isBlock: isBlock, in: text)
+            else {
                 index += 1
                 continue
             }
             let content = (index + width)..<close
             let whole = index..<(close + width)
-            let source = text.substring(with: NSRange(location: content.lowerBound,
-                                                      length: content.count))
-            out.append(Span(range: whole, content: content, isBlock: isBlock,
-                            tree: MathParser.parse(source)))
+            let source = text.substring(
+                with: NSRange(
+                    location: content.lowerBound,
+                    length: content.count))
+            out.append(
+                Span(
+                    range: whole, content: content, isBlock: isBlock,
+                    tree: MathParser.parse(source)))
             index = close + width
         }
         return out
@@ -87,18 +96,27 @@ enum MarkdownMath {
     /// An INLINE expression may not cross a line either. A stray `$` in prose
     /// would otherwise reach for one three paragraphs down and tint everything
     /// between.
-    private static func closingDelimiter(from start: Int, width: Int, isBlock: Bool,
-                                         in text: NSString) -> Int? {
+    private static func closingDelimiter(
+        from start: Int, width: Int, isBlock: Bool,
+        in text: NSString
+    ) -> Int? {
         var index = start
         while index < text.length {
             let unit = text.character(at: index)
             if !isBlock, unit == 0x0A || unit == 0x0D { return nil }
-            if unit == 0x5C { index += 2; continue }               // \$ is a literal
+            if unit == 0x5C {
+                index += 2
+                continue
+            }  // \$ is a literal
             if unit == 0x24 {
-                let matches = width == 1
+                let matches =
+                    width == 1
                     || (index + 1 < text.length && text.character(at: index + 1) == 0x24)
                 if matches, index > start,
-                   !isSpace(text.character(at: index - 1)) { return index }
+                    !isSpace(text.character(at: index - 1))
+                {
+                    return index
+                }
             }
             index += 1
         }
@@ -109,7 +127,6 @@ enum MarkdownMath {
         unit == 0x20 || unit == 0x09 || unit == 0x0A || unit == 0x0D
     }
 }
-
 
 /// The editor's math spans.
 ///
@@ -127,8 +144,10 @@ extension MarkdownDocumentModel {
         let text = fullText as NSString
         var out: [StyleSpan] = []
         for span in MarkdownMath.spans(in: text, isSuppressed: { isInsideCode(utf16Offset: $0) }) {
-            out.append(StyleSpan(range: span.range,
-                                 kind: .math(isRendered: span.isRenderable)))
+            out.append(
+                StyleSpan(
+                    range: span.range,
+                    kind: .math(isRendered: span.isRenderable)))
             // A drawable expression collapses WHOLE — delimiters, commands and
             // all — because the drawn box stands in for the entire thing.
             // Collapsing only the syntax would leave `frac` and its braces on

@@ -1,7 +1,8 @@
-import XCTest
-import SwiftUI
-@testable import LoreFeature
 import AinkradAppKit
+import SwiftUI
+import XCTest
+
+@testable import LoreFeature
 
 /// The sidebar's rename / move / trash flows, tested where the behaviour lives
 /// rather than through a view host. Every case here is a review finding from an
@@ -13,8 +14,9 @@ final class SidebarOperationsTests: XCTestCase {
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent("lore-\(label)-\(UUID())")
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
-        let s = LoreStore(documents: FakeDocs(),
-                          indexPath: root.appendingPathComponent(".idx.sqlite"))
+        let s = LoreStore(
+            documents: FakeDocs(),
+            indexPath: root.appendingPathComponent(".idx.sqlite"))
         try s.setVaultRootForTesting(root)
         return (root, s)
     }
@@ -32,7 +34,8 @@ final class SidebarOperationsTests: XCTestCase {
         let (root, s) = try vault()
         try "---\nid: a\ntitle: A\n---\nx"
             .write(to: root.appendingPathComponent("a.md"), atomically: true, encoding: .utf8)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
         let ops = SidebarOperations(store: s)
 
         ops.beginRename(try row(s, "a.md"))
@@ -44,8 +47,9 @@ final class SidebarOperationsTests: XCTestCase {
         XCTAssertFalse(preview.canConfirm)
         ops.confirm()
         XCTAssertNil(ops.report, "a refused plan must not be applicable")
-        XCTAssertTrue(FileManager.default
-            .fileExists(atPath: root.appendingPathComponent("a.md").path))
+        XCTAssertTrue(
+            FileManager.default
+                .fileExists(atPath: root.appendingPathComponent("a.md").path))
     }
 
     func test_validRenameProducesAConfirmablePreviewNamingTheAffectedFiles() async throws {
@@ -54,7 +58,8 @@ final class SidebarOperationsTests: XCTestCase {
             .write(to: root.appendingPathComponent("a.md"), atomically: true, encoding: .utf8)
         try "---\nid: d\ntitle: Design\n---\nx"
             .write(to: root.appendingPathComponent("Design.md"), atomically: true, encoding: .utf8)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
         let ops = SidebarOperations(store: s)
 
         ops.beginRename(try row(s, "Design.md"))
@@ -81,15 +86,17 @@ final class SidebarOperationsTests: XCTestCase {
         let (root, s) = try vault()
         try "---\nid: a\ntitle: A\n---\nx"
             .write(to: root.appendingPathComponent("a.md"), atomically: true, encoding: .utf8)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
         let ops = SidebarOperations(store: s)
 
         ops.move(try row(s, "a.md"), toFolder: FileManager.default.temporaryDirectory)
 
         XCTAssertNil(ops.preview)
         XCTAssertEqual(ops.activeSheet, .message)
-        XCTAssertTrue(try XCTUnwrap(ops.message).contains("outside the vault"),
-                      ops.message ?? "")
+        XCTAssertTrue(
+            try XCTUnwrap(ops.message).contains("outside the vault"),
+            ops.message ?? "")
     }
 
     // MARK: - A refused trash must be VISIBLE
@@ -101,7 +108,8 @@ final class SidebarOperationsTests: XCTestCase {
         let (root, s) = try vault("ops-trash")
         let url = root.appendingPathComponent("gone.md")
         try "---\nid: g\ntitle: Gone\n---\nx".write(to: url, atomically: true, encoding: .utf8)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
         let target = try row(s, "gone.md")
         s.open(target)
         let session = try XCTUnwrap(s.selectedTab)
@@ -137,7 +145,8 @@ final class SidebarOperationsTests: XCTestCase {
             .write(to: root.appendingPathComponent("a.md"), atomically: true, encoding: .utf8)
         let gone = root.appendingPathComponent("Gone.md")
         try "---\nid: g\ntitle: Gone\n---\nx".write(to: gone, atomically: true, encoding: .utf8)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
         let ops = SidebarOperations(store: s)
         let target = try row(s, "Gone.md")
 
@@ -156,10 +165,12 @@ final class SidebarOperationsTests: XCTestCase {
     /// the file was NOT permanently deleted — the fallback `trash` refuses to do.
     func test_trashFailedIsDescribedAndPromisesNoPermanentDelete() {
         let url = URL(fileURLWithPath: "/v/x.md")
-        let target = IndexRow(path: url, id: "x", title: "X", tags: [], aliases: [],
-                              updated: Date(), type: MarkdownEngine.identifier, properties: [])
-        let text = SidebarOperations.describe(.trashFailed(url, "No .Trashes on the volume."),
-                                              row: target)
+        let target = IndexRow(
+            path: url, id: "x", title: "X", tags: [], aliases: [],
+            updated: Date(), type: MarkdownEngine.identifier, properties: [])
+        let text = SidebarOperations.describe(
+            .trashFailed(url, "No .Trashes on the volume."),
+            row: target)
         XCTAssertTrue(text.contains("No .Trashes"), text)
         XCTAssertTrue(text.contains("Nothing was deleted"), text)
     }
@@ -168,34 +179,44 @@ final class SidebarOperationsTests: XCTestCase {
 
     func test_sheetsBuildInEveryState() throws {
         let theme = HostTheme(TestTokens.make())
-        let plan = RenamePlan(source: URL(fileURLWithPath: "/v/Design.md"),
-                              destination: URL(fileURLWithPath: "/v/Architecture.md"),
-                              edits: [LinkEdit(file: URL(fileURLWithPath: "/v/A.md"),
-                                               oldTarget: "Design", newTarget: "Architecture")])
+        let plan = RenamePlan(
+            source: URL(fileURLWithPath: "/v/Design.md"),
+            destination: URL(fileURLWithPath: "/v/Architecture.md"),
+            edits: [
+                LinkEdit(
+                    file: URL(fileURLWithPath: "/v/A.md"),
+                    oldTarget: "Design", newTarget: "Architecture")
+            ])
         let preview = RenamePreview(document: plan, isMove: false)
-        _ = RenamePreviewSheet(preview: preview, report: nil, theme: theme,
-                               onConfirm: {}, onCancel: {})
+        _ = RenamePreviewSheet(
+            preview: preview, report: nil, theme: theme,
+            onConfirm: {}, onCancel: {})
         _ = RenamePreviewSheet(
             preview: preview,
-            report: RenameReport(rewritten: [URL(fileURLWithPath: "/v/A.md")],
-                                 skipped: [], failed: [], movedTo: plan.destination),
+            report: RenameReport(
+                rewritten: [URL(fileURLWithPath: "/v/A.md")],
+                skipped: [], failed: [], movedTo: plan.destination),
             theme: theme, onConfirm: {}, onCancel: {})
         _ = RenamePreviewSheet(
-            preview: RenamePreview(document: RenamePlan(source: plan.source,
-                                                        destination: plan.source, edits: [],
-                                                        refusal: "Not a name."),
-                                   isMove: false),
+            preview: RenamePreview(
+                document: RenamePlan(
+                    source: plan.source,
+                    destination: plan.source, edits: [],
+                    refusal: "Not a name."),
+                isMove: false),
             report: nil, theme: theme, onConfirm: {}, onCancel: {})
-        _ = NameSheet(title: "Rename", text: .constant("x"), theme: theme,
-                      onConfirm: {}, onCancel: {})
+        _ = NameSheet(
+            title: "Rename", text: .constant("x"), theme: theme,
+            onConfirm: {}, onCancel: {})
         _ = MessageSheet(text: "nope", theme: theme, onDismiss: {})
     }
 
     /// A folder with no indexed documents still MOVES, so its preview must not
     /// claim there is nothing to do.
     func test_folderPreviewWithNoIndexedDocumentsStillDescribesTheMove() {
-        let plan = FolderRenamePlan(source: URL(fileURLWithPath: "/v/Projects"),
-                                    destination: URL(fileURLWithPath: "/v/Work"))
+        let plan = FolderRenamePlan(
+            source: URL(fileURLWithPath: "/v/Projects"),
+            destination: URL(fileURLWithPath: "/v/Work"))
         let preview = RenamePreview(folder: plan)
         XCTAssertTrue(preview.canConfirm)
         XCTAssertTrue(preview.summary.contains("will still be renamed"), preview.summary)
@@ -260,12 +281,14 @@ final class SidebarOperationsTests: XCTestCase {
     func test_rowMenuOmitsTrashForAttachmentsButKeepsItElsewhere() throws {
         let (_, s) = try vault("row-menu")
         let ops = SidebarOperations(store: s)
-        let doc = IndexRow(path: URL(fileURLWithPath: "/v/a.md"), id: "a", title: "A",
-                           tags: [], aliases: [], updated: Date(),
-                           type: MarkdownEngine.identifier, properties: [])
-        let attachment = IndexRow(path: URL(fileURLWithPath: "/v/a.pdf"), id: "b", title: "B",
-                                  tags: [], aliases: [], updated: Date(),
-                                  type: AttachmentEngine.identifier, properties: [])
+        let doc = IndexRow(
+            path: URL(fileURLWithPath: "/v/a.md"), id: "a", title: "A",
+            tags: [], aliases: [], updated: Date(),
+            type: MarkdownEngine.identifier, properties: [])
+        let attachment = IndexRow(
+            path: URL(fileURLWithPath: "/v/a.pdf"), id: "b", title: "B",
+            tags: [], aliases: [], updated: Date(),
+            type: AttachmentEngine.identifier, properties: [])
 
         let docItems = loreRowMenuItems(row: doc, ops: ops)
         XCTAssertTrue(docItems.contains { $0.title == "Move to Trash" && $0.isDestructive })
@@ -315,7 +338,8 @@ final class SidebarOperationsTests: XCTestCase {
         let (root, s) = try vault("notice-trash")
         try "---\nid: g\ntitle: G\n---\nx".write(
             to: root.appendingPathComponent("g.md"), atomically: true, encoding: .utf8)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
         let ops = SidebarOperations(store: s)
 
         ops.requestTrash(try row(s, "g.md"))
@@ -323,8 +347,9 @@ final class SidebarOperationsTests: XCTestCase {
 
         XCTAssertNil(ops.message, "a successful delete is not a refusal")
         XCTAssertEqual(ops.notice?.kind, .success)
-        XCTAssertEqual(ops.notice?.text.contains("⌘Z"), true,
-                       "the undo is unreachable if nothing mentions it")
+        XCTAssertEqual(
+            ops.notice?.text.contains("⌘Z"), true,
+            "the undo is unreachable if nothing mentions it")
         XCTAssertTrue(ops.canUndoTrash)
     }
 
@@ -333,7 +358,8 @@ final class SidebarOperationsTests: XCTestCase {
         let (root, s) = try vault("notice-undo")
         let url = root.appendingPathComponent("back.md")
         try "---\nid: b\ntitle: B\n---\nx".write(to: url, atomically: true, encoding: .utf8)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
         let ops = SidebarOperations(store: s)
 
         ops.requestTrash(try row(s, "back.md"))

@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// Markdown documents: plain `.md` with YAML frontmatter, read and written
 /// verbatim and safe to open in Obsidian.
@@ -78,19 +78,20 @@ public final class MarkdownEngine: DocumentEngine {
     /// parse; see `injectableSuppressionIndex`.
     public var indexPayload: IndexPayload {
         let model = MarkdownDocumentModel(body: note.body)
-        return IndexPayload(title: note.title,
-                            plaintext: note.body,
-                            // Frontmatter tags AND inline `#tags`, deduplicated.
-                            // A note tagged both ways must count once, or
-                            // `LoreStore.tagCounts` double-counts it in the
-                            // sidebar chip row.
-                            tags: Array(Set(note.tags + model.inlineTags)).sorted(),
-                            properties: note.extra,
-                            outline: model.outline,
-                            links: model.links,
-                            aliases: note.aliases,
-                            blocks: model.blockAnchors,
-                            id: note.id)
+        return IndexPayload(
+            title: note.title,
+            plaintext: note.body,
+            // Frontmatter tags AND inline `#tags`, deduplicated.
+            // A note tagged both ways must count once, or
+            // `LoreStore.tagCounts` double-counts it in the
+            // sidebar chip row.
+            tags: Array(Set(note.tags + model.inlineTags)).sorted(),
+            properties: note.extra,
+            outline: model.outline,
+            links: model.links,
+            aliases: note.aliases,
+            blocks: model.blockAnchors,
+            id: note.id)
     }
 
     public func replaceContents(with other: MarkdownEngine) {
@@ -162,7 +163,10 @@ private struct MarkdownDocumentEditor: View {
                 // gated on commit, below: renaming the file on every
                 // keystroke would thrash the filesystem and rewrite inbound
                 // links dozens of times for one typed word.
-                .onChange(of: title) { engine.note.title = title; ctx.onChange() }
+                .onChange(of: title) {
+                    engine.note.title = title
+                    ctx.onChange()
+                }
                 // `onSubmit` (Enter/Return) and losing focus (Tab away, click
                 // elsewhere) are the two "commit" gestures the owner asked
                 // for. Both funnel into the same commit function so there is
@@ -193,73 +197,89 @@ private struct MarkdownDocumentEditor: View {
             // preview and tags are still native-only, which is what keeps this
             // defaulting off rather than the flag being cosmetic.
             if ctx.editorSettings.usesCM6, mayUseCM6 == true {
-                CM6EditorView(text: $body_, tokens: ctx.theme.tokens,
-                              settings: ctx.editorSettings,
-                              onOpenLink: ctx.openLink,
-                              onOpenLinkBeside: ctx.openLinkBeside,
-                              onTagClick: ctx.onTagClick,
-                              allowsTaskToggle: !ctx.isReadOnly,
-                              resolveEmbedTarget: ctx.resolveEmbedTarget,
-                              completions: ctx.completions,
-                              headingCompletions: ctx.headingCompletions,
-                              tagCompletions: ctx.tagCompletions,
-                              createLinkedNote: ctx.createLinkedNote,
-                              linkTarget: ctx.linkTarget)
-                    .onChange(of: body_) { engine.note.body = body_; ctx.onChange() }
+                CM6EditorView(
+                    text: $body_, tokens: ctx.theme.tokens,
+                    settings: ctx.editorSettings,
+                    onOpenLink: ctx.openLink,
+                    onOpenLinkBeside: ctx.openLinkBeside,
+                    onTagClick: ctx.onTagClick,
+                    allowsTaskToggle: !ctx.isReadOnly,
+                    resolveEmbedTarget: ctx.resolveEmbedTarget,
+                    completions: ctx.completions,
+                    headingCompletions: ctx.headingCompletions,
+                    tagCompletions: ctx.tagCompletions,
+                    createLinkedNote: ctx.createLinkedNote,
+                    linkTarget: ctx.linkTarget
+                )
+                .onChange(of: body_) {
+                    engine.note.body = body_
+                    ctx.onChange()
+                }
             } else {
-            // Only markdown gets the link affordances: wikilinks are markdown
-            // syntax, and offering completion inside a plain-text file would
-            // insert brackets that mean nothing there.
-            MarkdownEditor(text: $body_, tokens: ctx.theme.tokens,
-                           settings: ctx.editorSettings,
-                           headingCompletions: ctx.headingCompletions,
-                           createLinkedNote: ctx.createLinkedNote,
-                           completions: ctx.completions, tagCompletions: ctx.tagCompletions,
-                           onOpenLink: ctx.openLink,
-                           onOpenLinkBeside: ctx.openLinkBeside,
-                           onTagClick: ctx.onTagClick,
-                           resolveEmbedTarget: ctx.resolveEmbedTarget,
-                           registerExternalChangeHandler: ctx.registerExternalChangeHandler,
-                           unregisterExternalChangeHandler: ctx.unregisterExternalChangeHandler,
-                           linkTarget: ctx.linkTarget, scrollTarget: $scrollTarget,
-                           // Task checkboxes are markdown, and only a session
-                           // that can actually be written may offer to flip
-                           // one — see `EditorContext.isReadOnly`.
-                           allowsTaskToggle: !ctx.isReadOnly,
-                           writePastedImage: ctx.writePastedImage,
-                           writeDroppedFile: ctx.writeDroppedFile,
-                           onSelectionChange: { text, selection, tag in
-                               // Cheap — a struct copy, no XPC — so this part
-                               // stays synchronous with the caret.
-                               menuSelection = selection
-                               // The spine rail's active-heading tracking rides
-                               // this same callback rather than adding a second
-                               // observer of the caret.
-                               ctx.reportCaretOffset(selection.location)
-                               // The XPC-backed part is debounced: see
-                               // `MenuSuggestionDebouncer`'s doc comment.
-                               menuSuggestionDebouncer.schedule(
-                                   text: text, offset: selection.location, tag: tag
-                               ) { menuSuggestions = $0 }
-                           },
-                           registerMenuActions: { menuActions = $0 })
-                .onChange(of: body_) { engine.note.body = body_; ctx.onChange() }
-                .ainkradContextMenu(EditorMenuItems.build(selection: menuSelection,
-                                                          suggestions: menuSuggestions,
-                                                          actions: menuActions))
+                // Only markdown gets the link affordances: wikilinks are markdown
+                // syntax, and offering completion inside a plain-text file would
+                // insert brackets that mean nothing there.
+                MarkdownEditor(
+                    text: $body_, tokens: ctx.theme.tokens,
+                    settings: ctx.editorSettings,
+                    headingCompletions: ctx.headingCompletions,
+                    createLinkedNote: ctx.createLinkedNote,
+                    completions: ctx.completions, tagCompletions: ctx.tagCompletions,
+                    onOpenLink: ctx.openLink,
+                    onOpenLinkBeside: ctx.openLinkBeside,
+                    onTagClick: ctx.onTagClick,
+                    resolveEmbedTarget: ctx.resolveEmbedTarget,
+                    registerExternalChangeHandler: ctx.registerExternalChangeHandler,
+                    unregisterExternalChangeHandler: ctx.unregisterExternalChangeHandler,
+                    linkTarget: ctx.linkTarget, scrollTarget: $scrollTarget,
+                    // Task checkboxes are markdown, and only a session
+                    // that can actually be written may offer to flip
+                    // one — see `EditorContext.isReadOnly`.
+                    allowsTaskToggle: !ctx.isReadOnly,
+                    writePastedImage: ctx.writePastedImage,
+                    writeDroppedFile: ctx.writeDroppedFile,
+                    onSelectionChange: { text, selection, tag in
+                        // Cheap — a struct copy, no XPC — so this part
+                        // stays synchronous with the caret.
+                        menuSelection = selection
+                        // The spine rail's active-heading tracking rides
+                        // this same callback rather than adding a second
+                        // observer of the caret.
+                        ctx.reportCaretOffset(selection.location)
+                        // The XPC-backed part is debounced: see
+                        // `MenuSuggestionDebouncer`'s doc comment.
+                        menuSuggestionDebouncer.schedule(
+                            text: text, offset: selection.location, tag: tag
+                        ) { menuSuggestions = $0 }
+                    },
+                    registerMenuActions: { menuActions = $0 }
+                )
+                .onChange(of: body_) {
+                    engine.note.body = body_
+                    ctx.onChange()
+                }
+                .ainkradContextMenu(
+                    EditorMenuItems.build(
+                        selection: menuSelection,
+                        suggestions: menuSuggestions,
+                        actions: menuActions))
             }
         }
         .background(ctx.theme.tokens.background)
         .onAppear {
-            title = engine.note.title; body_ = engine.note.body
+            title = engine.note.title
+            body_ = engine.note.body
             chooseSurface(for: engine.note.body)
             lastCommittedTitle = engine.note.title
             titleAtFocusStart = engine.note.title
             ctx.registerScrollHandler { offset in scrollTarget = offset }
         }
-        .alert(titleAlertTitle,
-               isPresented: Binding(get: { titleRefusal != nil },
-                                    set: { if !$0 { titleRefusal = nil } })) {
+        .alert(
+            titleAlertTitle,
+            isPresented: Binding(
+                get: { titleRefusal != nil },
+                set: { if !$0 { titleRefusal = nil } })
+        ) {
             Button("OK") { titleRefusal = nil }
         } message: {
             Text(titleRefusal ?? "")
@@ -309,8 +329,9 @@ private struct MarkdownDocumentEditor: View {
         guard mayUseCM6 == nil else { return }
         mayUseCM6 = CM6LineEndings.isConsistent(body)
         if mayUseCM6 == false {
-            NSLog("Lore: mixed line endings; opening in the native editor to "
-                  + "preserve them exactly")
+            NSLog(
+                "Lore: mixed line endings; opening in the native editor to "
+                    + "preserve them exactly")
         }
     }
 

@@ -1,13 +1,17 @@
-import XCTest
 import AppKit
 import SwiftUI
+import XCTest
+
 @testable import LoreFeature
 
 /// Defects Ahmed found by USING the editor, 2026-08-17. Written to FAIL first.
 @MainActor
 final class ReportedDefectsTests: XCTestCase {
     private var windows: [NSWindow] = []
-    override func tearDown() { windows.removeAll(); super.tearDown() }
+    override func tearDown() {
+        windows.removeAll()
+        super.tearDown()
+    }
 
     private func editor(_ body: String) -> (MarkdownEditor.Coordinator, LinkTextView) {
         var stored = body
@@ -16,8 +20,9 @@ final class ReportedDefectsTests: XCTestCase {
         let tv = LinkTextView(frame: NSRect(x: 0, y: 0, width: 800, height: 600))
         tv.isRichText = false
         tv.delegate = c
-        let w = NSWindow(contentRect: tv.frame, styleMask: [.titled],
-                         backing: .buffered, defer: false)
+        let w = NSWindow(
+            contentRect: tv.frame, styleMask: [.titled],
+            backing: .buffered, defer: false)
         w.contentView = tv
         w.makeFirstResponder(tv)
         windows.append(w)
@@ -47,15 +52,17 @@ final class ReportedDefectsTests: XCTestCase {
             // Caret AWAY: the marker is collapsed, so the heading stands in.
             tv.setSelectedRange(NSRange(location: 0, length: 0))
             c.revealForSelectionChange()
-            XCTAssertTrue(MarkdownBlockBackgrounds.drawsCalloutHeader(marker: marker, in: tv),
-                          "with the source hidden, the heading must be drawn")
+            XCTAssertTrue(
+                MarkdownBlockBackgrounds.drawsCalloutHeader(marker: marker, in: tv),
+                "with the source hidden, the heading must be drawn")
 
             // Caret ON the header line: the source is back, so it must not be.
             tv.setSelectedRange(NSRange(location: marker.location + 2, length: 0))
             c.revealForSelectionChange()
-            XCTAssertFalse(MarkdownBlockBackgrounds.drawsCalloutHeader(marker: marker, in: tv),
-                           "with `> [!note]` visible, drawing an icon and heading over "
-                           + "the top of it is the overlap in the 2026-08-17 report")
+            XCTAssertFalse(
+                MarkdownBlockBackgrounds.drawsCalloutHeader(marker: marker, in: tv),
+                "with `> [!note]` visible, drawing an icon and heading over "
+                    + "the top of it is the overlap in the 2026-08-17 report")
         }
     }
 
@@ -70,15 +77,20 @@ final class ReportedDefectsTests: XCTestCase {
         try withExtendedLifetime(c) { () -> Void in
             tv.setSelectedRange(NSRange(location: 0, length: 0))
             c.revealForSelectionChange()
-            let before = tv.blockBackgrounds.first { if case .callout = $0.kind { return true }
-                                                     return false }
+            let before = tv.blockBackgrounds.first {
+                if case .callout = $0.kind { return true }
+                return false
+            }
             tv.setSelectedRange(NSRange(location: 12, length: 0))
             c.revealForSelectionChange()
-            let after = tv.blockBackgrounds.first { if case .callout = $0.kind { return true }
-                                                    return false }
-            XCTAssertEqual(before, after,
-                           "a caret move must not need the regions rebuilt; the drawing "
-                           + "asks the geometry instead")
+            let after = tv.blockBackgrounds.first {
+                if case .callout = $0.kind { return true }
+                return false
+            }
+            XCTAssertEqual(
+                before, after,
+                "a caret move must not need the regions rebuilt; the drawing "
+                    + "asks the geometry instead")
         }
     }
 
@@ -92,12 +104,12 @@ final class ReportedDefectsTests: XCTestCase {
     /// the defect the block parse was added to fix.
     func test_aFootnoteDoesNotDisableKeystrokeStyling() throws {
         let body = """
-        Some prose here[^1] with more after it.
+            Some prose here[^1] with more after it.
 
-        plain paragraph here
+            plain paragraph here
 
-        [^1]: the footnote text
-        """
+            [^1]: the footnote text
+            """
         let (c, tv) = editor(body)
         try withExtendedLifetime(c) { () -> Void in
             let storage = try XCTUnwrap(tv.textStorage)
@@ -106,14 +118,18 @@ final class ReportedDefectsTests: XCTestCase {
             for ch in " **bold**" {
                 tv.insertText(String(ch), replacementRange: tv.selectedRange())
             }
-            XCTAssertTrue(c.lastEditTookFastPath,
-                          "a footnote elsewhere in the note must not disable the "
-                          + "block parse for every paragraph in it")
+            XCTAssertTrue(
+                c.lastEditTookFastPath,
+                "a footnote elsewhere in the note must not disable the "
+                    + "block parse for every paragraph in it")
             let word = (tv.string as NSString).range(of: "bold")
-            let font = try XCTUnwrap(storage.attribute(.font, at: word.location,
-                                                       effectiveRange: nil) as? NSFont)
-            XCTAssertTrue(font.fontDescriptor.symbolicTraits.contains(.bold),
-                          "and the word must bold on the keystroke, not after the debounce")
+            let font = try XCTUnwrap(
+                storage.attribute(
+                    .font, at: word.location,
+                    effectiveRange: nil) as? NSFont)
+            XCTAssertTrue(
+                font.fontDescriptor.symbolicTraits.contains(.bold),
+                "and the word must bold on the keystroke, not after the debounce")
         }
     }
 
@@ -122,18 +138,19 @@ final class ReportedDefectsTests: XCTestCase {
     /// a definition, so it is still safe to parse alone.
     func test_aReferenceDefinitionOnlyBlocksParagraphsThatCouldUseIt() throws {
         let body = """
-        [label]: https://example.com
+            [label]: https://example.com
 
-        plain paragraph here
+            plain paragraph here
 
-        """
+            """
         let (c, tv) = editor(body)
         try withExtendedLifetime(c) { () -> Void in
             let end = (tv.string as NSString).range(of: "plain paragraph here")
             tv.setSelectedRange(NSRange(location: NSMaxRange(end), length: 0))
             tv.insertText("x", replacementRange: tv.selectedRange())
-            XCTAssertTrue(c.lastEditTookFastPath,
-                          "a paragraph with no brackets cannot reference a definition")
+            XCTAssertTrue(
+                c.lastEditTookFastPath,
+                "a paragraph with no brackets cannot reference a definition")
         }
     }
 
@@ -141,20 +158,20 @@ final class ReportedDefectsTests: XCTestCase {
     /// contains the new constructs.
     func test_typingStillStylesOnTheKeystrokeInARichDocument() throws {
         let body = """
-        # Notes
+            # Notes
 
-        > [!warning] Careful
-        > body
+            > [!warning] Careful
+            > body
 
-        | a | b |
-        |---|---|
-        | 1 | 2 |
+            | a | b |
+            |---|---|
+            | 1 | 2 |
 
-        Some math $x^2$ here.
+            Some math $x^2$ here.
 
-        plain paragraph here
+            plain paragraph here
 
-        """
+            """
         let (c, tv) = editor(body)
         try withExtendedLifetime(c) {
             let storage = try XCTUnwrap(tv.textStorage)
@@ -163,14 +180,18 @@ final class ReportedDefectsTests: XCTestCase {
             for ch in " **bold**" {
                 tv.insertText(String(ch), replacementRange: tv.selectedRange())
             }
-            XCTAssertTrue(c.lastEditTookFastPath,
-                          "typing in a plain paragraph must still take the block path "
-                          + "even when the document contains callouts, tables and math")
+            XCTAssertTrue(
+                c.lastEditTookFastPath,
+                "typing in a plain paragraph must still take the block path "
+                    + "even when the document contains callouts, tables and math")
             let word = (tv.string as NSString).range(of: "bold")
-            let font = try XCTUnwrap(storage.attribute(.font, at: word.location,
-                                                       effectiveRange: nil) as? NSFont)
-            XCTAssertTrue(font.fontDescriptor.symbolicTraits.contains(.bold),
-                          "and it must be bold on the keystroke, not after the debounce")
+            let font = try XCTUnwrap(
+                storage.attribute(
+                    .font, at: word.location,
+                    effectiveRange: nil) as? NSFont)
+            XCTAssertTrue(
+                font.fontDescriptor.symbolicTraits.contains(.bold),
+                "and it must be bold on the keystroke, not after the debounce")
         }
     }
 }

@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 final class EngineRegistryTests: XCTestCase {
@@ -16,12 +17,15 @@ final class EngineRegistryTests: XCTestCase {
     }
 
     func test_specificEngines_areMutuallyExclusive() throws {
-        let samples = ["n.md", "n.markdown", "n.txt", "n.json", "n.swift",
-                       "n.pdf", "n.rtf", "n.html", "n.xlsx", "n.png", "n"]
+        let samples = [
+            "n.md", "n.markdown", "n.txt", "n.json", "n.swift",
+            "n.pdf", "n.rtf", "n.html", "n.xlsx", "n.png", "n",
+        ]
         for name in samples {
             let url = try tempFile(name, "x")
             let claimers = EngineRegistry.specificEngines.filter { $0.canOpen(url) }
-            XCTAssertLessThanOrEqual(claimers.count, 1,
+            XCTAssertLessThanOrEqual(
+                claimers.count, 1,
                 "\(name) claimed by \(claimers.map { $0.identifier })")
         }
     }
@@ -49,13 +53,15 @@ final class EngineRegistryTests: XCTestCase {
     }
 
     func test_load_dispatchesThroughTheRegisteredEngine() throws {
-        let url = try tempFile("n.md", """
-        ---
-        id: abc
-        title: Hello
-        ---
-        searchable haystack
-        """)
+        let url = try tempFile(
+            "n.md",
+            """
+            ---
+            id: abc
+            title: Hello
+            ---
+            searchable haystack
+            """)
         let engine = try EngineRegistry.load(url)
         XCTAssertEqual(engine.indexPayload.title, "Hello")
         XCTAssertTrue(engine.indexPayload.plaintext.contains("haystack"))
@@ -95,14 +101,16 @@ final class MarkdownEngineTests: XCTestCase {
     }
 
     func test_indexPayload_exposesTitleTagsAndBody() throws {
-        let url = try tempFile("n.md", """
-        ---
-        id: abc
-        title: Hello
-        tags: [x, y]
-        ---
-        searchable haystack
-        """)
+        let url = try tempFile(
+            "n.md",
+            """
+            ---
+            id: abc
+            title: Hello
+            tags: [x, y]
+            ---
+            searchable haystack
+            """)
         let engine = try MarkdownEngine.load(url)
         XCTAssertEqual(engine.indexPayload.title, "Hello")
         XCTAssertEqual(engine.indexPayload.tags, ["x", "y"])
@@ -110,15 +118,17 @@ final class MarkdownEngineTests: XCTestCase {
     }
 
     func test_outline_listsHeadings() throws {
-        let url = try tempFile("n.md", """
-        ---
-        id: abc
-        title: T
-        ---
-        # One
-        text
-        ## Two
-        """)
+        let url = try tempFile(
+            "n.md",
+            """
+            ---
+            id: abc
+            title: T
+            ---
+            # One
+            text
+            ## Two
+            """)
         let engine = try MarkdownEngine.load(url)
         // Full `OutlineEntry` equality, offsets included. `utf16Offset` is
         // body-relative (see `MarkdownEngine.indexPayload`'s doc comment), so
@@ -126,10 +136,12 @@ final class MarkdownEngineTests: XCTestCase {
         // than hand-counted — a hand-counted literal would silently stop
         // meaning anything the day the fixture text above changes.
         let body = engine.note.body as NSString
-        XCTAssertEqual(engine.indexPayload.outline, [
-            OutlineEntry(level: 1, text: "One", utf16Offset: body.range(of: "# One").location),
-            OutlineEntry(level: 2, text: "Two", utf16Offset: body.range(of: "## Two").location),
-        ])
+        XCTAssertEqual(
+            engine.indexPayload.outline,
+            [
+                OutlineEntry(level: 1, text: "One", utf16Offset: body.range(of: "# One").location),
+                OutlineEntry(level: 2, text: "Two", utf16Offset: body.range(of: "## Two").location),
+            ])
     }
 
     /// Task 7: outlines come from the AST, so a `#` inside a fenced code block
@@ -166,14 +178,16 @@ final class MarkdownEngineTests: XCTestCase {
     }
 
     func test_saveThenLoad_preservesUnmodelledProperties() throws {
-        let url = try tempFile("n.md", """
-        ---
-        id: abc
-        title: T
-        status: active
-        ---
-        body
-        """)
+        let url = try tempFile(
+            "n.md",
+            """
+            ---
+            id: abc
+            title: T
+            status: active
+            ---
+            body
+            """)
         let engine = try MarkdownEngine.load(url)
         try engine.save(to: url)
         let reloaded = try MarkdownEngine.load(url)
@@ -195,7 +209,10 @@ final class EngineConformanceTests: XCTestCase {
     /// `tags` and `aliases` plus a comment — because those are exactly what a
     /// model-re-emitting serializer destroys. The assertion stays strict.
     private static let samples: [String: (name: String, contents: String)] = [
-        "markdown": ("c.md", "---\nid: a\ntitle: T\ntags:\n  - alpha\n  - beta\ncreated: 2026-01-01\nupdated: 2026-01-01\naliases:\n  - one\n# a trailing comment\n---\nbody"),
+        "markdown": (
+            "c.md",
+            "---\nid: a\ntitle: T\ntags:\n  - alpha\n  - beta\ncreated: 2026-01-01\nupdated: 2026-01-01\naliases:\n  - one\n# a trailing comment\n---\nbody"
+        ),
         "plaintext": ("c.txt", "plain body text"),
     ]
 
@@ -226,8 +243,9 @@ final class EngineConformanceTests: XCTestCase {
     func test_everyEngineHasASample() {
         for engine in EngineRegistry.specificEngines
         where !Self.readOnlyEngineIdentifiers.contains(engine.identifier) {
-            XCTAssertNotNil(Self.samples[engine.identifier],
-                            "engine \(engine.identifier) has no conformance sample")
+            XCTAssertNotNil(
+                Self.samples[engine.identifier],
+                "engine \(engine.identifier) has no conformance sample")
         }
     }
 
@@ -243,12 +261,14 @@ final class EngineConformanceTests: XCTestCase {
             // earlier version of this test did) would pass even for an engine
             // that strips data on every save — it only proves idempotency,
             // not fidelity.
-            XCTAssertEqual(after, sample.contents,
-                           "\(engine.identifier): save does not round-trip the original bytes")
+            XCTAssertEqual(
+                after, sample.contents,
+                "\(engine.identifier): save does not round-trip the original bytes")
             try loaded.save(to: url)
             let afterTwice = try String(contentsOf: url, encoding: .utf8)
-            XCTAssertEqual(after, afterTwice,
-                           "\(engine.identifier): save is not idempotent")
+            XCTAssertEqual(
+                after, afterTwice,
+                "\(engine.identifier): save is not idempotent")
         }
     }
 
@@ -263,8 +283,9 @@ final class EngineConformanceTests: XCTestCase {
             guard let sample = Self.samples[engine.identifier] else { continue }
             let url = try write(sample.name, sample.contents)
             let claimers = EngineRegistry.specificEngines.filter { $0.canOpen(url) }
-            XCTAssertEqual(claimers.count, 1,
-                           "\(sample.name) claimed by \(claimers.map { $0.identifier })")
+            XCTAssertEqual(
+                claimers.count, 1,
+                "\(sample.name) claimed by \(claimers.map { $0.identifier })")
         }
     }
 
@@ -281,8 +302,9 @@ final class EngineConformanceTests: XCTestCase {
                 let url = try write("adversarial-\(label).\(ext)", contents)
                 let loaded = try engine.load(url)
                 let payload = loaded.indexPayload
-                XCTAssertNotNil(payload.plaintext,
-                                "\(engine.identifier)/\(label) produced no plaintext")
+                XCTAssertNotNil(
+                    payload.plaintext,
+                    "\(engine.identifier)/\(label) produced no plaintext")
             }
         }
     }

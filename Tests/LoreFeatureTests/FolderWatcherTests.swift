@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 /// `FolderWatcher` moved from a single root-only `DispatchSource` to a
@@ -46,8 +47,9 @@ final class FolderWatcherTests: XCTestCase {
         // (before the kernel-side watch is armed) would make this test flaky
         // for a reason that has nothing to do with the code under test.
         Thread.sleep(forTimeInterval: 0.2)
-        try "hello".write(to: sub.appendingPathComponent("note.md"),
-                          atomically: true, encoding: .utf8)
+        try "hello".write(
+            to: sub.appendingPathComponent("note.md"),
+            atomically: true, encoding: .utf8)
 
         // Bounded, generous wait: latency is 0.3s plus scheduling slop.
         // 5s gives wide headroom without the test hanging indefinitely on a
@@ -97,8 +99,9 @@ final class FolderWatcherTests: XCTestCase {
         XCTAssertNotNil(watcher)
 
         Thread.sleep(forTimeInterval: 0.2)
-        try "x".write(to: dotDir.appendingPathComponent("HEAD"),
-                      atomically: true, encoding: .utf8)
+        try "x".write(
+            to: dotDir.appendingPathComponent("HEAD"),
+            atomically: true, encoding: .utf8)
 
         // Wait long enough to be confident a wrongly-fired callback would
         // have landed (latency 0.3s) plus margin, while staying well short
@@ -137,7 +140,7 @@ final class FolderWatcherTests: XCTestCase {
         let root = try tempVault()
         let build = root.appendingPathComponent("App/build")
         try FileManager.default.createDirectory(at: build, withIntermediateDirectories: true)
-        Thread.sleep(forTimeInterval: 0.5)   // see the dot-directory test
+        Thread.sleep(forTimeInterval: 0.5)  // see the dot-directory test
 
         let expectation = expectation(description: "onChange must not fire for unindexable changes")
         expectation.isInverted = true
@@ -158,20 +161,22 @@ final class FolderWatcherTests: XCTestCase {
         // Phase 1 — positive control: the watcher must actually fire at
         // least once while alive, before we can trust its silence later.
         let fireOnceExpectation = expectation(description: "onChange fires at least once while alive")
-        fireOnceExpectation.assertForOverFulfill = false // "at least one", same reasoning as above
+        fireOnceExpectation.assertForOverFulfill = false  // "at least one", same reasoning as above
         var deliveryCount = 0
         var watcher: FolderWatcher? = FolderWatcher(url: root) {
             deliveryCount += 1
             fireOnceExpectation.fulfill()
         }
         XCTAssertNotNil(watcher)
-        Thread.sleep(forTimeInterval: 0.2) // let the stream actually arm
+        Thread.sleep(forTimeInterval: 0.2)  // let the stream actually arm
 
-        try "hello".write(to: root.appendingPathComponent("before-teardown.md"),
-                          atomically: true, encoding: .utf8)
+        try "hello".write(
+            to: root.appendingPathComponent("before-teardown.md"),
+            atomically: true, encoding: .utf8)
         wait(for: [fireOnceExpectation], timeout: 5)
-        XCTAssertGreaterThan(deliveryCount, 0,
-                             "the watcher must be proven live before its silence after teardown means anything")
+        XCTAssertGreaterThan(
+            deliveryCount, 0,
+            "the watcher must be proven live before its silence after teardown means anything")
 
         // Phase 2 — the actual regression test: tear the watcher down, then
         // make a change, then prove `onChange` does NOT fire again.
@@ -186,8 +191,9 @@ final class FolderWatcherTests: XCTestCase {
         // fix), this stops the stream before the write below.
         watcher = nil
 
-        try "hello".write(to: root.appendingPathComponent("after-teardown.md"),
-                          atomically: true, encoding: .utf8)
+        try "hello".write(
+            to: root.appendingPathComponent("after-teardown.md"),
+            atomically: true, encoding: .utf8)
 
         wait(for: [silenceExpectation], timeout: 2)
     }
@@ -209,10 +215,13 @@ final class FolderWatcherTests: XCTestCase {
         for _ in 0..<20 {
             let root = try tempVault()
             defer { try? FileManager.default.removeItem(at: root) }
-            var watcher: FolderWatcher? = FolderWatcher(url: root) { /* not asserted here — see doc comment */ }
+            var watcher: FolderWatcher? = FolderWatcher(url: root) {
+                // not asserted here — see doc comment
+            }
             XCTAssertNotNil(watcher)
-            try? "x".write(to: root.appendingPathComponent("f.md"),
-                           atomically: true, encoding: .utf8)
+            try? "x".write(
+                to: root.appendingPathComponent("f.md"),
+                atomically: true, encoding: .utf8)
             watcher = nil
             // No assertion beyond "the loop above did not crash" — this is
             // honestly a smoke test, not a proof; see the doc comment.

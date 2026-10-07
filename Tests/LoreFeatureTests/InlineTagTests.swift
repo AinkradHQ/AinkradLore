@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 final class InlineTagTests: XCTestCase {
@@ -40,7 +41,8 @@ final class InlineTagTests: XCTestCase {
         let url = FileManager.default.temporaryDirectory
             .appendingPathComponent("inline-tag-\(UUID()).md")
         let tagList = tags.map { "  - \($0)" }.joined(separator: "\n")
-        let frontmatter = tags.isEmpty
+        let frontmatter =
+            tags.isEmpty
             ? "---\nid: a\ntitle: T\n---\n"
             : "---\nid: a\ntitle: T\ntags:\n\(tagList)\n---\n"
         try (frontmatter + body).write(to: url, atomically: true, encoding: .utf8)

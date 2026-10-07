@@ -23,9 +23,13 @@ public struct DocumentLink: Equatable, Sendable {
     public let isEmbed: Bool
     public let syntax: LinkSyntax
 
-    public init(rawTarget: String, displayText: String? = nil, isEmbed: Bool = false,
-                syntax: LinkSyntax = .wikilink) {
-        self.rawTarget = rawTarget; self.displayText = displayText; self.isEmbed = isEmbed
+    public init(
+        rawTarget: String, displayText: String? = nil, isEmbed: Bool = false,
+        syntax: LinkSyntax = .wikilink
+    ) {
+        self.rawTarget = rawTarget
+        self.displayText = displayText
+        self.isEmbed = isEmbed
         self.syntax = syntax
     }
 
@@ -59,7 +63,8 @@ public struct LinkSpan: Equatable, Sendable {
     public let link: DocumentLink
     public let targetRange: Range<Int>
     public init(link: DocumentLink, targetRange: Range<Int>) {
-        self.link = link; self.targetRange = targetRange
+        self.link = link
+        self.targetRange = targetRange
     }
 }
 
@@ -95,9 +100,11 @@ public enum LinkParser {
     ///   misplace suppression, which is why `MarkdownDocumentModel` withholds
     ///   them for CRLF documents.
     static func spans(in body: String, codeRegions: [CodeRegion]?) -> [LinkSpan] {
-        spans(in: body, suppression: codeRegions.map {
-            CodeRegionIndex(regions: $0, kinds: MarkdownDocumentModel.linkSuppressingKinds)
-        })
+        spans(
+            in: body,
+            suppression: codeRegions.map {
+                CodeRegionIndex(regions: $0, kinds: MarkdownDocumentModel.linkSuppressingKinds)
+            })
     }
 
     /// The same injection point, pre-indexed. Callers that hold a
@@ -116,7 +123,8 @@ public enum LinkParser {
     ///   offsets therefore describe the NORMALISED string rather than `body` —
     ///   the caller must not use the table against `body`'s UTF-16 offsets.
     static func scan(_ body: String, suppression: CodeRegionIndex?)
-        -> (spans: [LinkSpan], offsets: CharacterOffsetMap, normalised: Bool) {
+        -> (spans: [LinkSpan], offsets: CharacterOffsetMap, normalised: Bool)
+    {
         // CRLF documents — Windows-authored vaults, sync clients, `core.autocrlf`
         // checkouts — do not split on `"\n"`: Swift treats `"\r\n"` as ONE
         // Character, which is not equal to `"\n"`, so the whole file scans as a
@@ -124,7 +132,8 @@ public enum LinkParser {
         // that, and it is offset-SAFE precisely because `"\r\n"` is one
         // Character: every span offset still indexes the caller's own string.
         let normalised = body.contains("\r\n")
-        let text = normalised
+        let text =
+            normalised
             ? body.replacingOccurrences(of: "\r\n", with: "\n") : body
 
         // Code regions now come from the ONE markdown parse, not from a second
@@ -161,7 +170,8 @@ public enum LinkParser {
         // `spans(in:codeRegions:)` above. Same set, same answer, O(log n).
         let isInsideCode: (Int) -> Bool = { characterOffset in
             guard characterOffset >= 0,
-                  characterOffset < utf16OffsetForCharacterOffset.count else { return false }
+                characterOffset < utf16OffsetForCharacterOffset.count
+            else { return false }
             return index.contains(utf16OffsetForCharacterOffset[characterOffset])
         }
 
@@ -173,17 +183,21 @@ public enum LinkParser {
         for line in text.split(separator: "\n", omittingEmptySubsequences: false) {
             // +1 for the "\n" removed by split
             defer { lineStartCharacterOffset += line.count + 1 }
-            found.append(contentsOf: spans(inLine: String(line),
-                                           offsetBy: lineStartCharacterOffset,
-                                           isInsideCode: isInsideCode))
+            found.append(
+                contentsOf: spans(
+                    inLine: String(line),
+                    offsetBy: lineStartCharacterOffset,
+                    isInsideCode: isInsideCode))
         }
         return (found, utf16OffsetForCharacterOffset, normalised)
     }
 
     /// - Parameter isInsideCode: takes an ABSOLUTE character offset into the
     ///   scanned string (not a line-relative one).
-    private static func spans(inLine line: String, offsetBy base: Int,
-                              isInsideCode: (Int) -> Bool) -> [LinkSpan] {
+    private static func spans(
+        inLine line: String, offsetBy base: Int,
+        isInsideCode: (Int) -> Bool
+    ) -> [LinkSpan] {
         var result: [LinkSpan] = []
         let chars = Array(line)
         var i = 0
@@ -192,8 +206,9 @@ public enum LinkParser {
                 let isEmbed = i > 0 && chars[i - 1] == "!"
                 if let close = closingBrackets(chars, from: i + 2) {
                     let inner = String(chars[(i + 2)..<close])
-                    let span = wikilink(inner, isEmbed: isEmbed, innerStart: i + 2,
-                                        offsetBy: base)
+                    let span = wikilink(
+                        inner, isEmbed: isEmbed, innerStart: i + 2,
+                        offsetBy: base)
                     if let span, isInsideCode(span.targetRange.lowerBound) {
                         // Suppressed: step ONE character rather than past the
                         // closing brackets. A `[[` that opened inside inline
@@ -231,19 +246,25 @@ public enum LinkParser {
         return nil
     }
 
-    private static func wikilink(_ inner: String, isEmbed: Bool, innerStart: Int,
-                                 offsetBy base: Int) -> LinkSpan? {
+    private static func wikilink(
+        _ inner: String, isEmbed: Bool, innerStart: Int,
+        offsetBy base: Int
+    ) -> LinkSpan? {
         let parts = inner.split(separator: "|", maxSplits: 1, omittingEmptySubsequences: false)
         let target = parts[0].trimmingCharacters(in: .whitespaces)
         guard !target.isEmpty else { return nil }
-        let display = parts.count > 1
+        let display =
+            parts.count > 1
             ? parts[1].trimmingCharacters(in: .whitespaces) : nil
-        let link = DocumentLink(rawTarget: target,
-                                displayText: (display?.isEmpty ?? true) ? nil : display,
-                                isEmbed: isEmbed, syntax: .wikilink)
-        return LinkSpan(link: link,
-                        targetRange: range(of: target, within: String(parts[0]),
-                                           startingAt: base + innerStart))
+        let link = DocumentLink(
+            rawTarget: target,
+            displayText: (display?.isEmpty ?? true) ? nil : display,
+            isEmbed: isEmbed, syntax: .wikilink)
+        return LinkSpan(
+            link: link,
+            targetRange: range(
+                of: target, within: String(parts[0]),
+                startingAt: base + innerStart))
     }
 
     /// The range the TRIMMED target occupies, given the untrimmed slice it came
@@ -251,17 +272,22 @@ public enum LinkParser {
     /// built, so `[[  Design  ]]` must still point at `Design` and not at the
     /// spaces around it — a rewrite that included them would silently reflow
     /// the user's spacing.
-    private static func range(of target: String, within slice: String,
-                              startingAt start: Int) -> Range<Int> {
+    private static func range(
+        of target: String, within slice: String,
+        startingAt start: Int
+    ) -> Range<Int> {
         let leading = slice.prefix { $0 == " " || $0 == "\t" }.count
         return (start + leading)..<(start + leading + target.count)
     }
 
     /// `[text](target)` — local targets only. A URL with a scheme is not a
     /// vault link and must never enter the graph.
-    private static func markdownLink(_ chars: [Character], from start: Int,
-                                     offsetBy base: Int)
-        -> (span: LinkSpan, end: Int)? {
+    private static func markdownLink(
+        _ chars: [Character], from start: Int,
+        offsetBy base: Int
+    )
+        -> (span: LinkSpan, end: Int)?
+    {
         var i = start + 1
         while i < chars.count, chars[i] != "]" { i += 1 }
         guard i + 1 < chars.count, chars[i] == "]", chars[i + 1] == "(" else { return nil }
@@ -274,12 +300,17 @@ public enum LinkParser {
         guard !target.isEmpty, !target.contains("://"), !target.hasPrefix("mailto:") else {
             return nil
         }
-        let link = DocumentLink(rawTarget: target, displayText: text.isEmpty ? nil : text,
-                                isEmbed: false, syntax: .markdown)
-        return (LinkSpan(link: link,
-                         targetRange: range(of: target, within: slice,
-                                            startingAt: base + i + 2)),
-                j + 1)
+        let link = DocumentLink(
+            rawTarget: target, displayText: text.isEmpty ? nil : text,
+            isEmbed: false, syntax: .markdown)
+        return (
+            LinkSpan(
+                link: link,
+                targetRange: range(
+                    of: target, within: slice,
+                    startingAt: base + i + 2)),
+            j + 1
+        )
     }
 }
 

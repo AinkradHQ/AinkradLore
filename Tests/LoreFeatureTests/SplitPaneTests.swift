@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 /// The second pane — store behaviour only. Layout and focus indication are the
@@ -10,8 +11,9 @@ final class SplitPaneTests: XCTestCase {
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent("lore-\(label)-\(UUID())")
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
-        let store = LoreStore(documents: FakeDocs(),
-                              indexPath: root.appendingPathComponent(".idx.sqlite"))
+        let store = LoreStore(
+            documents: FakeDocs(),
+            indexPath: root.appendingPathComponent(".idx.sqlite"))
         try store.setVaultRootForTesting(root)
         return (root, store)
     }
@@ -41,10 +43,12 @@ final class SplitPaneTests: XCTestCase {
         store.openInSecondaryPane(url: try note(root, "b.md"))
 
         XCTAssertTrue(store.isSplit)
-        XCTAssertEqual(store.selectedTab?.url.lastPathComponent, "b.md",
-                       "commands must act on the pane just opened")
-        XCTAssertEqual(store.pane.session?.url.lastPathComponent, "a.md",
-                       "the first pane keeps its own document")
+        XCTAssertEqual(
+            store.selectedTab?.url.lastPathComponent, "b.md",
+            "commands must act on the pane just opened")
+        XCTAssertEqual(
+            store.pane.session?.url.lastPathComponent, "a.md",
+            "the first pane keeps its own document")
     }
 
     /// An empty pane beside an empty pane is not a state worth reaching.
@@ -69,10 +73,12 @@ final class SplitPaneTests: XCTestCase {
         store.closeSecondaryPane()
 
         XCTAssertFalse(store.isSplit)
-        XCTAssertEqual(store.selectedTab?.url.lastPathComponent, "a.md",
-                       "focus must return to the pane that still exists")
-        XCTAssertTrue(store.tabs.contains { $0.url.lastPathComponent == "b.md" },
-                      "the document stays reachable by Back or ⌘P")
+        XCTAssertEqual(
+            store.selectedTab?.url.lastPathComponent, "a.md",
+            "focus must return to the pane that still exists")
+        XCTAssertTrue(
+            store.tabs.contains { $0.url.lastPathComponent == "b.md" },
+            "the document stays reachable by Back or ⌘P")
     }
 
     /// Focus pointing at a pane that does not exist is the one way commands
@@ -81,8 +87,9 @@ final class SplitPaneTests: XCTestCase {
         let (root, store) = try vault("split-focus")
         store.open(url: try note(root, "a.md"))
         store.focusPane(secondary: true)
-        XCTAssertEqual(store.selectedTab?.url.lastPathComponent, "a.md",
-                       "focusing a pane that does not exist must be ignored")
+        XCTAssertEqual(
+            store.selectedTab?.url.lastPathComponent, "a.md",
+            "focusing a pane that does not exist must be ignored")
 
         store.openInSecondaryPane(url: try note(root, "b.md"))
         store.closeSecondaryPane()
@@ -110,16 +117,19 @@ final class SplitPaneTests: XCTestCase {
         for i in 0..<(LoreStore.warmSessionLimit + 5) {
             _ = try note(root, "filler\(i).md")
         }
-        await store.settleForTesting(); try store.rebuild()
+        await store.settleForTesting()
+        try store.rebuild()
         for i in 0..<(LoreStore.warmSessionLimit + 5) {
             store.warmForTesting(root.appendingPathComponent("filler\(i).md"))
         }
         store.evictColdSessions()
 
-        XCTAssertTrue(store.tabs.contains { $0.url.lastPathComponent == "left.md" },
-                      "the first pane's document was evicted while on screen")
-        XCTAssertTrue(store.tabs.contains { $0.url.lastPathComponent == "right.md" },
-                      "the second pane's document was evicted while on screen")
+        XCTAssertTrue(
+            store.tabs.contains { $0.url.lastPathComponent == "left.md" },
+            "the first pane's document was evicted while on screen")
+        XCTAssertTrue(
+            store.tabs.contains { $0.url.lastPathComponent == "right.md" },
+            "the second pane's document was evicted while on screen")
     }
 
     // MARK: - Divider
@@ -154,15 +164,17 @@ final class SplitPaneTests: XCTestCase {
         XCTAssertTrue(store.canGoBack, "the first pane has a trail")
 
         store.openInSecondaryPane(url: try note(root, "c.md"))
-        XCTAssertFalse(store.canGoBack,
-                       "a freshly opened pane has nowhere to go back to")
+        XCTAssertFalse(
+            store.canGoBack,
+            "a freshly opened pane has nowhere to go back to")
 
         store.focusPane(secondary: false)
         XCTAssertTrue(store.canGoBack, "the first pane's trail is untouched")
         store.goBack()
         XCTAssertEqual(store.selectedTab?.url.lastPathComponent, "a.md")
-        XCTAssertEqual(store.secondaryPane?.session?.url.lastPathComponent, "c.md",
-                       "going back in one pane must not move the other")
+        XCTAssertEqual(
+            store.secondaryPane?.session?.url.lastPathComponent, "c.md",
+            "going back in one pane must not move the other")
     }
 
     /// ⌘W closes a DOCUMENT; the split collapsing behind it is the

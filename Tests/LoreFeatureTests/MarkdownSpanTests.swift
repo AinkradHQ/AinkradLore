@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 final class MarkdownDocumentModelTests: XCTestCase {
@@ -107,8 +108,9 @@ final class MarkdownDocumentModelTests: XCTestCase {
     func test_tagsFencedAndIndentedCodeBlocksDifferently() {
         let model = MarkdownDocumentModel(
             fullText: "```\nfenced\n```\n\npara\n\n    indented\n")
-        XCTAssertEqual(model.codeRegions.map(\.kind),
-                       [.fencedCodeBlock, .indentedCodeBlock])
+        XCTAssertEqual(
+            model.codeRegions.map(\.kind),
+            [.fencedCodeBlock, .indentedCodeBlock])
     }
 
     /// Up to three leading spaces still make a fence.
@@ -166,8 +168,10 @@ final class MarkdownDocumentModelTests: XCTestCase {
         let model = MarkdownDocumentModel(fullText: text)
         let offset = (text as NSString).range(of: "indented").location
         XCTAssertTrue(model.isInsideCode(utf16Offset: offset))
-        XCTAssertFalse(model.isInsideCode(utf16Offset: offset,
-                                          kinds: MarkdownDocumentModel.linkSuppressingKinds))
+        XCTAssertFalse(
+            model.isInsideCode(
+                utf16Offset: offset,
+                kinds: MarkdownDocumentModel.linkSuppressingKinds))
     }
 }
 
@@ -199,7 +203,11 @@ final class MarkdownStyleSpanTests: XCTestCase {
         // The bug this milestone exists to fix: the regex styler bolded this.
         let spans = MarkdownDocumentModel(fullText: "```\n**not bold** # not heading\n```\n").styleSpans
         XCTAssertFalse(spans.contains { $0.kind == .strong })
-        XCTAssertFalse(spans.contains { if case .heading = $0.kind { return true }; return false })
+        XCTAssertFalse(
+            spans.contains {
+                if case .heading = $0.kind { return true }
+                return false
+            })
     }
 
     func test_taskCheckboxStateIsReported() {
@@ -213,8 +221,9 @@ final class MarkdownStyleSpanTests: XCTestCase {
         let ns = text as NSString
         for span in MarkdownDocumentModel(fullText: text).styleSpans {
             XCTAssertGreaterThanOrEqual(span.range.lowerBound, 0)
-            XCTAssertLessThanOrEqual(span.range.upperBound, ns.length,
-                                     "a span past the end would crash the text view")
+            XCTAssertLessThanOrEqual(
+                span.range.upperBound, ns.length,
+                "a span past the end would crash the text view")
         }
     }
 
@@ -228,9 +237,12 @@ final class MarkdownStyleSpanTests: XCTestCase {
         let span = MarkdownDocumentModel(fullText: text).styleSpans
             .first { $0.kind == .strong }
         XCTAssertNotNil(span)
-        XCTAssertEqual(ns.substring(with: NSRange(location: span!.range.lowerBound,
-                                                  length: span!.range.count)),
-                       "**bold**")
+        XCTAssertEqual(
+            ns.substring(
+                with: NSRange(
+                    location: span!.range.lowerBound,
+                    length: span!.range.count)),
+            "**bold**")
     }
 
     /// Frontmatter shifts every body offset; an emoji makes byte columns lie.
@@ -240,9 +252,12 @@ final class MarkdownStyleSpanTests: XCTestCase {
         let span = MarkdownDocumentModel(fullText: text).styleSpans
             .first { $0.kind == .heading(1) }
         XCTAssertNotNil(span)
-        XCTAssertEqual(ns.substring(with: NSRange(location: span!.range.lowerBound,
-                                                  length: span!.range.count)),
-                       "# 👍 Title")
+        XCTAssertEqual(
+            ns.substring(
+                with: NSRange(
+                    location: span!.range.lowerBound,
+                    length: span!.range.count)),
+            "# 👍 Title")
     }
 
     /// Wikilinks are not AST nodes; they come from `LinkParser`, whose ranges
@@ -253,9 +268,12 @@ final class MarkdownStyleSpanTests: XCTestCase {
         let span = MarkdownDocumentModel(fullText: text).styleSpans
             .first { $0.kind == .wikilink }
         XCTAssertNotNil(span)
-        XCTAssertEqual(ns.substring(with: NSRange(location: span!.range.lowerBound,
-                                                  length: span!.range.count)),
-                       "Design")
+        XCTAssertEqual(
+            ns.substring(
+                with: NSRange(
+                    location: span!.range.lowerBound,
+                    length: span!.range.count)),
+            "Design")
     }
 
     /// The link parser already suppresses links inside code; the styler must
@@ -310,9 +328,12 @@ final class MarkdownStyleSpanTests: XCTestCase {
         let span = MarkdownDocumentModel(fullText: text).styleSpans
             .first { $0.kind == .wikilink }
         XCTAssertNotNil(span)
-        XCTAssertEqual(ns.substring(with: NSRange(location: span!.range.lowerBound,
-                                                  length: span!.range.count)),
-                       "Design")
+        XCTAssertEqual(
+            ns.substring(
+                with: NSRange(
+                    location: span!.range.lowerBound,
+                    length: span!.range.count)),
+            "Design")
     }
 
     /// Injection must not change what the parser answers. Same document, one
@@ -332,8 +353,10 @@ final class MarkdownStyleSpanTests: XCTestCase {
 /// for why that is legal, so it is checked directly rather than trusted.
 final class CodeRegionIndexTests: XCTestCase {
 
-    private func linear(_ regions: [CodeRegion], _ kinds: Set<CodeRegionKind>?,
-                        _ offset: Int) -> Bool {
+    private func linear(
+        _ regions: [CodeRegion], _ kinds: Set<CodeRegionKind>?,
+        _ offset: Int
+    ) -> Bool {
         regions.contains {
             (kinds?.contains($0.kind) ?? true) && NSLocationInRange(offset, $0.range)
         }
@@ -363,8 +386,9 @@ final class CodeRegionIndexTests: XCTestCase {
         for kinds in kindSets {
             let index = CodeRegionIndex(regions: regions, kinds: kinds)
             for offset in -5...60 {
-                XCTAssertEqual(index.contains(offset), linear(regions, kinds, offset),
-                               "offset \(offset), kinds \(String(describing: kinds))")
+                XCTAssertEqual(
+                    index.contains(offset), linear(regions, kinds, offset),
+                    "offset \(offset), kinds \(String(describing: kinds))")
             }
         }
     }
@@ -383,8 +407,9 @@ final class CodeRegionIndexTests: XCTestCase {
             CodeRegion(range: NSRange(location: 0, length: 5), kind: .fencedCodeBlock),
             CodeRegion(range: NSRange(location: 5, length: 5), kind: .indentedCodeBlock),
         ]
-        let index = CodeRegionIndex(regions: regions,
-                                    kinds: MarkdownDocumentModel.linkSuppressingKinds)
+        let index = CodeRegionIndex(
+            regions: regions,
+            kinds: MarkdownDocumentModel.linkSuppressingKinds)
         XCTAssertTrue(index.contains(4))
         XCTAssertFalse(index.contains(5), "an indented block must not suppress")
     }
@@ -397,20 +422,27 @@ final class CharacterOffsetMapTests: XCTestCase {
     private func table(_ text: String) -> [Int] {
         var offsets: [Int] = []
         var running = 0
-        for character in text { offsets.append(running); running += character.utf16.count }
+        for character in text {
+            offsets.append(running)
+            running += character.utf16.count
+        }
         offsets.append(running)
         return offsets
     }
 
-    private func assertAgrees(_ text: String, file: StaticString = #filePath,
-                              line: UInt = #line) {
+    private func assertAgrees(
+        _ text: String, file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
         let expected = table(text)
         let map = CharacterOffsetMap.make(for: text)
-        XCTAssertEqual(map.count, expected.count, text.debugDescription,
-                       file: file, line: line)
+        XCTAssertEqual(
+            map.count, expected.count, text.debugDescription,
+            file: file, line: line)
         for i in 0..<expected.count {
-            XCTAssertEqual(map[i], expected[i], "\(text.debugDescription) at \(i)",
-                           file: file, line: line)
+            XCTAssertEqual(
+                map[i], expected[i], "\(text.debugDescription) at \(i)",
+                file: file, line: line)
         }
     }
 
@@ -456,11 +488,15 @@ final class MarkdownStyleCacheDeriveTests: XCTestCase {
         // either way.
         let text = "---\n# Above\n\n**bold**\n\n---\n\n# Below\n"
         let derived = MarkdownStyleCache.derive(text)
-        XCTAssertTrue(derived.spans.contains { $0.kind == .heading(1) &&
-            $0.range.lowerBound == (text as NSString).range(of: "# Above").location })
+        XCTAssertTrue(
+            derived.spans.contains {
+                $0.kind == .heading(1) && $0.range.lowerBound == (text as NSString).range(of: "# Above").location
+            })
         XCTAssertTrue(derived.spans.contains { $0.kind == .strong })
-        XCTAssertTrue(derived.spans.contains { $0.kind == .heading(1) &&
-            $0.range.lowerBound == (text as NSString).range(of: "# Below").location })
+        XCTAssertTrue(
+            derived.spans.contains {
+                $0.kind == .heading(1) && $0.range.lowerBound == (text as NSString).range(of: "# Below").location
+            })
     }
 }
 

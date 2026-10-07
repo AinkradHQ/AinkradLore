@@ -1,6 +1,7 @@
 import AppKit
 import WebKit
 import XCTest
+
 @testable import LoreFeature
 
 /// E1T3: ten notes in one pane must cost ONE editor surface.
@@ -13,7 +14,10 @@ final class CM6SurfacePoolTests: XCTestCase {
 
     private var windows: [NSWindow] = []
 
-    override func tearDown() { windows.removeAll(); super.tearDown() }
+    override func tearDown() {
+        windows.removeAll()
+        super.tearDown()
+    }
 
     /// The pool is a singleton, so one test's leftovers would decide another's
     /// assertions. `@MainActor` cannot be added to `setUp` (it overrides a
@@ -117,29 +121,36 @@ final class CM6SurfacePoolTests: XCTestCase {
         for _ in 0..<10 {
             let (view, isPreloaded) = pool.acquire { _ in }
             if !isPreloaded {
-                let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 800, height: 600),
-                                      styleMask: [.titled], backing: .buffered, defer: false)
+                let window = NSWindow(
+                    contentRect: NSRect(x: 0, y: 0, width: 800, height: 600),
+                    styleMask: [.titled], backing: .buffered, defer: false)
                 view.frame = window.contentLayoutRect
                 window.contentView = view
                 windows.append(window)
-                view.loadFileURL(index,
-                                 allowingReadAccessTo: index.deletingLastPathComponent())
+                view.loadFileURL(
+                    index,
+                    allowingReadAccessTo: index.deletingLastPathComponent())
                 settle(3)
             }
-            peakOurs = max(peakOurs,
-                           Self.webContentProcesses().filter { before[$0.key] == nil }.count)
+            peakOurs = max(
+                peakOurs,
+                Self.webContentProcesses().filter { before[$0.key] == nil }.count)
             pool.release(view, handlerName: "lore")
         }
 
         let ours = Self.webContentProcesses().filter { before[$0.key] == nil }
         let total = ours.values.reduce(0, +)
-        print(String(format: "POOL notes=10 surfaces=%d peakProcs=%d procs=%d rss=%.1fMB",
-                     pool.created, peakOurs, ours.count, total))
-        XCTAssertLessThanOrEqual(peakOurs, 1,
-                                 "ten notes must not open ten content processes")
-        XCTAssertLessThan(total, 60,
-                          "one pane's memory must stay near the ~40 MB single-surface "
-                          + "figure, not multiply by the number of notes opened")
+        print(
+            String(
+                format: "POOL notes=10 surfaces=%d peakProcs=%d procs=%d rss=%.1fMB",
+                pool.created, peakOurs, ours.count, total))
+        XCTAssertLessThanOrEqual(
+            peakOurs, 1,
+            "ten notes must not open ten content processes")
+        XCTAssertLessThan(
+            total, 60,
+            "one pane's memory must stay near the ~40 MB single-surface "
+                + "figure, not multiply by the number of notes opened")
     }
 
     /// The pool is bounded. A returned surface beyond capacity is dropped
@@ -174,7 +185,9 @@ final class CM6SurfacePoolTests: XCTestCase {
     }
 
     private final class Sink: NSObject, WKScriptMessageHandler {
-        func userContentController(_ c: WKUserContentController,
-                                   didReceive message: WKScriptMessage) {}
+        func userContentController(
+            _ c: WKUserContentController,
+            didReceive message: WKScriptMessage
+        ) {}
     }
 }

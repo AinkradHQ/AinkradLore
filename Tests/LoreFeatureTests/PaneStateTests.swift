@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 /// `PaneState` — one pane's document and its history.
@@ -48,7 +49,7 @@ final class PaneStateTests: XCTestCase {
         var pane = PaneState()
         pane.recordVisit(url("a.md"), key: key)
         pane.recordVisit(url("b.md"), key: key)
-        pane.historyIndex = 0                       // as if Back had been pressed
+        pane.historyIndex = 0  // as if Back had been pressed
         pane.recordVisit(url("c.md"), key: key)
 
         XCTAssertEqual(pane.history.map(\.lastPathComponent), ["a.md", "c.md"])
@@ -87,7 +88,8 @@ final class PaneStateTests: XCTestCase {
         let collapsing: (URL) -> String = { _ in "same" }
         pane.recordVisit(url("a.md"), key: collapsing)
         pane.recordVisit(url("b.md"), key: collapsing)
-        XCTAssertEqual(pane.history.count, 1,
-                       "the key function is consulted, not the URL directly")
+        XCTAssertEqual(
+            pane.history.count, 1,
+            "the key function is consulted, not the URL directly")
     }
 }

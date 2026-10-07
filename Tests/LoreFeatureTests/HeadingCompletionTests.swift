@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 /// `[[Doc#…]]` heading completion.
@@ -49,25 +50,30 @@ final class HeadingCompletionTests: XCTestCase {
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent("lore-\(label)-\(UUID())")
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
-        let store = LoreStore(documents: FakeDocs(),
-                              indexPath: root.appendingPathComponent(".idx.sqlite"))
+        let store = LoreStore(
+            documents: FakeDocs(),
+            indexPath: root.appendingPathComponent(".idx.sqlite"))
         try store.setVaultRootForTesting(root)
         return (root, store)
     }
 
     private func write(_ root: URL, _ name: String, _ body: String) throws {
         try "---\nid: \(name)\ntitle: \(name)\n---\n\(body)"
-            .write(to: root.appendingPathComponent("\(name).md"),
-                   atomically: true, encoding: .utf8)
+            .write(
+                to: root.appendingPathComponent("\(name).md"),
+                atomically: true, encoding: .utf8)
     }
 
     func test_headingsComeBackForANamedDocument() async throws {
         let (root, store) = try vault("headings")
         try write(root, "Design", "# Overview\n\ntext\n\n## Deployment and rollback\n\nmore")
-        await store.settleForTesting(); try store.rebuild()
+        await store.settleForTesting()
+        try store.rebuild()
 
-        let found = try XCTUnwrap(store.headingCompletions(inDocumentNamed: "Design",
-                                                          matching: ""))
+        let found = try XCTUnwrap(
+            store.headingCompletions(
+                inDocumentNamed: "Design",
+                matching: ""))
         XCTAssertEqual(found.headings, ["Overview", "Deployment and rollback"])
     }
 
@@ -76,14 +82,19 @@ final class HeadingCompletionTests: XCTestCase {
     func test_filteringMatchesAnywhereInTheHeading() async throws {
         let (root, store) = try vault("headings-filter")
         try write(root, "Design", "# Overview\n\n## Deployment and rollback")
-        await store.settleForTesting(); try store.rebuild()
+        await store.settleForTesting()
+        try store.rebuild()
 
-        XCTAssertEqual(store.headingCompletions(inDocumentNamed: "Design",
-                                                matching: "rollback")?.headings,
-                       ["Deployment and rollback"])
-        XCTAssertEqual(store.headingCompletions(inDocumentNamed: "Design",
-                                                matching: "ROLL")?.headings.count, 1,
-                       "matching must ignore case")
+        XCTAssertEqual(
+            store.headingCompletions(
+                inDocumentNamed: "Design",
+                matching: "rollback")?.headings,
+            ["Deployment and rollback"])
+        XCTAssertEqual(
+            store.headingCompletions(
+                inDocumentNamed: "Design",
+                matching: "ROLL")?.headings.count, 1,
+            "matching must ignore case")
     }
 
     /// A name still being typed resolves to nothing, which is ordinary rather
@@ -97,9 +108,11 @@ final class HeadingCompletionTests: XCTestCase {
     func test_adocumentWithNoHeadingsYieldsNothing() async throws {
         let (root, store) = try vault("headings-none")
         try write(root, "Flat", "just prose, no headings at all")
-        await store.settleForTesting(); try store.rebuild()
-        XCTAssertEqual(store.headingCompletions(inDocumentNamed: "Flat", matching: "")?.headings,
-                       [])
+        await store.settleForTesting()
+        try store.rebuild()
+        XCTAssertEqual(
+            store.headingCompletions(inDocumentNamed: "Flat", matching: "")?.headings,
+            [])
     }
 
     /// The cache is per DOCUMENT: switching the named document must not keep
@@ -108,14 +121,18 @@ final class HeadingCompletionTests: XCTestCase {
         let (root, store) = try vault("headings-cache")
         try write(root, "First", "# Alpha")
         try write(root, "Second", "# Beta")
-        await store.settleForTesting(); try store.rebuild()
+        await store.settleForTesting()
+        try store.rebuild()
 
-        XCTAssertEqual(store.headingCompletions(inDocumentNamed: "First", matching: "")?.headings,
-                       ["Alpha"])
-        XCTAssertEqual(store.headingCompletions(inDocumentNamed: "Second", matching: "")?.headings,
-                       ["Beta"])
-        XCTAssertEqual(store.headingCompletions(inDocumentNamed: "First", matching: "")?.headings,
-                       ["Alpha"], "switching back must not serve the other document")
+        XCTAssertEqual(
+            store.headingCompletions(inDocumentNamed: "First", matching: "")?.headings,
+            ["Alpha"])
+        XCTAssertEqual(
+            store.headingCompletions(inDocumentNamed: "Second", matching: "")?.headings,
+            ["Beta"])
+        XCTAssertEqual(
+            store.headingCompletions(inDocumentNamed: "First", matching: "")?.headings,
+            ["Alpha"], "switching back must not serve the other document")
     }
 
     /// The link written must reach the document whose headings were OFFERED.
@@ -132,25 +149,31 @@ final class HeadingCompletionTests: XCTestCase {
             at: root.appendingPathComponent("Archive"), withIntermediateDirectories: true)
         try write(root, "Design", "# Current overview")
         try "---\nid: old\ntitle: Design\n---\n# Old overview"
-            .write(to: root.appendingPathComponent("Archive/Design.md"),
-                   atomically: true, encoding: .utf8)
-        await store.settleForTesting(); try store.rebuild()
+            .write(
+                to: root.appendingPathComponent("Archive/Design.md"),
+                atomically: true, encoding: .utf8)
+        await store.settleForTesting()
+        try store.rebuild()
 
-        let found = try XCTUnwrap(store.headingCompletions(inDocumentNamed: "Design",
-                                                           matching: ""))
+        let found = try XCTUnwrap(
+            store.headingCompletions(
+                inDocumentNamed: "Design",
+                matching: ""))
         // Whichever the resolver preferred, the target must resolve back to
         // THAT file — not merely repeat what was typed and hope.
         let resolved = try XCTUnwrap(store.resolveLink(found.insertTarget))
         let offeringOverview = found.headings.first
         let contents = try String(contentsOf: resolved, encoding: .utf8)
-        XCTAssertTrue(contents.contains(try XCTUnwrap(offeringOverview)),
-                      "the inserted target reaches a document without the heading offered")
+        XCTAssertTrue(
+            contents.contains(try XCTUnwrap(offeringOverview)),
+            "the inserted target reaches a document without the heading offered")
     }
 
     // MARK: - The rows it produces
 
     func test_aheadingRowReadsAsTheHeading() {
-        XCTAssertEqual(LinkCompletionItem.heading(document: "Design", text: "Overview").label,
-                       "Overview")
+        XCTAssertEqual(
+            LinkCompletionItem.heading(document: "Design", text: "Overview").label,
+            "Overview")
     }
 }

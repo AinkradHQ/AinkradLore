@@ -94,15 +94,15 @@ public enum MarkdownCallout {
         /// `MarkdownBlockBackgrounds.Palette`.
         public var hue: CGFloat {
             switch self {
-            case .note, .info: return 210      // blue
-            case .abstract, .tip: return 175   // teal
-            case .todo, .question: return 45   // amber
-            case .success: return 140          // green
-            case .warning: return 30           // orange
-            case .failure, .danger: return 0   // red
-            case .bug: return 350              // crimson
-            case .example: return 275          // violet
-            case .quote: return 0              // neutral, see isNeutral
+            case .note, .info: return 210  // blue
+            case .abstract, .tip: return 175  // teal
+            case .todo, .question: return 45  // amber
+            case .success: return 140  // green
+            case .warning: return 30  // orange
+            case .failure, .danger: return 0  // red
+            case .bug: return 350  // crimson
+            case .example: return 275  // violet
+            case .quote: return 0  // neutral, see isNeutral
             }
         }
 
@@ -138,7 +138,8 @@ public enum MarkdownCallout {
     ///   - text: the WHOLE editor string, which `range` indexes.
     public static func header(ofQuoteAt range: Range<Int>, in text: NSString) -> Header? {
         guard range.lowerBound >= 0, range.upperBound <= text.length,
-              range.lowerBound < range.upperBound else { return nil }
+            range.lowerBound < range.upperBound
+        else { return nil }
         // The quote's first line only. A `[!note]` on line three is prose.
         let firstLine = text.lineRange(for: NSRange(location: range.lowerBound, length: 0))
         let lineEnd = min(NSMaxRange(firstLine), range.upperBound)
@@ -152,16 +153,18 @@ public enum MarkdownCallout {
             if unit == 0x3E || unit == 0x20 || unit == 0x09 { index += 1 } else { break }
         }
         guard index + 2 < lineEnd,
-              text.character(at: index) == 0x5B,        // [
-              text.character(at: index + 1) == 0x21     // !
+            text.character(at: index) == 0x5B,  // [
+            text.character(at: index + 1) == 0x21  // !
         else { return nil }
 
         // The type name runs to the closing bracket, on this line.
         var close = index + 2
         while close < lineEnd, text.character(at: close) != 0x5D { close += 1 }
         guard close < lineEnd else { return nil }
-        let name = text.substring(with: NSRange(location: index + 2,
-                                                length: close - (index + 2)))
+        let name = text.substring(
+            with: NSRange(
+                location: index + 2,
+                length: close - (index + 2)))
         guard !name.isEmpty, let kind = Kind.named(name) else { return nil }
 
         // An optional fold marker sits immediately after the `]`.
@@ -169,24 +172,29 @@ public enum MarkdownCallout {
         var foldable = false
         if markerEnd < lineEnd {
             let unit = text.character(at: markerEnd)
-            if unit == 0x2D || unit == 0x2B { foldable = true; markerEnd += 1 }   // - +
+            if unit == 0x2D || unit == 0x2B {
+                foldable = true
+                markerEnd += 1
+            }  // - +
         }
 
         // Whatever is left on the line, minus surrounding whitespace, is the
         // author's title.
         var titleStart = markerEnd
         while titleStart < lineEnd,
-              text.character(at: titleStart) == 0x20
-                || text.character(at: titleStart) == 0x09 { titleStart += 1 }
+            text.character(at: titleStart) == 0x20
+                || text.character(at: titleStart) == 0x09
+        { titleStart += 1 }
         var titleEnd = lineEnd
         while titleEnd > titleStart {
             let unit = text.character(at: titleEnd - 1)
             guard unit == 0x20 || unit == 0x09 || unit == 0x0A || unit == 0x0D else { break }
             titleEnd -= 1
         }
-        return Header(kind: kind,
-                      markerRange: index..<markerEnd,
-                      titleRange: titleEnd > titleStart ? titleStart..<titleEnd : nil,
-                      isFoldable: foldable)
+        return Header(
+            kind: kind,
+            markerRange: index..<markerEnd,
+            titleRange: titleEnd > titleStart ? titleStart..<titleEnd : nil,
+            isFoldable: foldable)
     }
 }

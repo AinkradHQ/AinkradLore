@@ -85,11 +85,14 @@ public struct SourceOffsetMap: Sendable {
         return bodyUTF16Offset + table[column - 1]
     }
 
-    public func utf16Range(fromLine: Int, fromColumn: Int,
-                           toLine: Int, toColumn: Int) -> NSRange? {
+    public func utf16Range(
+        fromLine: Int, fromColumn: Int,
+        toLine: Int, toColumn: Int
+    ) -> NSRange? {
         guard let lower = utf16Offset(line: fromLine, column: fromColumn),
-              let upper = utf16Offset(line: toLine, column: toColumn),
-              upper >= lower else { return nil }
+            let upper = utf16Offset(line: toLine, column: toColumn),
+            upper >= lower
+        else { return nil }
         return NSRange(location: lower, length: upper - lower)
     }
 }

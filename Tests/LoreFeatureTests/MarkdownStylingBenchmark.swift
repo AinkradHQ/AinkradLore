@@ -1,6 +1,7 @@
-import XCTest
 import AppKit
 import SwiftUI
+import XCTest
+
 @testable import LoreFeature
 
 /// Measurements, not correctness assertions — the M2a claim that AST styling is
@@ -28,7 +29,7 @@ final class MarkdownStylingBenchmark: XCTestCase {
     /// `test_theWikilinkScanAlone` rather than by hand, so it stays comparable.
     func test_parsingALargeDocumentIsFastEnoughToDebounce() {
         let paragraph = "Some **bold** text with a [[Link]] and `code`.\n\n"
-        let body = String(repeating: paragraph, count: 5_000)   // ~230 KB
+        let body = String(repeating: paragraph, count: 5_000)  // ~230 KB
         XCTAssertGreaterThan((body as NSString).length, 200_000)
 
         measure {
@@ -86,8 +87,9 @@ final class MarkdownStylingBenchmark: XCTestCase {
     }
 
     func test_capsAreOrdered() {
-        XCTAssertLessThan(MarkdownDocumentModel.stylingViewportCap,
-                          MarkdownDocumentModel.stylingHardCap)
+        XCTAssertLessThan(
+            MarkdownDocumentModel.stylingViewportCap,
+            MarkdownDocumentModel.stylingHardCap)
     }
 }
 
@@ -96,7 +98,8 @@ final class MarkdownStylingBenchmark: XCTestCase {
 final class MarkdownStylingCacheTests: XCTestCase {
 
     private func makeEditor(_ text: String)
-        -> (MarkdownEditor.Coordinator, NSTextView, Binding<String>) {
+        -> (MarkdownEditor.Coordinator, NSTextView, Binding<String>)
+    {
         var stored = text
         let binding = Binding<String>(get: { stored }, set: { stored = $0 })
         let coordinator = MarkdownEditor.Coordinator(text: binding, tokens: TestTokens.make())
@@ -119,8 +122,9 @@ final class MarkdownStylingCacheTests: XCTestCase {
             for character in "hello world" {
                 tv.insertText(String(character), replacementRange: tv.selectedRange())
             }
-            XCTAssertEqual(MarkdownParseCounter.count, 0,
-                           "11 keystrokes must cost zero markdown parses")
+            XCTAssertEqual(
+                MarkdownParseCounter.count, 0,
+                "11 keystrokes must cost zero markdown parses")
         }
     }
 
@@ -148,8 +152,9 @@ final class MarkdownStylingCacheTests: XCTestCase {
             coordinator.applyStyles()
             coordinator.applyStyles()
             XCTAssertEqual(MarkdownParseCounter.count, 1)
-            XCTAssertTrue(coordinator.cachedSpansForTesting.contains { $0.kind == .heading(1) },
-                          "and it must be styled by the time applyStyles returns")
+            XCTAssertTrue(
+                coordinator.cachedSpansForTesting.contains { $0.kind == .heading(1) },
+                "and it must be styled by the time applyStyles returns")
         }
     }
 
@@ -159,24 +164,28 @@ final class MarkdownStylingCacheTests: XCTestCase {
     func test_externallyReplacedLargeTextDoesNotParseOnTheMainActor() {
         let (coordinator, tv, _) = makeEditor("start")
         withExtendedLifetime(coordinator) {
-            let large = "# Replaced\n\n**bold**\n\n"
+            let large =
+                "# Replaced\n\n**bold**\n\n"
                 + String(repeating: "Some prose with a [[Link]] in it.\n\n", count: 2_000)
             XCTAssertGreaterThan(large.utf16.count, MarkdownStyleCache.synchronousParseCap)
             resetParseCounter()
             tv.string = large
             coordinator.applyStyles()
-            XCTAssertEqual(MarkdownParseCounter.count, 0,
-                           "a large document must not be parsed on the main actor")
-            XCTAssertTrue(coordinator.styleCache.describes(large),
-                          "but the cache must claim currency at once, "
-                          + "or every redraw re-enters this path")
+            XCTAssertEqual(
+                MarkdownParseCounter.count, 0,
+                "a large document must not be parsed on the main actor")
+            XCTAssertTrue(
+                coordinator.styleCache.describes(large),
+                "but the cache must claim currency at once, "
+                    + "or every redraw re-enters this path")
 
             let landed = expectation(description: "off-actor parse landed")
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { landed.fulfill() }
             wait(for: [landed], timeout: 3)
             XCTAssertEqual(MarkdownParseCounter.count, 1, "and exactly one parse, off-actor")
-            XCTAssertTrue(coordinator.cachedSpansForTesting.contains { $0.kind == .strong },
-                          "the document must end up styled")
+            XCTAssertTrue(
+                coordinator.cachedSpansForTesting.contains { $0.kind == .strong },
+                "the document must end up styled")
         }
     }
 
@@ -194,16 +203,18 @@ final class MarkdownStylingCacheTests: XCTestCase {
             tv.setSelectedRange(NSRange(location: 0, length: 0))
             for character in "# " { tv.insertText(String(character), replacementRange: tv.selectedRange()) }
             let duringBurst = MarkdownParseCounter.count
-            XCTAssertLessThanOrEqual(duringBurst, 2,
-                                     "at most one block parse per typed character")
+            XCTAssertLessThanOrEqual(
+                duringBurst, 2,
+                "at most one block parse per typed character")
 
             let parsed = expectation(description: "debounced parse")
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { parsed.fulfill() }
             wait(for: [parsed], timeout: 2)
 
-            XCTAssertEqual(MarkdownParseCounter.count, duringBurst + 1,
-                           "exactly ONE document parse for the whole burst, "
-                           + "not one per keystroke")
+            XCTAssertEqual(
+                MarkdownParseCounter.count, duringBurst + 1,
+                "exactly ONE document parse for the whole burst, "
+                    + "not one per keystroke")
             XCTAssertTrue(coordinator.cachedSpansForTesting.contains { $0.kind == .heading(1) })
         }
     }
@@ -216,12 +227,14 @@ final class MarkdownStylingCacheTests: XCTestCase {
         var cache = MarkdownStyleCache()
         resetParseCounter()
         cache.reparse(huge)
-        XCTAssertEqual(MarkdownParseCounter.count, 0,
-                       "an over-cap document must cost zero parses")
+        XCTAssertEqual(
+            MarkdownParseCounter.count, 0,
+            "an over-cap document must cost zero parses")
         XCTAssertTrue(cache.spans.isEmpty)
         XCTAssertTrue(cache.isOverHardCap, "the editor must still say styling is off")
-        XCTAssertTrue(cache.describes(huge),
-                      "the cache must claim currency, or every redraw re-enters this path")
+        XCTAssertTrue(
+            cache.describes(huge),
+            "the cache must claim currency, or every redraw re-enters this path")
     }
 
     /// The guard must not swallow ordinary documents.
@@ -255,14 +268,16 @@ final class MarkdownStylingCacheTests: XCTestCase {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { settled.fulfill() }
             wait(for: [settled], timeout: 2)
 
-            XCTAssertTrue(coordinator.styleCache.describes(tv.string),
-                          "the cache must describe the text on screen, not the snapshot")
+            XCTAssertTrue(
+                coordinator.styleCache.describes(tv.string),
+                "the cache must describe the text on screen, not the snapshot")
             let limit = (tv.string as NSString).length
             for span in coordinator.cachedSpansForTesting {
                 XCTAssertLessThanOrEqual(span.range.upperBound, limit)
             }
-            XCTAssertTrue(coordinator.cachedSpansForTesting.contains { $0.kind == .strong },
-                          "and it must be the spans of THAT text")
+            XCTAssertTrue(
+                coordinator.cachedSpansForTesting.contains { $0.kind == .strong },
+                "and it must be the spans of THAT text")
         }
     }
 
@@ -312,8 +327,9 @@ final class MarkdownStylingCacheTests: XCTestCase {
         cache.reparse("# A\n\n**b**\n")
         let before = cache.spans.first { $0.kind == .strong }!.range
         // An insertion in the blank line, entirely before the strong span.
-        cache.shift(editedRange: NSRange(location: 4, length: 0), delta: 3,
-                    newText: "# A\nxxx\n**b**\n")
+        cache.shift(
+            editedRange: NSRange(location: 4, length: 0), delta: 3,
+            newText: "# A\nxxx\n**b**\n")
         let after = cache.spans.first { $0.kind == .strong }!.range
         XCTAssertEqual(after.lowerBound, before.lowerBound + 3)
         XCTAssertEqual(after.upperBound, before.upperBound + 3)
@@ -323,8 +339,9 @@ final class MarkdownStylingCacheTests: XCTestCase {
         var cache = MarkdownStyleCache()
         cache.reparse("**b** tail\n")
         let strongBefore = cache.spans.first { $0.kind == .strong }?.range
-        cache.shift(editedRange: NSRange(location: 10, length: 0), delta: 1,
-                    newText: "**b** tail!\n")
+        cache.shift(
+            editedRange: NSRange(location: 10, length: 0), delta: 1,
+            newText: "**b** tail!\n")
         XCTAssertEqual(cache.spans.first { $0.kind == .strong }?.range, strongBefore)
     }
 
@@ -334,8 +351,9 @@ final class MarkdownStylingCacheTests: XCTestCase {
         var cache = MarkdownStyleCache()
         cache.reparse("**bd**\n")
         let before = cache.spans.first { $0.kind == .strong }!.range
-        cache.shift(editedRange: NSRange(location: 3, length: 0), delta: 1,
-                    newText: "**bod**\n")
+        cache.shift(
+            editedRange: NSRange(location: 3, length: 0), delta: 1,
+            newText: "**bod**\n")
         let after = cache.spans.first { $0.kind == .strong }!.range
         XCTAssertEqual(after.lowerBound, before.lowerBound)
         XCTAssertEqual(after.upperBound, before.upperBound + 1)

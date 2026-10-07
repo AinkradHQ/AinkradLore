@@ -27,9 +27,11 @@ extension LoreStore {
     /// choices offered for `defaultNoteFolder` in Settings.
     public var subfolders: [String] {
         guard let root = configuredVaultRoot else { return [] }
-        let urls = (try? FileManager.default.contentsOfDirectory(
-            at: root, includingPropertiesForKeys: [.isDirectoryKey])) ?? []
-        return urls
+        let urls =
+            (try? FileManager.default.contentsOfDirectory(
+                at: root, includingPropertiesForKeys: [.isDirectoryKey])) ?? []
+        return
+            urls
             .filter { (try? $0.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true }
             .map(\.lastPathComponent)
             .filter { !$0.hasPrefix(".") }

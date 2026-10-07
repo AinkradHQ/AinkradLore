@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 public struct LoreApp: AinkradApp {
     public static let id = "lore"
@@ -39,8 +39,9 @@ public struct LoreApp: AinkradApp {
             let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
                 .appendingPathComponent("com.ainkrad.plugin.lore", isDirectory: true)
             try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-            let store = LoreStore(documents: host.documents,
-                                  indexPath: dir.appendingPathComponent("index.sqlite"))
+            let store = LoreStore(
+                documents: host.documents,
+                indexPath: dir.appendingPathComponent("index.sqlite"))
             // Generation 9 onward. Wired here rather than inside LoreStore so
             // the store keeps taking only what it needs and stays constructible
             // in tests without a host.
@@ -92,8 +93,10 @@ public struct LoreApp: AinkradApp {
     }
 
     public static func makeSettingsView(host: HostServices) -> AnyView {
-        AnyView(LoreSettingsView(store: store(for: host), theme: host.theme,
-                                 presentation: host.presentation, modeControl: host.mode))
+        AnyView(
+            LoreSettingsView(
+                store: store(for: host), theme: host.theme,
+                presentation: host.presentation, modeControl: host.mode))
     }
     public static func chromeFill(host: HostServices) -> Color? { host.theme.tokens.background }
 }
@@ -131,8 +134,10 @@ extension LoreApp: AinkradAppModes {
         case .basic:
             let store = store(for: host)
             store.activateVaultIfNeeded()
-            return AnyView(LoreBasicView(store: store, theme: host.theme,
-                                         launcher: host.apps))
+            return AnyView(
+                LoreBasicView(
+                    store: store, theme: host.theme,
+                    launcher: host.apps))
         case .advanced:
             return AnyView(advancedRoot(host: host))
         // Resilient enum: fall back to advanced, never to a stripped view for a
@@ -156,7 +161,8 @@ extension LoreApp: AinkradAppModes {
         return LoreRootView(store: store, theme: host.theme)
             .onAppear {
                 guard let intent = AinkradLaunchIntent.decode(host.apps.takePendingLaunch()),
-                      intent.isOpenDocument else { return }
+                    intent.isOpenDocument
+                else { return }
                 store.open(url: URL(fileURLWithPath: intent.path))
             }
     }

@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 /// The open-document model.
@@ -19,14 +20,16 @@ final class TabsTests: XCTestCase {
         return u
     }
     private func makeStore(_ root: URL) throws -> LoreStore {
-        let s = LoreStore(documents: FakeDocs(),
-                          indexPath: root.appendingPathComponent(".index.sqlite"))
+        let s = LoreStore(
+            documents: FakeDocs(),
+            indexPath: root.appendingPathComponent(".index.sqlite"))
         try s.setVaultRootForTesting(root)
         return s
     }
 
     func test_openTwoDocuments_bothTabsStayOpen() throws {
-        let root = tempDir(); let s = try makeStore(root)
+        let root = tempDir()
+        let s = try makeStore(root)
         try "---\nid: a\ntitle: A\n---\nx".write(
             to: root.appendingPathComponent("a.md"), atomically: true, encoding: .utf8)
         try "plain".write(
@@ -38,7 +41,8 @@ final class TabsTests: XCTestCase {
     }
 
     func test_openingSameDocumentTwice_selectsExistingTab() throws {
-        let root = tempDir(); let s = try makeStore(root)
+        let root = tempDir()
+        let s = try makeStore(root)
         let url = root.appendingPathComponent("a.md")
         try "---\nid: a\ntitle: A\n---\nx".write(to: url, atomically: true, encoding: .utf8)
         s.open(url: url)
@@ -53,7 +57,8 @@ final class TabsTests: XCTestCase {
     /// adjacency in a cache is meaningless and "what I was looking at before
     /// this one" is the only answer a user can predict.
     func test_closeTab_selectsTheMostRecentlyUsedDocument() throws {
-        let root = tempDir(); let s = try makeStore(root)
+        let root = tempDir()
+        let s = try makeStore(root)
         try "---\nid: a\ntitle: A\n---\nx".write(
             to: root.appendingPathComponent("a.md"), atomically: true, encoding: .utf8)
         try "plain".write(
@@ -71,7 +76,8 @@ final class TabsTests: XCTestCase {
     /// `test_openUnsupportedType_recordsErrorWithoutOpeningTab`, whose
     /// expectation is exactly the behavior this task removes.
     func test_openUnrecognizedType_opensAReadOnlyAttachmentTab() throws {
-        let root = tempDir(); let s = try makeStore(root)
+        let root = tempDir()
+        let s = try makeStore(root)
         let url = root.appendingPathComponent("sheet.xlsx")
         try "binary".write(to: url, atomically: true, encoding: .utf8)
         s.open(url: url)
@@ -82,7 +88,8 @@ final class TabsTests: XCTestCase {
     }
 
     func test_closeTab_savesDirtySessionBeforeClosing() throws {
-        let root = tempDir(); let s = try makeStore(root)
+        let root = tempDir()
+        let s = try makeStore(root)
         let url = root.appendingPathComponent("a.md")
         try "---\nid: a\ntitle: A\n---\nx".write(to: url, atomically: true, encoding: .utf8)
         s.open(url: url)
@@ -101,7 +108,8 @@ final class TabsTests: XCTestCase {
     }
 
     func test_closeTab_refusesWhenSaveConflictsWithExternalChange() throws {
-        let root = tempDir(); let s = try makeStore(root)
+        let root = tempDir()
+        let s = try makeStore(root)
         let url = root.appendingPathComponent("a.md")
         try "---\nid: a\ntitle: A\n---\nx".write(to: url, atomically: true, encoding: .utf8)
         s.open(url: url)
@@ -128,7 +136,8 @@ final class TabsTests: XCTestCase {
     }
 
     func test_closeTab_forceClosesDespiteConflict() async throws {
-        let root = tempDir(); let s = try makeStore(root)
+        let root = tempDir()
+        let s = try makeStore(root)
         let url = root.appendingPathComponent("a.md")
         try "---\nid: a\ntitle: A\n---\nx".write(to: url, atomically: true, encoding: .utf8)
         s.open(url: url)
@@ -165,7 +174,8 @@ final class TabsTests: XCTestCase {
     /// close, fire after the unlink, and recreate the file the user just
     /// deleted — containing the content they chose to discard.
     func test_deleteAfterForceClose_doesNotRecreateFileAfterDebounce() async throws {
-        let root = tempDir(); let s = try makeStore(root)
+        let root = tempDir()
+        let s = try makeStore(root)
         let url = root.appendingPathComponent("a.md")
         try "---\nid: a\ntitle: A\n---\nx".write(to: url, atomically: true, encoding: .utf8)
         try s.rebuild()
@@ -186,14 +196,16 @@ final class TabsTests: XCTestCase {
         XCTAssertFalse(FileManager.default.fileExists(atPath: url.path))
 
         try await Task.sleep(for: .milliseconds(900))
-        XCTAssertFalse(FileManager.default.fileExists(atPath: url.path),
-                       "pending autosave resurrected a deleted file")
+        XCTAssertFalse(
+            FileManager.default.fileExists(atPath: url.path),
+            "pending autosave resurrected a deleted file")
     }
 
     /// The primitive item 2 adds, tested on its own: an armed autosave that is
     /// cancelled never writes.
     func test_cancelPendingSave_stopsTheDebouncedWrite() async throws {
-        let root = tempDir(); let s = try makeStore(root)
+        let root = tempDir()
+        let s = try makeStore(root)
         let url = root.appendingPathComponent("a.md")
         let original = "---\nid: a\ntitle: A\n---\nx"
         try original.write(to: url, atomically: true, encoding: .utf8)
@@ -213,7 +225,8 @@ final class TabsTests: XCTestCase {
 
     /// Item 3: teardown must not silently discard a dirty tab.
     func test_shutdown_savesDirtyTabsBeforeClearingThem() throws {
-        let root = tempDir(); let s = try makeStore(root)
+        let root = tempDir()
+        let s = try makeStore(root)
         let url = root.appendingPathComponent("a.md")
         try "---\nid: a\ntitle: A\n---\nx".write(to: url, atomically: true, encoding: .utf8)
         s.open(url: url)
@@ -234,7 +247,8 @@ final class TabsTests: XCTestCase {
     /// Item 4: switching vaults must go through the same lifecycle as teardown.
     /// Tabs from vault A must not survive into vault B, still autosaving into A.
     func test_setVaultRoot_savesDirtyTabsIntoOldVaultAndClearsThem() throws {
-        let rootA = tempDir(); let s = try makeStore(rootA)
+        let rootA = tempDir()
+        let s = try makeStore(rootA)
         let url = rootA.appendingPathComponent("a.md")
         try "---\nid: a\ntitle: A\n---\nx".write(to: url, atomically: true, encoding: .utf8)
         s.open(url: url)
@@ -262,7 +276,8 @@ final class TabsTests: XCTestCase {
     }
 
     func test_closeTab_readOnlySessionClosesImmediately() throws {
-        let root = tempDir(); let s = try makeStore(root)
+        let root = tempDir()
+        let s = try makeStore(root)
         let url = root.appendingPathComponent("bad.txt")
         // Invalid UTF-8 byte sequence forces PlainTextEngine into lossy
         // decoding, which makes the session read-only.

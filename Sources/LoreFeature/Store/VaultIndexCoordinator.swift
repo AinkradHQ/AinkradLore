@@ -254,7 +254,6 @@ public final class VaultIndexCoordinator {
         while isRebuilding { await Task.yield() }
     }
 
-
     /// Kicks off an off-actor rescan, coalescing with one already in flight.
     ///
     /// FSEvents delivers bursts (a `git checkout` in the vault is hundreds of
@@ -262,7 +261,10 @@ public final class VaultIndexCoordinator {
     /// main actor. Now at most one runs at a time, off the main actor, and a
     /// burst arriving during one schedules exactly one follow-up.
     func startBackgroundRebuild() {
-        guard !isRebuilding else { rebuildRequestedAgain = true; return }
+        guard !isRebuilding else {
+            rebuildRequestedAgain = true
+            return
+        }
         isRebuilding = true
         Task { [weak self] in
             await self?.performBackgroundRebuild()
@@ -286,7 +288,7 @@ public final class VaultIndexCoordinator {
             let painted = await Task.detached(priority: .userInitiated) {
                 (try? index.all()) ?? []
             }.value
-            guard self.index === index else { return }   // shut down meanwhile
+            guard self.index === index else { return }  // shut down meanwhile
             if rows.isEmpty { rows = painted }
         }
         // Cheap pass first: if the vault is identical to what is indexed, the
@@ -316,7 +318,8 @@ public final class VaultIndexCoordinator {
         // the `if let` below fails to bind either way — so "never recorded"
         // correctly does NOT take the fast path.
         if let indexed = try? index.fingerprints(),
-           let indexedDirectories = try? index.indexedDirectories() {
+            let indexedDirectories = try? index.indexedDirectories()
+        {
             let (onDisk, onDiskDirectories) = await Task.detached(priority: .utility) {
                 (Self.scanFingerprints(at: root), Set(Self.scanDirectories(under: root)))
             }.value
@@ -358,7 +361,7 @@ public final class VaultIndexCoordinator {
         // redraw into a synchronous stall — see `directoryPaths`'s own
         // doc comment for the measured before/after.
         let outcome: RebuildOutcome = await Task.detached(priority: .utility) {
-                () -> RebuildOutcome in
+            () -> RebuildOutcome in
             let notes = Self.scanVault(at: root)
             let directories = Self.scanDirectories(under: root)
             do {
@@ -469,32 +472,39 @@ public final class VaultIndexCoordinator {
         // `ResolvedLink.targetPath`, and therefore every `links.target_path`
         // row, is canonical too. That is what makes `backlinks`,
         // `inboundLinks` and `inboundLinkCount` truthful.
-        return resolve(entries, against: entries.map {
-            (url: $0.url, title: $0.payload.title, aliases: $0.payload.aliases)
-        })
+        return resolve(
+            entries,
+            against: entries.map {
+                (url: $0.url, title: $0.payload.title, aliases: $0.payload.aliases)
+            })
     }
 
     /// Links resolved against `documents` — the whole vault's titles and aliases.
-    nonisolated static func resolve(_ entries: [IndexEntry],
-                                    against documents: [(url: URL, title: String, aliases: [String])])
-        -> [IndexEntry] {
+    nonisolated static func resolve(
+        _ entries: [IndexEntry],
+        against documents: [(url: URL, title: String, aliases: [String])]
+    )
+        -> [IndexEntry]
+    {
         let resolver = LinkResolver(documents: documents)
         return entries.map { entry in
-            IndexEntry(url: entry.url, type: entry.type, payload: entry.payload,
-                       updated: entry.updated,
-                       resolvedLinks: entry.payload.links.map {
-                           // RAW for rewriting, DECODED for resolution: a
-                           // markdown link written `[t](Design%20Doc.md)` must
-                           // be stored exactly as authored (the rewriter has to
-                           // find that text in the file) while resolving as
-                           // `Design Doc.md`. See `DocumentLink.resolutionTarget`.
-                           ResolvedLink(rawTarget: $0.rawTarget,
-                                        targetPath: resolver.resolve($0.resolutionTarget),
-                                        isEmbed: $0.isEmbed,
-                                        syntax: $0.syntax)
-                       },
-                       isEditable: entry.isEditable, byteSize: entry.byteSize,
-                       isTruncated: entry.isTruncated)
+            IndexEntry(
+                url: entry.url, type: entry.type, payload: entry.payload,
+                updated: entry.updated,
+                resolvedLinks: entry.payload.links.map {
+                    // RAW for rewriting, DECODED for resolution: a
+                    // markdown link written `[t](Design%20Doc.md)` must
+                    // be stored exactly as authored (the rewriter has to
+                    // find that text in the file) while resolving as
+                    // `Design Doc.md`. See `DocumentLink.resolutionTarget`.
+                    ResolvedLink(
+                        rawTarget: $0.rawTarget,
+                        targetPath: resolver.resolve($0.resolutionTarget),
+                        isEmbed: $0.isEmbed,
+                        syntax: $0.syntax)
+                },
+                isEditable: entry.isEditable, byteSize: entry.byteSize,
+                isTruncated: entry.isTruncated)
         }
     }
 
@@ -533,14 +543,16 @@ public final class VaultIndexCoordinator {
         // cap their text before `indexPayload` returns it, so the
         // before/after comparison above cannot see their truncation — see
         // `DocumentEngine.isContentTruncated`.
-        let isTruncated = payload.plaintext.utf8.count < uncappedByteCount
+        let isTruncated =
+            payload.plaintext.utf8.count < uncappedByteCount
             || engine.isContentTruncated
         let attributes = try? FileManager.default.attributesOfItem(atPath: url.path)
         let byteSize = (attributes?[.size] as? Int) ?? 0
-        return IndexEntry(url: url, type: engineType.identifier,
-                          payload: payload, updated: updated,
-                          isEditable: engine.isEditable, byteSize: byteSize,
-                          isTruncated: isTruncated)
+        return IndexEntry(
+            url: url, type: engineType.identifier,
+            payload: payload, updated: updated,
+            isEditable: engine.isEditable, byteSize: byteSize,
+            isTruncated: isTruncated)
     }
 
     /// The edits-only rescan: re-index `paths` (canonical, all already in the
@@ -549,14 +561,16 @@ public final class VaultIndexCoordinator {
     /// resolve, so any such change (or a file that no longer loads) bails;
     /// a pure content edit cannot, so only the edited files' own links need
     /// resolving, against the vault as the index already knows it.
-    nonisolated static func reindexEdited(_ paths: [String], known: [IndexRow],
-                                          in index: LoreIndex) -> [IndexRow]? {
+    nonisolated static func reindexEdited(
+        _ paths: [String], known: [IndexRow],
+        in index: LoreIndex
+    ) -> [IndexRow]? {
         let byPath = Dictionary(known.map { ($0.path.path, $0) }, uniquingKeysWith: { a, _ in a })
         var entries: [IndexEntry] = []
         for path in paths {
             guard let entry = loadEntry(URL(fileURLWithPath: path)),
-                  let old = byPath[path],
-                  old.title == entry.payload.title, old.aliases == entry.payload.aliases
+                let old = byPath[path],
+                old.title == entry.payload.title, old.aliases == entry.payload.aliases
             else { return nil }
             entries.append(entry)
         }
@@ -643,7 +657,8 @@ public final class VaultIndexCoordinator {
     /// Search with an excerpt per hit — see `LoreIndex.searchHits`.
     public func searchHits(_ query: String) -> [SearchHit] {
         let keyword = (try? index?.searchHits(query)) ?? []
-        return keyword + semanticRows(for: query, excluding: Set(keyword.map(\.row.path.path)))
+        return keyword
+            + semanticRows(for: query, excluding: Set(keyword.map(\.row.path.path)))
             .map { SearchHit(row: $0, snippet: nil) }
     }
 
@@ -697,11 +712,17 @@ public final class VaultIndexCoordinator {
     /// spellings makes those lookups miss, which in this codebase has meant an
     /// edit silently dropped or a dirty tab's file written anyway. One spelling
     /// out of here is what stops that at the source.
-    func inboundLinks(to url: URL) -> [(sourceFile: URL, rawTarget: String,
-                                        syntax: LinkSyntax)] {
+    func inboundLinks(to url: URL) -> [(
+        sourceFile: URL, rawTarget: String,
+        syntax: LinkSyntax
+    )] {
         let links = (try? index?.inboundLinks(to: Self.canonical(url))) ?? []
-        return links.map { (sourceFile: Self.canonical($0.sourceFile),
-                            rawTarget: $0.rawTarget, syntax: $0.syntax) }
+        return links.map {
+            (
+                sourceFile: Self.canonical($0.sourceFile),
+                rawTarget: $0.rawTarget, syntax: $0.syntax
+            )
+        }
     }
     func unresolvedLinks(from url: URL) -> [UnresolvedLink] {
         (try? index?.unresolvedLinks(from: Self.canonical(url))) ?? []
@@ -712,9 +733,10 @@ public final class VaultIndexCoordinator {
     /// lazily the first time it is asked for after `rows` changes.
     func currentResolver() -> LinkResolver {
         if let cachedResolver { return cachedResolver }
-        let resolver = LinkResolver(documents: rows.map {
-            (url: $0.path, title: $0.title, aliases: $0.aliases)
-        })
+        let resolver = LinkResolver(
+            documents: rows.map {
+                (url: $0.path, title: $0.title, aliases: $0.aliases)
+            })
         cachedResolver = resolver
         return resolver
     }
@@ -804,7 +826,8 @@ public final class VaultIndexCoordinator {
         var payload = engine.indexPayload
         let uncappedByteCount = payload.plaintext.utf8.count
         payload.plaintext = Self.capped(payload.plaintext)
-        let isTruncated = payload.plaintext.utf8.count < uncappedByteCount
+        let isTruncated =
+            payload.plaintext.utf8.count < uncappedByteCount
             || engine.isContentTruncated
         let attributes = try? FileManager.default.attributesOfItem(atPath: url.path)
         let byteSize = (attributes?[.size] as? Int) ?? 0
@@ -822,20 +845,23 @@ public final class VaultIndexCoordinator {
         let resolver = LinkResolver(documents: documents)
         let resolvedLinks = payload.links.map {
             // Raw for rewriting, decoded for resolution — as in `resolve(_:)`.
-            ResolvedLink(rawTarget: $0.rawTarget,
-                         targetPath: resolver.resolve($0.resolutionTarget),
-                         isEmbed: $0.isEmbed,
-                         syntax: $0.syntax)
+            ResolvedLink(
+                rawTarget: $0.rawTarget,
+                targetPath: resolver.resolve($0.resolutionTarget),
+                isEmbed: $0.isEmbed,
+                syntax: $0.syntax)
         }
-        try index.upsert(IndexEntry(url: url, type: type, payload: payload,
-                                    updated: Date(), resolvedLinks: resolvedLinks,
-                                    isEditable: engine.isEditable, byteSize: byteSize,
-                                    isTruncated: isTruncated))
+        try index.upsert(
+            IndexEntry(
+                url: url, type: type, payload: payload,
+                updated: Date(), resolvedLinks: resolvedLinks,
+                isEditable: engine.isEditable, byteSize: byteSize,
+                isTruncated: isTruncated))
         // One row re-read, not the whole index: `updated` is now, so it sorts
         // first under `all()`'s `ORDER BY updated DESC`.
         rows.removeAll { $0.path == url }
         if let row = try index.row(at: url) { rows.insert(row, at: 0) }
-        startEmbedding()   // re-embeds just this note; the rest are current
+        startEmbedding()  // re-embeds just this note; the rest are current
         // The per-save path — the one that fires when the SAME file is open
         // (and saved) in another split pane, not only when an external tool
         // writes it behind the store's back. `url` is already known exactly,

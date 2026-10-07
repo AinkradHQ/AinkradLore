@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 final class LinkRewriterTests: XCTestCase {
@@ -10,9 +11,13 @@ final class LinkRewriterTests: XCTestCase {
             to: URL(fileURLWithPath: "/v/Architecture.md"),
             inboundLinks: [(URL(fileURLWithPath: "/v/A.md"), "Design", .wikilink)],
             vaultRoot: root)
-        XCTAssertEqual(plan.edits,
-                       [LinkEdit(file: URL(fileURLWithPath: "/v/A.md"),
-                                 oldTarget: "Design", newTarget: "Architecture")])
+        XCTAssertEqual(
+            plan.edits,
+            [
+                LinkEdit(
+                    file: URL(fileURLWithPath: "/v/A.md"),
+                    oldTarget: "Design", newTarget: "Architecture")
+            ])
     }
 
     func test_planPreservesHeadingFragment() {
@@ -238,8 +243,9 @@ final class RenameApplicationTests: XCTestCase {
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent("lore-rename-\(UUID())")
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
-        let s = LoreStore(documents: FakeDocs(),
-                          indexPath: root.appendingPathComponent(".idx.sqlite"))
+        let s = LoreStore(
+            documents: FakeDocs(),
+            indexPath: root.appendingPathComponent(".idx.sqlite"))
         try s.setVaultRootForTesting(root)
         return (root, s)
     }
@@ -254,7 +260,8 @@ final class RenameApplicationTests: XCTestCase {
         let (root, s) = try vault()
         let a = try write(root, "a.md", "---\nid: a\ntitle: A\n---\nsee [[Design]]")
         let design = try write(root, "Design.md", "---\nid: d\ntitle: Design\n---\nx")
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
 
         let plan = s.plan(rename: design, to: "Architecture")
         XCTAssertEqual(plan.edits.count, 1)
@@ -264,15 +271,17 @@ final class RenameApplicationTests: XCTestCase {
         XCTAssertTrue(report.failed.isEmpty)
         XCTAssertTrue(try String(contentsOf: a, encoding: .utf8).contains("[[Architecture]]"))
         XCTAssertFalse(FileManager.default.fileExists(atPath: design.path))
-        XCTAssertTrue(FileManager.default
-            .fileExists(atPath: root.appendingPathComponent("Architecture.md").path))
+        XCTAssertTrue(
+            FileManager.default
+                .fileExists(atPath: root.appendingPathComponent("Architecture.md").path))
     }
 
     func test_fileChangedOnDiskIsSkippedAndReportedNotOverwritten() async throws {
         let (root, s) = try vault()
         let a = try write(root, "a.md", "---\nid: a\ntitle: A\n---\nsee [[Design]]")
         let design = try write(root, "Design.md", "---\nid: d\ntitle: Design\n---\nx")
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
 
         let plan = s.plan(rename: design, to: "Architecture")
         // Wide enough to clear any filesystem mtime granularity. `Thread.sleep`
@@ -300,7 +309,8 @@ final class RenameApplicationTests: XCTestCase {
         let (root, s) = try vault()
         _ = try write(root, "a.md", "---\nid: a\ntitle: A\n---\nsee [[Design]]")
         let design = try write(root, "Design.md", "---\nid: d\ntitle: Design\n---\nx")
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
 
         let report = s.apply(s.plan(rename: design, to: "Architecture"))
         XCTAssertEqual(report.movedTo?.lastPathComponent, "Architecture.md")
@@ -311,7 +321,8 @@ final class RenameApplicationTests: XCTestCase {
         let (root, s) = try vault()
         let a = try write(root, "a.md", "---\nid: a\ntitle: A\n---\nsee [[Design]]")
         let design = try write(root, "Design.md", "---\nid: d\ntitle: Design\n---\nx")
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
 
         s.open(url: a)
         let session = s.selectedTab!
@@ -326,7 +337,8 @@ final class RenameApplicationTests: XCTestCase {
     func test_tabOnTheRenamedDocumentFollowsIt() async throws {
         let (root, s) = try vault()
         let design = try write(root, "Design.md", "---\nid: d\ntitle: Design\n---\nx")
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
 
         s.open(url: design)
         _ = s.apply(s.plan(rename: design, to: "Architecture"))
@@ -337,7 +349,8 @@ final class RenameApplicationTests: XCTestCase {
         let (root, s) = try vault()
         let design = try write(root, "Design.md", "---\nid: d\ntitle: Design\n---\nx")
         _ = try write(root, "Architecture.md", "---\nid: e\ntitle: Arch\n---\ny")
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
 
         let report = s.apply(s.plan(rename: design, to: "Architecture"))
         XCTAssertNil(report.movedTo)
@@ -353,7 +366,8 @@ final class RenameApplicationTests: XCTestCase {
         let a = try write(root, "a.md", "---\nid: a\ntitle: A\n---\nsee [[Design]]")
         let design = try write(root, "Design.md", "---\nid: d\ntitle: Design\n---\nx")
         _ = try write(root, "Architecture.md", "---\nid: e\ntitle: Arch\n---\ny")
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
 
         let report = s.apply(s.plan(rename: design, to: "Architecture"))
         XCTAssertEqual(report.rewritten, [])
@@ -369,7 +383,8 @@ final class RenameApplicationTests: XCTestCase {
         let (root, s) = try vault()
         let a = try write(root, "a.md", "---\nid: a\ntitle: A\n---\nsee [[Design]]")
         let design = try write(root, "Design.md", "---\nid: d\ntitle: Design\n---\nx")
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
 
         s.open(url: a)
         let session = try XCTUnwrap(s.selectedTab)
@@ -388,11 +403,13 @@ final class RenameApplicationTests: XCTestCase {
     /// the word, and neither must a longer basename that merely starts with it.
     func test_rewriteIsAnchoredToLinkDelimiters() async throws {
         let (root, s) = try vault()
-        let a = try write(root, "a.md",
+        let a = try write(
+            root, "a.md",
             "---\nid: a\ntitle: A\n---\nThe design of [[Design Notes]] and [[Design]].")
         _ = try write(root, "Design Notes.md", "---\nid: n\ntitle: Design Notes\n---\nn")
         let design = try write(root, "Design.md", "---\nid: d\ntitle: Design\n---\nx")
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
 
         _ = s.apply(s.plan(rename: design, to: "Architecture"))
         let text = try String(contentsOf: a, encoding: .utf8)
@@ -407,8 +424,9 @@ final class RenameApplicationHardeningTests: XCTestCase {
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent("lore-rename2-\(UUID())")
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
-        let s = LoreStore(documents: FakeDocs(),
-                          indexPath: root.appendingPathComponent(".idx.sqlite"))
+        let s = LoreStore(
+            documents: FakeDocs(),
+            indexPath: root.appendingPathComponent(".idx.sqlite"))
         try s.setVaultRootForTesting(root)
         return (root, s)
     }
@@ -428,7 +446,8 @@ final class RenameApplicationHardeningTests: XCTestCase {
         let (root, s) = try vault()
         let a = try write(root, "a.md", "---\nid: a\ntitle: A\n---\nsee [[Design]]")
         let design = try write(root, "Design.md", "---\nid: d\ntitle: Design\n---\nx")
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
 
         s.open(url: a)
         let session = try XCTUnwrap(s.selectedTab)
@@ -470,9 +489,11 @@ final class RenameApplicationHardeningTests: XCTestCase {
         let a = try write(root, "a.md", "---\nid: a\ntitle: A\n---\nsee [[Projects/Design]]")
         try FileManager.default.createDirectory(
             at: root.appendingPathComponent("Projects"), withIntermediateDirectories: true)
-        let design = try write(root, "Projects/Design.md",
-                               "---\nid: d\ntitle: Design\n---\nx")
-        await s.settleForTesting(); try s.rebuild()
+        let design = try write(
+            root, "Projects/Design.md",
+            "---\nid: d\ntitle: Design\n---\nx")
+        await s.settleForTesting()
+        try s.rebuild()
 
         let missing = root.appendingPathComponent("Nope")
         let plan = s.plan(move: design, toFolder: missing)
@@ -491,9 +512,11 @@ final class RenameApplicationHardeningTests: XCTestCase {
     /// so it kept pre-rewrite text and its next save reverted the self-link.
     func test_selfLinkingDocumentSurvivesRenameAcrossItsNextSave() async throws {
         let (root, s) = try vault()
-        let design = try write(root, "Design.md",
-                               "---\nid: d\ntitle: Design\n---\nsee [[Design]] here")
-        await s.settleForTesting(); try s.rebuild()
+        let design = try write(
+            root, "Design.md",
+            "---\nid: d\ntitle: Design\n---\nsee [[Design]] here")
+        await s.settleForTesting()
+        try s.rebuild()
 
         s.open(url: design)
         let session = try XCTUnwrap(s.selectedTab)
@@ -523,29 +546,35 @@ final class RenameApplicationHardeningTests: XCTestCase {
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         let file = dir.appendingPathComponent("a.md")
         try "see [[Design]]".write(to: file, atomically: true, encoding: .utf8)
-        let baseline = try XCTUnwrap(FileManager.default
-            .attributesOfItem(atPath: file.path)[.modificationDate] as? Date)
+        let baseline = try XCTUnwrap(
+            FileManager.default
+                .attributesOfItem(atPath: file.path)[.modificationDate] as? Date)
 
         let hit = [LinkEdit(file: file, oldTarget: "Design", newTarget: "Architecture")]
         let miss = [LinkEdit(file: file, oldTarget: "Nothing", newTarget: "Else")]
 
         // Nothing matches: unchanged, and the file is left byte-identical.
-        XCTAssertEqual(try LinkRewriter.applyEdits(miss, to: file, baseline: baseline),
-                       .unchanged)
+        XCTAssertEqual(
+            try LinkRewriter.applyEdits(miss, to: file, baseline: baseline),
+            .unchanged)
         XCTAssertEqual(try String(contentsOf: file, encoding: .utf8), "see [[Design]]")
 
         // No baseline: fail closed.
-        XCTAssertEqual(try LinkRewriter.applyEdits(hit, to: file, baseline: nil),
-                       .skipped(.unverifiable))
+        XCTAssertEqual(
+            try LinkRewriter.applyEdits(hit, to: file, baseline: nil),
+            .skipped(.unverifiable))
         // Stale baseline: refuse.
-        XCTAssertEqual(try LinkRewriter.applyEdits(hit, to: file,
-                                                   baseline: .distantPast),
-                       .skipped(.changedOnDisk))
+        XCTAssertEqual(
+            try LinkRewriter.applyEdits(
+                hit, to: file,
+                baseline: .distantPast),
+            .skipped(.changedOnDisk))
         XCTAssertEqual(try String(contentsOf: file, encoding: .utf8), "see [[Design]]")
 
         // A real match writes.
-        XCTAssertEqual(try LinkRewriter.applyEdits(hit, to: file, baseline: baseline),
-                       .written)
+        XCTAssertEqual(
+            try LinkRewriter.applyEdits(hit, to: file, baseline: baseline),
+            .written)
         XCTAssertEqual(try String(contentsOf: file, encoding: .utf8), "see [[Architecture]]")
     }
 
@@ -553,9 +582,11 @@ final class RenameApplicationHardeningTests: XCTestCase {
     /// its NEW path — the old one no longer exists by the time the UI renders.
     func test_reportNamesTheMovedFileAtItsNewPath() async throws {
         let (root, s) = try vault()
-        let design = try write(root, "Design.md",
-                               "---\nid: d\ntitle: Design\n---\nsee [[Design]]")
-        await s.settleForTesting(); try s.rebuild()
+        let design = try write(
+            root, "Design.md",
+            "---\nid: d\ntitle: Design\n---\nsee [[Design]]")
+        await s.settleForTesting()
+        try s.rebuild()
 
         let report = s.apply(s.plan(rename: design, to: "Architecture"))
         XCTAssertEqual(report.rewritten.map(\.lastPathComponent), ["Architecture.md"])
@@ -589,11 +620,13 @@ final class RenameApplicationHardeningTests: XCTestCase {
         let (root, s) = try vault()
         let a = try write(root, "a.md", "---\nid: a\ntitle: A\n---\nsee [[Design]]")
         let design = try write(root, "Design.md", "---\nid: d\ntitle: Design\n---\nx")
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
 
         let canonicalA = VaultIndexCoordinator.canonical(a)
-        try XCTSkipIf(canonicalA.path == a.path,
-                      "this machine's temp root is already canonical; nothing to mix")
+        try XCTSkipIf(
+            canonicalA.path == a.path,
+            "this machine's temp root is already canonical; nothing to mix")
 
         // The tab is opened under the CANONICAL spelling, and the plan's edit
         // will name the RAW one, so its session path and the edit-file path
@@ -628,8 +661,9 @@ final class RenameApplicationHardeningTests: XCTestCase {
         // while the exclude-dirty-tabs machinery never ran — the exact
         // right-outcome-wrong-mechanism trap the previous round caught.
         let computed = s.plan(rename: design, to: "Architecture")
-        XCTAssertEqual(computed.edits.map(\.file.path), [canonicalA.path],
-                       "the store's own plan should already be canonical")
+        XCTAssertEqual(
+            computed.edits.map(\.file.path), [canonicalA.path],
+            "the store's own plan should already be canonical")
         let plan = RenamePlan(
             source: computed.source, destination: computed.destination,
             edits: computed.edits.map {
@@ -640,12 +674,14 @@ final class RenameApplicationHardeningTests: XCTestCase {
 
         let report = s.apply(plan)
 
-        XCTAssertFalse(session.isDirty,
-                       "the session was never seen by apply, so it was never flushed")
+        XCTAssertFalse(
+            session.isDirty,
+            "the session was never seen by apply, so it was never flushed")
         XCTAssertEqual(report.rewritten.map(\.lastPathComponent), ["a.md"])
         let onDisk = try String(contentsOf: a, encoding: .utf8)
-        XCTAssertTrue(onDisk.contains("unsaved edit"),
-                      "the tab's unsaved text was not flushed before the rewrite")
+        XCTAssertTrue(
+            onDisk.contains("unsaved edit"),
+            "the tab's unsaved text was not flushed before the rewrite")
         XCTAssertTrue(onDisk.contains("[[Architecture]]"), onDisk)
         XCTAssertFalse(onDisk.contains("[[Design]]"), onDisk)
         // The session was reloaded, so its next save cannot revert the rewrite.
@@ -665,7 +701,8 @@ final class RenameApplicationHardeningTests: XCTestCase {
         let a = try write(root, "a.md", "---\nid: a\ntitle: A\n---\nsee [[Design]]")
         let design = try write(root, "Design.md", "---\nid: d\ntitle: Design\n---\nx")
         let before = try String(contentsOf: a, encoding: .utf8)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
 
         for name in ["", "..", "../escape", "a/b", "."] {
             let plan = s.plan(rename: design, to: name)
@@ -675,18 +712,21 @@ final class RenameApplicationHardeningTests: XCTestCase {
             let report = s.apply(plan)
             XCTAssertEqual(report.failed.count, 1, "“\(name)”")
             XCTAssertNil(report.movedTo, "“\(name)” moved a file")
-            XCTAssertTrue(FileManager.default.fileExists(atPath: design.path),
-                          "“\(name)” moved the source away")
-            XCTAssertEqual(try String(contentsOf: a, encoding: .utf8), before,
-                           "“\(name)” rewrote a link")
+            XCTAssertTrue(
+                FileManager.default.fileExists(atPath: design.path),
+                "“\(name)” moved the source away")
+            XCTAssertEqual(
+                try String(contentsOf: a, encoding: .utf8), before,
+                "“\(name)” rewrote a link")
         }
         // Nothing was created anywhere: the vault holds exactly the two files.
         let contents = try FileManager.default.contentsOfDirectory(atPath: root.path)
             .filter { !$0.hasPrefix(".") }.sorted()
         XCTAssertEqual(contents, ["Design.md", "a.md"])
         // …and nothing escaped into the parent directory either.
-        XCTAssertFalse(FileManager.default.fileExists(
-            atPath: root.deletingLastPathComponent().appendingPathComponent("escape.md").path))
+        XCTAssertFalse(
+            FileManager.default.fileExists(
+                atPath: root.deletingLastPathComponent().appendingPathComponent("escape.md").path))
     }
 
     func test_invalidFolderNamesAreRefusedWithoutMovingTheFolder() async throws {
@@ -694,7 +734,8 @@ final class RenameApplicationHardeningTests: XCTestCase {
         let folder = root.appendingPathComponent("Projects")
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         _ = try write(folder, "Design.md", "---\nid: d\ntitle: Design\n---\nx")
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
 
         for name in ["", "..", "../escape", "a/b"] {
             let plan = s.plan(renameFolder: folder, to: name)
@@ -705,8 +746,9 @@ final class RenameApplicationHardeningTests: XCTestCase {
             XCTAssertEqual(report.failed.count, 1, "“\(name)”")
             XCTAssertTrue(FileManager.default.fileExists(atPath: folder.path))
         }
-        XCTAssertFalse(FileManager.default.fileExists(
-            atPath: root.deletingLastPathComponent().appendingPathComponent("escape").path))
+        XCTAssertFalse(
+            FileManager.default.fileExists(
+                atPath: root.deletingLastPathComponent().appendingPathComponent("escape").path))
     }
 }
 
@@ -718,8 +760,9 @@ final class FolderRenameTests: XCTestCase {
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent("lore-folder-\(UUID())")
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
-        let s = LoreStore(documents: FakeDocs(),
-                          indexPath: root.appendingPathComponent(".idx.sqlite"))
+        let s = LoreStore(
+            documents: FakeDocs(),
+            indexPath: root.appendingPathComponent(".idx.sqlite"))
         try s.setVaultRootForTesting(root)
         return (root, s)
     }
@@ -741,7 +784,8 @@ final class FolderRenameTests: XCTestCase {
         try write(folder, "Design.md", "---\nid: d\ntitle: Design\n---\nx")
         try write(folder, "Notes.md", "---\nid: n\ntitle: Notes\n---\ny")
         let a = try write(root, "a.md", "---\nid: a\ntitle: A\n---\n[[Projects/Design]]")
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
 
         let plan = s.plan(renameFolder: folder, to: "Work")
         XCTAssertEqual(plan.documentMoves.count, 2)
@@ -751,11 +795,13 @@ final class FolderRenameTests: XCTestCase {
         XCTAssertEqual(report.skipped, [])
         XCTAssertEqual(report.movedTo?.lastPathComponent, "Work")
         XCTAssertTrue(try String(contentsOf: a, encoding: .utf8).contains("[[Work/Design]]"))
-        XCTAssertFalse(FileManager.default.fileExists(atPath: folder.path),
-                       "the old folder survived the rename")
+        XCTAssertFalse(
+            FileManager.default.fileExists(atPath: folder.path),
+            "the old folder survived the rename")
         for name in ["Design.md", "Notes.md"] {
-            XCTAssertTrue(FileManager.default.fileExists(
-                atPath: root.appendingPathComponent("Work/\(name)").path), name)
+            XCTAssertTrue(
+                FileManager.default.fileExists(
+                    atPath: root.appendingPathComponent("Work/\(name)").path), name)
         }
     }
 
@@ -773,14 +819,16 @@ final class FolderRenameTests: XCTestCase {
         // best and never something `plan` could produce a move for.
         try Data([0x89, 0x50, 0x4E, 0x47]).write(to: nested.appendingPathComponent("diagram.png"))
         try Data([0x25, 0x50, 0x44, 0x46]).write(to: nested.appendingPathComponent("spec.pdf"))
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
 
         let report = s.apply(s.plan(renameFolder: folder, to: "Work"))
         XCTAssertTrue(report.failed.isEmpty, "\(report.failed)")
         XCTAssertFalse(FileManager.default.fileExists(atPath: folder.path))
         for relative in ["Work/Design.md", "Work/assets/diagram.png", "Work/assets/spec.pdf"] {
-            XCTAssertTrue(FileManager.default.fileExists(
-                atPath: root.appendingPathComponent(relative).path), relative)
+            XCTAssertTrue(
+                FileManager.default.fileExists(
+                    atPath: root.appendingPathComponent(relative).path), relative)
         }
     }
 
@@ -790,7 +838,8 @@ final class FolderRenameTests: XCTestCase {
         let (root, s) = try vault()
         let folder = root.appendingPathComponent("Empty")
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
 
         let plan = s.plan(renameFolder: folder, to: "Renamed")
         XCTAssertTrue(plan.hasNoIndexedDocuments)
@@ -798,12 +847,14 @@ final class FolderRenameTests: XCTestCase {
         let report = s.apply(plan)
 
         XCTAssertTrue(report.failed.isEmpty, "\(report.failed)")
-        XCTAssertEqual(report.movedTo?.lastPathComponent, "Renamed",
-                       "an empty folder rename must report the move, not nothing")
+        XCTAssertEqual(
+            report.movedTo?.lastPathComponent, "Renamed",
+            "an empty folder rename must report the move, not nothing")
         XCTAssertTrue(report.isCompleteSuccess)
         XCTAssertFalse(FileManager.default.fileExists(atPath: folder.path))
-        XCTAssertTrue(FileManager.default.fileExists(
-            atPath: root.appendingPathComponent("Renamed").path))
+        XCTAssertTrue(
+            FileManager.default.fileExists(
+                atPath: root.appendingPathComponent("Renamed").path))
     }
 
     /// An existing destination is refused BEFORE anything is written — the same
@@ -812,18 +863,21 @@ final class FolderRenameTests: XCTestCase {
         let (root, s) = try vault()
         let folder = root.appendingPathComponent("Projects")
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
-        try FileManager.default.createDirectory(at: root.appendingPathComponent("Work"),
-                                               withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(
+            at: root.appendingPathComponent("Work"),
+            withIntermediateDirectories: true)
         try write(folder, "Design.md", "---\nid: d\ntitle: Design\n---\nx")
         let a = try write(root, "a.md", "---\nid: a\ntitle: A\n---\n[[Projects/Design]]")
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
 
         let report = s.apply(s.plan(renameFolder: folder, to: "Work"))
         XCTAssertNil(report.movedTo)
         XCTAssertEqual(report.failed.count, 1)
         XCTAssertTrue(FileManager.default.fileExists(atPath: folder.path))
-        XCTAssertTrue(try String(contentsOf: a, encoding: .utf8).contains("[[Projects/Design]]"),
-                      "links were rewritten for a move that was refused")
+        XCTAssertTrue(
+            try String(contentsOf: a, encoding: .utf8).contains("[[Projects/Design]]"),
+            "links were rewritten for a move that was refused")
     }
 
     /// A case-only rename resolves to the SAME directory on a case-insensitive
@@ -834,13 +888,15 @@ final class FolderRenameTests: XCTestCase {
         let folder = root.appendingPathComponent("Projects")
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         try write(folder, "Design.md", "---\nid: d\ntitle: Design\n---\nx")
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
 
         let report = s.apply(s.plan(renameFolder: folder, to: "projects"))
         XCTAssertTrue(report.failed.isEmpty, "\(report.failed)")
         XCTAssertEqual(report.movedTo?.lastPathComponent, "projects")
-        XCTAssertTrue(FileManager.default.fileExists(
-            atPath: root.appendingPathComponent("projects/Design.md").path))
+        XCTAssertTrue(
+            FileManager.default.fileExists(
+                atPath: root.appendingPathComponent("projects/Design.md").path))
     }
 
     /// The third appearance of M1's recurring failure mode, now impossible to
@@ -862,11 +918,13 @@ final class FolderRenameTests: XCTestCase {
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         let design = try write(folder, "Design.md", "---\nid: d\ntitle: Design\n---\nx")
         let a = try write(root, "a.md", "---\nid: a\ntitle: A\n---\n[[Projects/Design]]")
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
 
         let canonicalDesign = VaultIndexCoordinator.canonical(design)
-        try XCTSkipIf(canonicalDesign.path == design.path,
-                      "this machine's temp root is already canonical; nothing to mix")
+        try XCTSkipIf(
+            canonicalDesign.path == design.path,
+            "this machine's temp root is already canonical; nothing to mix")
 
         // Re-index `Design.md` through the RAW spelling — the exact call any
         // document written outside a full rescan takes. `removeFromIndex` drops
@@ -876,21 +934,26 @@ final class FolderRenameTests: XCTestCase {
         try s.coordinator.removeFromIndex(canonicalDesign)
         try s.coordinator.indexDocument(MarkdownEngine.load(design), at: design)
         // THE INVARIANT: the raw URL went in, a canonical row came out.
-        XCTAssertTrue(s.rows.contains { $0.path.path == canonicalDesign.path },
-                      "indexDocument stored a non-canonical documents.path")
-        XCTAssertFalse(s.rows.contains { $0.path.path == design.path },
-                       "a non-canonical spelling reached documents.path")
+        XCTAssertTrue(
+            s.rows.contains { $0.path.path == canonicalDesign.path },
+            "indexDocument stored a non-canonical documents.path")
+        XCTAssertFalse(
+            s.rows.contains { $0.path.path == design.path },
+            "a non-canonical spelling reached documents.path")
 
         let plan = s.plan(renameFolder: folder, to: "Work")
-        XCTAssertEqual(plan.documentMoves.count, 1,
-                       "a non-canonically indexed row fell silently out of the plan")
+        XCTAssertEqual(
+            plan.documentMoves.count, 1,
+            "a non-canonically indexed row fell silently out of the plan")
         let report = s.apply(plan)
 
         XCTAssertTrue(report.failed.isEmpty, "\(report.failed)")
-        XCTAssertTrue(try String(contentsOf: a, encoding: .utf8).contains("[[Work/Design]]"),
-                      "the inbound link broke silently")
-        XCTAssertTrue(FileManager.default.fileExists(
-            atPath: root.appendingPathComponent("Work/Design.md").path))
+        XCTAssertTrue(
+            try String(contentsOf: a, encoding: .utf8).contains("[[Work/Design]]"),
+            "the inbound link broke silently")
+        XCTAssertTrue(
+            FileManager.default.fileExists(
+                atPath: root.appendingPathComponent("Work/Design.md").path))
     }
 
     /// The case-only skip must be conditioned on the volume ACTUALLY being
@@ -901,7 +964,8 @@ final class FolderRenameTests: XCTestCase {
         let upper = root.appendingPathComponent("Projects")
         try FileManager.default.createDirectory(at: upper, withIntermediateDirectories: true)
         try write(upper, "Design.md", "---\nid: d\ntitle: Design\n---\nx")
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
 
         // Empirical probe: on a case-insensitive volume the lowercase spelling
         // already "exists", because it is the same directory.
@@ -939,7 +1003,8 @@ final class FolderRenameTests: XCTestCase {
         try write(folder, "Notes.md", "---\nid: n\ntitle: Notes\n---\ny")
         let a = try write(root, "a.md", "---\nid: a\ntitle: A\n---\n[[Projects/Design]]")
         let b = try write(root, "b.md", "---\nid: b\ntitle: B\n---\n[[Projects/Notes]]")
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
 
         // `a.md` is open, dirty, AND in conflict — so the flush inside apply
         // refuses and its unsaved text must be left strictly alone.
@@ -982,7 +1047,8 @@ final class FolderRenameTests: XCTestCase {
         let folder = root.appendingPathComponent("Projects")
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         try write(folder, "Design.md", "---\nid: d\ntitle: Design\n---\nx")
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
         let row = try XCTUnwrap(s.rows.first { $0.path.lastPathComponent == "Design.md" })
         s.open(row)
         let session = try XCTUnwrap(s.selectedTab)
@@ -997,8 +1063,11 @@ final class FolderRenameTests: XCTestCase {
         let engine = try XCTUnwrap(session.engine as? MarkdownEngine)
         engine.note.body = "after"
         try session.saveNow()
-        XCTAssertTrue(try String(contentsOf: root.appendingPathComponent("Work/Design.md"),
-                                 encoding: .utf8).contains("after"))
+        XCTAssertTrue(
+            try String(
+                contentsOf: root.appendingPathComponent("Work/Design.md"),
+                encoding: .utf8
+            ).contains("after"))
         XCTAssertFalse(FileManager.default.fileExists(atPath: folder.path))
     }
 
@@ -1010,7 +1079,8 @@ final class FolderRenameTests: XCTestCase {
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         try write(folder, "Design.md", "---\nid: d\ntitle: Design\n---\nx")
         let a = try write(root, "a.md", "---\nid: a\ntitle: A\n---\n[[Projects/Design]]")
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
 
         let plan = s.plan(renameFolder: folder, to: "Work")
         try await Task.sleep(for: .milliseconds(1100))

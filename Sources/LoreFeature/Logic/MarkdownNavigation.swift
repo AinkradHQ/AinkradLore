@@ -48,16 +48,20 @@ enum MarkdownNavigation {
         guard let hit = innermost(footnoteSpans, containing: index) else { return nil }
         switch hit.kind {
         case .footnoteReference(let label):
-            guard let definition = footnoteSpans.first(where: {
-                if case .footnoteDefinition(let defLabel) = $0.kind { return defLabel == label }
-                return false
-            }) else { return nil }
+            guard
+                let definition = footnoteSpans.first(where: {
+                    if case .footnoteDefinition(let defLabel) = $0.kind { return defLabel == label }
+                    return false
+                })
+            else { return nil }
             return definition.range.lowerBound
         case .footnoteDefinition(let label):
-            guard let reference = footnoteSpans.first(where: {
-                if case .footnoteReference(let refLabel) = $0.kind { return refLabel == label }
-                return false
-            }) else { return nil }
+            guard
+                let reference = footnoteSpans.first(where: {
+                    if case .footnoteReference(let refLabel) = $0.kind { return refLabel == label }
+                    return false
+                })
+            else { return nil }
             return reference.range.lowerBound
         default:
             return nil
@@ -89,15 +93,17 @@ enum MarkdownNavigation {
     static func liveTagName(forSpan range: Range<Int>, in text: NSString) -> String? {
         guard range.lowerBound >= 0, range.upperBound <= text.length, range.count >= 2
         else { return nil }
-        guard text.character(at: range.lowerBound) == 0x23 else { return nil }   // #
-        let raw = text.substring(with: NSRange(location: range.lowerBound + 1,
-                                               length: range.count - 1))
+        guard text.character(at: range.lowerBound) == 0x23 else { return nil }  // #
+        let raw = text.substring(
+            with: NSRange(
+                location: range.lowerBound + 1,
+                length: range.count - 1))
         var hasNonDigit = false
         for scalar in raw.unicodeScalars {
             let u = scalar.value
             let isDigit = (u >= 0x30 && u <= 0x39)
             let isLetter = (u >= 0x41 && u <= 0x5A) || (u >= 0x61 && u <= 0x7A) || u > 0x7F
-            let isJoiner = u == 0x5F || u == 0x2D || u == 0x2F   // _ - /
+            let isJoiner = u == 0x5F || u == 0x2D || u == 0x2F  // _ - /
             guard isDigit || isLetter || isJoiner else { return nil }
             if isLetter || isJoiner { hasNonDigit = true }
         }

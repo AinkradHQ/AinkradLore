@@ -1,5 +1,6 @@
-import XCTest
 import GRDB
+import XCTest
+
 @testable import LoreFeature
 
 /// Tasks 2, 3, 4 and 7 — the parts of the Apple Notes reader that need no Full
@@ -55,11 +56,13 @@ final class NotesStoreLocatorTests: XCTestCase {
         let home = try makeHome()
         let container = try makeContainer(in: home)
         try Data().write(to: container.appendingPathComponent(NotesStoreLocator.storeName))
-        try FileManager.default.setAttributes([.posixPermissions: 0o000],
-                                              ofItemAtPath: container.path)
+        try FileManager.default.setAttributes(
+            [.posixPermissions: 0o000],
+            ofItemAtPath: container.path)
         addTeardownBlock {
-            try? FileManager.default.setAttributes([.posixPermissions: 0o755],
-                                                   ofItemAtPath: container.path)
+            try? FileManager.default.setAttributes(
+                [.posixPermissions: 0o755],
+                ofItemAtPath: container.path)
         }
         try XCTSkipIf(getuid() == 0, "root bypasses POSIX permissions entirely")
         XCTAssertEqual(NotesStoreLocator.probe(home: home), .permissionDenied)
@@ -88,10 +91,12 @@ final class NotesStoreSnapshotTests: XCTestCase {
         let snapshot = try NotesStoreSnapshot(copying: try makeStore())
         let dir = snapshot.url.deletingLastPathComponent()
         XCTAssertEqual(try Data(contentsOf: snapshot.url), Data("main".utf8))
-        XCTAssertEqual(try Data(contentsOf: dir.appendingPathComponent("NoteStore.sqlite-wal")),
-                       Data("wal".utf8))
-        XCTAssertEqual(try Data(contentsOf: dir.appendingPathComponent("NoteStore.sqlite-shm")),
-                       Data("shm".utf8))
+        XCTAssertEqual(
+            try Data(contentsOf: dir.appendingPathComponent("NoteStore.sqlite-wal")),
+            Data("wal".utf8))
+        XCTAssertEqual(
+            try Data(contentsOf: dir.appendingPathComponent("NoteStore.sqlite-shm")),
+            Data("shm".utf8))
     }
 
     /// A cleanly checkpointed store has no `-wal` at all. Requiring one would
@@ -125,12 +130,13 @@ final class NotesSchemaTests: XCTestCase {
     }
 
     private func createFullSchema(_ db: Database) throws {
-        try db.execute(sql: """
-            CREATE TABLE ZICNOTEDATA (Z_PK INTEGER, ZNOTE INTEGER, ZDATA BLOB);
-            CREATE TABLE ZICCLOUDSYNCINGOBJECT (
-                Z_PK INTEGER, ZTITLE1 TEXT, ZIDENTIFIER TEXT, ZFOLDER INTEGER,
-                ZCREATIONDATE1 REAL, ZMODIFICATIONDATE1 REAL, ZMARKEDFORDELETION INTEGER);
-            """)
+        try db.execute(
+            sql: """
+                CREATE TABLE ZICNOTEDATA (Z_PK INTEGER, ZNOTE INTEGER, ZDATA BLOB);
+                CREATE TABLE ZICCLOUDSYNCINGOBJECT (
+                    Z_PK INTEGER, ZTITLE1 TEXT, ZIDENTIFIER TEXT, ZFOLDER INTEGER,
+                    ZCREATIONDATE1 REAL, ZMODIFICATIONDATE1 REAL, ZMARKEDFORDELETION INTEGER);
+                """)
     }
 
     func testAcceptsAStoreWithEveryRequiredColumn() throws {
@@ -196,28 +202,28 @@ final class AppleNotesScriptSourceTests: XCTestCase {
     /// Dates are seconds since the Unix epoch, deliberately not a localised
     /// date string.
     private let canned = """
-    x-coredata://N1
-    Groceries
-    iCloud
-    Shopping
-    978307200
-    978307300
-    <p>milk</p>
-    \u{1E}
-    x-coredata://N2
-    Ideas
-    iCloud
-    Notes
-    978307200
-    978307300
-    <p>a <b>bold</b> plan</p>
-    """
+        x-coredata://N1
+        Groceries
+        iCloud
+        Shopping
+        978307200
+        978307300
+        <p>milk</p>
+        \u{1E}
+        x-coredata://N2
+        Ideas
+        iCloud
+        Notes
+        978307200
+        978307300
+        <p>a <b>bold</b> plan</p>
+        """
 
     func testParsesEveryRecord() {
         let items = AppleNotesScriptSource.parse(canned)
         XCTAssertEqual(items.map(\.title), ["Groceries", "Ideas"])
         XCTAssertEqual(items[0].sourceID, "apple-notes:x-coredata://N1")
-        XCTAssertEqual(items[0].created, Date(timeIntervalSince1970: 978307200))
+        XCTAssertEqual(items[0].created, Date(timeIntervalSince1970: 978_307_200))
         guard case .html(let raw) = items[1].body else { return XCTFail("expected .html") }
         XCTAssertTrue(raw.contains("<b>bold</b>"))
     }
@@ -237,15 +243,16 @@ final class AppleNotesScriptSourceTests: XCTestCase {
     /// wrong. Swift's `Double` parses that form exactly, but a fixture written
     /// only with plain integers never proved it.
     func testParsesTheScientificNotationRealAppleScriptActuallyEmits() {
-        let items = AppleNotesScriptSource.parse("""
-        x-coredata://N1
-        Exponent
-        iCloud
-        Notes
-        1.660637018E+9
-        1.695563356E+9
-        <p>x</p>
-        """)
+        let items = AppleNotesScriptSource.parse(
+            """
+            x-coredata://N1
+            Exponent
+            iCloud
+            Notes
+            1.660637018E+9
+            1.695563356E+9
+            <p>x</p>
+            """)
         XCTAssertEqual(items.first?.created, Date(timeIntervalSince1970: 1_660_637_018))
         XCTAssertEqual(items.first?.modified, Date(timeIntervalSince1970: 1_695_563_356))
     }
@@ -253,15 +260,16 @@ final class AppleNotesScriptSourceTests: XCTestCase {
     /// The folder name is dropped from the path when empty, but the account is
     /// still a real location — an unfoldered note must not land at the root.
     func testANoteWithNoFolderStillLandsUnderItsAccount() {
-        let items = AppleNotesScriptSource.parse("""
-        x-coredata://N1
-        Loose
-        iCloud
+        let items = AppleNotesScriptSource.parse(
+            """
+            x-coredata://N1
+            Loose
+            iCloud
 
-        0
-        0
-        <p>x</p>
-        """)
+            0
+            0
+            <p>x</p>
+            """)
         XCTAssertEqual(items.first?.folderPath, ["iCloud"])
     }
 
@@ -273,16 +281,17 @@ final class AppleNotesScriptSourceTests: XCTestCase {
     }
 
     func testAMultiLineBodyIsKeptWhole() {
-        let items = AppleNotesScriptSource.parse("""
-        x-coredata://N1
-        Long
-        iCloud
-        Notes
-        0
-        0
-        <p>one</p>
-        <p>two</p>
-        """)
+        let items = AppleNotesScriptSource.parse(
+            """
+            x-coredata://N1
+            Long
+            iCloud
+            Notes
+            0
+            0
+            <p>one</p>
+            <p>two</p>
+            """)
         guard case .html(let raw) = items[0].body else { return XCTFail("expected .html") }
         XCTAssertEqual(raw, "<p>one</p>\n<p>two</p>")
     }
@@ -297,14 +306,17 @@ final class AppleNotesScriptSourceTests: XCTestCase {
         XCTAssertTrue(AppleNotesScriptSource.parse("x-coredata://N1\nJust a title").isEmpty)
         // Six fields was the OLD complete record and is now a truncated one.
         // Accepting it would read the created date as a folder name.
-        XCTAssertTrue(AppleNotesScriptSource.parse("""
-        x-coredata://N1
-        Groceries
-        Shopping
-        978307200
-        978307300
-        <p>milk</p>
-        """).isEmpty)
+        XCTAssertTrue(
+            AppleNotesScriptSource.parse(
+                """
+                x-coredata://N1
+                Groceries
+                Shopping
+                978307200
+                978307300
+                <p>milk</p>
+                """
+            ).isEmpty)
     }
 
     /// An Automation denial is a DIFFERENT grant from Full Disk Access, and
@@ -339,15 +351,17 @@ final class AppleNotesScriptSourceTests: XCTestCase {
     /// The staging root has to reach the script, or `save` writes nowhere the
     /// caller can find and every attachment silently becomes unavailable.
     func testTheStagingRootReachesTheScript() {
-        XCTAssertTrue(AppleNotesScriptSource.script(stagingRoot: "/tmp/stage-me")
-            .contains("\"/tmp/stage-me\""))
+        XCTAssertTrue(
+            AppleNotesScriptSource.script(stagingRoot: "/tmp/stage-me")
+                .contains("\"/tmp/stage-me\""))
     }
 
     /// Importing the trash would resurrect deleted notes into the vault, where
     /// nothing distinguishes them from what the user meant to keep.
     func testTheScriptSkipsRecentlyDeleted() {
-        XCTAssertTrue(AppleNotesScriptSource.script(stagingRoot: "/tmp/x")
-            .contains("if fname is not \"Recently Deleted\""))
+        XCTAssertTrue(
+            AppleNotesScriptSource.script(stagingRoot: "/tmp/x")
+                .contains("if fname is not \"Recently Deleted\""))
     }
 
     // MARK: - attachments
@@ -416,11 +430,13 @@ final class AppleNotesScriptSourceTests: XCTestCase {
     }
 
     func testEveryAttachmentOfANoteIsCarried() {
-        let items = AppleNotesScriptSource.parse(withAttachments("""
-        x-coredata://A1\(US)a.png\(US)/tmp/stage/1-1.png
-        x-coredata://A2\(US)b.png\(US)/tmp/stage/1-2.png
-        x-coredata://A3\(US)c.png\(US)/tmp/stage/1-3.png
-        """))
+        let items = AppleNotesScriptSource.parse(
+            withAttachments(
+                """
+                x-coredata://A1\(US)a.png\(US)/tmp/stage/1-1.png
+                x-coredata://A2\(US)b.png\(US)/tmp/stage/1-2.png
+                x-coredata://A3\(US)c.png\(US)/tmp/stage/1-3.png
+                """))
         XCTAssertEqual(items.first?.attachments.map(\.preferredName), ["a.png", "b.png", "c.png"])
         XCTAssertEqual(items.first?.fidelity.isEmpty, true)
     }
@@ -428,17 +444,18 @@ final class AppleNotesScriptSourceTests: XCTestCase {
     /// A note that is nothing but a photo is ORDINARY in Apple Notes. Inferring
     /// `.file` from that shape is what loses its title and dates.
     func testAPhotoOnlyNoteIsStillANote() {
-        let items = AppleNotesScriptSource.parse("""
-        x-coredata://N1
-        Beach
+        let items = AppleNotesScriptSource.parse(
+            """
+            x-coredata://N1
+            Beach
 
-        Notes
-        0
-        0
+            Notes
+            0
+            0
 
-        \(US)
-        x-coredata://A1\(US)beach.png\(US)/tmp/stage/1-1.png
-        """)
+            \(US)
+            x-coredata://A1\(US)beach.png\(US)/tmp/stage/1-1.png
+            """)
         XCTAssertEqual(items.first?.kind, .note)
         XCTAssertEqual(items.first?.title, "Beach")
         XCTAssertEqual(items.first?.attachments.count, 1)

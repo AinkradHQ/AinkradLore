@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 /// Pinned documents.
@@ -16,8 +17,9 @@ final class ShortcutListsTests: XCTestCase {
             .appendingPathComponent("lore-\(label)-\(UUID())")
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
         let docs = FakeDocs()
-        let store = LoreStore(documents: docs,
-                              indexPath: root.appendingPathComponent(".idx.sqlite"))
+        let store = LoreStore(
+            documents: docs,
+            indexPath: root.appendingPathComponent(".idx.sqlite"))
         try store.setVaultRootForTesting(root)
         return (root, store, docs)
     }
@@ -33,7 +35,8 @@ final class ShortcutListsTests: XCTestCase {
     func test_pinningIsAToggleAndSurvivesARelaunch() async throws {
         let (root, store, docs) = try vault("pin")
         let a = try note(root, "a.md")
-        await store.settleForTesting(); try store.rebuild()
+        await store.settleForTesting()
+        try store.rebuild()
 
         XCTAssertFalse(store.isPinned(a))
         store.togglePinned(a)
@@ -47,10 +50,12 @@ final class ShortcutListsTests: XCTestCase {
         // writing. Production never has two stores on one index; the test
         // should not either.
         store.shutdown()
-        let reopened = LoreStore(documents: docs,
-                                 indexPath: root.appendingPathComponent(".idx.sqlite"))
+        let reopened = LoreStore(
+            documents: docs,
+            indexPath: root.appendingPathComponent(".idx.sqlite"))
         try reopened.setVaultRootForTesting(root)
-        await reopened.settleForTesting(); try reopened.rebuild()
+        await reopened.settleForTesting()
+        try reopened.rebuild()
         XCTAssertTrue(reopened.isPinned(a), "a pin must survive a relaunch")
 
         reopened.togglePinned(a)
@@ -60,7 +65,8 @@ final class ShortcutListsTests: XCTestCase {
     func test_pinnedRowsDropADeletedDocument() async throws {
         let (root, store, _) = try vault("pin-ghost")
         let a = try note(root, "a.md")
-        await store.settleForTesting(); try store.rebuild()
+        await store.settleForTesting()
+        try store.rebuild()
         store.togglePinned(a)
         XCTAssertEqual(store.pinnedRows.count, 1)
 

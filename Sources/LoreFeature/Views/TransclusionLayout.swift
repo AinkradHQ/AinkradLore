@@ -41,9 +41,12 @@ enum TransclusionLayout {
     ///   `nil` measures, through `height(for:width:theme:)`, which keeps
     ///   `TransclusionMeasureCounter.record()` at its single call site: one
     ///   measured box is exactly one recorded measurement.
-    static func box(for content: TransclusionContent, width: CGFloat,
-                    theme: MarkdownTheme, measuredHeight: CGFloat? = nil) -> Box {
-        Box(text: attributedString(for: content, theme: theme),
+    static func box(
+        for content: TransclusionContent, width: CGFloat,
+        theme: MarkdownTheme, measuredHeight: CGFloat? = nil
+    ) -> Box {
+        Box(
+            text: attributedString(for: content, theme: theme),
             innerWidth: max(1, width - framePadding * 2),
             height: measuredHeight
                 ?? height(for: content, width: width, theme: theme))
@@ -60,8 +63,10 @@ enum TransclusionLayout {
     /// same height, because the string laid out and the frame padding added
     /// are both pure functions of the inputs — nothing here reads mutable
     /// state.
-    static func height(for content: TransclusionContent, width: CGFloat,
-                       theme: MarkdownTheme) -> CGFloat {
+    static func height(
+        for content: TransclusionContent, width: CGFloat,
+        theme: MarkdownTheme
+    ) -> CGFloat {
         TransclusionMeasureCounter.record()
 
         let text = attributedString(for: content, theme: theme)
@@ -74,17 +79,21 @@ enum TransclusionLayout {
     /// case renders a visible notice string rather than empty text, so its
     /// measured height is never zero — a zero height is a blank gap,
     /// indistinguishable from an empty note.
-    private static func attributedString(for content: TransclusionContent,
-                                         theme: MarkdownTheme) -> NSAttributedString {
+    private static func attributedString(
+        for content: TransclusionContent,
+        theme: MarkdownTheme
+    ) -> NSAttributedString {
         let font = theme.bodyFont
         let paragraph = NSMutableParagraphStyle()
         paragraph.lineHeightMultiple = theme.lineHeightMultiple
 
         func string(_ s: String) -> NSAttributedString {
-            NSAttributedString(string: s, attributes: [
-                .font: font,
-                .paragraphStyle: paragraph
-            ])
+            NSAttributedString(
+                string: s,
+                attributes: [
+                    .font: font,
+                    .paragraphStyle: paragraph,
+                ])
         }
 
         switch content {
@@ -106,8 +115,10 @@ enum TransclusionLayout {
     /// The text's rendered height at `width`, from a single `NSTextContainer`
     /// layout pass — matching `MarkdownTableLayout.measure`'s use of
     /// `boundingRect`.
-    private static func measure(_ text: NSAttributedString,
-                                wrappingAt width: CGFloat) -> CGFloat {
+    private static func measure(
+        _ text: NSAttributedString,
+        wrappingAt width: CGFloat
+    ) -> CGFloat {
         let bounds = text.boundingRect(
             with: CGSize(width: width, height: .greatestFiniteMagnitude),
             options: [.usesLineFragmentOrigin, .usesFontLeading])

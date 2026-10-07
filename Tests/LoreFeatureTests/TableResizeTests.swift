@@ -1,6 +1,7 @@
 import AppKit
 import SwiftUI
 import XCTest
+
 @testable import LoreFeature
 
 /// A table measured at one width and then shown at another.
@@ -14,30 +15,35 @@ import XCTest
 final class TableResizeTests: XCTestCase {
 
     private var windows: [NSWindow] = []
-    override func tearDown() { windows.removeAll(); super.tearDown() }
+    override func tearDown() {
+        windows.removeAll()
+        super.tearDown()
+    }
 
     private let body = """
-    intro paragraph
+        intro paragraph
 
-    | | |
-    |---|---|
-    | **Web** | http://localhost:5180 |
-    | **API** | http://localhost:8001 |
+        | | |
+        |---|---|
+        | **Web** | http://localhost:5180 |
+        | **API** | http://localhost:8001 |
 
-    after
-    """
+        after
+        """
 
     @MainActor
     private func editor(startingWidth: CGFloat)
-        -> (MarkdownEditor.Coordinator, LinkTextView) {
+        -> (MarkdownEditor.Coordinator, LinkTextView)
+    {
         var stored = body
         let binding = Binding<String>(get: { stored }, set: { stored = $0 })
         let coordinator = MarkdownEditor.Coordinator(text: binding, tokens: TestTokens.make())
         let tv = LinkTextView(frame: NSRect(x: 0, y: 0, width: startingWidth, height: 800))
         tv.isRichText = false
         tv.delegate = coordinator
-        let window = NSWindow(contentRect: tv.frame, styleMask: [.titled],
-                              backing: .buffered, defer: false)
+        let window = NSWindow(
+            contentRect: tv.frame, styleMask: [.titled],
+            backing: .buffered, defer: false)
         window.contentView = tv
         window.makeFirstResponder(tv)
         windows.append(window)
@@ -80,9 +86,10 @@ final class TableResizeTests: XCTestCase {
         tv.layoutSubtreeIfNeeded()
 
         let widened = try XCTUnwrap(box(in: tv))
-        XCTAssertEqual(widened.columnWidths, expected.columnWidths,
-                       "the table must be remeasured against the width it is "
-                       + "actually drawn at, not the one it was created at")
+        XCTAssertEqual(
+            widened.columnWidths, expected.columnWidths,
+            "the table must be remeasured against the width it is "
+                + "actually drawn at, not the one it was created at")
 
         // And the cells still carry real, readable text. `prepare` has to run
         // BETWEEN the two collapse passes — it captures each cell's attributed
@@ -91,8 +98,9 @@ final class TableResizeTests: XCTestCase {
         let url = try XCTUnwrap(widened.rows.dropFirst().first?.cells.last)
         XCTAssertTrue(url.text.string.contains("localhost"))
         let font = url.text.attribute(.font, at: 0, effectiveRange: nil) as? NSFont
-        XCTAssertGreaterThan(try XCTUnwrap(font).pointSize, 5,
-                             "cell text captured after the rows collapsed would be 0.01 pt")
+        XCTAssertGreaterThan(
+            try XCTUnwrap(font).pointSize, 5,
+            "cell text captured after the rows collapsed would be 0.01 pt")
     }
 
     /// The BACKSTOP: a box measured at one width and then drawn at another
@@ -118,8 +126,9 @@ final class TableResizeTests: XCTestCase {
         tv.layoutSubtreeIfNeeded()
         let squeezed = try XCTUnwrap(box(in: tv))
         XCTAssertLessThan(squeezed.totalWidth, 200, "precondition: it really is squeezed")
-        XCTAssertEqual(squeezed.measuredWidth, 150, accuracy: 0.5,
-                       "the box records the width it was measured against")
+        XCTAssertEqual(
+            squeezed.measuredWidth, 150, accuracy: 0.5,
+            "the box records the width it was measured against")
 
         // Put the real width back and let the render loop notice on its own —
         // no resize call, no forced snapshot.
@@ -130,8 +139,9 @@ final class TableResizeTests: XCTestCase {
         wait(for: [recovered], timeout: 5)
         tv.layoutSubtreeIfNeeded()
 
-        XCTAssertEqual(try XCTUnwrap(box(in: tv)).columnWidths, expected,
-                       "a box drawn at a width it was not measured for must correct itself")
+        XCTAssertEqual(
+            try XCTUnwrap(box(in: tv)).columnWidths, expected,
+            "a box drawn at a width it was not measured for must correct itself")
     }
 
     /// Narrowing again must also take effect, or a table would only ever grow.

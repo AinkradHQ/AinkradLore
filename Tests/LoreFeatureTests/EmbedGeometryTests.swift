@@ -1,5 +1,6 @@
-import XCTest
 import AppKit
+import XCTest
+
 @testable import LoreFeature
 
 /// Pure-geometry proof for Task C's fix round: an inline embed image's draw
@@ -13,41 +14,47 @@ final class EmbedGeometryTests: XCTestCase {
     private let imageSize = NSSize(width: 100, height: 60)
 
     func test_ltrTopLevel_sitsAtTheLeftMargin() {
-        let rect = EmbedGeometry.drawRect(containerWidth: containerWidth,
-                                          writingDirection: .leftToRight,
-                                          indent: 0, imageSize: imageSize)
+        let rect = EmbedGeometry.drawRect(
+            containerWidth: containerWidth,
+            writingDirection: .leftToRight,
+            indent: 0, imageSize: imageSize)
         XCTAssertEqual(rect.origin.x, 0)
         XCTAssertEqual(rect.size, imageSize)
     }
 
     func test_rtlTopLevel_sitsAtTheRightMargin() {
-        let rect = EmbedGeometry.drawRect(containerWidth: containerWidth,
-                                          writingDirection: .rightToLeft,
-                                          indent: 0, imageSize: imageSize)
+        let rect = EmbedGeometry.drawRect(
+            containerWidth: containerWidth,
+            writingDirection: .rightToLeft,
+            indent: 0, imageSize: imageSize)
         // The image's RIGHT edge must be flush with the container's right
         // edge, growing LEFTWARD from there — the exact defect the owner
         // hit: the buggy code grew rightward from a right-margin x and
         // painted past the container.
         XCTAssertEqual(rect.origin.x, containerWidth - imageSize.width)
-        XCTAssertLessThanOrEqual(rect.origin.x + rect.size.width, containerWidth,
-                                 "must never overflow the right edge")
+        XCTAssertLessThanOrEqual(
+            rect.origin.x + rect.size.width, containerWidth,
+            "must never overflow the right edge")
     }
 
     func test_indentedLTR_sitsAtTheListOrBlockquoteIndent() {
         let indent: CGFloat = 40
-        let rect = EmbedGeometry.drawRect(containerWidth: containerWidth,
-                                          writingDirection: .leftToRight,
-                                          indent: indent, imageSize: imageSize)
-        XCTAssertEqual(rect.origin.x, indent,
-                       "a list/blockquote-nested embed must sit at its context's indent, "
-                       + "not reset to zero")
+        let rect = EmbedGeometry.drawRect(
+            containerWidth: containerWidth,
+            writingDirection: .leftToRight,
+            indent: indent, imageSize: imageSize)
+        XCTAssertEqual(
+            rect.origin.x, indent,
+            "a list/blockquote-nested embed must sit at its context's indent, "
+                + "not reset to zero")
     }
 
     func test_indentedRTL_sitsInFromTheRightMargin() {
         let indent: CGFloat = 40
-        let rect = EmbedGeometry.drawRect(containerWidth: containerWidth,
-                                          writingDirection: .rightToLeft,
-                                          indent: indent, imageSize: imageSize)
+        let rect = EmbedGeometry.drawRect(
+            containerWidth: containerWidth,
+            writingDirection: .rightToLeft,
+            indent: indent, imageSize: imageSize)
         XCTAssertEqual(rect.origin.x, containerWidth - indent - imageSize.width)
         XCTAssertGreaterThanOrEqual(rect.origin.x, 0, "must never overflow the left edge either")
     }
@@ -63,9 +70,10 @@ final class EmbedGeometryTests: XCTestCase {
     func test_imageWiderThanTheContainer_originIsPinnedNotNegative() {
         let hugeImage = NSSize(width: 900, height: 60)
         for direction: NSWritingDirection in [.leftToRight, .rightToLeft] {
-            let rect = EmbedGeometry.drawRect(containerWidth: containerWidth,
-                                              writingDirection: direction,
-                                              indent: 0, imageSize: hugeImage)
+            let rect = EmbedGeometry.drawRect(
+                containerWidth: containerWidth,
+                writingDirection: direction,
+                indent: 0, imageSize: hugeImage)
             XCTAssertEqual(rect.origin.x, 0, "\(direction)")
         }
     }
@@ -77,9 +85,10 @@ final class EmbedGeometryTests: XCTestCase {
         // container width.
         let indent: CGFloat = 350
         for direction: NSWritingDirection in [.leftToRight, .rightToLeft] {
-            let rect = EmbedGeometry.drawRect(containerWidth: containerWidth,
-                                              writingDirection: direction,
-                                              indent: indent, imageSize: imageSize)
+            let rect = EmbedGeometry.drawRect(
+                containerWidth: containerWidth,
+                writingDirection: direction,
+                indent: indent, imageSize: imageSize)
             XCTAssertGreaterThanOrEqual(rect.origin.x, 0, "\(direction)")
             XCTAssertLessThanOrEqual(rect.origin.x + rect.size.width, containerWidth, "\(direction)")
         }
@@ -125,14 +134,16 @@ final class EmbedGeometryTests: XCTestCase {
         let embedParagraph = text.paragraphRange(for: text.range(of: "![[screenshot.png]]"))
         // Sanity: the embed's OWN paragraph text alone would resolve LTR —
         // this is the precondition that makes the test meaningful at all.
-        XCTAssertEqual(EmbedGeometry.naturalWritingDirection(of: "![[screenshot.png]]"),
-                       .leftToRight, "precondition: the embed's own text is Latin-only")
+        XCTAssertEqual(
+            EmbedGeometry.naturalWritingDirection(of: "![[screenshot.png]]"),
+            .leftToRight, "precondition: the embed's own text is Latin-only")
 
         let resolved = EmbedGeometry.contextualWritingDirection(
             paragraph: embedParagraph, in: text)
-        XCTAssertEqual(resolved, .rightToLeft,
-                       "the Arabic paragraph ABOVE the embed must decide its direction, "
-                       + "not the Latin filename inside it")
+        XCTAssertEqual(
+            resolved, .rightToLeft,
+            "the Arabic paragraph ABOVE the embed must decide its direction, "
+                + "not the Latin filename inside it")
     }
 
     /// The other neighbour: no text before the embed (it opens the

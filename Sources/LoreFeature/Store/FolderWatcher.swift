@@ -1,5 +1,5 @@
-import Foundation
 import CoreServices
+import Foundation
 
 /// Watches a vault root RECURSIVELY for filesystem changes, using an
 /// `FSEventStream` rather than a single `DispatchSource` on the root vnode.
@@ -136,37 +136,38 @@ final class FolderWatcher {
 
         let flags: FSEventStreamCreateFlags = UInt32(
             kFSEventStreamCreateFlagUseCFTypes
-                | kFSEventStreamCreateFlagFileEvents   // per-file, not per-directory,
-                                                        // granularity — lets the dot-
-                                                        // directory filter below inspect
-                                                        // the actual changed path instead
-                                                        // of just "something changed
-                                                        // somewhere under this directory".
-                | kFSEventStreamCreateFlagNoDefer)     // deliver the FIRST event of a
-                                                        // burst immediately, then coalesce
-                                                        // the rest for `latency` — without
-                                                        // this, FSEvents waits a full
-                                                        // `latency` period after the FIRST
-                                                        // event before delivering anything,
-                                                        // which doubles worst-case delay
-                                                        // for an isolated, non-bursty change
-                                                        // (the common case: one file saved
-                                                        // from another machine).
+                | kFSEventStreamCreateFlagFileEvents  // per-file, not per-directory,
+                // granularity — lets the dot-
+                // directory filter below inspect
+                // the actual changed path instead
+                // of just "something changed
+                // somewhere under this directory".
+                | kFSEventStreamCreateFlagNoDefer)  // deliver the FIRST event of a
+        // burst immediately, then coalesce
+        // the rest for `latency` — without
+        // this, FSEvents waits a full
+        // `latency` period after the FIRST
+        // event before delivering anything,
+        // which doubles worst-case delay
+        // for an isolated, non-bursty change
+        // (the common case: one file saved
+        // from another machine).
 
-        guard let created = FSEventStreamCreate(
-            kCFAllocatorDefault,
-            { (streamRef, info, numEvents, eventPaths, eventFlags, eventIds) in
-                guard let info else { return }
-                let watcher = Unmanaged<FolderWatcher>.fromOpaque(info).takeUnretainedValue()
-                watcher.handleEvents(
-                    numEvents: numEvents, eventPaths: eventPaths,
-                    eventFlags: eventFlags, eventIds: eventIds)
-            },
-            &context,
-            [root.path] as CFArray,
-            FSEventStreamEventId(kFSEventStreamEventIdSinceNow), // no historical replay on launch
-            Self.latency,
-            flags)
+        guard
+            let created = FSEventStreamCreate(
+                kCFAllocatorDefault,
+                { (streamRef, info, numEvents, eventPaths, eventFlags, eventIds) in
+                    guard let info else { return }
+                    let watcher = Unmanaged<FolderWatcher>.fromOpaque(info).takeUnretainedValue()
+                    watcher.handleEvents(
+                        numEvents: numEvents, eventPaths: eventPaths,
+                        eventFlags: eventFlags, eventIds: eventIds)
+                },
+                &context,
+                [root.path] as CFArray,
+                FSEventStreamEventId(kFSEventStreamEventIdSinceNow),  // no historical replay on launch
+                Self.latency,
+                flags)
         else { return nil }
 
         // Main queue: `handleVaultChange` (the eventual consumer of
@@ -252,8 +253,9 @@ final class FolderWatcher {
         // duration of this callback only, never by us — where
         // `unsafeBitCast` (the sample-code idiom) leaves that unbalanced-ARC
         // contract implicit.
-        guard let pathsArray = Unmanaged<CFArray>.fromOpaque(eventPaths)
-            .takeUnretainedValue() as? [String]
+        guard
+            let pathsArray = Unmanaged<CFArray>.fromOpaque(eventPaths)
+                .takeUnretainedValue() as? [String]
         else {
             // Should not happen given `kFSEventStreamCreateFlagUseCFTypes`
             // (which guarantees a `CFArray` of `CFString`), but if the
@@ -270,7 +272,7 @@ final class FolderWatcher {
         var mustRescan = false
         var hasRelevantPath = false
         for i in 0..<numEvents {
-            guard eventIds[i] > startEventId else { continue } // stream-startup noise — see doc comment above
+            guard eventIds[i] > startEventId else { continue }  // stream-startup noise — see doc comment above
             let flags = eventFlags[i]
             if flags & FSEventStreamEventFlags(kFSEventStreamEventFlagMustScanSubDirs) != 0 {
                 mustRescan = true
@@ -285,7 +287,8 @@ final class FolderWatcher {
             // item-type flag, still counts.
             let isFile = flags & FSEventStreamEventFlags(kFSEventStreamEventFlagItemIsFile) != 0
             if !components.contains(where: { $0.hasPrefix(".") || VaultWalk.ignoredFolderNames.contains($0) }),
-               !isFile || VaultWalk.isIndexable(url) {
+                !isFile || VaultWalk.isIndexable(url)
+            {
                 hasRelevantPath = true
             }
         }

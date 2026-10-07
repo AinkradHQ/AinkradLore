@@ -1,6 +1,7 @@
-import XCTest
 import AppKit
 import SwiftUI
+import XCTest
+
 @testable import LoreFeature
 
 /// GFM pipe tables.
@@ -37,8 +38,11 @@ final class MarkdownTableTests: XCTestCase {
         let table = try XCTUnwrap(parse(body))
         let ns = body as NSString
         let first = try XCTUnwrap(table.rows.first?.cells.first)
-        XCTAssertEqual(ns.substring(with: NSRange(location: first.range.lowerBound,
-                                                  length: first.range.count)), "a")
+        XCTAssertEqual(
+            ns.substring(
+                with: NSRange(
+                    location: first.range.lowerBound,
+                    length: first.range.count)), "a")
         // `Cell.width` survives as a character COUNT — the one question it
         // can still answer honestly, and the one `row` needs it for: whether a
         // cell is empty, which is how a row's outer `|` are told from columns.
@@ -56,16 +60,18 @@ final class MarkdownTableTests: XCTestCase {
     /// row into the wrong number of columns and misalign every one after it.
     func test_anEscapedPipeIsContentNotASeparator() throws {
         let table = try XCTUnwrap(parse("| a \\| b | c |\n|---|---|\n| d | e |\n"))
-        XCTAssertEqual(table.rows.first?.cells.count, 2,
-                       "`a \\| b` is ONE cell")
+        XCTAssertEqual(
+            table.rows.first?.cells.count, 2,
+            "`a \\| b` is ONE cell")
     }
 
     /// The delimiter is the second line by definition. A body cell holding
     /// `---` is content, and hiding that row would delete a row of the table.
     func test_onlyTheSecondLineCanBeTheDelimiter() throws {
         let table = try XCTUnwrap(parse("| a | b |\n|---|---|\n| --- | x |\n"))
-        XCTAssertEqual(table.rows.count, 2,
-                       "the `| --- |` body row is a ROW, not a second delimiter")
+        XCTAssertEqual(
+            table.rows.count, 2,
+            "the `| --- |` body row is a ROW, not a second delimiter")
     }
 
     func test_alignmentColonsAreStillADelimiter() throws {
@@ -87,11 +93,13 @@ final class MarkdownTableTests: XCTestCase {
         let found = spans("| a | b |\n|---|---|\n| c | d |\n")
         XCTAssertTrue(found.contains { $0.kind == .table }, "the table itself")
         XCTAssertTrue(found.contains { $0.kind == .tableHeader }, "its header row")
-        XCTAssertTrue(found.contains { $0.kind == .marker(of: .tableDelimiter) },
-                      "the |---| row, as a marker so it collapses whole")
-        XCTAssertEqual(found.filter { $0.kind == .marker(of: .tablePipe) }.count, 2,
-                       "one marker per ROW — a row collapses whole, because the "
-                       + "drawing replaces all of it, not just its notation")
+        XCTAssertTrue(
+            found.contains { $0.kind == .marker(of: .tableDelimiter) },
+            "the |---| row, as a marker so it collapses whole")
+        XCTAssertEqual(
+            found.filter { $0.kind == .marker(of: .tablePipe) }.count, 2,
+            "one marker per ROW — a row collapses whole, because the "
+                + "drawing replaces all of it, not just its notation")
     }
 
     /// The delimiter row must be HIDDEN when the caret is elsewhere — it is
@@ -102,9 +110,12 @@ final class MarkdownTableTests: XCTestCase {
             spans: spans(body), selection: NSRange(location: 0, length: 0),
             text: body, isFocused: true)
         let delimiter = (body as NSString).range(of: "|---|---|")
-        XCTAssertTrue(hidden.contains { $0.lowerBound <= delimiter.location
-                                        && $0.upperBound >= NSMaxRange(delimiter) },
-                      "the delimiter row must be collapsed")
+        XCTAssertTrue(
+            hidden.contains {
+                $0.lowerBound <= delimiter.location
+                    && $0.upperBound >= NSMaxRange(delimiter)
+            },
+            "the delimiter row must be collapsed")
     }
 
     // MARK: - Column alignment markers
@@ -157,8 +168,9 @@ final class MarkdownTableTests: XCTestCase {
         let tv = LinkTextView(frame: NSRect(x: 0, y: 0, width: 800, height: 500))
         tv.isRichText = false
         tv.delegate = coordinator
-        let window = NSWindow(contentRect: tv.frame, styleMask: [.titled],
-                              backing: .buffered, defer: false)
+        let window = NSWindow(
+            contentRect: tv.frame, styleMask: [.titled],
+            backing: .buffered, defer: false)
         window.contentView = tv
         window.makeFirstResponder(tv)
         windows.append(window)
@@ -201,18 +213,19 @@ final class MarkdownTableTests: XCTestCase {
     @MainActor
     func test_aTableTooWideToFitWrapsInsteadOfOverflowing() throws {
         let body = """
-        intro
+            intro
 
-        | Wave | Tasks | Why first |
-        |---|---|---|
-        | 1 — unblock | B1 (timezone), E1 (office code) | B1 corrupts every \
-        date-dependent feature incl. D5; E1 blocks E2/E3/E4 |
-        | 5 — copy | F3, A2, A3, E5 | Low risk; E5 blocked on the analysis file |
+            | Wave | Tasks | Why first |
+            |---|---|---|
+            | 1 — unblock | B1 (timezone), E1 (office code) | B1 corrupts every \
+            date-dependent feature incl. D5; E1 blocks E2/E3/E4 |
+            | 5 — copy | F3, A2, A3, E5 | Low risk; E5 blocked on the analysis file |
 
-        """
+            """
         let laid = try box(body)
-        XCTAssertLessThanOrEqual(laid.totalWidth, 800,
-                                 "the grid must fit the measure it was given")
+        XCTAssertLessThanOrEqual(
+            laid.totalWidth, 800,
+            "the grid must fit the measure it was given")
         XCTAssertEqual(laid.columnWidths.count, 3)
 
         // The long third column must have wrapped, making its row taller than
@@ -220,9 +233,10 @@ final class MarkdownTableTests: XCTestCase {
         let bodyFont = MarkdownTheme(tokens: TestTokens.make()).bodyFont
         let single = bodyFont.ascender - bodyFont.descender
         let tallest = try XCTUnwrap(laid.rows.map(\.height).max())
-        XCTAssertGreaterThan(tallest, single * 1.8,
-                             "a cell too long for its column takes more lines INSIDE "
-                             + "the column, rather than pushing the row off the edge")
+        XCTAssertGreaterThan(
+            tallest, single * 1.8,
+            "a cell too long for its column takes more lines INSIDE "
+                + "the column, rather than pushing the row off the edge")
     }
 
     /// IMAGE 12, 2026-08-17: the grid painted ON TOP of still-visible source.
@@ -243,10 +257,13 @@ final class MarkdownTableTests: XCTestCase {
             // pipes — must be collapsed, or it shows through the grid.
             let row = (body as NSString).range(of: "| Wave | Tasks |")
             for offset in stride(from: row.location, to: NSMaxRange(row), by: 1) {
-                let font = storage.attribute(.font, at: offset,
-                                             effectiveRange: nil) as? NSFont
-                XCTAssertLessThan(font?.pointSize ?? 99, 1.0,
-                                  "offset \(offset) is still visible under the grid")
+                let font =
+                    storage.attribute(
+                        .font, at: offset,
+                        effectiveRange: nil) as? NSFont
+                XCTAssertLessThan(
+                    font?.pointSize ?? 99, 1.0,
+                    "offset \(offset) is still visible under the grid")
             }
         }
     }
@@ -276,17 +293,23 @@ final class MarkdownTableTests: XCTestCase {
             tv.setSelectedRange(NSRange(location: header.location + 3, length: 0))
             coordinator.revealForSelectionChange()
 
-            let font = storage.attribute(.font, at: header.location + 3,
-                                         effectiveRange: nil) as? NSFont
-            XCTAssertGreaterThan(font?.pointSize ?? 0, 1.0,
-                                 "the caret's row must show its source at full size")
+            let font =
+                storage.attribute(
+                    .font, at: header.location + 3,
+                    effectiveRange: nil) as? NSFont
+            XCTAssertGreaterThan(
+                font?.pointSize ?? 0, 1.0,
+                "the caret's row must show its source at full size")
 
             let body_ = (body as NSString).range(of: "| one | two |")
-            let other = storage.attribute(.font, at: body_.location + 3,
-                                          effectiveRange: nil) as? NSFont
-            XCTAssertGreaterThan(other?.pointSize ?? 0, 1.0,
-                                 "and so must every OTHER row — half a grid and half "
-                                 + "raw markdown is not a table")
+            let other =
+                storage.attribute(
+                    .font, at: body_.location + 3,
+                    effectiveRange: nil) as? NSFont
+            XCTAssertGreaterThan(
+                other?.pointSize ?? 0, 1.0,
+                "and so must every OTHER row — half a grid and half "
+                    + "raw markdown is not a table")
         }
     }
 
@@ -298,8 +321,9 @@ final class MarkdownTableTests: XCTestCase {
         let cell = try XCTUnwrap(laid.rows.first?.cells.first)
         XCTAssertGreaterThan(cell.text.length, 0)
         let font = cell.text.attribute(.font, at: 0, effectiveRange: nil) as? NSFont
-        XCTAssertGreaterThan(font?.pointSize ?? 0, 1.0,
-                             "captured cell text must be full size, not collapsed")
+        XCTAssertGreaterThan(
+            font?.pointSize ?? 0, 1.0,
+            "captured cell text must be full size, not collapsed")
     }
 
     /// IMAGE 13, 2026-08-17: `**1 — unblock**` drawn WITH its asterisks.
@@ -317,16 +341,21 @@ final class MarkdownTableTests: XCTestCase {
         // character — but collapsed to nothing, exactly as on screen.
         let markers = (cell.text.string as NSString).range(of: "**")
         XCTAssertNotEqual(markers.location, NSNotFound, "the text is captured whole")
-        let markerFont = cell.text.attribute(.font, at: markers.location,
-                                             effectiveRange: nil) as? NSFont
-        XCTAssertLessThan(markerFont?.pointSize ?? 99, 1.0,
-                          "a captured `**` must already be collapsed, or it is drawn "
-                          + "into the grid as literal asterisks")
+        let markerFont =
+            cell.text.attribute(
+                .font, at: markers.location,
+                effectiveRange: nil) as? NSFont
+        XCTAssertLessThan(
+            markerFont?.pointSize ?? 99, 1.0,
+            "a captured `**` must already be collapsed, or it is drawn "
+                + "into the grid as literal asterisks")
 
         // And the word itself is full size and bold.
         let word = (cell.text.string as NSString).range(of: "bold")
-        let wordFont = try XCTUnwrap(cell.text.attribute(.font, at: word.location,
-                                                          effectiveRange: nil) as? NSFont)
+        let wordFont = try XCTUnwrap(
+            cell.text.attribute(
+                .font, at: word.location,
+                effectiveRange: nil) as? NSFont)
         XCTAssertGreaterThan(wordFont.pointSize, 1.0)
         XCTAssertTrue(wordFont.fontDescriptor.symbolicTraits.contains(.bold))
     }
@@ -349,8 +378,9 @@ final class MarkdownTableTests: XCTestCase {
     @MainActor
     func test_squeezingIsProportional() {
         let fitted = MarkdownTableLayout.fit([200, 800], into: 500)
-        XCTAssertLessThan(fitted[0], fitted[1],
-                          "the narrower column stays the narrower one")
+        XCTAssertLessThan(
+            fitted[0], fitted[1],
+            "the narrower column stays the narrower one")
     }
 
     @MainActor
@@ -371,11 +401,13 @@ final class MarkdownTableTests: XCTestCase {
             coordinator.revealForSelectionChange()
             let header = (body as NSString).range(of: "| a | b |")
             let style = try XCTUnwrap(
-                storage.attribute(.paragraphStyle, at: header.location,
-                                  effectiveRange: nil) as? NSParagraphStyle)
-            XCTAssertGreaterThan(style.minimumLineHeight, 0,
-                                 "a drawn row must reserve its height, or the grid is "
-                                 + "painted over the text beneath it")
+                storage.attribute(
+                    .paragraphStyle, at: header.location,
+                    effectiveRange: nil) as? NSParagraphStyle)
+            XCTAssertGreaterThan(
+                style.minimumLineHeight, 0,
+                "a drawn row must reserve its height, or the grid is "
+                    + "painted over the text beneath it")
         }
     }
 
@@ -387,10 +419,11 @@ final class MarkdownTableTests: XCTestCase {
         withExtendedLifetime(coordinator) {
             tv.setSelectedRange(NSRange(location: 0, length: 0))
             coordinator.revealForSelectionChange()
-            XCTAssertTrue(tv.blockBackgrounds.contains { region in
-                if case .table = region.kind { return true }
-                return false
-            }, "a table must reach the layer that paints it")
+            XCTAssertTrue(
+                tv.blockBackgrounds.contains { region in
+                    if case .table = region.kind { return true }
+                    return false
+                }, "a table must reach the layer that paints it")
         }
     }
 
@@ -406,7 +439,10 @@ final class MarkdownTableTests: XCTestCase {
         cell.text.enumerateAttribute(.font, in: NSRange(location: 0, length: cell.text.length)) {
             value, _, _ in
             if let font = value as? NSFont,
-               font.fontDescriptor.symbolicTraits.contains(.bold) { sawBold = true }
+                font.fontDescriptor.symbolicTraits.contains(.bold)
+            {
+                sawBold = true
+            }
         }
         XCTAssertTrue(sawBold, "a bold cell must reach the grid still bold")
     }

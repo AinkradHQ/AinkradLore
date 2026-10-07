@@ -1,6 +1,6 @@
+import AinkradAppKit
 import AppKit
 import SwiftUI
-import AinkradAppKit
 
 /// The EDIT path: what a keystroke costs, and the guard that stops a redraw
 /// from paying for it twice.
@@ -29,8 +29,10 @@ extension MarkdownEditor.Coordinator {
     ///
     /// A nil `replacementString` is an attributes-only change: there is no
     /// delta to shift by, so the cache is left to notice the mismatch.
-    public func textView(_ tv: NSTextView, shouldChangeTextIn affected: NSRange,
-                         replacementString: String?) -> Bool {
+    public func textView(
+        _ tv: NSTextView, shouldChangeTextIn affected: NSRange,
+        replacementString: String?
+    ) -> Bool {
         // `tv.string` is still the PRE-edit text here, which is the only
         // moment the cache's currency can be checked against it. Spans that
         // did not describe the text before the edit cannot be shifted into
@@ -41,13 +43,15 @@ extension MarkdownEditor.Coordinator {
         // `MarkdownEditorReveal`'s single-block fast path needs to decide
         // whether the edit can possibly have moved a block boundary. Once
         // `textDidChange` fires, the removed text is gone.
-        pendingEdit = styleCache.describes(tv.string)
+        pendingEdit =
+            styleCache.describes(tv.string)
             ? replacementString.map {
-                PendingEdit(range: affected, replacementLength: ($0 as NSString).length,
-                            touchesBlockStructure:
-                                Self.disturbsStructure($0)
-                                || Self.disturbsStructure(removed: affected, from: tv.string))
-              }
+                PendingEdit(
+                    range: affected, replacementLength: ($0 as NSString).length,
+                    touchesBlockStructure:
+                        Self.disturbsStructure($0)
+                        || Self.disturbsStructure(removed: affected, from: tv.string))
+            }
             : nil
         return true
     }
@@ -65,11 +69,14 @@ extension MarkdownEditor.Coordinator {
     /// which bars the fast path and takes the full render. The conservative
     /// direction: a redundant whole-document render is the behaviour that
     /// shipped for years, and it cannot be wrong about anything.
-    private static func disturbsStructure(removed affected: NSRange,
-                                          from text: String) -> Bool {
+    private static func disturbsStructure(
+        removed affected: NSRange,
+        from text: String
+    ) -> Bool {
         let ns = text as NSString
         guard affected.location >= 0, affected.length >= 0,
-              NSMaxRange(affected) <= ns.length else { return true }
+            NSMaxRange(affected) <= ns.length
+        else { return true }
         return disturbsStructure(ns.substring(with: affected))
     }
 
@@ -105,9 +112,10 @@ extension MarkdownEditor.Coordinator {
         guard let tv = textView else { return }
         text.wrappedValue = tv.string
         if let edit = pendingEdit {
-            styleCache.shift(editedRange: edit.range,
-                             delta: edit.replacementLength - edit.range.length,
-                             newText: tv.string)
+            styleCache.shift(
+                editedRange: edit.range,
+                delta: edit.replacementLength - edit.range.length,
+                newText: tv.string)
         }
         let edit = pendingEdit
         pendingEdit = nil
@@ -170,12 +178,11 @@ extension MarkdownEditor.Coordinator {
         // where a redraw arrives first.)
         if styleCache.isOverViewportCap {
             guard let last = lastViewportWindow,
-                  NSEqualRanges(last, MarkdownStyleRenderer.viewportWindow(of: tv))
+                NSEqualRanges(last, MarkdownStyleRenderer.viewportWindow(of: tv))
             else { return true }
         }
         return false
     }
-
 
     // MARK: - The single-block edit path
 
@@ -267,9 +274,10 @@ extension MarkdownEditor.Coordinator {
         let delta = edit.replacementLength - edit.range.length
         let limit = (tv.string as NSString).length
         let shifted = revealIndex.blocks.map { block in
-            movedOffset(block.lowerBound, start: edit.range.location, delta: delta, limit: limit)
-                ..< movedOffset(block.upperBound, start: edit.range.location,
-                                delta: delta, limit: limit)
+            movedOffset(
+                block.lowerBound, start: edit.range.location, delta: delta, limit: limit)..<movedOffset(
+                    block.upperBound, start: edit.range.location,
+                    delta: delta, limit: limit)
         }
         let fresh = MarkdownReveal.blocks(in: tv.string)
         guard shifted == fresh else { return false }
@@ -292,9 +300,11 @@ extension MarkdownEditor.Coordinator {
         var existing: [StyleSpan] = []
         for span in styleCache.spans
         where span.range.lowerBound < blockRange.upperBound
-            && span.range.upperBound > blockRange.lowerBound {
+            && span.range.upperBound > blockRange.lowerBound
+        {
             guard span.range.lowerBound >= blockRange.lowerBound,
-                  span.range.upperBound <= blockRange.upperBound else { return false }
+                span.range.upperBound <= blockRange.upperBound
+            else { return false }
             existing.append(span)
         }
 
@@ -360,20 +370,26 @@ extension MarkdownEditor.Coordinator {
             // non-splice branch shifts them and by the same rule.
             let limit = (tv.string as NSString).length
             let outside = revealIndex.wideSpans.compactMap { span -> Range<Int>? in
-                let moved = movedOffset(span.lowerBound, start: edit.range.location,
-                                        delta: delta, limit: limit)
-                    ..< movedOffset(span.upperBound, start: edit.range.location,
-                                    delta: delta, limit: limit)
+                let moved =
+                    movedOffset(
+                        span.lowerBound, start: edit.range.location,
+                        delta: delta, limit: limit)..<movedOffset(
+                        span.upperBound, start: edit.range.location,
+                        delta: delta, limit: limit)
                 // Dropped if it belongs to the block just respliced; that
                 // block's wide spans are recomputed from its fresh parse below.
-                guard moved.lowerBound < blockRange.lowerBound
-                        || moved.lowerBound >= blockRange.upperBound else { return nil }
+                guard
+                    moved.lowerBound < blockRange.lowerBound
+                        || moved.lowerBound >= blockRange.upperBound
+                else { return nil }
                 return moved.lowerBound < moved.upperBound ? moved : nil
             }
             revealIndex = MarkdownEditorReveal.index(
                 blocks: fresh, spans: styleCache.spans,
-                wideSpans: outside + MarkdownReveal.wideSpans(in: tv.string,
-                                                              spans: blockSpans))
+                wideSpans: outside
+                    + MarkdownReveal.wideSpans(
+                        in: tv.string,
+                        spans: blockSpans))
         } else {
             // The buckets and the wide spans are both carried over, but for
             // different reasons. The buckets describe POSITIONS in the span
@@ -392,15 +408,17 @@ extension MarkdownEditor.Coordinator {
                 blocks: fresh, spansByBlock: revealIndex.spansByBlock,
                 depths: MarkdownListDepth.depths(of: styleCache.spans),
                 wideSpans: revealIndex.wideSpans.map { span in
-                    movedOffset(span.lowerBound, start: edit.range.location,
-                                delta: delta, limit: limit)
-                        ..< movedOffset(span.upperBound, start: edit.range.location,
-                                        delta: delta, limit: limit)
+                    movedOffset(
+                        span.lowerBound, start: edit.range.location,
+                        delta: delta, limit: limit)..<movedOffset(
+                            span.upperBound, start: edit.range.location,
+                            delta: delta, limit: limit)
                 })
         }
         revealIndexBuilds += 1
         rebuildEmbedIndex()
-        documentWritingDirection = EmbedGeometry.strongWritingDirection(of: tv.string)
+        documentWritingDirection =
+            EmbedGeometry.strongWritingDirection(of: tv.string)
             ?? .leftToRight
         // Reveal, computed the way a FULL render computes it — from the live
         // selection and focus against the fresh blocks — rather than read from
@@ -412,10 +430,11 @@ extension MarkdownEditor.Coordinator {
         // which the equivalence test caught immediately.
         let focused = isTextViewFocused
         let was = revealedRange
-        let now = MarkdownReveal.revealedRange(in: tv.string,
-                                               selection: tv.selectedRange(),
-                                               wideSpans: revealIndex.wideSpans,
-                                               isFocused: focused)
+        let now = MarkdownReveal.revealedRange(
+            in: tv.string,
+            selection: tv.selectedRange(),
+            wideSpans: revealIndex.wideSpans,
+            isFocused: focused)
         lastRevealFocus = focused
         revealedRange = now
         // The block that changed, plus every block the reveal moved out of or
@@ -434,13 +453,16 @@ extension MarkdownEditor.Coordinator {
         revealEmbedsForSelectionChange(in: storage)
         // A table's rows reserve their drawn heights, so an edit inside one has
         // to re-measure the grid before the decoration is rebuilt from it.
-        if styleCache.spans.contains(where: { if case .table = $0.kind { return true }
-                                              return false }) {
-            tableRegions = MarkdownTableStyling.prepare(styleCache.spans,
-                                                        revealed: revealedRange,
-                                                        maxWidth: textColumnWidth(of: tv),
-                                                        bodyFont: theme.bodyFont,
-                                                        in: storage)
+        if styleCache.spans.contains(where: {
+            if case .table = $0.kind { return true }
+            return false
+        }) {
+            tableRegions = MarkdownTableStyling.prepare(
+                styleCache.spans,
+                revealed: revealedRange,
+                maxWidth: textColumnWidth(of: tv),
+                bodyFont: theme.bodyFont,
+                in: storage)
         }
         // Drains whatever the restyled blocks above asked for — one
         // whole-document reservation per EDIT, not per block.

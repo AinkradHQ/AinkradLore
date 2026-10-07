@@ -1,6 +1,7 @@
-import XCTest
 import AppKit
 import SwiftUI
+import XCTest
+
 @testable import LoreFeature
 
 /// `$…$` math.
@@ -24,8 +25,9 @@ final class MarkdownMathTests: XCTestCase {
 
     /// The case that would be worst to get wrong, because it is so common.
     func test_pricesInProseAreNotMath() {
-        XCTAssertTrue(spans("it costs $5 and $7 in total\n").isEmpty,
-                      "a closing delimiter preceded by a space is not a delimiter")
+        XCTAssertTrue(
+            spans("it costs $5 and $7 in total\n").isEmpty,
+            "a closing delimiter preceded by a space is not a delimiter")
         XCTAssertTrue(spans("between $10 and $20 per unit\n").isEmpty)
     }
 
@@ -44,10 +46,11 @@ final class MarkdownMathTests: XCTestCase {
     /// opens an expression that runs to the next `$` anywhere in the file.
     func test_dollarsInsideCodeAreSuppressed() {
         let body = "```bash\necho $PATH and $HOME\n```\n"
-        XCTAssertFalse(styleSpans(body).contains {
-            if case .math = $0.kind { return true }
-            return false
-        }, "a shell variable must not be read as mathematics")
+        XCTAssertFalse(
+            styleSpans(body).contains {
+                if case .math = $0.kind { return true }
+                return false
+            }, "a shell variable must not be read as mathematics")
     }
 
     // MARK: - Mathematics, rendered
@@ -76,11 +79,12 @@ final class MarkdownMathTests: XCTestCase {
     func test_theWholeExpressionIsAMarker() {
         let body = "intro\n\n$\\frac{a}{b}$\n"
         let expression = (body as NSString).range(of: "$\\frac{a}{b}$")
-        XCTAssertTrue(styleSpans(body).contains {
-            $0.kind == .marker(of: .math)
-                && $0.range.lowerBound == expression.location
-                && $0.range.upperBound == NSMaxRange(expression)
-        })
+        XCTAssertTrue(
+            styleSpans(body).contains {
+                $0.kind == .marker(of: .math)
+                    && $0.range.lowerBound == expression.location
+                    && $0.range.upperBound == NSMaxRange(expression)
+            })
     }
 
     func test_theSpansReachTheStyleLayer() {
@@ -113,8 +117,9 @@ final class MarkdownMathTests: XCTestCase {
     /// It is still TINTED, so the reader can see it is mathematics rather than
     /// a typo — the whole value of recognising it at all.
     func test_anUnrenderableExpressionIsStillMarkedAsMath() {
-        XCTAssertTrue(styleSpans("$\\begin{matrix}a\\end{matrix}$\n")
-            .contains { $0.kind == .math(isRendered: false) })
+        XCTAssertTrue(
+            styleSpans("$\\begin{matrix}a\\end{matrix}$\n")
+                .contains { $0.kind == .math(isRendered: false) })
     }
 
     /// `$a + b$` renders now, where the attribute-only version could not: the
@@ -149,8 +154,9 @@ final class MarkdownMathTests: XCTestCase {
             let tv = LinkTextView(frame: NSRect(x: 0, y: 0, width: 700, height: 300))
             tv.isRichText = false
             tv.delegate = c
-            let w = NSWindow(contentRect: tv.frame, styleMask: [.titled],
-                             backing: .buffered, defer: false)
+            let w = NSWindow(
+                contentRect: tv.frame, styleMask: [.titled],
+                backing: .buffered, defer: false)
             w.contentView = tv
             w.makeFirstResponder(tv)
             windows.append(w)
@@ -172,11 +178,13 @@ final class MarkdownMathTests: XCTestCase {
 
         let plain = try measure(plainBody)
         let math = try measure(mathBody)
-        XCTAssertGreaterThan(math.lineHeight, plain.lineHeight,
-                             "a fraction is taller than a line of prose, and the line "
-                             + "must grow or it is drawn over the one above")
-        XCTAssertGreaterThan(math.afterX, plain.afterX,
-                             "and the text after it must start past the reserved width")
+        XCTAssertGreaterThan(
+            math.lineHeight, plain.lineHeight,
+            "a fraction is taller than a line of prose, and the line "
+                + "must grow or it is drawn over the one above")
+        XCTAssertGreaterThan(
+            math.afterX, plain.afterX,
+            "and the text after it must start past the reserved width")
     }
 
     /// A collapsed expression must actually be DRAWN.
@@ -196,8 +204,9 @@ final class MarkdownMathTests: XCTestCase {
         let tv = LinkTextView(frame: NSRect(x: 0, y: 0, width: 700, height: 300))
         tv.isRichText = false
         tv.delegate = c
-        let w = NSWindow(contentRect: tv.frame, styleMask: [.titled],
-                         backing: .buffered, defer: false)
+        let w = NSWindow(
+            contentRect: tv.frame, styleMask: [.titled],
+            backing: .buffered, defer: false)
         w.contentView = tv
         w.makeFirstResponder(tv)
         windows.append(w)
@@ -211,25 +220,28 @@ final class MarkdownMathTests: XCTestCase {
             XCTAssertNotEqual(expression.location, NSNotFound)
 
             // A region must exist for the drawing layer at all.
-            XCTAssertTrue(tv.blockBackgrounds.contains { region in
-                if case .math = region.kind { return true }
-                return false
-            }, "the editor must hand the drawing layer a math region")
+            XCTAssertTrue(
+                tv.blockBackgrounds.contains { region in
+                    if case .math = region.kind { return true }
+                    return false
+                }, "the editor must hand the drawing layer a math region")
 
             // Caret elsewhere: collapsed, therefore drawn.
             tv.setSelectedRange(NSRange(location: 0, length: 0))
             c.revealForSelectionChange()
             tv.layoutSubtreeIfNeeded()
-            XCTAssertTrue(MarkdownMathStyling.drawsExpression(at: expression, in: tv),
-                          "a collapsed expression must be drawn, or the reader sees "
-                          + "a blank gap where the fraction should be")
+            XCTAssertTrue(
+                MarkdownMathStyling.drawsExpression(at: expression, in: tv),
+                "a collapsed expression must be drawn, or the reader sees "
+                    + "a blank gap where the fraction should be")
 
             // Caret inside: source is back, so nothing is drawn over it.
             tv.setSelectedRange(NSRange(location: expression.location + 3, length: 0))
             c.revealForSelectionChange()
             tv.layoutSubtreeIfNeeded()
-            XCTAssertFalse(MarkdownMathStyling.drawsExpression(at: expression, in: tv),
-                           "with the source revealed the drawing must stop")
+            XCTAssertFalse(
+                MarkdownMathStyling.drawsExpression(at: expression, in: tv),
+                "with the source revealed the drawing must stop")
         }
     }
 

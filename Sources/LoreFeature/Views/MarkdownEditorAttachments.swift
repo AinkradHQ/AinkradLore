@@ -63,7 +63,8 @@ extension LinkTextView {
         let pb = NSPasteboard.general
 
         if let onDropFileURLs, let urls = Self.fileURLs(on: pb), !urls.isEmpty,
-           Self.stringsRepresentOnlyFiles(on: pb, urls: urls) {
+            Self.stringsRepresentOnlyFiles(on: pb, urls: urls)
+        {
             // Committed: this pasteboard is a file copy with no independent
             // prose riding along. Whatever the handler reports — full
             // success, partial success (some files written, per
@@ -77,7 +78,8 @@ extension LinkTextView {
 
         let imageTypes: [NSPasteboard.PasteboardType] = [.png, .tiff]
         guard let best = pb.availableType(from: imageTypes),
-              let data = pb.data(forType: best) else {
+            let data = pb.data(forType: best)
+        else {
             super.paste(sender)
             return
         }
@@ -131,7 +133,8 @@ extension LinkTextView {
         guard let items = pb.pasteboardItems else { return true }
         for item in items {
             guard let string = item.string(forType: .string),
-                  !string.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { continue }
+                !string.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            else { continue }
             guard urls.contains(where: { Self.isRepresentation(string, of: $0) }) else { return false }
         }
         return true
@@ -147,7 +150,8 @@ extension LinkTextView {
             return true
         }
         if let decoded = token.removingPercentEncoding,
-           decoded == url.absoluteString || decoded == url.path || decoded == url.lastPathComponent {
+            decoded == url.absoluteString || decoded == url.path || decoded == url.lastPathComponent
+        {
             return true
         }
         return false
@@ -175,7 +179,8 @@ extension LinkTextView {
     /// ever be read as "this is the image's source, not the user's text".
     fileprivate static func isImageSourceRepresentation(_ string: String) -> Bool {
         guard let token = Self.singleToken(string),
-              let url = URL(string: token), url.scheme != nil else { return false }
+            let url = URL(string: token), url.scheme != nil
+        else { return false }
         return true
     }
 
@@ -207,7 +212,8 @@ extension LinkTextView {
 
     override func draggingEntered(_ sender: any NSDraggingInfo) -> NSDragOperation {
         guard onDropFileURLs != nil,
-              sender.draggingPasteboard.canReadObject(forClasses: [NSURL.self]) else {
+            sender.draggingPasteboard.canReadObject(forClasses: [NSURL.self])
+        else {
             return super.draggingEntered(sender)
         }
         return .copy
@@ -231,8 +237,10 @@ extension LinkTextView {
     /// must insert nothing.
     override func performDragOperation(_ sender: any NSDraggingInfo) -> Bool {
         guard let onDropFileURLs else { return super.performDragOperation(sender) }
-        guard let urls = sender.draggingPasteboard.readObjects(
-            forClasses: [NSURL.self]) as? [URL], !urls.isEmpty else {
+        guard
+            let urls = sender.draggingPasteboard.readObjects(
+                forClasses: [NSURL.self]) as? [URL], !urls.isEmpty
+        else {
             return super.performDragOperation(sender)
         }
         return onDropFileURLs(urls)
@@ -284,7 +292,9 @@ extension MarkdownEditor.Coordinator {
         guard tv.shouldChangeText(in: range, replacementString: insertion) else { return }
         tv.textStorage?.replaceCharacters(in: range, with: insertion)
         tv.didChangeText()
-        tv.setSelectedRange(NSRange(location: range.location + (insertion as NSString).length,
-                                    length: 0))
+        tv.setSelectedRange(
+            NSRange(
+                location: range.location + (insertion as NSString).length,
+                length: 0))
     }
 }

@@ -64,7 +64,8 @@ enum MathParser {
     static func parse(_ source: String) -> MathNode? {
         var scanner = Scanner(source: Array(source))
         guard let node = scanner.parseRow(stopAtCloseBrace: false),
-              scanner.isAtEnd else { return nil }
+            scanner.isAtEnd
+        else { return nil }
         return node
     }
 
@@ -105,8 +106,9 @@ enum MathParser {
                     }
                 }
                 if superscript != nil || subscript_ != nil {
-                    atom = .script(base: atom, superscript: superscript,
-                                   subscript_: subscript_)
+                    atom = .script(
+                        base: atom, superscript: superscript,
+                        subscript_: subscript_)
                 }
                 items.append(atom)
             }
@@ -121,7 +123,8 @@ enum MathParser {
             case "{":
                 index += 1
                 guard let inner = parseRow(stopAtCloseBrace: true),
-                      peek() == "}" else { return nil }
+                    peek() == "}"
+                else { return nil }
                 index += 1
                 return inner
             case "\\":
@@ -142,7 +145,7 @@ enum MathParser {
         }
 
         mutating func parseCommand() -> MathNode? {
-            index += 1                                    // the backslash
+            index += 1  // the backslash
             var name = ""
             while let character = peek(), character.isLetter {
                 name.append(character)
@@ -153,7 +156,8 @@ enum MathParser {
             switch name {
             case "frac":
                 guard let numerator = parseBracedGroup(),
-                      let denominator = parseBracedGroup() else { return nil }
+                    let denominator = parseBracedGroup()
+                else { return nil }
                 return .fraction(numerator: numerator, denominator: denominator)
             case "sqrt":
                 guard let inner = parseBracedGroup() else { return nil }

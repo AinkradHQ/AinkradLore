@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 /// The drag-and-drop rule.
@@ -13,51 +14,62 @@ final class SidebarDropTests: XCTestCase {
     private let root = URL(fileURLWithPath: "/tmp/vault")
 
     private func row(_ path: String) -> IndexRow {
-        IndexRow(path: URL(fileURLWithPath: path), id: path, title: path,
-                 tags: [], aliases: [], updated: Date(),
-                 type: MarkdownEngine.identifier, properties: [])
+        IndexRow(
+            path: URL(fileURLWithPath: path), id: path, title: path,
+            tags: [], aliases: [], updated: Date(),
+            type: MarkdownEngine.identifier, properties: [])
     }
 
     // MARK: - Refusals
 
     func test_aMoveIntoAFolderInsideTheVaultIsAllowed() {
-        XCTAssertNil(SidebarDrop.rejection(moving: URL(fileURLWithPath: "/tmp/vault/a.md"),
-                                           into: URL(fileURLWithPath: "/tmp/vault/Notes"),
-                                           root: root))
+        XCTAssertNil(
+            SidebarDrop.rejection(
+                moving: URL(fileURLWithPath: "/tmp/vault/a.md"),
+                into: URL(fileURLWithPath: "/tmp/vault/Notes"),
+                root: root))
     }
 
     /// Refused rather than performed: the store would happily move the file,
     /// but its inbound links have no vault-relative path to be rewritten to,
     /// so every explicit-path link to it breaks and the file leaves the index.
     func test_aMoveOutsideTheVaultIsRefused() {
-        XCTAssertEqual(SidebarDrop.rejection(moving: URL(fileURLWithPath: "/tmp/vault/a.md"),
-                                             into: URL(fileURLWithPath: "/tmp/elsewhere"),
-                                             root: root),
-                       .outsideVault)
+        XCTAssertEqual(
+            SidebarDrop.rejection(
+                moving: URL(fileURLWithPath: "/tmp/vault/a.md"),
+                into: URL(fileURLWithPath: "/tmp/elsewhere"),
+                root: root),
+            .outsideVault)
     }
 
     /// Not an error — just nothing to do — but it must not be PLANNED, because
     /// a move that changes nothing still raises a preview and a confirmation
     /// the user has no reason to read.
     func test_droppingIntoTheFolderItIsAlreadyInIsRefused() {
-        XCTAssertEqual(SidebarDrop.rejection(moving: URL(fileURLWithPath: "/tmp/vault/Notes/a.md"),
-                                             into: URL(fileURLWithPath: "/tmp/vault/Notes"),
-                                             root: root),
-                       .alreadyThere)
+        XCTAssertEqual(
+            SidebarDrop.rejection(
+                moving: URL(fileURLWithPath: "/tmp/vault/Notes/a.md"),
+                into: URL(fileURLWithPath: "/tmp/vault/Notes"),
+                root: root),
+            .alreadyThere)
     }
 
     func test_withNoVaultEverythingIsRefused() {
-        XCTAssertEqual(SidebarDrop.rejection(moving: URL(fileURLWithPath: "/tmp/vault/a.md"),
-                                             into: URL(fileURLWithPath: "/tmp/vault/Notes"),
-                                             root: nil),
-                       .noVault)
+        XCTAssertEqual(
+            SidebarDrop.rejection(
+                moving: URL(fileURLWithPath: "/tmp/vault/a.md"),
+                into: URL(fileURLWithPath: "/tmp/vault/Notes"),
+                root: nil),
+            .noVault)
     }
 
     func test_aFolderCannotBeDroppedIntoItsOwnDescendant() {
-        XCTAssertEqual(SidebarDrop.rejection(moving: URL(fileURLWithPath: "/tmp/vault/Notes"),
-                                             into: URL(fileURLWithPath: "/tmp/vault/Notes/Sub"),
-                                             root: root),
-                       .intoItself)
+        XCTAssertEqual(
+            SidebarDrop.rejection(
+                moving: URL(fileURLWithPath: "/tmp/vault/Notes"),
+                into: URL(fileURLWithPath: "/tmp/vault/Notes/Sub"),
+                root: root),
+            .intoItself)
     }
 
     /// Containment is compared as path COMPONENTS, never as a string prefix.
@@ -65,16 +77,20 @@ final class SidebarDropTests: XCTestCase {
     /// being an unrelated sibling — a string test would refuse this legitimate
     /// move.
     func test_aSiblingWhoseNameSharesAPrefixIsNotADescendant() {
-        XCTAssertNil(SidebarDrop.rejection(moving: URL(fileURLWithPath: "/tmp/vault/a.md"),
-                                           into: URL(fileURLWithPath: "/tmp/vault/Notes2"),
-                                           root: root))
+        XCTAssertNil(
+            SidebarDrop.rejection(
+                moving: URL(fileURLWithPath: "/tmp/vault/a.md"),
+                into: URL(fileURLWithPath: "/tmp/vault/Notes2"),
+                root: root))
     }
 
     /// The vault root itself is a legal destination — it is where the "move it
     /// back out of a folder" gesture lands.
     func test_theVaultRootIsALegalDestination() {
-        XCTAssertNil(SidebarDrop.rejection(moving: URL(fileURLWithPath: "/tmp/vault/Notes/a.md"),
-                                           into: root, root: root))
+        XCTAssertNil(
+            SidebarDrop.rejection(
+                moving: URL(fileURLWithPath: "/tmp/vault/Notes/a.md"),
+                into: root, root: root))
     }
 
     // MARK: - Resolving a dropped URL
@@ -85,10 +101,14 @@ final class SidebarDropTests: XCTestCase {
     /// has never seen.
     func test_onlyKnownDocumentsResolve() {
         let rows = [row("/tmp/vault/a.md"), row("/tmp/vault/b.md")]
-        XCTAssertEqual(SidebarDrop.row(for: URL(fileURLWithPath: "/tmp/vault/a.md"),
-                                       in: rows)?.path.lastPathComponent, "a.md")
-        XCTAssertNil(SidebarDrop.row(for: URL(fileURLWithPath: "/tmp/vault/stranger.md"),
-                                     in: rows))
+        XCTAssertEqual(
+            SidebarDrop.row(
+                for: URL(fileURLWithPath: "/tmp/vault/a.md"),
+                in: rows)?.path.lastPathComponent, "a.md")
+        XCTAssertNil(
+            SidebarDrop.row(
+                for: URL(fileURLWithPath: "/tmp/vault/stranger.md"),
+                in: rows))
     }
 
     /// Every refusal produces a sentence naming what happened — a drop that
@@ -96,8 +116,10 @@ final class SidebarDropTests: XCTestCase {
     func test_everyRejectionHasASentence() {
         let source = URL(fileURLWithPath: "/tmp/vault/a.md")
         let folder = URL(fileURLWithPath: "/tmp/elsewhere")
-        for rejection: SidebarDrop.Rejection in [.noVault, .outsideVault,
-                                                 .alreadyThere, .intoItself] {
+        for rejection: SidebarDrop.Rejection in [
+            .noVault, .outsideVault,
+            .alreadyThere, .intoItself,
+        ] {
             let sentence = SidebarDrop.describe(rejection, source: source, folder: folder)
             XCTAssertFalse(sentence.isEmpty, "\(rejection) has no explanation")
         }

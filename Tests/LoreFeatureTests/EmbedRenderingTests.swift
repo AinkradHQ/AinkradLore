@@ -1,6 +1,7 @@
-import XCTest
 import AppKit
 import SwiftUI
+import XCTest
+
 @testable import LoreFeature
 
 final class EmbedRenderingTests: XCTestCase {
@@ -57,7 +58,8 @@ final class EmbedRenderingTests: XCTestCase {
 final class EmbedOffsetSafetyTests: XCTestCase {
 
     private func makeEditor(_ text: String, resolveEmbedTarget: (@MainActor (String) -> URL?)? = nil)
-        -> (MarkdownEditor.Coordinator, NSTextView) {
+        -> (MarkdownEditor.Coordinator, NSTextView)
+    {
         var stored = text
         let binding = Binding<String>(get: { stored }, set: { stored = $0 })
         let coordinator = MarkdownEditor.Coordinator(text: binding, tokens: TestTokens.make())
@@ -90,10 +92,12 @@ final class EmbedOffsetSafetyTests: XCTestCase {
             let before = (tv.string as NSString).length
             XCTAssertEqual(before, (text as NSString).length)
             coordinator.applyStyles()
-            XCTAssertEqual((tv.string as NSString).length, before,
-                           "an image embed must never change the storage's character count")
-            XCTAssertEqual(tv.string, text,
-                           "the raw markdown source must be untouched by rendering")
+            XCTAssertEqual(
+                (tv.string as NSString).length, before,
+                "an image embed must never change the storage's character count")
+            XCTAssertEqual(
+                tv.string, text,
+                "the raw markdown source must be untouched by rendering")
         }
     }
 
@@ -119,8 +123,9 @@ final class EmbedOffsetSafetyTests: XCTestCase {
             tv.insertText("X", replacementRange: tv.selectedRange())
 
             let expected = "![[diagram.png]]X\n"
-            XCTAssertEqual(tv.string, expected,
-                           "the inserted character must land exactly after the embed's ']]'")
+            XCTAssertEqual(
+                tv.string, expected,
+                "the inserted character must land exactly after the embed's ']]'")
         }
     }
 
@@ -133,8 +138,8 @@ final class EmbedOffsetSafetyTests: XCTestCase {
         NSRect(x: 0, y: 0, width: 1, height: 1).fill()
         image.unlockFocus()
         guard let tiff = image.tiffRepresentation,
-              let rep = NSBitmapImageRep(data: tiff),
-              let png = rep.representation(using: .png, properties: [:])
+            let rep = NSBitmapImageRep(data: tiff),
+            let png = rep.representation(using: .png, properties: [:])
         else {
             XCTFail("failed to synthesize a test PNG")
             return Data()
@@ -150,7 +155,8 @@ final class EmbedOffsetSafetyTests: XCTestCase {
 final class EmbedDecorationTests: XCTestCase {
 
     private func makeEditor(_ text: String, resolveEmbedTarget: @escaping @MainActor (String) -> URL?)
-        -> (MarkdownEditor.Coordinator, LinkTextView) {
+        -> (MarkdownEditor.Coordinator, LinkTextView)
+    {
         var stored = text
         let binding = Binding<String>(get: { stored }, set: { stored = $0 })
         let coordinator = MarkdownEditor.Coordinator(text: binding, tokens: TestTokens.make())
@@ -189,13 +195,15 @@ final class EmbedDecorationTests: XCTestCase {
         let text = "Intro.\n\n![[diagram.png]]\n"
         let (coordinator, tv) = makeEditor(text) { _ in imageURL }
         withExtendedLifetime(coordinator) {
-            XCTAssertEqual(tv.embedImages.count, 1,
-                           "a resolved, decodable image embed must produce one drawn region")
+            XCTAssertEqual(
+                tv.embedImages.count, 1,
+                "a resolved, decodable image embed must produce one drawn region")
             let embedStart = (text as NSString).range(of: "![[").location
             let font = tv.textStorage?.attribute(.font, at: embedStart, effectiveRange: nil) as? NSFont
             XCTAssertNotNil(font)
-            XCTAssertLessThan(font?.pointSize ?? 99, 1,
-                              "the embed's source text must be collapsed to near-zero size")
+            XCTAssertLessThan(
+                font?.pointSize ?? 99, 1,
+                "the embed's source text must be collapsed to near-zero size")
         }
     }
 
@@ -237,8 +245,9 @@ final class EmbedDecorationTests: XCTestCase {
             guard let storage = tv.textStorage else { return XCTFail("no storage") }
             let ns = text as NSString
             let targetStart = ns.range(of: "broken.png").location
-            XCTAssertNotNil(storage.attribute(.backgroundColor, at: targetStart, effectiveRange: nil),
-                            "a broken image must fall back to the chip pill, not a blank gap")
+            XCTAssertNotNil(
+                storage.attribute(.backgroundColor, at: targetStart, effectiveRange: nil),
+                "a broken image must fall back to the chip pill, not a blank gap")
         }
     }
 
@@ -259,8 +268,9 @@ final class EmbedDecorationTests: XCTestCase {
         let (coordinator, tv) = makeEditor(text) { _ in imageURL }
         withExtendedLifetime(coordinator) {
             XCTAssertEqual(tv.embedImages.count, 1)
-            XCTAssertEqual(tv.embedImages.first?.writingDirection, .rightToLeft,
-                           "the Arabic paragraph above the embed must decide its direction")
+            XCTAssertEqual(
+                tv.embedImages.first?.writingDirection, .rightToLeft,
+                "the Arabic paragraph above the embed must decide its direction")
         }
     }
 
@@ -281,13 +291,15 @@ final class EmbedDecorationTests: XCTestCase {
         let text = "Before ![[shot.png]] after.\n"
         let (coordinator, tv) = makeEditor(text) { _ in imageURL }
         withExtendedLifetime(coordinator) {
-            XCTAssertTrue(tv.embedImages.isEmpty,
-                          "a mid-paragraph embed must never produce a drawn image region")
+            XCTAssertTrue(
+                tv.embedImages.isEmpty,
+                "a mid-paragraph embed must never produce a drawn image region")
             guard let storage = tv.textStorage else { return XCTFail("no storage") }
             let ns = text as NSString
             let targetStart = ns.range(of: "shot.png").location
-            XCTAssertNotNil(storage.attribute(.backgroundColor, at: targetStart, effectiveRange: nil),
-                            "a mid-paragraph embed must fall back to the chip pill")
+            XCTAssertNotNil(
+                storage.attribute(.backgroundColor, at: targetStart, effectiveRange: nil),
+                "a mid-paragraph embed must fall back to the chip pill")
             XCTAssertEqual(storage.string, text, "the surrounding prose must be untouched")
         }
     }
@@ -338,8 +350,9 @@ final class EmbedDecorationTests: XCTestCase {
         // without it, since the cache key is exactly `(path, mtime, size)`.
         Thread.sleep(forTimeInterval: 1.05)
         try EmbedOffsetSafetyTests.onePixelPNG().write(to: url)
-        XCTAssertNotNil(EmbedImageCache.shared.image(for: url),
-                        "a changed file must be re-decoded, not served the stale cached failure")
+        XCTAssertNotNil(
+            EmbedImageCache.shared.image(for: url),
+            "a changed file must be re-decoded, not served the stale cached failure")
     }
 }
 
@@ -359,8 +372,9 @@ final class ResolverCacheInvalidationTests: XCTestCase {
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent("lore-resolvercache-\(UUID())")
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
-        let store = LoreStore(documents: FakeDocs(),
-                              indexPath: root.appendingPathComponent(".idx.sqlite"))
+        let store = LoreStore(
+            documents: FakeDocs(),
+            indexPath: root.appendingPathComponent(".idx.sqlite"))
         try store.setVaultRootForTesting(root)
         return (root, store)
     }
@@ -373,9 +387,10 @@ final class ResolverCacheInvalidationTests: XCTestCase {
         XCTAssertNil(store.resolveLink("Later"), "precondition: nothing named Later yet")
 
         let note = try store.create(title: "Later")
-        XCTAssertEqual(store.resolveLink("Later"), note.path,
-                       "indexDocument must invalidate the cached resolver, "
-                       + "or every link created this session resolves to nothing")
+        XCTAssertEqual(
+            store.resolveLink("Later"), note.path,
+            "indexDocument must invalidate the cached resolver, "
+                + "or every link created this session resolves to nothing")
     }
 
     /// The `rebuild()` path — a whole-vault rescan, e.g. after an external
@@ -387,12 +402,14 @@ final class ResolverCacheInvalidationTests: XCTestCase {
         // Written directly to disk, behind the store's back, exactly as an
         // external editor would — so ONLY `rebuild()` can make it known.
         let external = root.appendingPathComponent("outside.md")
-        try "---\ntitle: Outside\n---\n\nbody\n".write(to: external, atomically: true,
-                                                       encoding: .utf8)
+        try "---\ntitle: Outside\n---\n\nbody\n".write(
+            to: external, atomically: true,
+            encoding: .utf8)
         try store.rebuild()
 
-        XCTAssertEqual(store.resolveLink("Outside")?.lastPathComponent, "outside.md",
-                       "rebuild must invalidate the cached resolver")
+        XCTAssertEqual(
+            store.resolveLink("Outside")?.lastPathComponent, "outside.md",
+            "rebuild must invalidate the cached resolver")
     }
 
     /// The cache must still be doing its job — the same resolver instance is
@@ -413,7 +430,8 @@ final class ResolverCacheInvalidationTests: XCTestCase {
 final class EmbedRevealTests: XCTestCase {
 
     private func makeEditor(_ text: String, resolve: @escaping @MainActor (String) -> URL?)
-        -> (MarkdownEditor.Coordinator, LinkTextView) {
+        -> (MarkdownEditor.Coordinator, LinkTextView)
+    {
         var stored = text
         let binding = Binding<String>(get: { stored }, set: { stored = $0 })
         let coordinator = MarkdownEditor.Coordinator(text: binding, tokens: TestTokens.make())
@@ -433,7 +451,7 @@ final class EmbedRevealTests: XCTestCase {
     /// the inclusive-touch rule made the image vanish at exactly the moment
     /// the user was looking at it.
     func test_caretAtEitherBoundaryDoesNotRevealTheEmbed() {
-        let embed = NSRange(location: 10, length: 16)   // e.g. "![[diagram.png]]"
+        let embed = NSRange(location: 10, length: 16)  // e.g. "![[diagram.png]]"
         let justBefore = NSRange(location: 10, length: 0)
         let justAfter = NSRange(location: 26, length: 0)
         XCTAssertFalse(MarkdownEditor.Coordinator.isEmbedRevealed(embed, selection: justBefore))
@@ -444,10 +462,12 @@ final class EmbedRevealTests: XCTestCase {
     /// — which is when the user is editing the target — does reveal.
     func test_caretInsideTheEmbedRevealsIt() {
         let embed = NSRange(location: 10, length: 16)
-        XCTAssertTrue(MarkdownEditor.Coordinator.isEmbedRevealed(
-            embed, selection: NSRange(location: 15, length: 0)))
-        XCTAssertTrue(MarkdownEditor.Coordinator.isEmbedRevealed(
-            embed, selection: NSRange(location: 12, length: 4)))
+        XCTAssertTrue(
+            MarkdownEditor.Coordinator.isEmbedRevealed(
+                embed, selection: NSRange(location: 15, length: 0)))
+        XCTAssertTrue(
+            MarkdownEditor.Coordinator.isEmbedRevealed(
+                embed, selection: NSRange(location: 12, length: 4)))
     }
 
     /// I6, the finding that mattered: moving the caret INTO an embed's range
@@ -481,20 +501,23 @@ final class EmbedRevealTests: XCTestCase {
             // test exists for.
             tv.setSelectedRange(NSRange(location: 0, length: 0))
             coordinator.applyStyles()
-            XCTAssertEqual(tv.embedImages.count, 1,
-                           "precondition: the embed renders while the caret is outside it")
+            XCTAssertEqual(
+                tv.embedImages.count, 1,
+                "precondition: the embed renders while the caret is outside it")
             let revealedBefore = coordinator.revealedRange
 
             // Move INTO the embed's own range. No text change, no keystroke.
             tv.setSelectedRange(NSRange(location: 5, length: 0))
             coordinator.revealForSelectionChange()
 
-            XCTAssertEqual(coordinator.revealedRange, revealedBefore,
-                           "precondition: this move must not flip the revealed range, "
-                           + "or the test is not exercising I6")
-            XCTAssertTrue(tv.embedImages.isEmpty,
-                          "an embed whose range the caret entered must un-render "
-                          + "immediately, not wait for a keystroke or the debounce")
+            XCTAssertEqual(
+                coordinator.revealedRange, revealedBefore,
+                "precondition: this move must not flip the revealed range, "
+                    + "or the test is not exercising I6")
+            XCTAssertTrue(
+                tv.embedImages.isEmpty,
+                "an embed whose range the caret entered must un-render "
+                    + "immediately, not wait for a keystroke or the debounce")
         }
     }
 
@@ -517,8 +540,9 @@ final class EmbedRevealTests: XCTestCase {
 
             tv.setSelectedRange(NSRange(location: (text as NSString).length, length: 0))
             coordinator.revealForSelectionChange()
-            XCTAssertEqual(tv.embedImages.count, 1,
-                           "leaving the embed's range must restore its rendering")
+            XCTAssertEqual(
+                tv.embedImages.count, 1,
+                "leaving the embed's range must restore its rendering")
         }
     }
 }

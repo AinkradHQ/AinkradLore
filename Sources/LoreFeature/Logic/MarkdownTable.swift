@@ -70,7 +70,8 @@ struct MarkdownTable: Equatable {
     /// leave the source alone rather than half-render it.
     static func parse(range: Range<Int>, in text: NSString) -> MarkdownTable? {
         guard range.lowerBound >= 0, range.upperBound <= text.length,
-              range.lowerBound < range.upperBound else { return nil }
+            range.lowerBound < range.upperBound
+        else { return nil }
 
         var lines: [Range<Int>] = []
         var index = range.lowerBound
@@ -91,7 +92,8 @@ struct MarkdownTable: Equatable {
         // The delimiter is the SECOND line by GFM's definition, not "any line
         // that looks like one" — a body cell containing `---` is content.
         let delimiterIndex = 1
-        let isDelimiter = parsed.indices.contains(delimiterIndex)
+        let isDelimiter =
+            parsed.indices.contains(delimiterIndex)
             && parsed[delimiterIndex].cells.allSatisfy {
                 isDelimiterCell($0.range, in: text)
             }
@@ -107,8 +109,9 @@ struct MarkdownTable: Equatable {
                 alignments[column] = alignment(ofDelimiterCell: cell.range, in: text)
             }
         }
-        return MarkdownTable(rows: content, delimiterRow: delimiter,
-                             columnCount: columns, columnAlignments: alignments)
+        return MarkdownTable(
+            rows: content, delimiterRow: delimiter,
+            columnCount: columns, columnAlignments: alignments)
     }
 
     /// Splits one line into cells and pipes.
@@ -128,9 +131,10 @@ struct MarkdownTable: Equatable {
         }
 
         while index < line.upperBound {
-            if text.character(at: index) == 0x7C {                    // |
-                let escaped = index > line.lowerBound
-                    && text.character(at: index - 1) == 0x5C          // \
+            if text.character(at: index) == 0x7C {  // |
+                let escaped =
+                    index > line.lowerBound
+                    && text.character(at: index - 1) == 0x5C  // \
                 if !escaped {
                     pipes.append(index..<(index + 1))
                     closeCell(upTo: index)
@@ -157,8 +161,10 @@ struct MarkdownTable: Equatable {
     /// `Table.columnAlignments`, because this type is consumed by the styling
     /// layer, which holds text and no AST — and because the two must agree
     /// about column INDICES, which only the same split can guarantee.
-    private static func alignment(ofDelimiterCell range: Range<Int>,
-                                  in text: NSString) -> Alignment {
+    private static func alignment(
+        ofDelimiterCell range: Range<Int>,
+        in text: NSString
+    ) -> Alignment {
         guard range.lowerBound < range.upperBound else { return .left }
         let leading = text.character(at: range.lowerBound) == 0x3A
         let trailing = text.character(at: range.upperBound - 1) == 0x3A
@@ -176,8 +182,8 @@ struct MarkdownTable: Equatable {
         var sawDash = false
         for offset in range.lowerBound..<range.upperBound {
             switch text.character(at: offset) {
-            case 0x2D: sawDash = true          // -
-            case 0x3A: continue                // :
+            case 0x2D: sawDash = true  // -
+            case 0x3A: continue  // :
             default: return false
             }
         }
@@ -194,8 +200,10 @@ struct MarkdownTable: Equatable {
 
     private static func characterWidth(of range: Range<Int>, in text: NSString) -> Int {
         guard range.lowerBound < range.upperBound else { return 0 }
-        let slice = text.substring(with: NSRange(location: range.lowerBound,
-                                                 length: range.count))
+        let slice = text.substring(
+            with: NSRange(
+                location: range.lowerBound,
+                length: range.count))
         return slice.count
     }
 

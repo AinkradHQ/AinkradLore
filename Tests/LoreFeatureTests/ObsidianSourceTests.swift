@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 final class ObsidianSourceTests: XCTestCase {

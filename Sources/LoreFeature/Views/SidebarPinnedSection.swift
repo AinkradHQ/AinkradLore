@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// Pinned documents, above the browse list.
 ///
@@ -57,8 +57,12 @@ struct SidebarPinnedSection: View {
             row: row, depth: 0,
             isSelected: selected?.path == row.path,
             emptyTitleFallback: "Untitled",
-            onTap: { selected = row; onSelect(row) })
-            .loreDraggableDocument(row)
-            .ainkradContextMenu(loreRowMenuItems(row: row, ops: ops, store: store))
+            onTap: {
+                selected = row
+                onSelect(row)
+            }
+        )
+        .loreDraggableDocument(row)
+        .ainkradContextMenu(loreRowMenuItems(row: row, ops: ops, store: store))
     }
 }

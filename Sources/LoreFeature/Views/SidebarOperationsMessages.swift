@@ -139,7 +139,7 @@ extension SidebarOperations {
             return "“\(name)” was not deleted: it is the vault's own folder, or outside "
                 + "the vault entirely."
         case .externalChange, .invalidName, .alreadyExists, .notARegularFile,
-             .restoreBlocked, .restoreFailed:
+            .restoreBlocked, .restoreFailed:
             // Not reachable from `applyTrashFolder` — kept for the same reason
             // the single-document `describe(_:row:)` keeps its own unreachable
             // cases: a true sentence rather than a silent gap in the switch.
@@ -199,7 +199,8 @@ extension SidebarOperations {
         // performs. Spelled out rather than defaulted, so a new error still
         // breaks this switch and gets a sentence written for it.
         case .externalChange, .trashFailed, .unsavedEdits, .outsideVault,
-             .invalidName, .alreadyExists, .notARegularFile:
+            .invalidName, .alreadyExists, .notARegularFile:
             return "The file couldn't be restored."
         }
-    }}
+    }
+}

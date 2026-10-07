@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 /// Typing affordances as PURE transforms, so every rule is asserted without an
@@ -51,8 +52,9 @@ final class MarkdownEditingTests: XCTestCase {
 
 extension MarkdownEditingTests {
     private func indent(_ text: String, at location: Int, by delta: Int) -> EditResult? {
-        MarkdownEditing.indent(text: text,
-                               selection: NSRange(location: location, length: 0), by: delta)
+        MarkdownEditing.indent(
+            text: text,
+            selection: NSRange(location: location, length: 0), by: delta)
     }
 
     func test_tabIndentsTheItemUnderTheCaret() {
@@ -82,18 +84,20 @@ extension MarkdownEditingTests {
 extension MarkdownEditingTests {
 
     func test_cmdBWrapsTheSelection() {
-        let r = MarkdownEditing.toggleWrap(text: "make bold now",
-                                           selection: NSRange(location: 5, length: 4),
-                                           with: "**")
+        let r = MarkdownEditing.toggleWrap(
+            text: "make bold now",
+            selection: NSRange(location: 5, length: 4),
+            with: "**")
         XCTAssertEqual(r.text, "make **bold** now")
     }
 
     /// The same keystroke unwraps — a toggle, not an "add more asterisks".
     /// Selection sits strictly INSIDE the delimiters: "make **|bold|** now".
     func test_cmdBOnAlreadyBoldTextUnwrapsIt() {
-        let r = MarkdownEditing.toggleWrap(text: "make **bold** now",
-                                           selection: NSRange(location: 7, length: 4),
-                                           with: "**")
+        let r = MarkdownEditing.toggleWrap(
+            text: "make **bold** now",
+            selection: NSRange(location: 7, length: 4),
+            with: "**")
         XCTAssertEqual(r.text, "make bold now")
     }
 
@@ -101,16 +105,18 @@ extension MarkdownEditingTests {
     /// drag-select or triple-click across a bolded span produces. This must
     /// also unwrap, not re-wrap into "****bold****".
     func test_cmdBOnASelectionThatIncludesTheDelimitersUnwrapsIt() {
-        let r = MarkdownEditing.toggleWrap(text: "make **bold** now",
-                                           selection: NSRange(location: 5, length: 8),
-                                           with: "**")
+        let r = MarkdownEditing.toggleWrap(
+            text: "make **bold** now",
+            selection: NSRange(location: 5, length: 8),
+            with: "**")
         XCTAssertEqual(r.text, "make bold now")
         XCTAssertEqual(r.selection, NSRange(location: 5, length: 4))
     }
 
     func test_cmdBWithNoSelectionInsertsAnEmptyPairWithTheCaretInside() {
-        let r = MarkdownEditing.toggleWrap(text: "ab", selection: NSRange(location: 1, length: 0),
-                                           with: "**")
+        let r = MarkdownEditing.toggleWrap(
+            text: "ab", selection: NSRange(location: 1, length: 0),
+            with: "**")
         XCTAssertEqual(r.text, "a****b")
         XCTAssertEqual(r.selection.location, 3)
     }
@@ -118,14 +124,16 @@ extension MarkdownEditingTests {
     /// Losing a selection to a stray bracket is a small data loss, so
     /// auto-pair SURROUNDS a selection rather than replacing it.
     func test_autoPairSurroundsASelectionInsteadOfReplacingIt() {
-        let r = MarkdownEditing.autoPair(text: "keep me",
-                                         selection: NSRange(location: 5, length: 2), typing: "[")
+        let r = MarkdownEditing.autoPair(
+            text: "keep me",
+            selection: NSRange(location: 5, length: 2), typing: "[")
         XCTAssertEqual(r?.text, "keep [me]")
     }
 
     func test_autoPairInsertsTheClosingCharacter() {
-        let r = MarkdownEditing.autoPair(text: "", selection: NSRange(location: 0, length: 0),
-                                         typing: "[")
+        let r = MarkdownEditing.autoPair(
+            text: "", selection: NSRange(location: 0, length: 0),
+            typing: "[")
         XCTAssertEqual(r?.text, "[]")
         XCTAssertEqual(r?.selection.location, 1)
     }
@@ -133,8 +141,9 @@ extension MarkdownEditingTests {
     /// Typing the closing character when it is already there moves past it
     /// rather than doubling it.
     func test_typingAClosingCharacterOverATypedOneSkipsIt() {
-        let r = MarkdownEditing.autoPair(text: "[]", selection: NSRange(location: 1, length: 0),
-                                         typing: "]")
+        let r = MarkdownEditing.autoPair(
+            text: "[]", selection: NSRange(location: 1, length: 0),
+            typing: "]")
         XCTAssertEqual(r?.text, "[]")
         XCTAssertEqual(r?.selection.location, 2)
     }
@@ -149,8 +158,10 @@ extension MarkdownEditingTests {
         var text = ""
         var caret = NSRange(location: 0, length: 0)
         for _ in 0..<2 {
-            let step = try XCTUnwrap(MarkdownEditing.autoPair(text: text, selection: caret,
-                                                              typing: "["))
+            let step = try XCTUnwrap(
+                MarkdownEditing.autoPair(
+                    text: text, selection: caret,
+                    typing: "["))
             text = step.text
             caret = step.selection
         }
@@ -158,13 +169,16 @@ extension MarkdownEditingTests {
         XCTAssertEqual(caret.location, 2)
 
         // The panel opens on an empty prefix — this is what M1 detects.
-        let prefix = try XCTUnwrap(LinkCompletionContext.activePrefix(in: text,
-                                                                      caret: caret.location))
+        let prefix = try XCTUnwrap(
+            LinkCompletionContext.activePrefix(
+                in: text,
+                caret: caret.location))
         XCTAssertEqual(prefix, "")
 
-        let result = MarkdownEditing.linkInsertion(text: text, caret: caret.location,
-                                                   prefixLength: prefix.utf16.count,
-                                                   target: "Target")
+        let result = MarkdownEditing.linkInsertion(
+            text: text, caret: caret.location,
+            prefixLength: prefix.utf16.count,
+            target: "Target")
         XCTAssertEqual(result.text, "[[Target]]", "the auto-paired closer must be absorbed")
         XCTAssertEqual(result.selection.location, 10, "the caret continues in prose")
     }
@@ -173,8 +187,9 @@ extension MarkdownEditingTests {
     /// or hand-typed `[[Des` with nothing after it. The closer is added, not
     /// absorbed.
     func test_acceptingACompletionWithNoExistingCloserStillClosesTheLink() {
-        let result = MarkdownEditing.linkInsertion(text: "see [[Des", caret: 9,
-                                                   prefixLength: 3, target: "Design")
+        let result = MarkdownEditing.linkInsertion(
+            text: "see [[Des", caret: 9,
+            prefixLength: 3, target: "Design")
         XCTAssertEqual(result.text, "see [[Design]]")
         XCTAssertEqual(result.selection.location, 14)
     }
@@ -182,8 +197,9 @@ extension MarkdownEditingTests {
     /// Re-completing INSIDE an already-closed link must not leave the old `]]`
     /// stranded after the new one.
     func test_recompletingInsideAClosedLinkKeepsOnePairOfBrackets() {
-        let result = MarkdownEditing.linkInsertion(text: "[[Des]] tail", caret: 5,
-                                                   prefixLength: 3, target: "Design")
+        let result = MarkdownEditing.linkInsertion(
+            text: "[[Des]] tail", caret: 5,
+            prefixLength: 3, target: "Design")
         XCTAssertEqual(result.text, "[[Design]] tail")
     }
 
@@ -191,18 +207,21 @@ extension MarkdownEditingTests {
     /// character of prose and half of it must not be eaten as the second
     /// bracket of a pair that is not there.
     func test_absorptionTakesAtMostTheTwoBracketsItNeeds() {
-        let result = MarkdownEditing.linkInsertion(text: "[[Des]]]] more", caret: 5,
-                                                   prefixLength: 3, target: "Design")
-        XCTAssertEqual(result.text, "[[Design]]]] more",
-                       "at most two brackets belong to this link")
+        let result = MarkdownEditing.linkInsertion(
+            text: "[[Des]]]] more", caret: 5,
+            prefixLength: 3, target: "Design")
+        XCTAssertEqual(
+            result.text, "[[Design]]]] more",
+            "at most two brackets belong to this link")
     }
 
     /// Escaping the panel leaves the auto-paired brackets exactly as typing
     /// them produced — the user carries on inside a well-formed link.
     func test_dismissingThePanelLeavesAWellFormedEmptyLink() {
         // After the FIRST `[`, the text is already `[]` with the caret inside.
-        let opened = MarkdownEditing.autoPair(text: "[]", selection: NSRange(location: 1, length: 0),
-                                              typing: "[")
+        let opened = MarkdownEditing.autoPair(
+            text: "[]", selection: NSRange(location: 1, length: 0),
+            typing: "[")
         XCTAssertEqual(opened?.text, "[[]]")
         XCTAssertEqual(opened?.selection.location, 2)
     }
@@ -210,14 +229,17 @@ extension MarkdownEditingTests {
     /// And a lone `[` in prose still pairs, which is the affordance Task 9 was
     /// for. Nothing about the fix reaches it.
     func test_aLoneBracketInProseStillPairs() {
-        let r = MarkdownEditing.autoPair(text: "a b", selection: NSRange(location: 2, length: 0),
-                                         typing: "[")
+        let r = MarkdownEditing.autoPair(
+            text: "a b", selection: NSRange(location: 2, length: 0),
+            typing: "[")
         XCTAssertEqual(r?.text, "a []b")
         XCTAssertEqual(r?.selection.location, 3)
     }
 
     func test_autoPairIgnoresUnpairedCharacters() {
-        XCTAssertNil(MarkdownEditing.autoPair(text: "", selection: NSRange(location: 0, length: 0),
-                                              typing: "z"))
+        XCTAssertNil(
+            MarkdownEditing.autoPair(
+                text: "", selection: NSRange(location: 0, length: 0),
+                typing: "z"))
     }
 }

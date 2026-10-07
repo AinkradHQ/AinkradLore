@@ -1,6 +1,6 @@
+import AinkradAppKit
 import AppKit
 import SwiftUI
-import AinkradAppKit
 
 /// WHERE things are: the text column's own geometry, and the entry point that
 /// puts the caret at an offset and scrolls it on screen.
@@ -45,8 +45,10 @@ enum MarkdownEditorLayout {
     /// large empty margin before every line. The measure cap is what keeps
     /// lines readable; centering was never doing that work, and the column now
     /// simply starts where the pane starts.
-    static func containerInset(forViewWidth viewWidth: CGFloat,
-                               theme: MarkdownTheme) -> NSSize {
+    static func containerInset(
+        forViewWidth viewWidth: CGFloat,
+        theme: MarkdownTheme
+    ) -> NSSize {
         // Clamped so a view narrower than twice the inset still leaves a
         // positive column rather than an inverted one.
         let horizontal = min(theme.contentInset, max(0, viewWidth / 2 - 1))
@@ -63,8 +65,10 @@ enum MarkdownEditorLayout {
     /// task removed. The container must fit inside whatever space the inset
     /// leaves, so it is capped at both the theme's measure AND the space
     /// actually available after both horizontal insets.
-    static func containerWidth(forViewWidth viewWidth: CGFloat,
-                               theme: MarkdownTheme) -> CGFloat {
+    static func containerWidth(
+        forViewWidth viewWidth: CGFloat,
+        theme: MarkdownTheme
+    ) -> CGFloat {
         let inset = containerInset(forViewWidth: viewWidth, theme: theme)
         let available = max(0, viewWidth - inset.width * 2)
         guard let measure = theme.maxMeasure else { return available }

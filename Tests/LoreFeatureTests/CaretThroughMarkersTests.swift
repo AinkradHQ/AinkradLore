@@ -1,6 +1,7 @@
 import AppKit
 import SwiftUI
 import XCTest
+
 @testable import LoreFeature
 
 /// Does the caret ever sit inside a marker the reader cannot see?
@@ -17,7 +18,10 @@ import XCTest
 final class CaretThroughMarkersTests: XCTestCase {
 
     private var windows: [NSWindow] = []
-    override func tearDown() { windows.removeAll(); super.tearDown() }
+    override func tearDown() {
+        windows.removeAll()
+        super.tearDown()
+    }
 
     @MainActor
     private func editor(_ body: String) -> (MarkdownEditor.Coordinator, LinkTextView) {
@@ -27,8 +31,9 @@ final class CaretThroughMarkersTests: XCTestCase {
         let tv = LinkTextView(frame: NSRect(x: 0, y: 0, width: 800, height: 500))
         tv.isRichText = false
         tv.delegate = coordinator
-        let window = NSWindow(contentRect: tv.frame, styleMask: [.titled],
-                              backing: .buffered, defer: false)
+        let window = NSWindow(
+            contentRect: tv.frame, styleMask: [.titled],
+            backing: .buffered, defer: false)
         window.contentView = tv
         window.makeFirstResponder(tv)
         windows.append(window)
@@ -69,8 +74,8 @@ final class CaretThroughMarkersTests: XCTestCase {
                     width(ofCharacterAt: probe, in: tv),
                     MarkdownBlockBackgrounds.collapsedMarkerWidth,
                     "caret at \(offset): character \(probe) is collapsed while the "
-                    + "caret is on its line, so arrow-keying past it would move "
-                    + "through something the reader cannot see")
+                        + "caret is on its line, so arrow-keying past it would move "
+                        + "through something the reader cannot see")
             }
         }
     }
@@ -82,13 +87,14 @@ final class CaretThroughMarkersTests: XCTestCase {
     func test_markersOnAnotherLineAreStillCollapsed() {
         let body = "**bold** here\nsecond line\n"
         let (coordinator, tv) = editor(body)
-        tv.setSelectedRange(NSRange(location: 16, length: 0))   // second line
+        tv.setSelectedRange(NSRange(location: 16, length: 0))  // second line
         coordinator.revealForSelectionChange()
         tv.layoutSubtreeIfNeeded()
 
-        XCTAssertLessThan(width(ofCharacterAt: 0, in: tv),
-                          MarkdownBlockBackgrounds.collapsedMarkerWidth,
-                          "a marker on an unvisited line must collapse")
+        XCTAssertLessThan(
+            width(ofCharacterAt: 0, in: tv),
+            MarkdownBlockBackgrounds.collapsedMarkerWidth,
+            "a marker on an unvisited line must collapse")
     }
 }
 
@@ -98,7 +104,10 @@ final class CaretThroughMarkersTests: XCTestCase {
 final class LinkHoverUnderlineTests: XCTestCase {
 
     private var windows: [NSWindow] = []
-    override func tearDown() { windows.removeAll(); super.tearDown() }
+    override func tearDown() {
+        windows.removeAll()
+        super.tearDown()
+    }
 
     @MainActor
     private func editor(_ body: String) -> (MarkdownEditor.Coordinator, LinkTextView) {
@@ -108,8 +117,9 @@ final class LinkHoverUnderlineTests: XCTestCase {
         let tv = LinkTextView(frame: NSRect(x: 0, y: 0, width: 800, height: 500))
         tv.isRichText = false
         tv.delegate = coordinator
-        let window = NSWindow(contentRect: tv.frame, styleMask: [.titled],
-                              backing: .buffered, defer: false)
+        let window = NSWindow(
+            contentRect: tv.frame, styleMask: [.titled],
+            backing: .buffered, defer: false)
         window.contentView = tv
         window.makeFirstResponder(tv)
         windows.append(window)
@@ -123,8 +133,9 @@ final class LinkHoverUnderlineTests: XCTestCase {
     @MainActor
     private func temporaryUnderline(at offset: Int, in tv: LinkTextView) -> Bool {
         guard let layoutManager = tv.layoutManager else { return false }
-        return layoutManager.temporaryAttribute(.underlineStyle, atCharacterIndex: offset,
-                                                effectiveRange: nil) != nil
+        return layoutManager.temporaryAttribute(
+            .underlineStyle, atCharacterIndex: offset,
+            effectiveRange: nil) != nil
     }
 
     /// At rest, no link carries an underline — in the STORAGE, which is where
@@ -136,11 +147,15 @@ final class LinkHoverUnderlineTests: XCTestCase {
         let markdownLink = (body as NSString).range(of: "text").location
         let wikilink = (body as NSString).range(of: "Target").location
 
-        XCTAssertNil(tv.textStorage?.attribute(.underlineStyle, at: markdownLink,
-                                               effectiveRange: nil),
-                     "the persistent underline is gone from markdown links")
-        XCTAssertNil(tv.textStorage?.attribute(.underlineStyle, at: wikilink,
-                                               effectiveRange: nil))
+        XCTAssertNil(
+            tv.textStorage?.attribute(
+                .underlineStyle, at: markdownLink,
+                effectiveRange: nil),
+            "the persistent underline is gone from markdown links")
+        XCTAssertNil(
+            tv.textStorage?.attribute(
+                .underlineStyle, at: wikilink,
+                effectiveRange: nil))
     }
 
     /// Under the pointer, it appears — and as a TEMPORARY attribute, so the
@@ -152,11 +167,14 @@ final class LinkHoverUnderlineTests: XCTestCase {
         let inside = (body as NSString).range(of: "text").location
 
         coordinator.underlineLink(at: inside)
-        XCTAssertTrue(temporaryUnderline(at: inside, in: tv),
-                      "the hovered link underlines")
-        XCTAssertNil(tv.textStorage?.attribute(.underlineStyle, at: inside,
-                                               effectiveRange: nil),
-                     "and does so WITHOUT touching the storage")
+        XCTAssertTrue(
+            temporaryUnderline(at: inside, in: tv),
+            "the hovered link underlines")
+        XCTAssertNil(
+            tv.textStorage?.attribute(
+                .underlineStyle, at: inside,
+                effectiveRange: nil),
+            "and does so WITHOUT touching the storage")
     }
 
     /// Moving off the link takes it away again.
@@ -169,8 +187,9 @@ final class LinkHoverUnderlineTests: XCTestCase {
 
         coordinator.underlineLink(at: inside)
         coordinator.underlineLink(at: outside)
-        XCTAssertFalse(temporaryUnderline(at: inside, in: tv),
-                       "the underline follows the pointer rather than accumulating")
+        XCTAssertFalse(
+            temporaryUnderline(at: inside, in: tv),
+            "the underline follows the pointer rather than accumulating")
     }
 
     /// A wikilink underlines too. It did not carry the persistent underline,

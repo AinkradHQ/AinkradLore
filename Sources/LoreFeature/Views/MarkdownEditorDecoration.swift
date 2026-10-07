@@ -1,6 +1,6 @@
+import AinkradAppKit
 import AppKit
 import SwiftUI
-import AinkradAppKit
 
 /// What is HIDDEN, and what is DRAWN over the gap it leaves.
 ///
@@ -21,19 +21,23 @@ extension MarkdownEditor.Coordinator {
     /// Internal rather than `private` since the render path moved to another
     /// file for the length ceiling, and Swift's `private` is file-scoped. Still
     /// an implementation detail outside this module.
-    func collapseHiddenMarkers(in storage: NSTextStorage, window: NSRange?,
-                                       forcedFocus: Bool? = nil) {
+    func collapseHiddenMarkers(
+        in storage: NSTextStorage, window: NSRange?,
+        forcedFocus: Bool? = nil
+    ) {
         guard let tv = textView else { return }
         let selection = tv.selectedRange()
         let focused = forcedFocus ?? isTextViewFocused
         lastRevealFocus = focused
-        revealedRange = MarkdownReveal.revealedRange(in: tv.string, selection: selection,
-                                                     spans: styleCache.spans,
-                                                     isFocused: focused)
-        var hidden = MarkdownReveal.hiddenMarkers(spans: styleCache.spans,
-                                                  selection: selection,
-                                                  text: tv.string,
-                                                  isFocused: focused)
+        revealedRange = MarkdownReveal.revealedRange(
+            in: tv.string, selection: selection,
+            spans: styleCache.spans,
+            isFocused: focused)
+        var hidden = MarkdownReveal.hiddenMarkers(
+            spans: styleCache.spans,
+            selection: selection,
+            text: tv.string,
+            isFocused: focused)
         if let window {
             hidden = hidden.filter {
                 $0.lowerBound < NSMaxRange(window) && $0.upperBound > window.location
@@ -51,18 +55,22 @@ extension MarkdownEditor.Coordinator {
         // So: hide everything except the table rows, capture the cells as the
         // reader will see them, then hide the rows themselves.
         let rowMarkers = MarkdownTableStyling.rowMarkerRanges(styleCache.spans)
-        MarkdownStyleRenderer.collapse(hidden.filter { !rowMarkers.contains($0) },
-                                       in: storage)
-        tableRegions = MarkdownTableStyling.prepare(styleCache.spans,
-                                                    revealed: revealedRange,
-                                                    maxWidth: textColumnWidth(of: tv),
-                                                    bodyFont: theme.bodyFont,
-                                                    in: storage)
-        MarkdownStyleRenderer.collapse(hidden.filter { rowMarkers.contains($0) },
-                                       in: storage)
-        MarkdownMathStyling.reserveSpace(styleCache.spans, revealed: revealedRange,
-                                         font: theme.bodyFont,
-                                         in: storage)
+        MarkdownStyleRenderer.collapse(
+            hidden.filter { !rowMarkers.contains($0) },
+            in: storage)
+        tableRegions = MarkdownTableStyling.prepare(
+            styleCache.spans,
+            revealed: revealedRange,
+            maxWidth: textColumnWidth(of: tv),
+            bodyFont: theme.bodyFont,
+            in: storage)
+        MarkdownStyleRenderer.collapse(
+            hidden.filter { rowMarkers.contains($0) },
+            in: storage)
+        MarkdownMathStyling.reserveSpace(
+            styleCache.spans, revealed: revealedRange,
+            font: theme.bodyFont,
+            in: storage)
         // LAST, and after both collapse passes, for the reason every other
         // reservation here runs late: `collapse` resets attributes over the
         // ranges this writes to, so a height reserved before it would be
@@ -120,14 +128,16 @@ extension MarkdownEditor.Coordinator {
         linkView.blockBackgroundPalette = MarkdownBlockBackgrounds.Palette(tokens: tokens)
         linkView.blockBackgroundFont = theme.bodyFont
         linkView.blockBackgrounds =
-            MarkdownBlockBackgrounds.regions(for: styleCache.spans,
-                                             length: storage.length,
-                                             limitedTo: window,
-                                             in: storage.string as NSString,
-                                             tagPills: theme.renderTagsAsChips)
-            + MarkdownMathStyling.regions(for: styleCache.spans,
-                                          font: theme.bodyFont,
-                                          in: storage.string as NSString)
+            MarkdownBlockBackgrounds.regions(
+                for: styleCache.spans,
+                length: storage.length,
+                limitedTo: window,
+                in: storage.string as NSString,
+                tagPills: theme.renderTagsAsChips)
+            + MarkdownMathStyling.regions(
+                for: styleCache.spans,
+                font: theme.bodyFont,
+                in: storage.string as NSString)
             + tableRegions
             + transclusionRegions
         remeasureTablesIfTheyWereMeasuredAtAnotherWidth(in: linkView)

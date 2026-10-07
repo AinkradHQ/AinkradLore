@@ -1,6 +1,6 @@
+import AinkradAppKit
 import AppKit
 import SwiftUI
-import AinkradAppKit
 
 /// Block decoration that is DRAWN, not attributed.
 ///
@@ -149,16 +149,19 @@ enum MarkdownBlockBackgrounds {
         ///
         /// `.quote` has no colour of its own and falls back to quiet
         /// foreground, exactly as an ordinary block quote does.
-        static func calloutTint(_ kind: MarkdownCallout.Kind,
-                                tokens: HostThemeTokens) -> NSColor {
+        static func calloutTint(
+            _ kind: MarkdownCallout.Kind,
+            tokens: HostThemeTokens
+        ) -> NSColor {
             guard !kind.isNeutral else {
                 return NSColor(tokens.foreground).withAlphaComponent(0.70)
             }
             let onDark = isDarkSurface(tokens: tokens)
-            return NSColor(hue: kind.hue / 360,
-                           saturation: onDark ? 0.55 : 0.75,
-                           brightness: onDark ? 0.95 : 0.70,
-                           alpha: 1)
+            return NSColor(
+                hue: kind.hue / 360,
+                saturation: onDark ? 0.55 : 0.75,
+                brightness: onDark ? 0.95 : 0.70,
+                alpha: 1)
         }
 
         /// Whether the editor is painting on a dark surface, judged from the
@@ -168,7 +171,8 @@ enum MarkdownBlockBackgrounds {
         static func isDarkSurface(tokens: HostThemeTokens) -> Bool {
             let foreground = NSColor(tokens.foreground).usingColorSpace(.sRGB)
             guard let foreground else { return true }
-            let luminance = 0.299 * foreground.redComponent
+            let luminance =
+                0.299 * foreground.redComponent
                 + 0.587 * foreground.greenComponent
                 + 0.114 * foreground.blueComponent
             return luminance > 0.5
@@ -197,10 +201,12 @@ enum MarkdownBlockBackgrounds {
     ///   call site because the chip is now a drawn region rather than a text
     ///   attribute — with it off, no region is emitted at all and a tag is
     ///   simply tinted text.
-    static func regions(for spans: [StyleSpan], length: Int,
-                        limitedTo window: NSRange? = nil,
-                        in text: NSString? = nil,
-                        tagPills: Bool = false) -> [Region] {
+    static func regions(
+        for spans: [StyleSpan], length: Int,
+        limitedTo window: NSRange? = nil,
+        in text: NSString? = nil,
+        tagPills: Bool = false
+    ) -> [Region] {
         // The lines that carry a checkbox, so the bullet on those lines can be
         // suppressed. Collected in one pass up front rather than searched per
         // bullet, which would be quadratic on a long task list.
@@ -244,14 +250,17 @@ enum MarkdownBlockBackgrounds {
                 // the author wrote a title.
                 guard let text, NSMaxRange(r) <= text.length else { return nil }
                 let header = MarkdownCallout.header(ofQuoteAt: span.range, in: text)
-                let marker = header.map {
-                    NSRange(location: $0.markerRange.lowerBound,
+                let marker =
+                    header.map {
+                        NSRange(
+                            location: $0.markerRange.lowerBound,
                             length: $0.markerRange.count)
-                } ?? NSRange(location: span.range.lowerBound, length: 0)
-                kind = .callout(callout,
-                                title: header?.titleRange == nil
-                                    ? callout.displayTitle : nil,
-                                marker: marker)
+                    } ?? NSRange(location: span.range.lowerBound, length: 0)
+                kind = .callout(
+                    callout,
+                    title: header?.titleRange == nil
+                        ? callout.displayTitle : nil,
+                    marker: marker)
             case .checkbox(let done):
                 // Drawn only where the source is collapsed, decided at draw
                 // time from geometry — the same self-correcting witness the
@@ -272,12 +281,15 @@ enum MarkdownBlockBackgrounds {
                 // characters, so intersecting it would draw half a `10.`. It is
                 // either wholly inside the styled window or it is not drawn.
                 guard let text, NSMaxRange(r) <= text.length,
-                      let glyph = listMarkerGlyph(
+                    let glyph = listMarkerGlyph(
                         for: text.substring(with: r),
                         depth: depthByItemStart[span.range.lowerBound] ?? 0)
                 else { return nil }
                 if let window,
-                   NSIntersectionRange(r, window).length != r.length { return nil }
+                    NSIntersectionRange(r, window).length != r.length
+                {
+                    return nil
+                }
                 return Region(kind: .listMarker(glyph), range: r)
             default: return nil
             }
@@ -310,7 +322,7 @@ enum MarkdownBlockBackgrounds {
         }
         let digits = body.dropLast()
         guard let last = body.last, last == "." || last == ")",
-              !digits.isEmpty, digits.allSatisfy({ $0.isASCII && $0.isNumber })
+            !digits.isEmpty, digits.allSatisfy({ $0.isASCII && $0.isNumber })
         else { return nil }
         return digits + "."
     }
@@ -408,8 +420,10 @@ enum MarkdownBlockBackgrounds {
     ///   sized from it — a substituted list marker, a callout's icon and its
     ///   drawn title, a maths baseline — so decoration and text move together
     ///   when density or zoom changes.
-    static func draw(_ regions: [Region], palette: Palette, font: NSFont,
-                     in textView: NSTextView, dirtyRect: NSRect) {
+    static func draw(
+        _ regions: [Region], palette: Palette, font: NSFont,
+        in textView: NSTextView, dirtyRect: NSRect
+    ) {
         guard !regions.isEmpty else { return }
         let origin = textView.textContainerOrigin
         // ONE coordinate source. `x` is the same `origin.x` the text rects are
@@ -419,22 +433,25 @@ enum MarkdownBlockBackgrounds {
         let width = columnWidth(in: textView)
         for region in regions {
             if case .listMarker(let glyph) = region.kind {
-                drawListMarker(glyph, at: region.range, columnX: x,
-                               palette: palette, font: font, in: textView,
-                               origin: origin, dirtyRect: dirtyRect)
+                drawListMarker(
+                    glyph, at: region.range, columnX: x,
+                    palette: palette, font: font, in: textView,
+                    origin: origin, dirtyRect: dirtyRect)
                 continue
             }
             if case .checkbox(let done) = region.kind {
-                drawCheckbox(done, at: region.range, columnX: x,
-                             palette: palette, font: font, in: textView,
-                             origin: origin, dirtyRect: dirtyRect)
+                drawCheckbox(
+                    done, at: region.range, columnX: x,
+                    palette: palette, font: font, in: textView,
+                    origin: origin, dirtyRect: dirtyRect)
                 continue
             }
             if case .table(let box, let marker) = region.kind {
                 if MarkdownMathStyling.drawsExpression(at: marker, in: textView) {
-                    MarkdownTableStyling.draw(box, tint: palette.listMarker,
-                                              rule: palette.quoteBar, in: textView,
-                                              origin: origin, dirtyRect: dirtyRect)
+                    MarkdownTableStyling.draw(
+                        box, tint: palette.listMarker,
+                        rule: palette.quoteBar, in: textView,
+                        origin: origin, dirtyRect: dirtyRect)
                 }
                 continue
             }
@@ -443,10 +460,11 @@ enum MarkdownBlockBackgrounds {
                 // source means the caret is in the expression, and the drawn
                 // form must not be painted over the top of it.
                 if MarkdownMathStyling.drawsExpression(at: region.range, in: textView) {
-                    MarkdownMathStyling.draw(box, at: region.range,
-                                             tint: palette.mathTint, font: font,
-                                             in: textView,
-                                             origin: origin, dirtyRect: dirtyRect)
+                    MarkdownMathStyling.draw(
+                        box, at: region.range,
+                        tint: palette.mathTint, font: font,
+                        in: textView,
+                        origin: origin, dirtyRect: dirtyRect)
                 }
                 continue
             }
@@ -457,13 +475,15 @@ enum MarkdownBlockBackgrounds {
                 // painted on top of its own `![[…]]` source.
                 if MarkdownMathStyling.drawsExpression(
                     at: NSRange(location: region.range.location, length: 1),
-                    in: textView) {
-                    TransclusionStyling.draw(box, at: region.range,
-                                             columnX: x, columnWidth: width,
-                                             rule: palette.mathTint,
-                                             frame: palette.quoteBar,
-                                             in: textView, origin: origin,
-                                             dirtyRect: dirtyRect)
+                    in: textView)
+                {
+                    TransclusionStyling.draw(
+                        box, at: region.range,
+                        columnX: x, columnWidth: width,
+                        rule: palette.mathTint,
+                        frame: palette.quoteBar,
+                        in: textView, origin: origin,
+                        dirtyRect: dirtyRect)
                 }
                 continue
             }
@@ -472,12 +492,13 @@ enum MarkdownBlockBackgrounds {
                 // heading stand in for it. Visible marker means the caret is
                 // on the header line and they must not be drawn at all.
                 let drawsHeader = drawsCalloutHeader(marker: marker, in: textView)
-                drawCallout(kind, title: drawsHeader ? title : nil,
-                            drawsIcon: drawsHeader,
-                            at: region.range, columnX: x,
-                            columnWidth: width, tokens: palette.tokens,
-                            font: font,
-                            in: textView, origin: origin, dirtyRect: dirtyRect)
+                drawCallout(
+                    kind, title: drawsHeader ? title : nil,
+                    drawsIcon: drawsHeader,
+                    at: region.range, columnX: x,
+                    columnWidth: width, tokens: palette.tokens,
+                    font: font,
+                    in: textView, origin: origin, dirtyRect: dirtyRect)
                 continue
             }
             var rect = boundingRect(of: region.range, in: textView)
@@ -490,14 +511,17 @@ enum MarkdownBlockBackgrounds {
                 // 8 pt above and below, not the 2 this carried. A fence sat
                 // so tight inside its own panel that the panel read as a
                 // highlight on the text rather than as a container for it.
-                let panel = NSRect(x: x,
-                                   y: rect.minY - codePanelPadding,
-                                   width: width,
-                                   height: rect.height + codePanelPadding * 2)
+                let panel = NSRect(
+                    x: x,
+                    y: rect.minY - codePanelPadding,
+                    width: width,
+                    height: rect.height + codePanelPadding * 2)
                 guard panel.intersects(dirtyRect) else { continue }
                 palette.codePanel.setFill()
-                NSBezierPath(roundedRect: panel, xRadius: cornerRadius,
-                             yRadius: cornerRadius).fill()
+                NSBezierPath(
+                    roundedRect: panel, xRadius: cornerRadius,
+                    yRadius: cornerRadius
+                ).fill()
             case .inlineCodePill:
                 // Per line fragment, and vertically inset to the TEXT rather
                 // than the line box: at a 1.5 line height the fragment is half
@@ -512,15 +536,19 @@ enum MarkdownBlockBackgrounds {
                         .insetBy(dx: -inlineCodePaddingH, dy: -inlineCodePaddingV)
                     guard pill.intersects(dirtyRect) else { continue }
                     NSColor(palette.tokens.surfaceElevated).withAlphaComponent(0.9).setFill()
-                    NSBezierPath(roundedRect: pill, xRadius: inlineCodeRadius,
-                                 yRadius: inlineCodeRadius).fill()
+                    NSBezierPath(
+                        roundedRect: pill, xRadius: inlineCodeRadius,
+                        yRadius: inlineCodeRadius
+                    ).fill()
                 }
             case .tagPill:
                 let pill = rect.insetBy(dx: -tagPillPaddingH, dy: -tagPillPaddingV)
                 guard pill.intersects(dirtyRect) else { continue }
                 NSColor(palette.tokens.accentPrimary).withAlphaComponent(0.14).setFill()
-                NSBezierPath(roundedRect: pill, xRadius: pill.height / 2,
-                             yRadius: pill.height / 2).fill()
+                NSBezierPath(
+                    roundedRect: pill, xRadius: pill.height / 2,
+                    yRadius: pill.height / 2
+                ).fill()
             case .rule:
                 // Centred in the line the paragraph style reserved, full
                 // measure. `barWidth`'s sibling constant rather than a literal
@@ -531,14 +559,17 @@ enum MarkdownBlockBackgrounds {
                 palette.quoteBar.setFill()
                 line.fill()
             case .quoteBar:
-                let bar = NSRect(x: x, y: rect.minY,
-                                 width: barWidth, height: rect.height)
+                let bar = NSRect(
+                    x: x, y: rect.minY,
+                    width: barWidth, height: rect.height)
                 guard bar.intersects(dirtyRect) else { continue }
                 palette.quoteBar.setFill()
-                NSBezierPath(roundedRect: bar, xRadius: barWidth / 2,
-                             yRadius: barWidth / 2).fill()
+                NSBezierPath(
+                    roundedRect: bar, xRadius: barWidth / 2,
+                    yRadius: barWidth / 2
+                ).fill()
             case .listMarker, .checkbox, .callout, .math, .table, .transclusion:
-                break   // handled above, before the rect is taken
+                break  // handled above, before the rect is taken
             }
         }
     }
@@ -550,19 +581,23 @@ enum MarkdownBlockBackgrounds {
     /// of the marker plus the first character of the item answers "where is
     /// this line, and how tall?", which a 0.01pt run cannot be trusted to.
     @MainActor
-    private static func drawListMarker(_ glyph: String, at range: NSRange,
-                                       columnX x: CGFloat, palette: Palette,
-                                       font: NSFont,
-                                       in textView: NSTextView, origin: NSPoint,
-                                       dirtyRect: NSRect) {
+    private static func drawListMarker(
+        _ glyph: String, at range: NSRange,
+        columnX x: CGFloat, palette: Palette,
+        font: NSFont,
+        in textView: NSTextView, origin: NSPoint,
+        dirtyRect: NSRect
+    ) {
         let markerRect = boundingRect(of: range, in: textView)
         guard !markerRect.isNull else { return }
         guard markerRect.width < collapsedMarkerWidth else { return }
 
-        let withContent = NSRange(location: range.location,
-                                  length: min(range.length + 1,
-                                              (textView.string as NSString).length
-                                                - range.location))
+        let withContent = NSRange(
+            location: range.location,
+            length: min(
+                range.length + 1,
+                (textView.string as NSString).length
+                    - range.location))
         var line = boundingRect(of: withContent, in: textView)
         if line.isNull || line.height <= 0 { line = markerRect }
         guard line.height > 0 else { return }
@@ -570,15 +605,16 @@ enum MarkdownBlockBackgrounds {
         let textStart = markerRect.minX + origin.x
 
         let attributes: [NSAttributedString.Key: Any] = [
-            .font: font, .foregroundColor: palette.listMarker
+            .font: font, .foregroundColor: palette.listMarker,
         ]
         let size = (glyph as NSString).size(withAttributes: attributes)
         // Right-aligned into the gutter, but never pushed out of the column: a
         // wide ordinal (`10.`) on a shallow indent runs out of gutter, and
         // clamping keeps it inside the measure instead of under the margin.
         let drawX = max(x, textStart - size.width - listMarkerGap)
-        let rect = NSRect(x: drawX, y: line.midY - size.height / 2,
-                          width: size.width, height: size.height)
+        let rect = NSRect(
+            x: drawX, y: line.midY - size.height / 2,
+            width: size.width, height: size.height)
         guard rect.intersects(dirtyRect) else { return }
         (glyph as NSString).draw(in: rect, withAttributes: attributes)
     }
@@ -595,11 +631,13 @@ enum MarkdownBlockBackgrounds {
     ///
     /// The symbol is DRAWN, never inserted. The document still says `[x]`.
     @MainActor
-    private static func drawCheckbox(_ done: Bool, at range: NSRange,
-                                     columnX x: CGFloat, palette: Palette,
-                                     font: NSFont,
-                                     in textView: NSTextView, origin: NSPoint,
-                                     dirtyRect: NSRect) {
+    private static func drawCheckbox(
+        _ done: Bool, at range: NSRange,
+        columnX x: CGFloat, palette: Palette,
+        font: NSFont,
+        in textView: NSTextView, origin: NSPoint,
+        dirtyRect: NSRect
+    ) {
         let markerRect = boundingRect(of: range, in: textView)
         guard !markerRect.isNull else { return }
         // Collapsed means the caret is elsewhere and the box stands in for the
@@ -607,10 +645,12 @@ enum MarkdownBlockBackgrounds {
         // painting a checkbox over it would double the control.
         guard markerRect.width < collapsedMarkerWidth else { return }
 
-        let withContent = NSRange(location: range.location,
-                                  length: min(range.length + 1,
-                                              (textView.string as NSString).length
-                                                - range.location))
+        let withContent = NSRange(
+            location: range.location,
+            length: min(
+                range.length + 1,
+                (textView.string as NSString).length
+                    - range.location))
         var line = boundingRect(of: withContent, in: textView)
         if line.isNull || line.height <= 0 { line = markerRect }
         guard line.height > 0 else { return }
@@ -622,18 +662,22 @@ enum MarkdownBlockBackgrounds {
         let box = NSRect(x: drawX, y: line.midY - side / 2, width: side, height: side)
         guard box.intersects(dirtyRect) else { return }
 
-        guard let symbol = NSImage(systemSymbolName: done ? "checkmark.square.fill" : "square",
-                                   accessibilityDescription: done ? "checked" : "unchecked")
+        guard
+            let symbol = NSImage(
+                systemSymbolName: done ? "checkmark.square.fill" : "square",
+                accessibilityDescription: done ? "checked" : "unchecked")
         else { return }
-        let configured = symbol.withSymbolConfiguration(
-            .init(pointSize: side, weight: .regular)) ?? symbol
+        let configured =
+            symbol.withSymbolConfiguration(
+                .init(pointSize: side, weight: .regular)) ?? symbol
         configured.isTemplate = true
         // A done box is tinted; an empty one is quiet foreground, like the
         // bullet it replaced. Colour marks the state, so an unchecked list does
         // not read as a column of controls demanding attention.
         (done ? NSColor(palette.tokens.accentTertiary) : palette.listMarker).set()
-        configured.draw(in: box, from: .zero, operation: .sourceOver,
-                        fraction: 1, respectFlipped: true, hints: nil)
+        configured.draw(
+            in: box, from: .zero, operation: .sourceOver,
+            fraction: 1, respectFlipped: true, hints: nil)
     }
 
     /// The union of the line rects `range` occupies, in TEXT CONTAINER
@@ -650,11 +694,12 @@ enum MarkdownBlockBackgrounds {
     /// the decoration and the text cannot disagree about where a run is.
     static func boundingRect(of range: NSRange, in textView: NSTextView) -> NSRect {
         if let layout = textView.textLayoutManager,
-           let content = layout.textContentManager {
+            let content = layout.textContentManager
+        {
             let document = content.documentRange
             guard let start = content.location(document.location, offsetBy: range.location),
-                  let end = content.location(start, offsetBy: range.length),
-                  let textRange = NSTextRange(location: start, end: end)
+                let end = content.location(start, offsetBy: range.length),
+                let textRange = NSTextRange(location: start, end: end)
             else { return .null }
             var union = NSRect.null
             // No `ensureLayout(for:)`. Forcing layout from inside
@@ -666,17 +711,21 @@ enum MarkdownBlockBackgrounds {
             // being drawn is by definition laid out. A region that is entirely
             // off screen enumerates no segments, returns a null rect, and is
             // skipped — which is the desired outcome, reached without the work.
-            layout.enumerateTextSegments(in: textRange, type: .standard,
-                                         options: []) { _, frame, _, _ in
+            layout.enumerateTextSegments(
+                in: textRange, type: .standard,
+                options: []
+            ) { _, frame, _, _ in
                 if !frame.isEmpty { union = union.union(frame) }
                 return true
             }
             return union
         }
         guard let manager = textView.layoutManager,
-              let container = textView.textContainer else { return .null }
-        let glyphs = manager.glyphRange(forCharacterRange: range,
-                                        actualCharacterRange: nil)
+            let container = textView.textContainer
+        else { return .null }
+        let glyphs = manager.glyphRange(
+            forCharacterRange: range,
+            actualCharacterRange: nil)
         guard glyphs.length > 0 else { return .null }
         return manager.boundingRect(forGlyphRange: glyphs, in: container)
     }
@@ -691,22 +740,26 @@ enum MarkdownBlockBackgrounds {
     @MainActor
     static func lineRects(of range: NSRange, in textView: NSTextView) -> [NSRect] {
         if let layout = textView.textLayoutManager,
-           let content = layout.textContentManager {
+            let content = layout.textContentManager
+        {
             let document = content.documentRange
             guard let start = content.location(document.location, offsetBy: range.location),
-                  let end = content.location(start, offsetBy: range.length),
-                  let textRange = NSTextRange(location: start, end: end)
+                let end = content.location(start, offsetBy: range.length),
+                let textRange = NSTextRange(location: start, end: end)
             else { return [] }
             var rects: [NSRect] = []
-            layout.enumerateTextSegments(in: textRange, type: .standard,
-                                         options: []) { _, frame, _, _ in
+            layout.enumerateTextSegments(
+                in: textRange, type: .standard,
+                options: []
+            ) { _, frame, _, _ in
                 if !frame.isEmpty { rects.append(frame) }
                 return true
             }
             return merged(rects)
         }
         guard let manager = textView.layoutManager,
-              let container = textView.textContainer else { return [] }
+            let container = textView.textContainer
+        else { return [] }
         var rects: [NSRect] = []
         let glyphs = manager.glyphRange(forCharacterRange: range, actualCharacterRange: nil)
         manager.enumerateLineFragments(forGlyphRange: glyphs) { _, used, _, lineGlyphs, _ in

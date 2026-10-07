@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// Every modal the sidebar's rename / move / trash flows need, attached in ONE
 /// place so both sidebar modes get identical behaviour and `LoreRootView` stays
@@ -14,18 +14,22 @@ extension View {
     func loreSidebarOperations(_ ops: SidebarOperations, theme: HostTheme) -> some View {
         self
             .overlay { LoreNoticeBridge(ops: ops) }
-            .sheet(isPresented: Binding(
-                get: { ops.activeSheet != nil },
-                set: { if !$0 { ops.dismissAll() } })) {
-                    SidebarOperationSheet(ops: ops, theme: theme)
-                }
+            .sheet(
+                isPresented: Binding(
+                    get: { ops.activeSheet != nil },
+                    set: { if !$0 { ops.dismissAll() } })
+            ) {
+                SidebarOperationSheet(ops: ops, theme: theme)
+            }
             .ainkradConfirmDialog(
-                isPresented: Binding(get: { ops.pendingTrash != nil },
-                                     set: { if !$0 { ops.cancelTrash() } }),
+                isPresented: Binding(
+                    get: { ops.pendingTrash != nil },
+                    set: { if !$0 { ops.cancelTrash() } }),
                 title: "Move to Trash",
                 message: ops.pendingTrash.map { ops.trashMessage(for: $0) } ?? "",
                 confirmTitle: "Move to Trash",
-                isDestructive: true) { ops.confirmTrash() }
+                isDestructive: true
+            ) { ops.confirmTrash() }
             // A SECOND confirm dialog on the same view is safe where a second
             // `.sheet` would not be: `ainkradConfirmDialog` is an `.overlay`,
             // not a presentation, so the two cannot race the way the stacked
@@ -33,12 +37,14 @@ extension View {
             // practice — a close refusal and a trash confirmation come from
             // different gestures.
             .ainkradConfirmDialog(
-                isPresented: Binding(get: { ops.refusedClose != nil },
-                                     set: { if !$0 { ops.refusedClose = nil } }),
+                isPresented: Binding(
+                    get: { ops.refusedClose != nil },
+                    set: { if !$0 { ops.refusedClose = nil } }),
                 title: "Unsaved changes",
                 message: ops.refusedCloseMessage,
                 confirmTitle: "Close anyway",
-                isDestructive: true) { ops.confirmForcedClose() }
+                isDestructive: true
+            ) { ops.confirmForcedClose() }
     }
 }
 
@@ -65,8 +71,9 @@ private struct LoreNoticeBridge: View {
             .onChange(of: ops.notice) { _, notice in
                 guard let notice else { return }
                 ops.notice = nil
-                toasts.show(notice.text,
-                            status: notice.kind == .success ? .success : .danger)
+                toasts.show(
+                    notice.text,
+                    status: notice.kind == .success ? .success : .danger)
             }
     }
 }
@@ -80,12 +87,14 @@ struct SidebarOperationSheet: View {
     var body: some View {
         switch ops.activeSheet {
         case .name:
-            NameSheet(title: ops.nameTargetTitle, text: $ops.nameText, theme: theme,
-                      onConfirm: { ops.commitName() }, onCancel: { ops.cancelName() })
+            NameSheet(
+                title: ops.nameTargetTitle, text: $ops.nameText, theme: theme,
+                onConfirm: { ops.commitName() }, onCancel: { ops.cancelName() })
         case .preview:
             if let preview = ops.preview {
-                RenamePreviewSheet(preview: preview, report: ops.report, theme: theme,
-                                   onConfirm: { ops.confirm() }, onCancel: { ops.dismiss() })
+                RenamePreviewSheet(
+                    preview: preview, report: ops.report, theme: theme,
+                    onConfirm: { ops.confirm() }, onCancel: { ops.dismiss() })
             }
         case .message:
             MessageSheet(text: ops.message ?? "", theme: theme) { ops.message = nil }
@@ -109,7 +118,8 @@ struct NameSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: AinkradSpacing.md) {
-            Text(title).font(AinkradFontResolver.font(.headline, typography: typo)).foregroundStyle(theme.tokens.foreground)
+            Text(title).font(AinkradFontResolver.font(.headline, typography: typo)).foregroundStyle(
+                theme.tokens.foreground)
             TextField("New name", text: $text)
                 .textFieldStyle(.roundedBorder)
                 .onSubmit(onConfirm)
@@ -138,10 +148,14 @@ struct MessageSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: AinkradSpacing.md) {
-            Text("Not done").font(AinkradFontResolver.font(.headline, typography: typo)).foregroundStyle(theme.tokens.foreground)
+            Text("Not done").font(AinkradFontResolver.font(.headline, typography: typo)).foregroundStyle(
+                theme.tokens.foreground)
             Text(text).foregroundStyle(theme.tokens.foreground.opacity(0.85))
                 .fixedSize(horizontal: false, vertical: true)
-            HStack { Spacer(); AinkradButton(title: "OK", style: .primary, action: onDismiss) }
+            HStack {
+                Spacer()
+                AinkradButton(title: "OK", style: .primary, action: onDismiss)
+            }
         }
         .padding(AinkradSpacing.lg)
         .frame(width: 420)
@@ -173,23 +187,31 @@ struct MessageSheet: View {
 ///   is simply absent there, which is correct: a menu that cannot read the pin
 ///   state cannot label itself honestly either.
 @MainActor
-func loreRowMenuItems(row: IndexRow, ops: SidebarOperations,
-                      store: LoreStore? = nil) -> [AinkradMenuItem] {
+func loreRowMenuItems(
+    row: IndexRow, ops: SidebarOperations,
+    store: LoreStore? = nil
+) -> [AinkradMenuItem] {
     var items: [AinkradMenuItem] = []
     if let store {
         let pinned = store.isPinned(row.path)
-        items.append(AinkradMenuItem(title: pinned ? "Unpin" : "Pin",
-                                     systemName: pinned ? "pin.slash" : "pin") {
-            store.togglePinned(row.path)
-        })
+        items.append(
+            AinkradMenuItem(
+                title: pinned ? "Unpin" : "Pin",
+                systemName: pinned ? "pin.slash" : "pin"
+            ) {
+                store.togglePinned(row.path)
+            })
     }
     items += [
         AinkradMenuItem(title: "Rename…", systemName: "pencil") { ops.beginRename(row) },
         AinkradMenuItem(title: "Move to…", systemName: "folder") { ops.beginMove(row) },
     ]
     if row.type != AttachmentEngine.identifier {
-        items.append(AinkradMenuItem(title: "Move to Trash", systemName: "trash",
-                                     isDestructive: true) { ops.requestTrash(row) })
+        items.append(
+            AinkradMenuItem(
+                title: "Move to Trash", systemName: "trash",
+                isDestructive: true
+            ) { ops.requestTrash(row) })
     }
     return items
 }
@@ -207,8 +229,10 @@ func loreFolderMenuItems(folder: URL, ops: SidebarOperations) -> [AinkradMenuIte
         AinkradMenuItem(title: "New Folder…", systemName: "folder.badge.plus") {
             ops.beginNewFolder(in: folder)
         },
-        AinkradMenuItem(title: "Move to Trash", systemName: "trash",
-                        isDestructive: true) { ops.requestTrashFolder(folder) },
+        AinkradMenuItem(
+            title: "Move to Trash", systemName: "trash",
+            isDestructive: true
+        ) { ops.requestTrashFolder(folder) },
     ]
 }
 
@@ -217,9 +241,11 @@ func loreFolderMenuItems(folder: URL, ops: SidebarOperations) -> [AinkradMenuIte
 /// at all. Just the one action — root has nothing to rename or trash.
 @MainActor
 func loreRootMenuItems(root: URL, ops: SidebarOperations) -> [AinkradMenuItem] {
-    [AinkradMenuItem(title: "New Folder…", systemName: "folder.badge.plus") {
-        ops.beginNewFolder(in: root)
-    }]
+    [
+        AinkradMenuItem(title: "New Folder…", systemName: "folder.badge.plus") {
+            ops.beginNewFolder(in: root)
+        }
+    ]
 }
 
 extension SidebarOperations {

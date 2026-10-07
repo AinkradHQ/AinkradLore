@@ -1,6 +1,7 @@
-import XCTest
-@testable import LoreFeature
 import AinkradAppKit
+import XCTest
+
+@testable import LoreFeature
 
 /// `LoreStore.forTesting(vaultRoot:)` named in the Task 9 brief does not
 /// exist. `LoreStoreTests.makeStore` is the real seam every other store test
@@ -19,8 +20,9 @@ final class AttachmentWriteTests: XCTestCase {
     }
 
     private func store(_ root: URL) throws -> LoreStore {
-        let s = LoreStore(documents: FakeDocs(),
-                          indexPath: root.appendingPathComponent(".index.sqlite"))
+        let s = LoreStore(
+            documents: FakeDocs(),
+            indexPath: root.appendingPathComponent(".index.sqlite"))
         try s.setVaultRootForTesting(root)
         return s
     }
@@ -64,8 +66,9 @@ final class AttachmentWriteTests: XCTestCase {
         let s = try store(root)
         let outside = FileManager.default.temporaryDirectory
             .appendingPathComponent("elsewhere/n.md")
-        XCTAssertThrowsError(try s.writeAttachment(
-            data: Data("x".utf8), preferredName: "shot.png", besideNote: outside))
+        XCTAssertThrowsError(
+            try s.writeAttachment(
+                data: Data("x".utf8), preferredName: "shot.png", besideNote: outside))
     }
 
     /// A pasteboard/Finder-supplied name with traversal segments must not be
@@ -80,8 +83,9 @@ final class AttachmentWriteTests: XCTestCase {
         let s = try store(root)
         let written = try s.writeAttachment(
             data: Data("x".utf8), preferredName: "../../etc/passwd", besideNote: note)
-        XCTAssertEqual(written.deletingLastPathComponent().standardizedFileURL.path,
-                       note.deletingLastPathComponent().standardizedFileURL.path)
+        XCTAssertEqual(
+            written.deletingLastPathComponent().standardizedFileURL.path,
+            note.deletingLastPathComponent().standardizedFileURL.path)
         XCTAssertFalse(written.path.contains("etc/passwd"))
     }
 
@@ -96,8 +100,9 @@ final class AttachmentWriteTests: XCTestCase {
         let written = try s.writeAttachment(
             data: Data("x".utf8), preferredName: "....", besideNote: note)
         XCTAssertEqual(written.lastPathComponent, "attachment")
-        XCTAssertEqual(written.deletingLastPathComponent().standardizedFileURL.path,
-                       note.deletingLastPathComponent().standardizedFileURL.path)
+        XCTAssertEqual(
+            written.deletingLastPathComponent().standardizedFileURL.path,
+            note.deletingLastPathComponent().standardizedFileURL.path)
     }
 
     /// A dedupe test, not a guard test — renamed from an earlier version
@@ -201,8 +206,9 @@ final class AttachmentWriteTests: XCTestCase {
         let result = try s.writeAttachment(copying: existing, besideNote: note)
         XCTAssertEqual(result.path, existing.path)
         // No duplicate was created.
-        XCTAssertFalse(FileManager.default.fileExists(
-            atPath: root.appendingPathComponent("Notes/shot 2.png").path))
+        XCTAssertFalse(
+            FileManager.default.fileExists(
+                atPath: root.appendingPathComponent("Notes/shot 2.png").path))
     }
 
     /// Fix round 2 / Important B: the same-file dedup early return above
@@ -257,8 +263,9 @@ final class AttachmentWriteTests: XCTestCase {
             XCTAssertEqual(url.path, droppedFolder.path)
         }
         // Nothing was copied into the vault beside the note.
-        XCTAssertFalse(FileManager.default.fileExists(
-            atPath: root.appendingPathComponent("Notes/DroppedFolder").path))
+        XCTAssertFalse(
+            FileManager.default.fileExists(
+                atPath: root.appendingPathComponent("Notes/DroppedFolder").path))
     }
 
     /// Round 3 / Important 4: the test above proves the STORE throws
@@ -282,18 +289,22 @@ final class AttachmentWriteTests: XCTestCase {
             at: droppedFolder, withIntermediateDirectories: true)
         let s = try store(root)
 
-        let result = attemptAttachmentWrite(write: {
-            try s.writeAttachment(copying: droppedFolder, besideNote: note)
-        }, embedSyntax: { s.embedSyntax(for: $0) })
+        let result = attemptAttachmentWrite(
+            write: {
+                try s.writeAttachment(copying: droppedFolder, besideNote: note)
+            }, embedSyntax: { s.embedSyntax(for: $0) })
 
         XCTAssertNil(result.embedSyntax, "a rejected drop must insert nothing")
         let message = try XCTUnwrap(result.failureMessage, "the failure must surface a message")
-        XCTAssertFalse(message.contains("LoreError"),
-                       "the message must be human-readable, not the raw enum: \(message)")
-        XCTAssertFalse(message.contains("couldn't be completed"),
-                       "must not be the generic Foundation fallback: \(message)")
-        XCTAssertTrue(message.contains("folder"),
-                      "must actually explain WHY it was refused: \(message)")
+        XCTAssertFalse(
+            message.contains("LoreError"),
+            "the message must be human-readable, not the raw enum: \(message)")
+        XCTAssertFalse(
+            message.contains("couldn't be completed"),
+            "must not be the generic Foundation fallback: \(message)")
+        XCTAssertTrue(
+            message.contains("folder"),
+            "must actually explain WHY it was refused: \(message)")
     }
 
     /// Fix round 2 / Minor A: the length cap must be a BYTE budget, not a

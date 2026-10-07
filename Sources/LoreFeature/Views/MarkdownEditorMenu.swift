@@ -1,5 +1,5 @@
-import AppKit
 import AinkradAppKit
+import AppKit
 
 /// Hosts the editor's own context menu in place of `NSTextView`'s.
 ///
@@ -49,13 +49,16 @@ enum EditorSpellCheck {
         guard let range = WordAtPoint.range(in: text, atUTF16: offset) else { return nil }
         let word = (text as NSString).substring(with: range)
         let checker = NSSpellChecker.shared
-        let misspelled = checker.checkSpelling(of: word, startingAt: 0, language: nil,
-                                               wrap: false, inSpellDocumentWithTag: tag,
-                                               wordCount: nil)
+        let misspelled = checker.checkSpelling(
+            of: word, startingAt: 0, language: nil,
+            wrap: false, inSpellDocumentWithTag: tag,
+            wordCount: nil)
         guard misspelled.location != NSNotFound else { return (range, []) }
-        let guesses = checker.guesses(forWordRange: NSRange(location: 0, length: (word as NSString).length),
-                                      in: word, language: nil,
-                                      inSpellDocumentWithTag: tag) ?? []
+        let guesses =
+            checker.guesses(
+                forWordRange: NSRange(location: 0, length: (word as NSString).length),
+                in: word, language: nil,
+                inSpellDocumentWithTag: tag) ?? []
         return (range, guesses)
     }
 }
@@ -87,8 +90,10 @@ final class MenuSuggestionDebouncer {
 
     deinit { timer?.invalidate() }
 
-    func schedule(text: String, offset: Int, tag: Int,
-                 apply: @escaping @MainActor ([String]) -> Void) {
+    func schedule(
+        text: String, offset: Int, tag: Int,
+        apply: @escaping @MainActor ([String]) -> Void
+    ) {
         timer?.invalidate()
         let t = Timer(timeInterval: Self.interval, repeats: false) { _ in
             MainActor.assumeIsolated {
@@ -193,8 +198,9 @@ enum MarkdownEditorMenuActions {
         }
         let delta = (newLine as NSString).length - (line as NSString).length
         let text = ns.replacingCharacters(in: lineRange, with: newLine)
-        let cursor = NSRange(location: max(lineRange.location, selection.location + delta),
-                             length: selection.length)
+        let cursor = NSRange(
+            location: max(lineRange.location, selection.location + delta),
+            length: selection.length)
         MarkdownEditorTyping.apply(EditResult(text: text, selection: cursor), to: tv)
     }
 

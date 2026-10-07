@@ -1,6 +1,6 @@
+import AinkradAppKit
 import SwiftUI
 import UniformTypeIdentifiers
-import AinkradAppKit
 
 /// Dragging documents between folders in the sidebar.
 ///
@@ -32,9 +32,11 @@ extension View {
     /// `isTargeted` drives a visible highlight, and it is gated on the drop
     /// being LEGAL — see `SidebarDrop`, which both this and `move` consult so a
     /// folder cannot light up and then refuse.
-    func loreDocumentDropTarget(folder: URL, store: LoreStore,
-                                ops: SidebarOperations,
-                                theme: HostTheme) -> some View {
+    func loreDocumentDropTarget(
+        folder: URL, store: LoreStore,
+        ops: SidebarOperations,
+        theme: HostTheme
+    ) -> some View {
         modifier(LoreDocumentDropTarget(folder: folder, store: store, ops: ops, theme: theme))
     }
 }
@@ -52,8 +54,9 @@ private struct LoreDocumentDropTarget: ViewModifier {
                 if targeted {
                     ChamferShape(cut: LoreMetrics.chamfer)
                         .fill(theme.tokens.accentSecondary.opacity(0.25))
-                        .overlay(ChamferShape(cut: LoreMetrics.chamfer)
-                            .strokeBorder(theme.tokens.accentSecondary, lineWidth: 1.5))
+                        .overlay(
+                            ChamferShape(cut: LoreMetrics.chamfer)
+                                .strokeBorder(theme.tokens.accentSecondary, lineWidth: 1.5))
                 }
             }
             .onDrop(of: [.fileURL], isTargeted: $targeted) { providers in
@@ -76,7 +79,8 @@ private struct LoreDocumentDropTarget: ViewModifier {
                 // the vault can be rebuilt, renamed or closed mid-drag, and a
                 // row captured when the drag started may no longer exist.
                 guard let row = SidebarDrop.row(for: url, in: store.rows) else {
-                    ops.message = "“\(url.lastPathComponent)” isn't a document in this vault, "
+                    ops.message =
+                        "“\(url.lastPathComponent)” isn't a document in this vault, "
                         + "so it wasn't moved."
                     return
                 }

@@ -1,5 +1,5 @@
-import Foundation
 import AppKit
+import Foundation
 import Observation
 
 /// What the import surface is currently showing.
@@ -56,9 +56,10 @@ public final class ImportCoordinator: Identifiable {
         state = next
         switch next {
         case .finished(let report):
-            reporter?.importFinished(imported: report.imported.count,
-                                     skipped: report.skipped.count,
-                                     failed: report.failed.count)
+            reporter?.importFinished(
+                imported: report.imported.count,
+                skipped: report.skipped.count,
+                failed: report.failed.count)
         case .failed(let reason):
             reporter?.importFailed(reason: reason)
         case .needsAutomation(let detail):
@@ -99,8 +100,10 @@ public final class ImportCoordinator: Identifiable {
     /// Opens the Automation pane directly. Telling the user where the switch is
     /// and making them find it are different products.
     public func openAutomationSettings() {
-        guard let url = URL(string:
-            "x-apple.systempreferences:com.apple.preference.security?Privacy_Automation")
+        guard
+            let url = URL(
+                string:
+                    "x-apple.systempreferences:com.apple.preference.security?Privacy_Automation")
         else { return }
         NSWorkspace.shared.open(url)
     }
@@ -111,8 +114,11 @@ public final class ImportCoordinator: Identifiable {
     /// check below is about DIRECTORIES, and not every `ImportSource` has one
     /// (Apple Notes does not). Pass nil when the source is not a folder.
     public func scan(_ source: some ImportSource, sourceRoot: URL?) async {
-        if let sourceRoot, let reason = Self.nestingRefusal(source: sourceRoot,
-                                                            target: vaultRoot) {
+        if let sourceRoot,
+            let reason = Self.nestingRefusal(
+                source: sourceRoot,
+                target: vaultRoot)
+        {
             transition(to: .failed(reason))
             return
         }
@@ -120,9 +126,11 @@ public final class ImportCoordinator: Identifiable {
         do {
             let items = try await source.scan()
             guard !items.isEmpty else {
-                transition(to: .failed(sourceRoot == nil
-                    ? "There were no notes to import."
-                    : "There was nothing to import in that folder."))
+                transition(
+                    to: .failed(
+                        sourceRoot == nil
+                            ? "There were no notes to import."
+                            : "There was nothing to import in that folder."))
                 return
             }
             // The reader runs HERE, once, against the live vault — not at
@@ -130,15 +138,18 @@ public final class ImportCoordinator: Identifiable {
             // preview honest about what a re-run will actually skip, instead
             // of offering the user a checkbox for work that is already done.
             let existing = ImportIDReader.read(vaultRoot: vaultRoot)
-            state = .previewing(ImportSelection(items: items, vaultRoot: vaultRoot,
-                                                existingImportIDs: existing))
+            state = .previewing(
+                ImportSelection(
+                    items: items, vaultRoot: vaultRoot,
+                    existingImportIDs: existing))
         } catch let error as ImportSourceError {
             // Only Apple Notes maps a denial to the Automation state. An
             // unreadable Obsidian folder is also `.permissionDenied`, and
             // pointing THAT at the Automation pane would send the user to flip
             // a switch that has nothing to do with their problem.
             if case .permissionDenied(let detail) = error,
-               type(of: source).identifier == AppleNotesScriptSource.identifier {
+                type(of: source).identifier == AppleNotesScriptSource.identifier
+            {
                 transition(to: .needsAutomation(detail))
             } else {
                 transition(to: .failed(Self.describe(error)))

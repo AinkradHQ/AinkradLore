@@ -23,8 +23,9 @@ public struct ObsidianSource: ImportSource {
         // Canonicalise FIRST: Obsidian vaults in iCloud Drive are full of symlinks,
         // and every path computed below is relative to this resolved root.
         let root = URL(fileURLWithPath: vaultURL.resolvingSymlinksInPath().path)
-        guard let walker = FileManager.default.enumerator(
-            at: root, includingPropertiesForKeys: [.isDirectoryKey, .contentModificationDateKey])
+        guard
+            let walker = FileManager.default.enumerator(
+                at: root, includingPropertiesForKeys: [.isDirectoryKey, .contentModificationDateKey])
         else { throw ImportSourceError.sourceUnavailable(root.path) }
 
         let rootComponentCount = root.standardizedFileURL.pathComponents.count
@@ -44,32 +45,39 @@ public struct ObsidianSource: ImportSource {
                 continue
             }
 
-            guard (try? url.resourceValues(forKeys: [.isDirectoryKey]))?
-                .isDirectory == false else { continue }
+            guard
+                (try? url.resourceValues(forKeys: [.isDirectoryKey]))?
+                    .isDirectory == false
+            else { continue }
 
             let folders = Array(components.dropLast())
-            let modified = (try? url.resourceValues(forKeys: [.contentModificationDateKey]))?
+            let modified =
+                (try? url.resourceValues(forKeys: [.contentModificationDateKey]))?
                 .contentModificationDate ?? Date()
 
             if url.pathExtension.lowercased() == "md" {
-                items.append(markdownItem(
-                    url: url, relative: relative, folders: folders, modified: modified))
+                items.append(
+                    markdownItem(
+                        url: url, relative: relative, folders: folders, modified: modified))
             } else {
-                items.append(ImportItem(
-                    sourceID: "\(identifier):\(relative)",
-                    title: url.lastPathComponent,
-                    body: .markdown(""),
-                    attachments: [ImportAttachment(
+                items.append(
+                    ImportItem(
                         sourceID: "\(identifier):\(relative)",
-                        preferredName: url.lastPathComponent,
-                        sourceURL: url)],
-                    folderPath: folders,
-                    created: modified,
-                    modified: modified,
-                    fidelity: [],
-                    // Declared, not inferred: in an Obsidian vault a non-`.md`
-                    // file IS the item, and there is no note to write for it.
-                    kind: .file))
+                        title: url.lastPathComponent,
+                        body: .markdown(""),
+                        attachments: [
+                            ImportAttachment(
+                                sourceID: "\(identifier):\(relative)",
+                                preferredName: url.lastPathComponent,
+                                sourceURL: url)
+                        ],
+                        folderPath: folders,
+                        created: modified,
+                        modified: modified,
+                        fidelity: [],
+                        // Declared, not inferred: in an Obsidian vault a non-`.md`
+                        // file IS the item, and there is no note to write for it.
+                        kind: .file))
             }
         }
         return items
@@ -88,9 +96,10 @@ public struct ObsidianSource: ImportSource {
             // real content is exactly the silent-loss failure this milestone guards
             // against, so flag it instead of pretending the note was empty.
             text = ""
-            fidelity.append(FidelityWarning(
-                kind: .unsupportedElement,
-                detail: "could not read \(relative) as UTF-8 text; note imported empty"))
+            fidelity.append(
+                FidelityWarning(
+                    kind: .unsupportedElement,
+                    detail: "could not read \(relative) as UTF-8 text; note imported empty"))
         }
         return ImportItem(
             sourceID: "\(identifier):\(relative)",
@@ -108,13 +117,18 @@ public struct ObsidianSource: ImportSource {
     static func pluginWarnings(in text: String) -> [FidelityWarning] {
         var warnings: [FidelityWarning] = []
         if text.contains("```dataview") {
-            warnings.append(FidelityWarning(kind: .pluginSyntax,
-                                            detail: "Dataview block kept verbatim"))
+            warnings.append(
+                FidelityWarning(
+                    kind: .pluginSyntax,
+                    detail: "Dataview block kept verbatim"))
         }
         if text.range(of: #"^>\s*\[!"#, options: [.regularExpression, .anchored]) != nil
-            || text.contains("\n> [!") {
-            warnings.append(FidelityWarning(kind: .pluginSyntax,
-                                            detail: "callout renders as a blockquote"))
+            || text.contains("\n> [!")
+        {
+            warnings.append(
+                FidelityWarning(
+                    kind: .pluginSyntax,
+                    detail: "callout renders as a blockquote"))
         }
         return warnings
     }

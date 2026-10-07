@@ -1,6 +1,6 @@
-import SwiftUI
-import AppKit
 import AinkradAppKit
+import AppKit
+import SwiftUI
 
 public struct MarkdownEditor: NSViewRepresentable {
     @Binding var text: String
@@ -79,31 +79,35 @@ public struct MarkdownEditor: NSViewRepresentable {
     /// menu should run. See `MarkdownEditorMenu.swift`.
     let registerMenuActions: (@MainActor (EditorMenuActions) -> Void)?
 
-    public init(text: Binding<String>, tokens: HostThemeTokens,
-                settings: EditorSettings = .default,
-                headingCompletions: (@MainActor (String, String) -> HeadingCompletions?)? = nil,
-                createLinkedNote: (@MainActor (String) -> Bool)? = nil,
-                completions: (@MainActor (String) -> [IndexRow])? = nil,
-                tagCompletions: (@MainActor (String) -> [String])? = nil,
-                onOpenLink: (@MainActor (String) -> Void)? = nil,
-                onOpenLinkBeside: (@MainActor (String) -> Void)? = nil,
-                onTagClick: (@MainActor (String) -> Void)? = nil,
-                resolveEmbedTarget: (@MainActor (String) -> URL?)? = nil,
-                registerExternalChangeHandler:
-                    (@MainActor (@escaping @MainActor (URL) -> Void) -> UUID)? = nil,
-                unregisterExternalChangeHandler: (@MainActor (UUID) -> Void)? = nil,
-                linkTarget: @escaping @MainActor (IndexRow) -> String
-                    = { LinkCompletionContext.insertableTarget(for: $0) },
-                scrollTarget: Binding<Int?> = .constant(nil),
-                allowsTaskToggle: Bool = false,
-                writePastedImage: (@MainActor (Data, String) -> String?)? = nil,
-                writeDroppedFile: (@MainActor (URL) -> String?)? = nil,
-                onSelectionChange: (@MainActor (String, NSRange, Int) -> Void)? = nil,
-                registerMenuActions: (@MainActor (EditorMenuActions) -> Void)? = nil) {
-        self._text = text; self.tokens = tokens; self.settings = settings
+    public init(
+        text: Binding<String>, tokens: HostThemeTokens,
+        settings: EditorSettings = .default,
+        headingCompletions: (@MainActor (String, String) -> HeadingCompletions?)? = nil,
+        createLinkedNote: (@MainActor (String) -> Bool)? = nil,
+        completions: (@MainActor (String) -> [IndexRow])? = nil,
+        tagCompletions: (@MainActor (String) -> [String])? = nil,
+        onOpenLink: (@MainActor (String) -> Void)? = nil,
+        onOpenLinkBeside: (@MainActor (String) -> Void)? = nil,
+        onTagClick: (@MainActor (String) -> Void)? = nil,
+        resolveEmbedTarget: (@MainActor (String) -> URL?)? = nil,
+        registerExternalChangeHandler:
+            (@MainActor (@escaping @MainActor (URL) -> Void) -> UUID)? = nil,
+        unregisterExternalChangeHandler: (@MainActor (UUID) -> Void)? = nil,
+        linkTarget: @escaping @MainActor (IndexRow) -> String = { LinkCompletionContext.insertableTarget(for: $0) },
+        scrollTarget: Binding<Int?> = .constant(nil),
+        allowsTaskToggle: Bool = false,
+        writePastedImage: (@MainActor (Data, String) -> String?)? = nil,
+        writeDroppedFile: (@MainActor (URL) -> String?)? = nil,
+        onSelectionChange: (@MainActor (String, NSRange, Int) -> Void)? = nil,
+        registerMenuActions: (@MainActor (EditorMenuActions) -> Void)? = nil
+    ) {
+        self._text = text
+        self.tokens = tokens
+        self.settings = settings
         self.headingCompletions = headingCompletions
         self.createLinkedNote = createLinkedNote
-        self.completions = completions; self.tagCompletions = tagCompletions
+        self.completions = completions
+        self.tagCompletions = tagCompletions
         self.onOpenLink = onOpenLink
         self.onOpenLinkBeside = onOpenLinkBeside
         self.onTagClick = onTagClick
@@ -178,13 +182,17 @@ public struct MarkdownEditor: NSViewRepresentable {
         /// input: both are `Equatable`, `updateNSView` assigns them freely, and
         /// a cache that has to be manually poisoned is a cache that eventually
         /// is not.
-        private var themeCache: (tokens: HostThemeTokens,
-                                 settings: EditorSettings,
-                                 theme: MarkdownTheme)?
+        private var themeCache:
+            (
+                tokens: HostThemeTokens,
+                settings: EditorSettings,
+                theme: MarkdownTheme
+            )?
 
         var theme: MarkdownTheme {
             if let cached = themeCache,
-               cached.tokens == tokens, cached.settings == settings {
+                cached.tokens == tokens, cached.settings == settings
+            {
                 return cached.theme
             }
             let built = MarkdownTheme(tokens: tokens, settings: settings)
@@ -203,8 +211,7 @@ public struct MarkdownEditor: NSViewRepresentable {
         /// practice — `makeNSView`/`updateNSView` always install at least the
         /// "no candidates" closure, matching how `completions` degrades.
         var resolveEmbedTarget: @MainActor (String) -> URL? = { _ in nil }
-        var linkTarget: @MainActor (IndexRow) -> String
-            = { LinkCompletionContext.insertableTarget(for: $0) }
+        var linkTarget: @MainActor (IndexRow) -> String = { LinkCompletionContext.insertableTarget(for: $0) }
         /// See `MarkdownEditor.allowsTaskToggle`.
         var allowsTaskToggle = false
         /// See `MarkdownEditor.writePastedImage`. `nil` — the default — means
@@ -411,9 +418,13 @@ public struct MarkdownEditor: NSViewRepresentable {
         /// `dismantleNSView` would leak one observer per document opened.
         nonisolated(unsafe) private var scrollObserver: (any NSObjectProtocol)?
 
-        init(text: Binding<String>, tokens: HostThemeTokens,
-             settings: EditorSettings = .default) {
-            self.text = text; self.tokens = tokens; self.settings = settings
+        init(
+            text: Binding<String>, tokens: HostThemeTokens,
+            settings: EditorSettings = .default
+        ) {
+            self.text = text
+            self.tokens = tokens
+            self.settings = settings
             super.init()
             completionPanel.onPick = { [weak self] item in self?.accept(item) }
         }
@@ -423,12 +434,13 @@ public struct MarkdownEditor: NSViewRepresentable {
         func observeScrolling(of clipView: NSClipView) {
             scrollObserver = NotificationCenter.default.addObserver(
                 forName: NSView.boundsDidChangeNotification, object: clipView,
-                queue: .main) { [weak self] _ in
-                    MainActor.assumeIsolated {
-                        self?.repositionCompletions()
-                        self?.restyleForViewportIfNeeded()
-                    }
+                queue: .main
+            ) { [weak self] _ in
+                MainActor.assumeIsolated {
+                    self?.repositionCompletions()
+                    self?.restyleForViewportIfNeeded()
                 }
+            }
         }
 
         func tearDown() {
@@ -505,14 +517,18 @@ public struct MarkdownEditor: NSViewRepresentable {
             }
             switch selector {
             case #selector(NSResponder.moveUp(_:)):
-                completionPanel.moveSelection(by: -1); return true
+                completionPanel.moveSelection(by: -1)
+                return true
             case #selector(NSResponder.moveDown(_:)):
-                completionPanel.moveSelection(by: 1); return true
+                completionPanel.moveSelection(by: 1)
+                return true
             case #selector(NSResponder.insertNewline(_:)),
-                 #selector(NSResponder.insertTab(_:)):
-                completionPanel.pickSelected(); return true
+                #selector(NSResponder.insertTab(_:)):
+                completionPanel.pickSelected()
+                return true
             case #selector(NSResponder.cancelOperation(_:)):
-                completionPanel.hide(); return true
+                completionPanel.hide()
+                return true
             default:
                 return false
             }
@@ -554,10 +570,12 @@ public struct MarkdownEditor: NSViewRepresentable {
         /// already keeps for a flipped checkbox.
         @MainActor func openTransclusion(atUTF16 index: Int, beside: Bool) -> Bool {
             guard let tv = textView else { return false }
-            guard let region = transclusionRegions.first(where: { region in
-                guard case .transclusion = region.kind else { return false }
-                return index >= region.range.location && index <= NSMaxRange(region.range)
-            }) else { return false }
+            guard
+                let region = transclusionRegions.first(where: { region in
+                    guard case .transclusion = region.kind else { return false }
+                    return index >= region.range.location && index <= NSMaxRange(region.range)
+                })
+            else { return false }
 
             defer {
                 tv.setSelectedRange(NSRange(location: NSMaxRange(region.range), length: 0))
@@ -625,8 +643,10 @@ public struct MarkdownEditor: NSViewRepresentable {
         /// destination, never an out-of-bounds one, since `scrollToOffset`
         /// clamps to `[0, length]`.
         @MainActor private func jumpFootnote(atUTF16 index: Int) -> Bool {
-            guard let target = MarkdownNavigation.footnoteJumpTarget(
-                in: styleCache.spans, at: index) else { return false }
+            guard
+                let target = MarkdownNavigation.footnoteJumpTarget(
+                    in: styleCache.spans, at: index)
+            else { return false }
             scrollToOffset(target)
             return true
         }
@@ -651,13 +671,13 @@ public struct MarkdownEditor: NSViewRepresentable {
         /// the caret elsewhere anyway.
         @MainActor private func selectTag(atUTF16 index: Int) -> Bool {
             guard let onTagClick, let hit = MarkdownNavigation.tagSpan(in: styleCache.spans, at: index),
-                  let tv = textView,
-                  // Finding 12: the cached span's associated `name` is a
-                  // CANDIDATE, never an authority — re-derive it from the
-                  // live text the way `toggleTask` re-reads `tv.string`
-                  // rather than trusting `styleCache`, which may lag by up
-                  // to one styling debounce.
-                  let name = MarkdownNavigation.liveTagName(forSpan: hit.range, in: tv.string as NSString)
+                let tv = textView,
+                // Finding 12: the cached span's associated `name` is a
+                // CANDIDATE, never an authority — re-derive it from the
+                // live text the way `toggleTask` re-reads `tv.string`
+                // rather than trusting `styleCache`, which may lag by up
+                // to one styling debounce.
+                let name = MarkdownNavigation.liveTagName(forSpan: hit.range, in: tv.string as NSString)
             else { return false }
             onTagClick(name)
             return false

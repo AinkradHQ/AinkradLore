@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 /// The SINGLE create-from-a-link path, `LoreStore.createAndOpenNote(forLinkTarget:syntax:)`.
@@ -16,8 +17,9 @@ final class LinkCreatePathTests: XCTestCase {
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent("lore-createpath-\(UUID())")
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
-        let store = LoreStore(documents: FakeDocs(),
-                              indexPath: root.appendingPathComponent(".idx.sqlite"))
+        let store = LoreStore(
+            documents: FakeDocs(),
+            indexPath: root.appendingPathComponent(".idx.sqlite"))
         try store.setVaultRootForTesting(root)
         return (root, store)
     }
@@ -52,16 +54,18 @@ final class LinkCreatePathTests: XCTestCase {
     func test_theCreatedNoteIsOpened() throws {
         let (_, store) = try store()
         let note = try store.createAndOpenNote(forLinkTarget: "Design", syntax: .wikilink)
-        XCTAssertEqual(store.selectedTab?.url.standardizedFileURL,
-                       note.path.standardizedFileURL)
+        XCTAssertEqual(
+            store.selectedTab?.url.standardizedFileURL,
+            note.path.standardizedFileURL)
     }
 
     /// A genuine failure must be THROWN so the caller can show it. Swallowing
     /// it in a `try?` is the whole defect.
     func test_aCreateThatFailsThrowsRatherThanDoingNothing() {
-        let store = LoreStore(documents: FakeDocs(),
-                              indexPath: FileManager.default.temporaryDirectory
-                                  .appendingPathComponent("\(UUID()).sqlite"))
+        let store = LoreStore(
+            documents: FakeDocs(),
+            indexPath: FileManager.default.temporaryDirectory
+                .appendingPathComponent("\(UUID()).sqlite"))
         XCTAssertThrowsError(try store.createAndOpenNote(forLinkTarget: "Design", syntax: .wikilink)) {
             XCTAssertEqual($0 as? LoreError, .noVault)
         }
@@ -90,8 +94,9 @@ final class LinkCreatePathTests: XCTestCase {
 /// `candidates.last` UNVERIFIED.
 final class InsertableTargetFallbackTests: XCTestCase {
     private func row(path: String, title: String) -> IndexRow {
-        IndexRow(path: URL(fileURLWithPath: path), id: "x", title: title, tags: [],
-                 aliases: [], updated: Date(), type: "markdown", properties: [])
+        IndexRow(
+            path: URL(fileURLWithPath: path), id: "x", title: title, tags: [],
+            aliases: [], updated: Date(), type: "markdown", properties: [])
     }
 
     /// The premise is deliberately contrived — it is the shape the old code

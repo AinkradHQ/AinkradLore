@@ -56,10 +56,12 @@ struct CodeGrammar: Sendable {
     let blockOpenUnits: [UInt16]
     let blockCloseUnits: [UInt16]
 
-    init(lineComments: [String] = [], blockComment: BlockComment? = nil,
-         stringDelimiters: [String] = ["\"", "'"], hasBackslashEscapes: Bool = true,
-         keywords: Set<String> = [], types: Set<String> = [],
-         identifiersMayContainHyphen: Bool = false) {
+    init(
+        lineComments: [String] = [], blockComment: BlockComment? = nil,
+        stringDelimiters: [String] = ["\"", "'"], hasBackslashEscapes: Bool = true,
+        keywords: Set<String> = [], types: Set<String> = [],
+        identifiersMayContainHyphen: Bool = false
+    ) {
         // Sorted here rather than trusted from the call site: the "longest
         // first" rule is load-bearing for correctness and a table this long is
         // exactly where one entry gets written in the wrong order.
@@ -113,157 +115,207 @@ struct CodeGrammar: Sendable {
     static let swift = CodeGrammar(
         lineComments: ["//"], blockComment: cStyle,
         stringDelimiters: ["\"\"\"", "\""],
-        keywords: ["associatedtype", "class", "deinit", "enum", "extension", "fileprivate",
-                   "func", "import", "init", "inout", "internal", "let", "open", "operator",
-                   "private", "protocol", "public", "static", "struct", "subscript",
-                   "typealias", "var", "break", "case", "continue", "default", "defer",
-                   "do", "else", "fallthrough", "for", "guard", "if", "in", "repeat",
-                   "return", "switch", "where", "while", "as", "catch", "false", "is",
-                   "nil", "rethrows", "super", "self", "throw", "throws", "true", "try",
-                   "async", "await", "actor", "some", "any", "final", "lazy", "weak",
-                   "unowned", "mutating", "nonmutating", "override", "required",
-                   "convenience", "indirect", "@escaping", "@MainActor"],
-        types: ["Int", "Double", "Float", "String", "Bool", "Character", "Array", "Set",
-                "Dictionary", "Optional", "Result", "Error", "Void", "Any", "AnyObject",
-                "Data", "Date", "URL", "UUID", "Range", "Task", "Sendable", "Equatable",
-                "Hashable", "Codable", "Comparable", "Identifiable"])
+        keywords: [
+            "associatedtype", "class", "deinit", "enum", "extension", "fileprivate",
+            "func", "import", "init", "inout", "internal", "let", "open", "operator",
+            "private", "protocol", "public", "static", "struct", "subscript",
+            "typealias", "var", "break", "case", "continue", "default", "defer",
+            "do", "else", "fallthrough", "for", "guard", "if", "in", "repeat",
+            "return", "switch", "where", "while", "as", "catch", "false", "is",
+            "nil", "rethrows", "super", "self", "throw", "throws", "true", "try",
+            "async", "await", "actor", "some", "any", "final", "lazy", "weak",
+            "unowned", "mutating", "nonmutating", "override", "required",
+            "convenience", "indirect", "@escaping", "@MainActor",
+        ],
+        types: [
+            "Int", "Double", "Float", "String", "Bool", "Character", "Array", "Set",
+            "Dictionary", "Optional", "Result", "Error", "Void", "Any", "AnyObject",
+            "Data", "Date", "URL", "UUID", "Range", "Task", "Sendable", "Equatable",
+            "Hashable", "Codable", "Comparable", "Identifiable",
+        ])
 
     static let javascript = CodeGrammar(
         lineComments: ["//"], blockComment: cStyle,
         stringDelimiters: ["\"", "'", "`"],
-        keywords: ["var", "let", "const", "function", "return", "if", "else", "for",
-                   "while", "do", "break", "continue", "switch", "case", "default",
-                   "throw", "try", "catch", "finally", "new", "delete", "typeof",
-                   "instanceof", "in", "of", "this", "class", "extends", "super",
-                   "import", "export", "from", "as", "async", "await", "yield",
-                   "true", "false", "null", "undefined", "void", "static", "get", "set"],
-        types: ["Object", "Array", "String", "Number", "Boolean", "Promise", "Map", "Set",
-                "Symbol", "Date", "RegExp", "Error", "JSON", "Math", "console"])
+        keywords: [
+            "var", "let", "const", "function", "return", "if", "else", "for",
+            "while", "do", "break", "continue", "switch", "case", "default",
+            "throw", "try", "catch", "finally", "new", "delete", "typeof",
+            "instanceof", "in", "of", "this", "class", "extends", "super",
+            "import", "export", "from", "as", "async", "await", "yield",
+            "true", "false", "null", "undefined", "void", "static", "get", "set",
+        ],
+        types: [
+            "Object", "Array", "String", "Number", "Boolean", "Promise", "Map", "Set",
+            "Symbol", "Date", "RegExp", "Error", "JSON", "Math", "console",
+        ])
 
     static let typescript = CodeGrammar(
         lineComments: ["//"], blockComment: cStyle,
         stringDelimiters: ["\"", "'", "`"],
-        keywords: javascript.keywords.union(["interface", "type", "enum", "implements",
-                                             "declare", "namespace", "abstract", "public",
-                                             "private", "protected", "readonly", "keyof",
-                                             "satisfies", "infer", "is"]),
-        types: javascript.types.union(["string", "number", "boolean", "any", "unknown",
-                                       "never", "void", "Record", "Partial", "Readonly"]))
+        keywords: javascript.keywords.union([
+            "interface", "type", "enum", "implements",
+            "declare", "namespace", "abstract", "public",
+            "private", "protected", "readonly", "keyof",
+            "satisfies", "infer", "is",
+        ]),
+        types: javascript.types.union([
+            "string", "number", "boolean", "any", "unknown",
+            "never", "void", "Record", "Partial", "Readonly",
+        ]))
 
     static let python = CodeGrammar(
         lineComments: ["#"], blockComment: nil,
         stringDelimiters: ["\"\"\"", "'''", "\"", "'"],
-        keywords: ["def", "class", "return", "if", "elif", "else", "for", "while",
-                   "break", "continue", "pass", "import", "from", "as", "try", "except",
-                   "finally", "raise", "with", "lambda", "global", "nonlocal", "yield",
-                   "assert", "del", "in", "is", "not", "and", "or", "None", "True",
-                   "False", "async", "await", "match", "case"],
-        types: ["int", "float", "str", "bool", "list", "dict", "set", "tuple", "bytes",
-                "object", "type", "Any", "Optional", "List", "Dict", "Callable"])
+        keywords: [
+            "def", "class", "return", "if", "elif", "else", "for", "while",
+            "break", "continue", "pass", "import", "from", "as", "try", "except",
+            "finally", "raise", "with", "lambda", "global", "nonlocal", "yield",
+            "assert", "del", "in", "is", "not", "and", "or", "None", "True",
+            "False", "async", "await", "match", "case",
+        ],
+        types: [
+            "int", "float", "str", "bool", "list", "dict", "set", "tuple", "bytes",
+            "object", "type", "Any", "Optional", "List", "Dict", "Callable",
+        ])
 
     static let rust = CodeGrammar(
         lineComments: ["///", "//!", "//"], blockComment: cStyle,
-        keywords: ["fn", "let", "mut", "const", "static", "struct", "enum", "trait",
-                   "impl", "for", "while", "loop", "if", "else", "match", "return",
-                   "break", "continue", "use", "mod", "pub", "crate", "super", "self",
-                   "Self", "where", "as", "dyn", "ref", "move", "async", "await",
-                   "unsafe", "extern", "type", "true", "false"],
-        types: ["i8", "i16", "i32", "i64", "i128", "isize", "u8", "u16", "u32", "u64",
-                "u128", "usize", "f32", "f64", "bool", "char", "str", "String", "Vec",
-                "Option", "Result", "Box", "Rc", "Arc", "HashMap", "HashSet"])
+        keywords: [
+            "fn", "let", "mut", "const", "static", "struct", "enum", "trait",
+            "impl", "for", "while", "loop", "if", "else", "match", "return",
+            "break", "continue", "use", "mod", "pub", "crate", "super", "self",
+            "Self", "where", "as", "dyn", "ref", "move", "async", "await",
+            "unsafe", "extern", "type", "true", "false",
+        ],
+        types: [
+            "i8", "i16", "i32", "i64", "i128", "isize", "u8", "u16", "u32", "u64",
+            "u128", "usize", "f32", "f64", "bool", "char", "str", "String", "Vec",
+            "Option", "Result", "Box", "Rc", "Arc", "HashMap", "HashSet",
+        ])
 
     static let go = CodeGrammar(
         lineComments: ["//"], blockComment: cStyle,
         stringDelimiters: ["\"", "`", "'"],
-        keywords: ["func", "var", "const", "type", "struct", "interface", "map", "chan",
-                   "package", "import", "return", "if", "else", "for", "range", "switch",
-                   "case", "default", "break", "continue", "fallthrough", "go", "defer",
-                   "select", "goto", "nil", "true", "false"],
-        types: ["int", "int8", "int16", "int32", "int64", "uint", "uint8", "uint16",
-                "uint32", "uint64", "float32", "float64", "string", "bool", "byte",
-                "rune", "error", "any"])
+        keywords: [
+            "func", "var", "const", "type", "struct", "interface", "map", "chan",
+            "package", "import", "return", "if", "else", "for", "range", "switch",
+            "case", "default", "break", "continue", "fallthrough", "go", "defer",
+            "select", "goto", "nil", "true", "false",
+        ],
+        types: [
+            "int", "int8", "int16", "int32", "int64", "uint", "uint8", "uint16",
+            "uint32", "uint64", "float32", "float64", "string", "bool", "byte",
+            "rune", "error", "any",
+        ])
 
     static let ruby = CodeGrammar(
         lineComments: ["#"], blockComment: nil,
-        keywords: ["def", "class", "module", "end", "if", "elsif", "else", "unless",
-                   "while", "until", "for", "in", "do", "begin", "rescue", "ensure",
-                   "raise", "return", "yield", "require", "require_relative", "attr_accessor",
-                   "attr_reader", "attr_writer", "self", "nil", "true", "false", "and",
-                   "or", "not", "then", "case", "when", "next", "break", "lambda", "proc"],
-        types: ["String", "Integer", "Float", "Array", "Hash", "Symbol", "Range",
-                "Struct", "Proc", "Exception"])
+        keywords: [
+            "def", "class", "module", "end", "if", "elsif", "else", "unless",
+            "while", "until", "for", "in", "do", "begin", "rescue", "ensure",
+            "raise", "return", "yield", "require", "require_relative", "attr_accessor",
+            "attr_reader", "attr_writer", "self", "nil", "true", "false", "and",
+            "or", "not", "then", "case", "when", "next", "break", "lambda", "proc",
+        ],
+        types: [
+            "String", "Integer", "Float", "Array", "Hash", "Symbol", "Range",
+            "Struct", "Proc", "Exception",
+        ])
 
     static let java = CodeGrammar(
         lineComments: ["//"], blockComment: cStyle,
-        keywords: ["public", "private", "protected", "static", "final", "abstract",
-                   "class", "interface", "enum", "extends", "implements", "new", "return",
-                   "if", "else", "for", "while", "do", "switch", "case", "default",
-                   "break", "continue", "try", "catch", "finally", "throw", "throws",
-                   "import", "package", "this", "super", "synchronized", "volatile",
-                   "transient", "native", "instanceof", "null", "true", "false", "var",
-                   "record", "sealed", "yield"],
-        types: ["int", "long", "short", "byte", "char", "float", "double", "boolean",
-                "void", "String", "Object", "List", "Map", "Set", "Integer", "Long",
-                "Double", "Boolean", "Optional", "Stream"])
+        keywords: [
+            "public", "private", "protected", "static", "final", "abstract",
+            "class", "interface", "enum", "extends", "implements", "new", "return",
+            "if", "else", "for", "while", "do", "switch", "case", "default",
+            "break", "continue", "try", "catch", "finally", "throw", "throws",
+            "import", "package", "this", "super", "synchronized", "volatile",
+            "transient", "native", "instanceof", "null", "true", "false", "var",
+            "record", "sealed", "yield",
+        ],
+        types: [
+            "int", "long", "short", "byte", "char", "float", "double", "boolean",
+            "void", "String", "Object", "List", "Map", "Set", "Integer", "Long",
+            "Double", "Boolean", "Optional", "Stream",
+        ])
 
     static let kotlin = CodeGrammar(
         lineComments: ["//"], blockComment: cStyle,
         stringDelimiters: ["\"\"\"", "\"", "'"],
-        keywords: ["fun", "val", "var", "class", "object", "interface", "data", "sealed",
-                   "enum", "companion", "init", "constructor", "override", "open",
-                   "abstract", "private", "protected", "public", "internal", "return",
-                   "if", "else", "when", "for", "while", "do", "break", "continue",
-                   "try", "catch", "finally", "throw", "import", "package", "is", "as",
-                   "in", "by", "suspend", "null", "true", "false", "this", "super"],
-        types: ["Int", "Long", "Short", "Byte", "Char", "Float", "Double", "Boolean",
-                "String", "Any", "Unit", "Nothing", "List", "Map", "Set", "Array"])
+        keywords: [
+            "fun", "val", "var", "class", "object", "interface", "data", "sealed",
+            "enum", "companion", "init", "constructor", "override", "open",
+            "abstract", "private", "protected", "public", "internal", "return",
+            "if", "else", "when", "for", "while", "do", "break", "continue",
+            "try", "catch", "finally", "throw", "import", "package", "is", "as",
+            "in", "by", "suspend", "null", "true", "false", "this", "super",
+        ],
+        types: [
+            "Int", "Long", "Short", "Byte", "Char", "Float", "Double", "Boolean",
+            "String", "Any", "Unit", "Nothing", "List", "Map", "Set", "Array",
+        ])
 
     static let c = CodeGrammar(
         lineComments: ["//"], blockComment: cStyle,
-        keywords: ["auto", "break", "case", "const", "continue", "default", "do", "else",
-                   "enum", "extern", "for", "goto", "if", "inline", "register", "restrict",
-                   "return", "sizeof", "static", "struct", "switch", "typedef", "union",
-                   "volatile", "while", "#include", "#define", "#ifdef", "#ifndef",
-                   "#endif", "#pragma", "NULL"],
-        types: ["int", "char", "short", "long", "float", "double", "void", "signed",
-                "unsigned", "size_t", "bool", "FILE", "uint8_t", "uint32_t", "int32_t"])
+        keywords: [
+            "auto", "break", "case", "const", "continue", "default", "do", "else",
+            "enum", "extern", "for", "goto", "if", "inline", "register", "restrict",
+            "return", "sizeof", "static", "struct", "switch", "typedef", "union",
+            "volatile", "while", "#include", "#define", "#ifdef", "#ifndef",
+            "#endif", "#pragma", "NULL",
+        ],
+        types: [
+            "int", "char", "short", "long", "float", "double", "void", "signed",
+            "unsigned", "size_t", "bool", "FILE", "uint8_t", "uint32_t", "int32_t",
+        ])
 
     static let cpp = CodeGrammar(
         lineComments: ["//"], blockComment: cStyle,
-        keywords: c.keywords.union(["class", "namespace", "template", "typename", "public",
-                                    "private", "protected", "virtual", "override", "final",
-                                    "new", "delete", "this", "using", "friend", "operator",
-                                    "explicit", "constexpr", "noexcept", "nullptr", "true",
-                                    "false", "try", "catch", "throw", "@interface",
-                                    "@implementation", "@end", "@property"]),
-        types: c.types.union(["string", "vector", "map", "set", "pair", "shared_ptr",
-                              "unique_ptr", "auto", "wchar_t", "NSString", "NSArray",
-                              "NSDictionary", "id", "BOOL"]))
+        keywords: c.keywords.union([
+            "class", "namespace", "template", "typename", "public",
+            "private", "protected", "virtual", "override", "final",
+            "new", "delete", "this", "using", "friend", "operator",
+            "explicit", "constexpr", "noexcept", "nullptr", "true",
+            "false", "try", "catch", "throw", "@interface",
+            "@implementation", "@end", "@property",
+        ]),
+        types: c.types.union([
+            "string", "vector", "map", "set", "pair", "shared_ptr",
+            "unique_ptr", "auto", "wchar_t", "NSString", "NSArray",
+            "NSDictionary", "id", "BOOL",
+        ]))
 
     static let shell = CodeGrammar(
         lineComments: ["#"], blockComment: nil,
-        keywords: ["if", "then", "else", "elif", "fi", "for", "while", "until", "do",
-                   "done", "case", "esac", "function", "return", "exit", "export",
-                   "local", "readonly", "declare", "source", "alias", "unset", "shift",
-                   "trap", "echo", "cd", "set", "in"],
+        keywords: [
+            "if", "then", "else", "elif", "fi", "for", "while", "until", "do",
+            "done", "case", "esac", "function", "return", "exit", "export",
+            "local", "readonly", "declare", "source", "alias", "unset", "shift",
+            "trap", "echo", "cd", "set", "in",
+        ],
         types: ["true", "false"])
 
     static let sql = CodeGrammar(
         lineComments: ["--"], blockComment: cStyle,
         stringDelimiters: ["'", "\""],
-        keywords: ["SELECT", "FROM", "WHERE", "INSERT", "INTO", "VALUES", "UPDATE", "SET",
-                   "DELETE", "CREATE", "TABLE", "INDEX", "VIEW", "DROP", "ALTER", "ADD",
-                   "JOIN", "LEFT", "RIGHT", "INNER", "OUTER", "FULL", "ON", "AS", "AND",
-                   "OR", "NOT", "NULL", "IS", "IN", "BETWEEN", "LIKE", "ORDER", "BY",
-                   "GROUP", "HAVING", "LIMIT", "OFFSET", "UNION", "ALL", "DISTINCT",
-                   "COUNT", "SUM", "AVG", "MIN", "MAX", "PRIMARY", "KEY", "FOREIGN",
-                   "REFERENCES", "UNIQUE", "DEFAULT", "CASCADE", "BEGIN", "COMMIT",
-                   "ROLLBACK", "TRANSACTION", "WITH", "CASE", "WHEN", "THEN", "END",
-                   "select", "from", "where", "insert", "into", "values", "update",
-                   "set", "delete", "create", "table", "join", "on", "as", "and", "or",
-                   "not", "null", "order", "by", "group", "limit"],
-        types: ["INTEGER", "TEXT", "REAL", "BLOB", "VARCHAR", "CHAR", "DATE", "TIMESTAMP",
-                "BOOLEAN", "DECIMAL", "SERIAL", "UUID"])
+        keywords: [
+            "SELECT", "FROM", "WHERE", "INSERT", "INTO", "VALUES", "UPDATE", "SET",
+            "DELETE", "CREATE", "TABLE", "INDEX", "VIEW", "DROP", "ALTER", "ADD",
+            "JOIN", "LEFT", "RIGHT", "INNER", "OUTER", "FULL", "ON", "AS", "AND",
+            "OR", "NOT", "NULL", "IS", "IN", "BETWEEN", "LIKE", "ORDER", "BY",
+            "GROUP", "HAVING", "LIMIT", "OFFSET", "UNION", "ALL", "DISTINCT",
+            "COUNT", "SUM", "AVG", "MIN", "MAX", "PRIMARY", "KEY", "FOREIGN",
+            "REFERENCES", "UNIQUE", "DEFAULT", "CASCADE", "BEGIN", "COMMIT",
+            "ROLLBACK", "TRANSACTION", "WITH", "CASE", "WHEN", "THEN", "END",
+            "select", "from", "where", "insert", "into", "values", "update",
+            "set", "delete", "create", "table", "join", "on", "as", "and", "or",
+            "not", "null", "order", "by", "group", "limit",
+        ],
+        types: [
+            "INTEGER", "TEXT", "REAL", "BLOB", "VARCHAR", "CHAR", "DATE", "TIMESTAMP",
+            "BOOLEAN", "DECIMAL", "SERIAL", "UUID",
+        ])
 
     /// JSON has no keywords beyond its three literals, and no comments. The
     /// value is almost entirely in colouring strings and numbers apart.
@@ -277,22 +329,30 @@ struct CodeGrammar: Sendable {
 
     static let css = CodeGrammar(
         lineComments: ["//"], blockComment: cStyle,
-        keywords: ["important", "media", "import", "keyframes", "font-face", "supports",
-                   "charset", "namespace", "from", "to", "and", "not", "only"],
-        types: ["px", "em", "rem", "vh", "vw", "fr", "deg", "ms", "auto", "none",
-                "inherit", "initial", "unset", "flex", "grid", "block", "inline"],
+        keywords: [
+            "important", "media", "import", "keyframes", "font-face", "supports",
+            "charset", "namespace", "from", "to", "and", "not", "only",
+        ],
+        types: [
+            "px", "em", "rem", "vh", "vw", "fr", "deg", "ms", "auto", "none",
+            "inherit", "initial", "unset", "flex", "grid", "block", "inline",
+        ],
         identifiersMayContainHyphen: true)
 
     /// HTML has no line comments and a comment syntax nothing else shares.
     static let html = CodeGrammar(
         lineComments: [], blockComment: BlockComment(open: "<!--", close: "-->"),
         stringDelimiters: ["\"", "'"],
-        keywords: ["html", "head", "body", "div", "span", "a", "p", "ul", "ol", "li",
-                   "table", "tr", "td", "th", "img", "script", "style", "link", "meta",
-                   "input", "button", "form", "label", "select", "option", "header",
-                   "footer", "nav", "section", "article", "main", "aside", "h1", "h2",
-                   "h3", "h4", "h5", "h6", "svg", "path", "g", "rect", "circle"],
-        types: ["class", "id", "href", "src", "type", "name", "value", "alt", "title",
-                "width", "height", "style", "rel", "target", "placeholder"],
+        keywords: [
+            "html", "head", "body", "div", "span", "a", "p", "ul", "ol", "li",
+            "table", "tr", "td", "th", "img", "script", "style", "link", "meta",
+            "input", "button", "form", "label", "select", "option", "header",
+            "footer", "nav", "section", "article", "main", "aside", "h1", "h2",
+            "h3", "h4", "h5", "h6", "svg", "path", "g", "rect", "circle",
+        ],
+        types: [
+            "class", "id", "href", "src", "type", "name", "value", "alt", "title",
+            "width", "height", "style", "rel", "target", "placeholder",
+        ],
         identifiersMayContainHyphen: true)
 }

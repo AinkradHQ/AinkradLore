@@ -35,8 +35,10 @@ extension LoreStore {
     /// Empty when the name resolves to nothing, or to a document with no
     /// headings — both of which are ordinary while the name is still being
     /// typed, and neither of which is an error.
-    public func headingCompletions(inDocumentNamed name: String,
-                                   matching prefix: String) -> HeadingCompletions? {
+    public func headingCompletions(
+        inDocumentNamed name: String,
+        matching prefix: String
+    ) -> HeadingCompletions? {
         guard let url = resolveLink(name) else { return nil }
         // The VERIFIED target, not the typed name.
         //
@@ -46,7 +48,8 @@ extension LoreStore {
         // OTHER one, which does not have the heading. `linkTarget(for:)` is
         // the same guarantee the document-completion path already uses: a
         // target that resolves back to this row and not to a namesake.
-        let target = rows.first { Self.pathKey($0.path) == Self.pathKey(url) }
+        let target =
+            rows.first { Self.pathKey($0.path) == Self.pathKey(url) }
             .map { linkTarget(for: $0) } ?? name
         let headings = cachedOutline(for: url)
         let trimmed = prefix.trimmingCharacters(in: .whitespaces).lowercased()
@@ -56,10 +59,11 @@ extension LoreStore {
         // Substring, not prefix: headings are sentences, and the words worth
         // typing are often not the first ones ("Rollback" in "Deployment and
         // rollback").
-        return HeadingCompletions(insertTarget: target,
-                                  headings: headings.filter {
-                                      $0.lowercased().contains(trimmed)
-                                  })
+        return HeadingCompletions(
+            insertTarget: target,
+            headings: headings.filter {
+                $0.lowercased().contains(trimmed)
+            })
     }
 
     /// The outline of `url`, parsed at most once per document.
@@ -70,7 +74,8 @@ extension LoreStore {
     private func cachedOutline(for url: URL) -> [String] {
         let key = Self.pathKey(url)
         if headingCacheKey == key { return headingCache }
-        let headings = ((try? EngineRegistry.load(url)) as? MarkdownEngine)?
+        let headings =
+            ((try? EngineRegistry.load(url)) as? MarkdownEngine)?
             .outline.map(\.text) ?? []
         headingCacheKey = key
         headingCache = headings

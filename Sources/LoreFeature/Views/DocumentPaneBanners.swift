@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// The three banners every document type can raise: read-only, conflict, and a
 /// failed save.
@@ -26,9 +26,10 @@ extension DocumentPane {
     /// fix. The status also picks the icon and colour, which is why these
     /// three banners no longer name either — see `LoreBanner`.
     var readOnlyBanner: some View {
-        LoreBanner(message: "Read-only: this file isn't valid UTF-8, so Lore can't write it "
-                       + "back without destroying data. Edits here won't be saved.",
-                   status: .neutral)
+        LoreBanner(
+            message: "Read-only: this file isn't valid UTF-8, so Lore can't write it "
+                + "back without destroying data. Edits here won't be saved.",
+            status: .neutral)
     }
 
     /// Three resolutions, all reachable, none destructive by default. The old
@@ -36,8 +37,10 @@ extension DocumentPane {
     /// "overwrite", which meant the safe choice was the one you got by
     /// accident.
     var conflictBanner: some View {
-        LoreBanner(message: "This document changed on disk outside Lore.",
-                   status: .warning) {
+        LoreBanner(
+            message: "This document changed on disk outside Lore.",
+            status: .warning
+        ) {
             AinkradButton(title: "Reload from disk", style: .secondary) {
                 try? session.resolveByReloading()
             }
@@ -54,7 +57,8 @@ extension DocumentPane {
     /// Disk full, permissions, a read-only volume. There is no resolution to
     /// offer — the only requirement is that it stops being invisible.
     func saveErrorBanner(_ error: Error) -> some View {
-        LoreBanner(message: "Couldn't save this document: \(error.localizedDescription)",
-                   status: .danger)
+        LoreBanner(
+            message: "Couldn't save this document: \(error.localizedDescription)",
+            status: .danger)
     }
 }

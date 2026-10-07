@@ -1,6 +1,6 @@
+import AinkradAppKit
 import Foundation
 import Observation
-import AinkradAppKit
 
 @MainActor
 @Observable
@@ -128,43 +128,52 @@ public final class LoreStore {
         self.documents = documents
         self.coordinator = VaultIndexCoordinator(indexPath: indexPath)
         if let data = documents.data(forKey: Self.defaultFolderKey),
-           let folder = String(data: data, encoding: .utf8) {
+            let folder = String(data: data, encoding: .utf8)
+        {
             defaultNoteFolder = folder
         }
         if let data = documents.data(forKey: Self.sidebarModeKey),
-           let raw = String(data: data, encoding: .utf8),
-           let mode = SidebarMode(rawValue: raw) {
+            let raw = String(data: data, encoding: .utf8),
+            let mode = SidebarMode(rawValue: raw)
+        {
             sidebarMode = mode
         }
         if let data = documents.data(forKey: Self.expandedFoldersKey),
-           let text = String(data: data, encoding: .utf8) {
+            let text = String(data: data, encoding: .utf8)
+        {
             expandedFolders = Set(text.split(separator: "\n").map(String.init))
         }
         if let data = documents.data(forKey: Self.backlinksPanelExpandedKey),
-           let raw = String(data: data, encoding: .utf8) {
+            let raw = String(data: data, encoding: .utf8)
+        {
             backlinksPanelExpanded = raw == "true"
         }
         if let data = documents.data(forKey: Self.outlinePanelExpandedKey),
-           let raw = String(data: data, encoding: .utf8) {
+            let raw = String(data: data, encoding: .utf8)
+        {
             outlinePanelExpanded = raw == "true"
         }
         if let data = documents.data(forKey: Self.showAllFilesKey),
-           let raw = String(data: data, encoding: .utf8) {
+            let raw = String(data: data, encoding: .utf8)
+        {
             showAllFiles = raw == "true"
         }
         if let data = documents.data(forKey: Self.sidebarCollapsedKey),
-           let text = String(data: data, encoding: .utf8) {
+            let text = String(data: data, encoding: .utf8)
+        {
             sidebarCollapsed = (text == "1")
         }
         // Decoded leniently: a settings blob written by a NEWER Lore (or a
         // corrupt one) falls back to the defaults rather than refusing to
         // start. Preferences are not worth failing a launch over.
         if let data = documents.data(forKey: Self.editorSettingsKey),
-           let decoded = try? JSONDecoder().decode(EditorSettings.self, from: data) {
+            let decoded = try? JSONDecoder().decode(EditorSettings.self, from: data)
+        {
             editorSettings = decoded
         }
         if let data = documents.data(forKey: Self.sidebarWidthKey),
-           let text = String(data: data, encoding: .utf8), let width = Double(text) {
+            let text = String(data: data, encoding: .utf8), let width = Double(text)
+        {
             // Clamped on READ too — the stored value comes from a file a user
             // can edit, and a 4000pt sidebar leaves no editor and no grip to
             // drag back with.
@@ -394,8 +403,7 @@ public final class LoreStore {
     internal var focusedPane: PaneState {
         get { (focusIsSecondary ? secondaryPane : nil) ?? pane }
         set {
-            if focusIsSecondary, secondaryPane != nil { secondaryPane = newValue }
-            else { pane = newValue }
+            if focusIsSecondary, secondaryPane != nil { secondaryPane = newValue } else { pane = newValue }
         }
     }
 

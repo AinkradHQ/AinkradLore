@@ -1,6 +1,6 @@
-import SwiftUI
-import AppKit
 import AinkradAppKit
+import AppKit
+import SwiftUI
 
 /// Word processor and markup formats, read-only.
 ///
@@ -54,7 +54,7 @@ public final class RichTextEngine: DocumentEngine {
     /// extracted text must still not render as a silently blank pane.
     public static func load(_ url: URL) throws -> RichTextEngine {
         let options: [NSAttributedString.DocumentReadingOptionKey: Any] = [
-            .characterEncoding: String.Encoding.utf8.rawValue,
+            .characterEncoding: String.Encoding.utf8.rawValue
         ]
         var attributes: NSDictionary?
         do {
@@ -62,7 +62,8 @@ public final class RichTextEngine: DocumentEngine {
                 url: url, options: options, documentAttributes: &attributes)
             let ext = url.pathExtension.lowercased()
             let isHTML = ext == "html" || ext == "htm"
-            let documentType = attributes?[NSAttributedString.DocumentAttributeKey.documentType]
+            let documentType =
+                attributes?[NSAttributedString.DocumentAttributeKey.documentType]
                 as? NSAttributedString.DocumentType
             if !isHTML, documentType == .plain {
                 return RichTextEngine(
@@ -157,8 +158,10 @@ public final class RichTextEngine: DocumentEngine {
 
     @MainActor public func makeEditor(_ ctx: EditorContext) -> AnyView {
         if let loadFailure {
-            return AnyView(DocumentErrorCard(url: sourceURL, message: loadFailure,
-                                             theme: ctx.theme))
+            return AnyView(
+                DocumentErrorCard(
+                    url: sourceURL, message: loadFailure,
+                    theme: ctx.theme))
         }
         if hasNoExtractableText {
             // NOT auto-rendered: `AttachmentEngine` already wraps
@@ -182,13 +185,15 @@ public final class RichTextEngine: DocumentEngine {
             // PREVIEW is gated behind the owner's explicit action.
             return AnyView(EmptyExtractionFallbackView(url: sourceURL, theme: ctx.theme))
         }
-        var view = AnyView(RichTextViewer(attributed: attributed)
-            .background(ctx.theme.tokens.background))
+        var view = AnyView(
+            RichTextViewer(attributed: attributed)
+                .background(ctx.theme.tokens.background))
         if isContentTruncated {
-            view = AnyView(VStack(spacing: 0) {
-                TruncationNotice(theme: ctx.theme)
-                view
-            })
+            view = AnyView(
+                VStack(spacing: 0) {
+                    TruncationNotice(theme: ctx.theme)
+                    view
+                })
         }
         return view
     }

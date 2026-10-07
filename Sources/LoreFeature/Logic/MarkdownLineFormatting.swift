@@ -22,8 +22,10 @@ enum MarkdownLineFormatting {
     /// because that is what someone selecting a ragged block and pressing the
     /// list key is asking for. Toggling each line independently would leave
     /// the block exactly as ragged as it started, just inverted.
-    static func toggleLinePrefix(text: String, selection: NSRange,
-                                 prefix: String) -> EditResult {
+    static func toggleLinePrefix(
+        text: String, selection: NSRange,
+        prefix: String
+    ) -> EditResult {
         let ns = text as NSString
         let lineRange = ns.lineRange(for: selection)
         let block = ns.substring(with: lineRange)
@@ -36,9 +38,11 @@ enum MarkdownLineFormatting {
         let hasTrailingNewline = block.hasSuffix("\n")
         let content = hasTrailingNewline ? Array(lines.dropLast()) : lines
 
-        let allPrefixed = !content.isEmpty && content.allSatisfy {
-            $0.isEmpty || $0.hasPrefix(prefix)
-        }
+        let allPrefixed =
+            !content.isEmpty
+            && content.allSatisfy {
+                $0.isEmpty || $0.hasPrefix(prefix)
+            }
         let rewritten = content.map { line -> String in
             if allPrefixed {
                 return line.hasPrefix(prefix) ? String(line.dropFirst(prefix.count)) : line
@@ -57,10 +61,13 @@ enum MarkdownLineFormatting {
         // front of it.
         let location = max(lineRange.location, selection.location + (allPrefixed ? -prefix.count : prefix.count))
         let length = max(0, selection.length + (delta - (allPrefixed ? -prefix.count : prefix.count)))
-        return EditResult(text: updated,
-                          selection: NSRange(location: min(location, (updated as NSString).length),
-                                             length: min(length,
-                                                         (updated as NSString).length - min(location, (updated as NSString).length))))
+        return EditResult(
+            text: updated,
+            selection: NSRange(
+                location: min(location, (updated as NSString).length),
+                length: min(
+                    length,
+                    (updated as NSString).length - min(location, (updated as NSString).length))))
     }
 
     /// Sets the heading level of the lines the selection touches.
@@ -81,9 +88,11 @@ enum MarkdownLineFormatting {
         let content = hasTrailingNewline ? Array(lines.dropLast()) : lines
 
         let clamped = min(max(level, 0), 6)
-        let alreadyAtLevel = !content.isEmpty && content.allSatisfy {
-            $0.isEmpty || headingLevel(of: $0) == clamped
-        }
+        let alreadyAtLevel =
+            !content.isEmpty
+            && content.allSatisfy {
+                $0.isEmpty || headingLevel(of: $0) == clamped
+            }
         let target = alreadyAtLevel ? 0 : clamped
 
         let rewritten = content.map { line -> String in
@@ -99,9 +108,11 @@ enum MarkdownLineFormatting {
         // character on the line, so preserving a column offset would put the
         // caret somewhere arbitrary inside the new marker.
         let end = lineRange.location + (replacement as NSString).length
-        return EditResult(text: updated,
-                          selection: NSRange(location: min(end, (updated as NSString).length),
-                                             length: 0))
+        return EditResult(
+            text: updated,
+            selection: NSRange(
+                location: min(end, (updated as NSString).length),
+                length: 0))
     }
 
     /// The ATX heading level of a line, or 0 for body text.

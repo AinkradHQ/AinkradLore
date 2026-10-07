@@ -1,5 +1,6 @@
 import AppKit
 import XCTest
+
 @testable import LoreFeature
 
 final class EditorLayoutTests: XCTestCase {
@@ -16,9 +17,11 @@ final class EditorLayoutTests: XCTestCase {
     /// below are about the capping mechanism, not about the default. Using the
     /// default made them silently test nothing.
     private func cappedTheme() -> MarkdownTheme {
-        MarkdownTheme(tokens: TestTokens.make(),
-                      settings: EditorSettings(density: .standard, measure: .standard,
-                                               zoomStep: 0))
+        MarkdownTheme(
+            tokens: TestTokens.make(),
+            settings: EditorSettings(
+                density: .standard, measure: .standard,
+                zoomStep: 0))
     }
 
     /// A wide pane must NOT push the column into the middle of the window.
@@ -32,13 +35,15 @@ final class EditorLayoutTests: XCTestCase {
     /// The measure cap still applies — the column is left-aligned, not
     /// unbounded, so long lines stay readable.
     func test_theMeasureCapStillApplies() {
-        XCTAssertNotNil(cappedTheme().maxMeasure,
-                        "a capped measure must still produce a cap")
+        XCTAssertNotNil(
+            cappedTheme().maxMeasure,
+            "a capped measure must still produce a cap")
         // And the DEFAULT is deliberately uncapped now — recorded here so the
         // change is visible where the cap is asserted, not only where it was
         // made.
-        XCTAssertNil(MarkdownTheme(tokens: TestTokens.make()).maxMeasure,
-                     "the default measure is full width")
+        XCTAssertNil(
+            MarkdownTheme(tokens: TestTokens.make()).maxMeasure,
+            "the default measure is full width")
     }
 
     /// A pane narrower than twice the inset must still leave a POSITIVE
@@ -57,8 +62,10 @@ final class EditorLayoutTests: XCTestCase {
 
     // MARK: - containerWidth
 
-    private func width(forViewWidth viewWidth: CGFloat,
-                       theme: MarkdownTheme? = nil) -> CGFloat {
+    private func width(
+        forViewWidth viewWidth: CGFloat,
+        theme: MarkdownTheme? = nil
+    ) -> CGFloat {
         MarkdownEditorLayout.containerWidth(
             forViewWidth: viewWidth,
             theme: theme ?? MarkdownTheme(tokens: TestTokens.make()))
@@ -78,8 +85,9 @@ final class EditorLayoutTests: XCTestCase {
     /// the container width is decided.
     func test_aWidePaneWithNoCapFillsTheAvailableWidth() {
         let theme = MarkdownTheme(tokens: TestTokens.make())
-        XCTAssertEqual(width(forViewWidth: 2000, theme: theme),
-                       2000 - theme.contentInset * 2, accuracy: 0.5)
+        XCTAssertEqual(
+            width(forViewWidth: 2000, theme: theme),
+            2000 - theme.contentInset * 2, accuracy: 0.5)
     }
 
     /// A pane narrower than the measure must fit ENTIRELY inside the visible
@@ -93,8 +101,9 @@ final class EditorLayoutTests: XCTestCase {
         let viewWidth: CGFloat = 400
         let inset = MarkdownEditorLayout.containerInset(forViewWidth: viewWidth, theme: theme)
         let container = width(forViewWidth: viewWidth)
-        XCTAssertLessThanOrEqual(container, viewWidth - inset.width * 2,
-                                 "the container must never be wider than the space the insets leave")
+        XCTAssertLessThanOrEqual(
+            container, viewWidth - inset.width * 2,
+            "the container must never be wider than the space the insets leave")
     }
 
     /// The degenerate narrow case: a pane so narrow the inset itself is

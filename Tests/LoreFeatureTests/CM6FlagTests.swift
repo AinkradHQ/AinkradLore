@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 /// E4T1: the flag that lets both surfaces exist.
@@ -20,8 +21,11 @@ final class CM6FlagTests: XCTestCase {
         XCTAssertTrue(EditorSettings.default.usesCM6)
         // And through the memberwise init, not only `.default` — the two have
         // drifted apart before.
-        XCTAssertTrue(EditorSettings(density: .standard, measure: .standard,
-                                     zoomStep: 0).usesCM6)
+        XCTAssertTrue(
+            EditorSettings(
+                density: .standard, measure: .standard,
+                zoomStep: 0
+            ).usesCM6)
     }
 
     /// Turning it off has to keep working, or the flag is not a flag.
@@ -50,9 +54,13 @@ final class CM6FlagTests: XCTestCase {
 
         // JSON from before this key existed.
         let old = #"{"density":"compact","measure":"wide","zoomStep":2}"#
-        let decoded = try JSONDecoder().decode(EditorSettings.self,
-                                               from: Data(old.utf8))
-        XCTAssertTrue(decoded.usesCM6, "an absent key means ON since E4T3 — settings stored before it have no such key, and reading them as off would leave every existing reader on the old surface")
+        let decoded = try JSONDecoder().decode(
+            EditorSettings.self,
+            from: Data(old.utf8))
+        XCTAssertTrue(
+            decoded.usesCM6,
+            "an absent key means ON since E4T3 — settings stored before it have no such key, and reading them as off would leave every existing reader on the old surface"
+        )
         XCTAssertEqual(decoded.density, .compact, "and must not reset what WAS set")
         XCTAssertEqual(decoded.measure, .wide)
         XCTAssertEqual(decoded.zoomStep, 2)

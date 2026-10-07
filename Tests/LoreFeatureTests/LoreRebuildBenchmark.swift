@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 /// Not a correctness test — a measurement, so the Wave 2 claim about the
@@ -8,7 +9,7 @@ import XCTest
 final class LoreRebuildBenchmark: XCTestCase {
 
     func testMeasureRebuildStrategies() throws {
-        let noteCount = 400   // enough to show the difference; keeps `make test` fast
+        let noteCount = 400  // enough to show the difference; keeps `make test` fast
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent("lore-bench-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
@@ -32,15 +33,16 @@ final class LoreRebuildBenchmark: XCTestCase {
         try newIndex.replaceAll(with: notes)
         let newElapsed = Date().timeIntervalSince(newStart)
 
-        print("""
+        print(
+            """
 
-        ── Lore rescan, \(noteCount) notes ──────────────────────────────
-          per-note transactions (old): \(String(format: "%.3f", oldElapsed))s
-          single transaction   (new): \(String(format: "%.3f", newElapsed))s
-          speedup: \(String(format: "%.1f", oldElapsed / max(newElapsed, 0.0001)))x
-        ────────────────────────────────────────────────────────────────
+            ── Lore rescan, \(noteCount) notes ──────────────────────────────
+              per-note transactions (old): \(String(format: "%.3f", oldElapsed))s
+              single transaction   (new): \(String(format: "%.3f", newElapsed))s
+              speedup: \(String(format: "%.1f", oldElapsed / max(newElapsed, 0.0001)))x
+            ────────────────────────────────────────────────────────────────
 
-        """)
+            """)
         XCTAssertEqual(try newIndex.all().count, noteCount)
     }
 }

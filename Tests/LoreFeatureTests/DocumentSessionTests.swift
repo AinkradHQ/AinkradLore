@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 @MainActor
@@ -61,7 +62,7 @@ final class DocumentSessionTests: XCTestCase {
         let (root, c) = try vault()
         let url = try note(root, "a.md", "---\nid: a\ntitle: T\n---\nbody")
         let s = try DocumentSession.open(url: url, coordinator: c)
-        Thread.sleep(forTimeInterval: 1.1)   // exceed filesystem mtime granularity
+        Thread.sleep(forTimeInterval: 1.1)  // exceed filesystem mtime granularity
         try "---\nid: a\ntitle: T\n---\nEXTERNAL".write(to: url, atomically: true, encoding: .utf8)
         s.markChanged()
         XCTAssertThrowsError(try s.saveNow())
@@ -175,8 +176,9 @@ final class DocumentSessionTests: XCTestCase {
         let s = try DocumentSession.open(url: url, coordinator: c)
         XCTAssertThrowsError(try s.resolveByOverwriting())
         XCTAssertThrowsError(try s.resolveBySavingCopy())
-        XCTAssertFalse(FileManager.default.fileExists(
-            atPath: root.appendingPathComponent("bad (Lore copy).txt").path))
+        XCTAssertFalse(
+            FileManager.default.fileExists(
+                atPath: root.appendingPathComponent("bad (Lore copy).txt").path))
     }
 
     // MARK: - Review finding 1: the session adopts the copy
@@ -224,7 +226,7 @@ final class DocumentSessionTests: XCTestCase {
         }
         XCTAssertThrowsError(try s.saveNow())
         XCTAssertNotNil(s.lastSaveError)
-        XCTAssertFalse(s.conflict)   // not conflated with the conflict path
+        XCTAssertFalse(s.conflict)  // not conflated with the conflict path
         XCTAssertTrue(s.isDirty)
 
         try FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: dir.path)

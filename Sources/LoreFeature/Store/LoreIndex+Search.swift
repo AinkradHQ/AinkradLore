@@ -33,11 +33,14 @@ extension LoreIndex {
     public func search(_ query: String) throws -> [IndexRow] {
         guard let expression = Self.ftsExpression(for: query) else { return try all() }
         return try dbQueue.read { db in
-            try Row.fetchAll(db, sql: """
-                SELECT n.* FROM documents n
-                JOIN documents_fts f ON f.rowid = n.rowid
-                WHERE documents_fts MATCH ? \(Self.rankOrder) LIMIT ?;
-            """, arguments: [expression, Self.searchLimit]).map(Self.row)
+            try Row.fetchAll(
+                db,
+                sql: """
+                        SELECT n.* FROM documents n
+                        JOIN documents_fts f ON f.rowid = n.rowid
+                        WHERE documents_fts MATCH ? \(Self.rankOrder) LIMIT ?;
+                    """, arguments: [expression, Self.searchLimit]
+            ).map(Self.row)
         }
     }
 
@@ -66,12 +69,15 @@ extension LoreIndex {
             return try all().map { SearchHit(row: $0, snippet: nil) }
         }
         return try dbQueue.read { db in
-            try Row.fetchAll(db, sql: """
-                SELECT n.*, snippet(documents_fts, 1, ?, ?, '…', 12) AS excerpt
-                FROM documents n
-                JOIN documents_fts f ON f.rowid = n.rowid
-                WHERE documents_fts MATCH ? \(Self.rankOrder) LIMIT ?;
-            """, arguments: [SearchSnippet.open, SearchSnippet.close, expression, Self.searchLimit])
+            try Row.fetchAll(
+                db,
+                sql: """
+                        SELECT n.*, snippet(documents_fts, 1, ?, ?, '…', 12) AS excerpt
+                        FROM documents n
+                        JOIN documents_fts f ON f.rowid = n.rowid
+                        WHERE documents_fts MATCH ? \(Self.rankOrder) LIMIT ?;
+                    """, arguments: [SearchSnippet.open, SearchSnippet.close, expression, Self.searchLimit]
+            )
             .map { row in
                 let marked: String = row["excerpt"] ?? ""
                 let parsed = SearchSnippet.parse(marked: marked)
@@ -113,7 +119,8 @@ extension LoreIndex {
     /// `*` for prefix matching, joined by implicit AND. Inside a quoted
     /// literal every character is data, so no input can be an operator.
     static func ftsExpression(for query: String) -> String? {
-        let terms = query
+        let terms =
+            query
             .split(whereSeparator: { $0.isWhitespace })
             .map { term -> String in
                 let escaped = term.replacingOccurrences(of: "\"", with: "\"\"")

@@ -92,9 +92,10 @@ public struct ImportApplier {
         // folder can still follow an image that was renamed in another.
         let renames = reservations.flatMap(\.renames)
         for reservation in reservations {
-            report.renamed.append(contentsOf: reservation.renames.map {
-                (id: reservation.planned.item.sourceID, from: $0.from, to: $0.to)
-            })
+            report.renamed.append(
+                contentsOf: reservation.renames.map {
+                    (id: reservation.planned.item.sourceID, from: $0.from, to: $0.to)
+                })
         }
 
         // PASS 2 — write the bodies, with links pointed at where things
@@ -104,8 +105,11 @@ public struct ImportApplier {
                 try write(reservation, renames: renames, into: &report)
             } catch {
                 rollback(reservation)
-                report.failed.append((reservation.planned.item.sourceID,
-                                      error.localizedDescription))
+                report.failed.append(
+                    (
+                        reservation.planned.item.sourceID,
+                        error.localizedDescription
+                    ))
             }
         }
         return report
@@ -116,8 +120,10 @@ public struct ImportApplier {
     /// Resolves this item's final names and copies its attachments. Returns
     /// nil for an item that is already complete (attachment-only), which has
     /// no body for pass 2 to write.
-    private func reserve(_ planned: PlannedItem,
-                         into report: inout ImportReport) throws -> Reservation? {
+    private func reserve(
+        _ planned: PlannedItem,
+        into report: inout ImportReport
+    ) throws -> Reservation? {
         let directory = planned.targetURL.deletingLastPathComponent()
         let directoryPreexisted = FileManager.default.fileExists(atPath: directory.path)
         // Outside the do/catch below: if the `mkdir` ITSELF fails there is
@@ -125,9 +131,10 @@ public struct ImportApplier {
         // never created.
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
 
-        var reservation = Reservation(planned: planned, directory: directory,
-                                      directoryPreexisted: directoryPreexisted,
-                                      noteURL: nil, sidecarURL: nil)
+        var reservation = Reservation(
+            planned: planned, directory: directory,
+            directoryPreexisted: directoryPreexisted,
+            noteURL: nil, sidecarURL: nil)
         // Pass 1 owns its own unwind. A reservation that throws never reaches
         // the caller, so the caller has nothing to hand to `rollback` — and
         // without this, a failure here leaves behind the empty folder the
@@ -140,9 +147,11 @@ public struct ImportApplier {
         }
     }
 
-    private func reserveNames(_ planned: PlannedItem,
-                              into reservation: inout Reservation,
-                              report: inout ImportReport) throws -> Reservation? {
+    private func reserveNames(
+        _ planned: PlannedItem,
+        into reservation: inout Reservation,
+        report: inout ImportReport
+    ) throws -> Reservation? {
         let directory = reservation.directory
 
         // Attachment-only items (every non-`.md` file in an Obsidian
@@ -162,9 +171,12 @@ public struct ImportApplier {
         if Self.isAttachmentOnly(planned.item) {
             var landed: URL?
             for attachment in planned.item.attachments {
-                guard let destination = copy(attachment, into: directory,
-                                             renames: &reservation.renames,
-                                             report: &report) else { continue }
+                guard
+                    let destination = copy(
+                        attachment, into: directory,
+                        renames: &reservation.renames,
+                        report: &report)
+                else { continue }
                 report.imported.append(destination)
                 if landed == nil { landed = destination }
             }
@@ -178,18 +190,21 @@ public struct ImportApplier {
             // `ImportLedger`).
             if let landed {
                 do {
-                    try ImportLedger.record(id: planned.item.sourceID,
-                                            landedAt: landed, vaultRoot: vaultRoot)
+                    try ImportLedger.record(
+                        id: planned.item.sourceID,
+                        landedAt: landed, vaultRoot: vaultRoot)
                 } catch {
                     // The bytes DID land, so this is not an item failure —
                     // but staying silent would mean a re-import duplicates
                     // this file with nothing to warn the user. It is
                     // reported alongside the successful import, which is
                     // exactly the truth of what happened.
-                    report.failed.append((
-                        planned.item.sourceID,
-                        "imported, but its import id could not be recorded "
-                            + "(re-importing may duplicate it): \(error.localizedDescription)"))
+                    report.failed.append(
+                        (
+                            planned.item.sourceID,
+                            "imported, but its import id could not be recorded "
+                                + "(re-importing may duplicate it): \(error.localizedDescription)"
+                        ))
                 }
             }
             // Renames still travel back: another item's body may embed this
@@ -209,8 +224,11 @@ public struct ImportApplier {
         try Self.reserveName(noteURL)
         reservation.reserved.append(noteURL)
         if noteURL.lastPathComponent != planned.targetURL.lastPathComponent {
-            reservation.renames.append((from: planned.targetURL.lastPathComponent,
-                                        to: noteURL.lastPathComponent))
+            reservation.renames.append(
+                (
+                    from: planned.targetURL.lastPathComponent,
+                    to: noteURL.lastPathComponent
+                ))
         }
 
         // The `.original.html` sidecar goes through the SAME on-disk
@@ -240,8 +258,9 @@ public struct ImportApplier {
         // Attachments before the note: a written note must never point
         // at an attachment that does not exist yet.
         for attachment in planned.item.attachments {
-            _ = copy(attachment, into: directory, renames: &reservation.renames,
-                     report: &report)
+            _ = copy(
+                attachment, into: directory, renames: &reservation.renames,
+                report: &report)
         }
 
         return reservation
@@ -249,9 +268,11 @@ public struct ImportApplier {
 
     /// Copies one attachment, recording the rename if its landed name differs
     /// from the name the source (and therefore every link to it) used.
-    private func copy(_ attachment: ImportAttachment, into directory: URL,
-                      renames: inout [(from: String, to: String)],
-                      report: inout ImportReport) -> URL? {
+    private func copy(
+        _ attachment: ImportAttachment, into directory: URL,
+        renames: inout [(from: String, to: String)],
+        report: inout ImportReport
+    ) -> URL? {
         guard let source = attachment.sourceURL else {
             report.failed.append((attachment.sourceID, "no data available"))
             return nil
@@ -261,8 +282,11 @@ public struct ImportApplier {
                 in: directory, preferredName: LoreStore.sanitized(attachment.preferredName))
             try FileManager.default.copyItem(at: source, to: destination)
             if destination.lastPathComponent != attachment.preferredName {
-                renames.append((from: attachment.preferredName,
-                                to: destination.lastPathComponent))
+                renames.append(
+                    (
+                        from: attachment.preferredName,
+                        to: destination.lastPathComponent
+                    ))
             }
             return destination
         } catch {
@@ -273,9 +297,11 @@ public struct ImportApplier {
 
     // MARK: - pass 2
 
-    private func write(_ reservation: Reservation,
-                       renames: [(from: String, to: String)],
-                       into report: inout ImportReport) throws {
+    private func write(
+        _ reservation: Reservation,
+        renames: [(from: String, to: String)],
+        into report: inout ImportReport
+    ) throws {
         guard let noteURL = reservation.noteURL else { return }
         var finalized: Set<URL> = []
 
@@ -315,14 +341,16 @@ public struct ImportApplier {
             // Only ever removes a file still the size we reserved it at —
             // an empty placeholder. A body that got written before a later
             // step failed is the user's data and stays.
-            let size = (try? FileManager.default
-                .attributesOfItem(atPath: url.path)[.size] as? Int) ?? nil
+            let size =
+                (try? FileManager.default
+                    .attributesOfItem(atPath: url.path)[.size] as? Int) ?? nil
             if size == 0 { try? FileManager.default.removeItem(at: url) }
         }
         if !reservation.directoryPreexisted,
-           let remaining = try? FileManager.default
-            .contentsOfDirectory(atPath: reservation.directory.path),
-           remaining.isEmpty {
+            let remaining = try? FileManager.default
+                .contentsOfDirectory(atPath: reservation.directory.path),
+            remaining.isEmpty
+        {
             try? FileManager.default.removeItem(at: reservation.directory)
         }
     }

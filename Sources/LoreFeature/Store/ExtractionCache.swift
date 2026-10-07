@@ -53,12 +53,14 @@ public final class ExtractionCache: @unchecked Sendable {
     private init() {}
 
     public var count: Int {
-        lock.lock(); defer { lock.unlock() }
+        lock.lock()
+        defer { lock.unlock() }
         return storage.count
     }
 
     public func removeAll() {
-        lock.lock(); defer { lock.unlock() }
+        lock.lock()
+        defer { lock.unlock() }
         storage.removeAll()
         order.removeAll()
     }
@@ -95,7 +97,8 @@ public final class ExtractionCache: @unchecked Sendable {
         // and the second write is identical — wasteful once, never wrong.
         let value = extract()
 
-        lock.lock(); defer { lock.unlock() }
+        lock.lock()
+        defer { lock.unlock() }
         if storage[key] == nil {
             storage[key] = value
             order.append(key)
@@ -109,8 +112,8 @@ public final class ExtractionCache: @unchecked Sendable {
     private static func key(for url: URL) -> Key? {
         let path = VaultIndexCoordinator.canonical(url).path
         guard let attributes = try? FileManager.default.attributesOfItem(atPath: path),
-              let mtime = attributes[.modificationDate] as? Date,
-              let size = attributes[.size] as? Int
+            let mtime = attributes[.modificationDate] as? Date,
+            let size = attributes[.size] as? Int
         else { return nil }
         return Key(path: path, mtime: mtime.timeIntervalSince1970, size: size)
     }

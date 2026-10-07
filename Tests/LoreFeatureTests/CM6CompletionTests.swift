@@ -1,6 +1,7 @@
 import AppKit
 import WebKit
 import XCTest
+
 @testable import LoreFeature
 
 /// `[[` and `#` completion on the CodeMirror surface, rendered in the page.
@@ -54,15 +55,17 @@ final class CM6CompletionTests: XCTestCase {
     @MainActor
     func test_theQueryOffersDocumentsAndACreateRowLast() throws {
         let rows = [Self.row("Design Doc"), Self.row("Design Review")]
-        let query = try XCTUnwrap(CM6Completion.query(
-            text: "See [[desi", utf16Caret: 10,
-            documents: { _ in rows },
-            headings: { _, _ in nil },
-            tags: { _ in [] },
-            linkTarget: { $0.title },
-            canCreate: true))
-        XCTAssertEqual(query.items.map(\.label),
-                       ["Design Doc", "Design Review", "Create \u{201C}desi\u{201D}"])
+        let query = try XCTUnwrap(
+            CM6Completion.query(
+                text: "See [[desi", utf16Caret: 10,
+                documents: { _ in rows },
+                headings: { _, _ in nil },
+                tags: { _ in [] },
+                linkTarget: { $0.title },
+                canCreate: true))
+        XCTAssertEqual(
+            query.items.map(\.label),
+            ["Design Doc", "Design Review", "Create \u{201C}desi\u{201D}"])
         // LAST, never first: a create row at the top is one stray Return away
         // from a duplicate note.
         XCTAssertEqual(query.items.last?.createsNote, "desi")
@@ -78,11 +81,12 @@ final class CM6CompletionTests: XCTestCase {
     @MainActor
     func test_anAlreadyTypedCloserIsAbsorbed() throws {
         let text = "See [[desi]]"
-        let query = try XCTUnwrap(CM6Completion.query(
-            text: text, utf16Caret: 10,
-            documents: { _ in [Self.row("Design Doc")] },
-            headings: { _, _ in nil }, tags: { _ in [] },
-            linkTarget: { $0.title }, canCreate: false))
+        let query = try XCTUnwrap(
+            CM6Completion.query(
+                text: text, utf16Caret: 10,
+                documents: { _ in [Self.row("Design Doc")] },
+                headings: { _, _ in nil }, tags: { _ in [] },
+                linkTarget: { $0.title }, canCreate: false))
         XCTAssertEqual(query.to, 12, "the `]]` must be inside the replaced range")
         let result = (text as NSString).replacingCharacters(
             in: NSRange(location: query.from, length: query.to - query.from),
@@ -95,23 +99,28 @@ final class CM6CompletionTests: XCTestCase {
     /// finished link cannot land on a namesake in another folder.
     @MainActor
     func test_aHeadingQueryInsertsTheVerifiedTarget() throws {
-        let query = try XCTUnwrap(CM6Completion.query(
-            text: "See [[Design#Over", utf16Caret: 17,
-            documents: { _ in [Self.row("WRONG")] },
-            headings: { _, _ in HeadingCompletions(insertTarget: "Projects/Design",
-                                                   headings: ["Overview"]) },
-            tags: { _ in [] }, linkTarget: { $0.title }, canCreate: true))
+        let query = try XCTUnwrap(
+            CM6Completion.query(
+                text: "See [[Design#Over", utf16Caret: 17,
+                documents: { _ in [Self.row("WRONG")] },
+                headings: { _, _ in
+                    HeadingCompletions(
+                        insertTarget: "Projects/Design",
+                        headings: ["Overview"])
+                },
+                tags: { _ in [] }, linkTarget: { $0.title }, canCreate: true))
         XCTAssertEqual(query.items.map(\.label), ["Overview"])
         XCTAssertEqual(query.items[0].insert, "Projects/Design#Overview]]")
     }
 
     @MainActor
     func test_aTagQueryReplacesTheHashThroughTheCaret() throws {
-        let query = try XCTUnwrap(CM6Completion.query(
-            text: "Tagged #proj", utf16Caret: 12,
-            documents: { _ in [] }, headings: { _, _ in nil },
-            tags: { _ in ["project/ainkrad"] },
-            linkTarget: { $0.title }, canCreate: false))
+        let query = try XCTUnwrap(
+            CM6Completion.query(
+                text: "Tagged #proj", utf16Caret: 12,
+                documents: { _ in [] }, headings: { _, _ in nil },
+                tags: { _ in ["project/ainkrad"] },
+                linkTarget: { $0.title }, canCreate: false))
         XCTAssertEqual(query.from, 7, "the `#` itself is replaced")
         XCTAssertEqual(query.to, 12)
         XCTAssertEqual(query.items[0].insert, "#project/ainkrad")
@@ -119,24 +128,29 @@ final class CM6CompletionTests: XCTestCase {
 
     @MainActor
     func test_nothingIsOfferedWhenNothingIsBeingCompleted() {
-        XCTAssertNil(CM6Completion.query(
-            text: "Just prose.", utf16Caret: 11,
-            documents: { _ in [Self.row("Design Doc")] },
-            headings: { _, _ in nil }, tags: { _ in [] },
-            linkTarget: { $0.title }, canCreate: true))
+        XCTAssertNil(
+            CM6Completion.query(
+                text: "Just prose.", utf16Caret: 11,
+                documents: { _ in [Self.row("Design Doc")] },
+                headings: { _, _ in nil }, tags: { _ in [] },
+                linkTarget: { $0.title }, canCreate: true))
     }
 
     // MARK: - the list, in the page
 
     private var windows: [NSWindow] = []
     private var webView: WKWebView!
-    override func tearDown() { windows.removeAll(); super.tearDown() }
+    override func tearDown() {
+        windows.removeAll()
+        super.tearDown()
+    }
 
     @MainActor
     private func boot(_ text: String) throws {
         webView = WKWebView(frame: NSRect(x: 0, y: 0, width: 900, height: 700))
-        let window = NSWindow(contentRect: webView.frame, styleMask: [.titled],
-                              backing: .buffered, defer: false)
+        let window = NSWindow(
+            contentRect: webView.frame, styleMask: [.titled],
+            backing: .buffered, defer: false)
         window.contentView = webView
         windows.append(window)
         let index = try XCTUnwrap(CM6EditorView.Coordinator.bundledIndexURL)
@@ -240,21 +254,26 @@ final class CM6CompletionTests: XCTestCase {
     @MainActor
     func test_aCreateRowAsksSwiftAndDoesNotEditOnItsOwn() throws {
         try boot("See [[newnote\n")
-        _ = try js("""
-        (() => {
-          window.__posted = [];
-          window.webkit = { messageHandlers: { lore: {
-            postMessage: m => window.__posted.push(m) } } };
-        })()
-        """)
-        let query = CM6Completion.Query(from: 6, to: 13, items: [
-            CM6Completion.Item(label: "Create “newnote”", detail: "new note",
-                               insert: "newnote]]", createsNote: "newnote"),
-        ])
+        _ = try js(
+            """
+            (() => {
+              window.__posted = [];
+              window.webkit = { messageHandlers: { lore: {
+                postMessage: m => window.__posted.push(m) } } };
+            })()
+            """)
+        let query = CM6Completion.Query(
+            from: 6, to: 13,
+            items: [
+                CM6Completion.Item(
+                    label: "Create “newnote”", detail: "new note",
+                    insert: "newnote]]", createsNote: "newnote")
+            ])
         try show(query)
         _ = try js("window.loreEditor.completionKey('Enter')")
-        XCTAssertEqual(try documentText(), "See [[newnote\n",
-                       "the page must not write a link to a note that may not exist")
+        XCTAssertEqual(
+            try documentText(), "See [[newnote\n",
+            "the page must not write a link to a note that may not exist")
         let posted = try js("window.__posted.filter(m => m.kind === 'completionCreate').length")
         XCTAssertEqual(posted as? Int, 1)
         // And once Swift confirms, the text lands.
@@ -265,24 +284,35 @@ final class CM6CompletionTests: XCTestCase {
     // MARK: - plumbing
 
     private static func row(_ title: String) -> IndexRow {
-        IndexRow(path: URL(fileURLWithPath: "/vault/Projects/\(title).md"),
-                 id: title, title: title, tags: [], aliases: [], updated: Date(),
-                 type: MarkdownEngine.identifier, properties: [])
+        IndexRow(
+            path: URL(fileURLWithPath: "/vault/Projects/\(title).md"),
+            id: title, title: title, tags: [], aliases: [], updated: Date(),
+            type: MarkdownEngine.identifier, properties: [])
     }
 
     private static func sampleQuery() -> CM6Completion.Query {
-        CM6Completion.Query(from: 6, to: 10, items: [
-            CM6Completion.Item(label: "Design Doc", detail: "Projects",
-                               insert: "Design Doc]]", createsNote: nil),
-            CM6Completion.Item(label: "Design Review", detail: "Projects",
-                               insert: "Design Review]]", createsNote: nil),
-        ])
+        CM6Completion.Query(
+            from: 6, to: 10,
+            items: [
+                CM6Completion.Item(
+                    label: "Design Doc", detail: "Projects",
+                    insert: "Design Doc]]", createsNote: nil),
+                CM6Completion.Item(
+                    label: "Design Review", detail: "Projects",
+                    insert: "Design Review]]", createsNote: nil),
+            ])
     }
 
     @MainActor @discardableResult
     private func js(_ source: String) throws -> Any? {
-        var result: Any?; var failure: Error?; var done = false
-        webView.evaluateJavaScript(source) { v, e in result = v; failure = e; done = true }
+        var result: Any?
+        var failure: Error?
+        var done = false
+        webView.evaluateJavaScript(source) { v, e in
+            result = v
+            failure = e
+            done = true
+        }
         let deadline = Date().addingTimeInterval(20)
         while !done, Date() < deadline {
             RunLoop.current.run(mode: .default, before: Date().addingTimeInterval(0.01))

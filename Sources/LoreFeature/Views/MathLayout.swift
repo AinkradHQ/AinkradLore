@@ -35,12 +35,14 @@ struct MathBox: Equatable {
     /// Moves everything by `dx`/`dy`, which is how the composing functions
     /// place a child box inside a parent.
     func offset(dx: CGFloat, dy: CGFloat) -> MathBox {
-        MathBox(width: width, ascent: ascent - dy, descent: descent + dy,
-                glyphs: glyphs.map {
-                    Glyph(origin: CGPoint(x: $0.origin.x + dx, y: $0.origin.y + dy),
-                          text: $0.text, font: $0.font)
-                },
-                rules: rules.map { $0.offsetBy(dx: dx, dy: dy) })
+        MathBox(
+            width: width, ascent: ascent - dy, descent: descent + dy,
+            glyphs: glyphs.map {
+                Glyph(
+                    origin: CGPoint(x: $0.origin.x + dx, y: $0.origin.y + dy),
+                    text: $0.text, font: $0.font)
+            },
+            rules: rules.map { $0.offsetBy(dx: dx, dy: dy) })
     }
 }
 
@@ -77,8 +79,10 @@ enum MathLayout {
 
     // MARK: - Leaves
 
-    private static func symbolBox(_ text: String, isVariable: Bool,
-                                  font: NSFont) -> MathBox {
+    private static func symbolBox(
+        _ text: String, isVariable: Bool,
+        font: NSFont
+    ) -> MathBox {
         let face = isVariable ? italic(font) : font
         let size = (text as NSString).size(withAttributes: [.font: face])
         var box = MathBox()
@@ -114,14 +118,16 @@ enum MathLayout {
     /// `a+b` read as mathematics rather than as a word.
     private static func spacing(around node: MathNode, font: NSFont) -> CGFloat {
         guard case .symbol(let text, let isVariable) = node, !isVariable,
-              text.count == 1, let character = text.first,
-              "+−-=×·÷±∓≤≥≠≈≡→←↔⇒∈∉⊂⊃∪∩".contains(character)
+            text.count == 1, let character = text.first,
+            "+−-=×·÷±∓≤≥≠≈≡→←↔⇒∈∉⊂⊃∪∩".contains(character)
         else { return 0 }
         return font.pointSize * 0.16
     }
 
-    private static func fractionBox(_ numerator: MathNode, _ denominator: MathNode,
-                                    font: NSFont) -> MathBox {
+    private static func fractionBox(
+        _ numerator: MathNode, _ denominator: MathNode,
+        font: NSFont
+    ) -> MathBox {
         let top = layout(numerator, font: font)
         let bottom = layout(denominator, font: font)
         let gap = font.pointSize * fractionGap
@@ -141,8 +147,10 @@ enum MathLayout {
         out.glyphs += bottom.offset(dx: (width - bottom.width) / 2, dy: bottomShift).glyphs
         out.rules += bottom.offset(dx: (width - bottom.width) / 2, dy: bottomShift).rules
 
-        out.rules.append(CGRect(x: 0, y: axis - ruleThickness / 2,
-                                width: width, height: ruleThickness))
+        out.rules.append(
+            CGRect(
+                x: 0, y: axis - ruleThickness / 2,
+                width: width, height: ruleThickness))
         out.ascent = topShift + top.ascent
         out.descent = -bottomShift + bottom.descent
         return out
@@ -164,16 +172,22 @@ enum MathLayout {
         out.ascent = max(radicalFont.ascender, body.ascent + gap)
         out.descent = max(-radicalFont.descender, body.descent)
         // The bar over the radicand, joining the tick of the √.
-        out.rules.append(CGRect(x: radicalWidth, y: out.ascent - ruleThickness,
-                                width: body.width + gap, height: ruleThickness))
+        out.rules.append(
+            CGRect(
+                x: radicalWidth, y: out.ascent - ruleThickness,
+                width: body.width + gap, height: ruleThickness))
         return out
     }
 
-    private static func scriptBox(_ base: MathNode, _ superscript: MathNode?,
-                                  _ subscript_: MathNode?, font: NSFont) -> MathBox {
+    private static func scriptBox(
+        _ base: MathNode, _ superscript: MathNode?,
+        _ subscript_: MathNode?, font: NSFont
+    ) -> MathBox {
         let baseBox = layout(base, font: font)
-        let smallFont = NSFont(descriptor: font.fontDescriptor,
-                               size: font.pointSize * scriptScale) ?? font
+        let smallFont =
+            NSFont(
+                descriptor: font.fontDescriptor,
+                size: font.pointSize * scriptScale) ?? font
         var out = baseBox
         var scriptWidth: CGFloat = 0
 

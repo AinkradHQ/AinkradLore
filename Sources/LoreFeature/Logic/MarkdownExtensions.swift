@@ -89,8 +89,10 @@ public enum MarkdownExtensions {
     ///
     /// - Parameter linkRanges: a `#` inside one of these (a link target or a
     ///   wikilink's fragment) is never a tag — see `scanTags`.
-    static func scan(_ text: NSString, masked: [Range<Int>],
-                     linkRanges: [Range<Int>] = []) -> [Span] {
+    static func scan(
+        _ text: NSString, masked: [Range<Int>],
+        linkRanges: [Range<Int>] = []
+    ) -> [Span] {
         var found: [Span] = []
         var claimed = ClaimedBitmap(length: text.length)
         // Built ONCE per scan, not per character: `isClaimed` used to
@@ -98,10 +100,12 @@ public enum MarkdownExtensions {
         // sort-and-coalesce paid once per offset scanned — O(n² log n)
         // overall, strictly worse than the linear scan it replaced. See
         // `MarkdownDocumentModel.swift:31-34`.
-        let index = CodeRegionIndex(regions: masked.map {
-            CodeRegion(range: NSRange(location: $0.lowerBound, length: $0.count),
-                       kind: .fencedCodeBlock)
-        }, kinds: nil)
+        let index = CodeRegionIndex(
+            regions: masked.map {
+                CodeRegion(
+                    range: NSRange(location: $0.lowerBound, length: $0.count),
+                    kind: .fencedCodeBlock)
+            }, kinds: nil)
         // `linkRanges` gets the SAME treatment as `masked` above and for the
         // same reason: `scanTags` used to test membership with
         // `linkRanges.contains(where: { $0.contains(i) })`, a linear scan
@@ -113,10 +117,12 @@ public enum MarkdownExtensions {
         // `CodeRegionIndex` rather than inventing a second structure for
         // the same shape of data — same fix as the note above, and the same
         // bug this exact file already fixed once for the code mask.
-        let linkIndex = CodeRegionIndex(regions: linkRanges.map {
-            CodeRegion(range: NSRange(location: $0.lowerBound, length: $0.count),
-                       kind: .fencedCodeBlock)
-        }, kinds: nil)
+        let linkIndex = CodeRegionIndex(
+            regions: linkRanges.map {
+                CodeRegion(
+                    range: NSRange(location: $0.lowerBound, length: $0.count),
+                    kind: .fencedCodeBlock)
+            }, kinds: nil)
         // THE ORDER IS THE CONTRACT. Each scanner appends in the order
         // listed, and `isClaimed` stops a later one from taking an offset an
         // earlier one already has — that is what makes the precedence below
@@ -128,10 +134,10 @@ public enum MarkdownExtensions {
         // 1-2. Code regions and math arrive already masked, from
         //      `MarkdownDocumentModel` and `MarkdownMath`. They are not
         //      rescanned here — one answer to "is this inside code", not two.
-        scanHighlights(text, masked: index, found: &found, claimed: &claimed)   // 3
-        scanFootnotes(text, masked: index, found: &found, claimed: &claimed)    // 4, 5
-        scanTags(text, masked: index, found: &found, claimed: &claimed, linkIndex: linkIndex) // 6
-        scanBlockIDs(text, masked: index, found: &found, claimed: &claimed)     // 7
+        scanHighlights(text, masked: index, found: &found, claimed: &claimed)  // 3
+        scanFootnotes(text, masked: index, found: &found, claimed: &claimed)  // 4, 5
+        scanTags(text, masked: index, found: &found, claimed: &claimed, linkIndex: linkIndex)  // 6
+        scanBlockIDs(text, masked: index, found: &found, claimed: &claimed)  // 7
         return found.sorted { $0.range.lowerBound < $1.range.lowerBound }
     }
 
@@ -139,20 +145,33 @@ public enum MarkdownExtensions {
     ///
     /// Runs LAST, after math is masked: `^` is superscript inside `$…$`, and a
     /// block ID scanned first would claim it before the math scan could.
-    private static func scanBlockIDs(_ text: NSString, masked: CodeRegionIndex,
-                                     found: inout [Span], claimed: inout ClaimedBitmap) {
+    private static func scanBlockIDs(
+        _ text: NSString, masked: CodeRegionIndex,
+        found: inout [Span], claimed: inout ClaimedBitmap
+    ) {
         var i = 0
         while i < text.length {
-            guard text.character(at: i) == 0x5E,          // ^
-                  !isClaimed(i, masked: masked, claimed: claimed) else { i += 1; continue }
+            guard text.character(at: i) == 0x5E,  // ^
+                !isClaimed(i, masked: masked, claimed: claimed)
+            else {
+                i += 1
+                continue
+            }
             // Must be preceded by whitespace: `caret^abc` is one word.
-            guard i > 0 else { i += 1; continue }
+            guard i > 0 else {
+                i += 1
+                continue
+            }
             let before = text.character(at: i - 1)
-            guard before == 0x20 || before == 0x09 else { i += 1; continue }
+            guard before == 0x20 || before == 0x09 else {
+                i += 1
+                continue
+            }
             var j = i + 1
             while j < text.length {
                 let u = text.character(at: j)
-                let ok = (u >= 0x30 && u <= 0x39) || (u >= 0x41 && u <= 0x5A)
+                let ok =
+                    (u >= 0x30 && u <= 0x39) || (u >= 0x41 && u <= 0x5A)
                     || (u >= 0x61 && u <= 0x7A) || u == 0x2D
                 guard ok else { break }
                 j += 1
@@ -165,9 +184,13 @@ public enum MarkdownExtensions {
             let id = text.substring(with: NSRange(location: i + 1, length: j - (i + 1)))
             // Must run to the end of the line — a block ID is a trailing
             // anchor, not something in the middle of a sentence.
-            let atLineEnd = j >= text.length || text.character(at: j) == 0x0A
+            let atLineEnd =
+                j >= text.length || text.character(at: j) == 0x0A
                 || text.character(at: j) == 0x0D
-            guard !id.isEmpty, atLineEnd else { i = max(j, i + 1); continue }
+            guard !id.isEmpty, atLineEnd else {
+                i = max(j, i + 1)
+                continue
+            }
             found.append(Span(range: i..<j, content: (i + 1)..<j, kind: .blockID(id: id)))
             claimed.mark(i..<j)
             i = j
@@ -179,19 +202,28 @@ public enum MarkdownExtensions {
     /// `#` is the most overloaded character in markdown — heading marker,
     /// wikilink fragment separator, URL anchor, shebang — so this is mostly a
     /// list of disqualifications. Every one of them has a test.
-    private static func scanTags(_ text: NSString, masked: CodeRegionIndex,
-                                 found: inout [Span], claimed: inout ClaimedBitmap,
-                                 linkIndex: CodeRegionIndex) {
+    private static func scanTags(
+        _ text: NSString, masked: CodeRegionIndex,
+        found: inout [Span], claimed: inout ClaimedBitmap,
+        linkIndex: CodeRegionIndex
+    ) {
         var i = 0
         while i < text.length {
-            guard text.character(at: i) == 0x23,          // #
-                  !isClaimed(i, masked: masked, claimed: claimed),
-                  !linkIndex.contains(i) else { i += 1; continue }
+            guard text.character(at: i) == 0x23,  // #
+                !isClaimed(i, masked: masked, claimed: claimed),
+                !linkIndex.contains(i)
+            else {
+                i += 1
+                continue
+            }
             // A heading: `#`(s) at line start, then a space. The AST owns it.
             if isAtLineStart(i, text: text) {
                 var h = i
                 while h < text.length, text.character(at: h) == 0x23 { h += 1 }
-                if h < text.length, text.character(at: h) == 0x20 { i = h; continue }
+                if h < text.length, text.character(at: h) == 0x20 {
+                    i = h
+                    continue
+                }
             }
             var j = i + 1
             var hasNonDigit = false
@@ -199,7 +231,7 @@ public enum MarkdownExtensions {
                 let u = text.character(at: j)
                 let isDigit = (u >= 0x30 && u <= 0x39)
                 let isLetter = (u >= 0x41 && u <= 0x5A) || (u >= 0x61 && u <= 0x7A) || u > 0x7F
-                let isJoiner = u == 0x5F || u == 0x2D || u == 0x2F    // _ - /
+                let isJoiner = u == 0x5F || u == 0x2D || u == 0x2F  // _ - /
                 guard isDigit || isLetter || isJoiner else { break }
                 if isLetter || isJoiner { hasNonDigit = true }
                 j += 1
@@ -214,12 +246,18 @@ public enum MarkdownExtensions {
             let name = text.substring(with: NSRange(location: i + 1, length: j - (i + 1)))
             // At least one non-digit, or `#1234` (an issue reference) becomes a
             // tag and every changelog in the vault fills with them.
-            guard hasNonDigit, !name.isEmpty else { i += 1; continue }
+            guard hasNonDigit, !name.isEmpty else {
+                i += 1
+                continue
+            }
             // A trailing `/` is notation the author was mid-typing, not part of
             // the name — but it stays inside the SPAN so the chip does not
             // visibly clip while they type.
             let trimmed = name.hasSuffix("/") ? String(name.dropLast()) : name
-            guard !trimmed.isEmpty else { i += 1; continue }
+            guard !trimmed.isEmpty else {
+                i += 1
+                continue
+            }
             found.append(Span(range: i..<j, content: (i + 1)..<j, kind: .tag(name: trimmed)))
             claimed.mark(i..<j)
             i = j
@@ -232,28 +270,43 @@ public enum MarkdownExtensions {
     /// line start is a definition and the same characters mid-line are a
     /// reference — the two differ only by position, so one scan decides both
     /// rather than two scans racing.
-    private static func scanFootnotes(_ text: NSString, masked: CodeRegionIndex,
-                                      found: inout [Span], claimed: inout ClaimedBitmap) {
+    private static func scanFootnotes(
+        _ text: NSString, masked: CodeRegionIndex,
+        found: inout [Span], claimed: inout ClaimedBitmap
+    ) {
         var i = 0
         while i + 2 < text.length {
-            guard text.character(at: i) == 0x5B,          // [
-                  text.character(at: i + 1) == 0x5E,      // ^
-                  !isClaimed(i, masked: masked, claimed: claimed) else { i += 1; continue }
+            guard text.character(at: i) == 0x5B,  // [
+                text.character(at: i + 1) == 0x5E,  // ^
+                !isClaimed(i, masked: masked, claimed: claimed)
+            else {
+                i += 1
+                continue
+            }
             // A preceding `!` makes this an embed, never a footnote.
-            if i > 0, text.character(at: i - 1) == 0x21 { i += 1; continue }
+            if i > 0, text.character(at: i - 1) == 0x21 {
+                i += 1
+                continue
+            }
             var j = i + 2
             var valid = true
-            while j < text.length, text.character(at: j) != 0x5D {   // ]
+            while j < text.length, text.character(at: j) != 0x5D {  // ]
                 let u = text.character(at: j)
                 // No whitespace in a label — that is what separates a footnote
                 // from a bracketed aside the author wrote by hand. `0x0D`
                 // alongside `0x0A`: "\r\n" is two UTF-16 units and either half
                 // alone still means "not a label" — see `scanHighlights` and
                 // `isAtLineStart`, which the same CRLF consistency pass fixed.
-                if u == 0x20 || u == 0x09 || u == 0x0A || u == 0x0D { valid = false; break }
+                if u == 0x20 || u == 0x09 || u == 0x0A || u == 0x0D {
+                    valid = false
+                    break
+                }
                 j += 1
             }
-            guard valid, j < text.length, j > i + 2 else { i += 1; continue }
+            guard valid, j < text.length, j > i + 2 else {
+                i += 1
+                continue
+            }
             // The label is sliced from the SOURCE over the matched UTF-16
             // range in one operation, not built scalar-by-scalar — the exact
             // bug this branch already fixed for `scanTags`' `name` and
@@ -266,12 +319,16 @@ public enum MarkdownExtensions {
             let label = text.substring(with: NSRange(location: i + 2, length: j - (i + 2)))
             let closeEnd = j + 1
             let atLineStart = isAtLineStart(i, text: text)
-            let isDefinition = atLineStart && closeEnd < text.length
-                && text.character(at: closeEnd) == 0x3A          // :
+            let isDefinition =
+                atLineStart && closeEnd < text.length
+                && text.character(at: closeEnd) == 0x3A  // :
             let end = isDefinition ? closeEnd + 1 : closeEnd
-            found.append(Span(range: i..<end, content: (i + 2)..<j,
-                              kind: isDefinition ? .footnoteDefinition(label: label)
-                                                 : .footnoteReference(label: label)))
+            found.append(
+                Span(
+                    range: i..<end, content: (i + 2)..<j,
+                    kind: isDefinition
+                        ? .footnoteDefinition(label: label)
+                        : .footnoteReference(label: label)))
             claimed.mark(i..<end)
             i = end
         }
@@ -290,7 +347,11 @@ public enum MarkdownExtensions {
             // this and `scanBlockIDs`' `atLineEnd`, which already checks
             // both.
             if u == 0x0A || u == 0x0D { return true }
-            if u == 0x20 { spaces += 1; k -= 1; continue }
+            if u == 0x20 {
+                spaces += 1
+                k -= 1
+                continue
+            }
             return false
         }
         return k < 0
@@ -299,12 +360,18 @@ public enum MarkdownExtensions {
     /// `==text==`. Paired, equal delimiters, SINGLE LINE — Obsidian's own
     /// behaviour, and the constraint that keeps a stray `==` from swallowing
     /// the rest of a document.
-    private static func scanHighlights(_ text: NSString, masked: CodeRegionIndex,
-                                       found: inout [Span], claimed: inout ClaimedBitmap) {
+    private static func scanHighlights(
+        _ text: NSString, masked: CodeRegionIndex,
+        found: inout [Span], claimed: inout ClaimedBitmap
+    ) {
         var i = 0
         while i + 1 < text.length {
             guard text.character(at: i) == 0x3D, text.character(at: i + 1) == 0x3D,
-                  !isClaimed(i, masked: masked, claimed: claimed) else { i += 1; continue }
+                !isClaimed(i, masked: masked, claimed: claimed)
+            else {
+                i += 1
+                continue
+            }
             let contentStart = i + 2
             var j = contentStart
             // Stop at the line end: an unclosed `==` must emit nothing, not
@@ -318,9 +385,13 @@ public enum MarkdownExtensions {
                 j += 1
             }
             guard j + 1 < text.length,
-                  text.character(at: j) == 0x3D, text.character(at: j + 1) == 0x3D,
-                  j > contentStart,                                  // non-empty
-                  !isClaimed(j, masked: masked, claimed: claimed) else { i += 1; continue }
+                text.character(at: j) == 0x3D, text.character(at: j + 1) == 0x3D,
+                j > contentStart,  // non-empty
+                !isClaimed(j, masked: masked, claimed: claimed)
+            else {
+                i += 1
+                continue
+            }
             found.append(Span(range: i..<(j + 2), content: contentStart..<j, kind: .highlight))
             claimed.mark(i..<(j + 2))
             i = j + 2
@@ -334,8 +405,10 @@ public enum MarkdownExtensions {
     /// `claimed` is the bitmap every scanner marks as it appends to `found` —
     /// see `ClaimedBitmap` — so this is two O(1)/O(log n) checks, never a
     /// scan over a collection that grows with the document.
-    static func isClaimed(_ offset: Int, masked: CodeRegionIndex,
-                          claimed: ClaimedBitmap) -> Bool {
+    static func isClaimed(
+        _ offset: Int, masked: CodeRegionIndex,
+        claimed: ClaimedBitmap
+    ) -> Bool {
         masked.contains(offset) || claimed.contains(offset)
     }
 }

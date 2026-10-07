@@ -1,17 +1,22 @@
 import XCTest
+
 @testable import LoreFeature
 
 final class TransclusionResolverTests: XCTestCase {
 
-    private func resolve(_ target: String,
-                         files: [String: String],
-                         path: [URL] = []) -> TransclusionContent {
+    private func resolve(
+        _ target: String,
+        files: [String: String],
+        path: [URL] = []
+    ) -> TransclusionContent {
         // NOTE the shape: `LinkResolver.init` takes tuples, not bare URLs
         // (`Sources/LoreFeature/Logic/LinkResolver.swift:51`).
         let docs = files.keys.map { name in
-            (url: URL(fileURLWithPath: "/vault/\(name)"),
-             title: (name as NSString).deletingPathExtension,
-             aliases: [String]())
+            (
+                url: URL(fileURLWithPath: "/vault/\(name)"),
+                title: (name as NSString).deletingPathExtension,
+                aliases: [String]()
+            )
         }
         let resolver = LinkResolver(documents: docs)
         return TransclusionResolver.resolve(
@@ -25,23 +30,29 @@ final class TransclusionResolverTests: XCTestCase {
     }
 
     func test_wholeNote_stripsFrontmatter() {
-        let content = resolve("note.md", files: [
-            "note.md": "---\ntitle: T\n---\n# Heading\n\nBody text.",
-        ])
+        let content = resolve(
+            "note.md",
+            files: [
+                "note.md": "---\ntitle: T\n---\n# Heading\n\nBody text."
+            ])
         XCTAssertEqual(content, .content("# Heading\n\nBody text."))
     }
 
     func test_blockFragment_returnsThatBlockOnly() {
-        let content = resolve("note.md#^abc", files: [
-            "note.md": "First para.\n\nSecond para. ^abc\n\nThird para.",
-        ])
+        let content = resolve(
+            "note.md#^abc",
+            files: [
+                "note.md": "First para.\n\nSecond para. ^abc\n\nThird para."
+            ])
         XCTAssertEqual(content, .content("Second para. ^abc"))
     }
 
     func test_headingFragment_returnsUntilNextHeadingOfSameOrHigherLevel() {
-        let content = resolve("note.md#Two", files: [
-            "note.md": "# One\n\nA\n\n## Two\n\nB\n\n## Three\n\nC",
-        ])
+        let content = resolve(
+            "note.md#Two",
+            files: [
+                "note.md": "# One\n\nA\n\n## Two\n\nB\n\n## Three\n\nC"
+            ])
         XCTAssertEqual(content, .content("## Two\n\nB"))
     }
 
@@ -78,9 +89,11 @@ final class TransclusionResolverTests: XCTestCase {
     }
 
     func test_crlfTargetSlicesWithoutEatingAByte() {
-        let content = resolve("note.md#^abc", files: [
-            "note.md": "First.\r\n\r\nSecond. ^abc\r\n\r\nThird.",
-        ])
+        let content = resolve(
+            "note.md#^abc",
+            files: [
+                "note.md": "First.\r\n\r\nSecond. ^abc\r\n\r\nThird."
+            ])
         XCTAssertEqual(content, .content("Second. ^abc"))
     }
 

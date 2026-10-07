@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 final class MarkdownExtensionsTests: XCTestCase {
@@ -21,8 +22,8 @@ final class MarkdownExtensionsTests: XCTestCase {
         let spans = scan("a ==lit== b")
         XCTAssertEqual(spans.count, 1)
         XCTAssertEqual(spans.first?.kind, .highlight)
-        XCTAssertEqual(spans.first?.range, 2..<9)     // ==lit==
-        XCTAssertEqual(spans.first?.content, 4..<7)   // lit
+        XCTAssertEqual(spans.first?.range, 2..<9)  // ==lit==
+        XCTAssertEqual(spans.first?.content, 4..<7)  // lit
     }
 
     func test_highlight_emptyContentEmitsNothing() {
@@ -64,8 +65,9 @@ final class MarkdownExtensionsTests: XCTestCase {
     }
 
     func test_footnoteReference_namedLabel() {
-        XCTAssertEqual(scan("x[^why-it-matters]").first?.kind,
-                       .footnoteReference(label: "why-it-matters"))
+        XCTAssertEqual(
+            scan("x[^why-it-matters]").first?.kind,
+            .footnoteReference(label: "why-it-matters"))
     }
 
     func test_footnoteReference_emptyLabelEmitsNothing() {
@@ -88,12 +90,13 @@ final class MarkdownExtensionsTests: XCTestCase {
     func test_footnoteDefinition_atLineStart() {
         let spans = scan("[^1]: the note")
         XCTAssertEqual(spans.first?.kind, .footnoteDefinition(label: "1"))
-        XCTAssertEqual(spans.first?.range, 0..<5)     // `[^1]:`
+        XCTAssertEqual(spans.first?.range, 0..<5)  // `[^1]:`
     }
 
     func test_footnoteDefinition_midLineIsAReferenceNotADefinition() {
-        XCTAssertEqual(scan("see [^1]: here").first?.kind,
-                       .footnoteReference(label: "1"))
+        XCTAssertEqual(
+            scan("see [^1]: here").first?.kind,
+            .footnoteReference(label: "1"))
     }
 
     func test_footnoteReference_astralCharacterSurvivesInLabel() {
@@ -101,8 +104,9 @@ final class MarkdownExtensionsTests: XCTestCase {
         // must not be mangled into "?" — the label is the key `jumpFootnote`
         // matches on, so two different astral labels collapsing to the same
         // string would jump to the wrong footnote.
-        XCTAssertEqual(scan("x[^🎈label]").first?.kind,
-                       .footnoteReference(label: "🎈label"))
+        XCTAssertEqual(
+            scan("x[^🎈label]").first?.kind,
+            .footnoteReference(label: "🎈label"))
     }
 
     func test_footnote_insideCodeEmitsNothing() {
@@ -118,13 +122,15 @@ final class MarkdownExtensionsTests: XCTestCase {
     }
 
     func test_tag_nested() {
-        XCTAssertEqual(scan("#project/ainkrad").first?.kind,
-                       .tag(name: "project/ainkrad"))
+        XCTAssertEqual(
+            scan("#project/ainkrad").first?.kind,
+            .tag(name: "project/ainkrad"))
     }
 
     func test_tag_withHyphenAndUnderscore() {
-        XCTAssertEqual(scan("#well-known_thing").first?.kind,
-                       .tag(name: "well-known_thing"))
+        XCTAssertEqual(
+            scan("#well-known_thing").first?.kind,
+            .tag(name: "well-known_thing"))
     }
 
     func test_tag_headingIsNotATag() {
@@ -171,7 +177,7 @@ final class MarkdownExtensionsTests: XCTestCase {
     func test_tag_trailingPunctuationIsNotPartOfIt() {
         let spans = scan("about #idea.")
         XCTAssertEqual(spans.first?.kind, .tag(name: "idea"))
-        XCTAssertEqual(spans.first?.range, 6..<11)   // excludes the full stop
+        XCTAssertEqual(spans.first?.range, 6..<11)  // excludes the full stop
     }
 
     func test_tag_astralCharacterSurvivesInName() {
@@ -269,8 +275,9 @@ final class MarkdownExtensionsTests: XCTestCase {
     }
 
     func test_footnoteDefinition_atLineStart_afterCRLF() {
-        XCTAssertEqual(scan("intro\r\n[^1]: the note").last?.kind,
-                       .footnoteDefinition(label: "1"))
+        XCTAssertEqual(
+            scan("intro\r\n[^1]: the note").last?.kind,
+            .footnoteDefinition(label: "1"))
     }
 
     func test_blockID_atEndOfLine_CRLF() {
