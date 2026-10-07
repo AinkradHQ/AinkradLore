@@ -120,7 +120,7 @@ private struct MarkdownDocumentEditor: View {
     /// `onChange(of: titleFocused)`'s doc comment.
     @State private var titleAtFocusStart: String = ""
     @State private var titleRefusal: String?
-    /// The alert's own title — distinct from "Couldn't rename" for
+    /// The dialog's own title — distinct from "Couldn't rename" for
     /// `.partial`, where the rename actually SUCCEEDED and only something
     /// afterward (persisting the title, an unrewritable link) did not; that
     /// case previously reused "Couldn't rename" verbatim, which is simply
@@ -275,16 +275,10 @@ private struct MarkdownDocumentEditor: View {
             titleAtFocusStart = engine.note.title
             ctx.registerScrollHandler { offset in scrollTarget = offset }
         }
-        .alert(
-            titleAlertTitle,
-            isPresented: Binding(
-                get: { titleRefusal != nil },
-                set: { if !$0 { titleRefusal = nil } })
-        ) {
-            Button("OK") { titleRefusal = nil }
-        } message: {
-            Text(titleRefusal ?? "")
-        }
+        .loreConfirmDialog(
+            titleRefusal.map { reason in
+                LoreConfirmation.titleRefusal(title: titleAlertTitle, reason: reason) { titleRefusal = nil }
+            })
     }
 
     /// The one place a title-field edit turns into a file rename. Called only

@@ -95,11 +95,12 @@ struct DocumentPane: View {
 
     @Environment(\.ainkradReduceMotion) private var reduceMotion
     @Environment(\.ainkradToastCenter) private var toasts
+    @Environment(\.ainkradSkin) private var skin
 
     /// The document stack and the modifiers that belong to it.
     ///
     /// `body` is split in two because the combined chain — the stack, six
-    /// modifiers, three overlays, an alert and a change handler — exceeded
+    /// modifiers, three overlays, a confirm dialog and a change handler — exceeded
     /// what the type-checker will attempt in one expression. The split point
     /// is arbitrary; the need for one is not.
     @ViewBuilder private var pane: some View {
@@ -153,7 +154,7 @@ struct DocumentPane: View {
             .overlay(alignment: .topTrailing) {
                 if showingActions {
                     ZStack(alignment: .topTrailing) {
-                        Color.black.opacity(0.001)
+                        skin.color(.palette("black", skin.opacity.hitTarget))
                             .ignoresSafeArea()
                             .contentShape(Rectangle())
                             .onTapGesture { showingActions = false }
@@ -184,7 +185,7 @@ struct DocumentPane: View {
             // `[[`-completion popup.
             .overlay {
                 if showingActions || showingMentions {
-                    Button("Close") {
+                    Button("Close") {  // design-lint: allow raw-control key-equivalent claim
                         showingActions = false
                         showingMentions = false
                     }
@@ -199,20 +200,13 @@ struct DocumentPane: View {
                 mentionsRequest = false
                 showingMentions.toggle()
             }
-            .alert(
-                "Create this note?",
-                isPresented: Binding(
-                    get: { unresolved != nil },
-                    set: { if !$0 { unresolved = nil } })
-            ) {
-                Button("Cancel", role: .cancel) { unresolved = nil }
-                Button("Create") {
-                    if let target = unresolved { createUnresolved(target) }
-                    unresolved = nil
+            .loreConfirmDialog(
+                unresolved.map { target in
+                    LoreConfirmation.createNote(
+                        named: target, store: store, onFailure: { createFailure = $0 },
+                        dismiss: { unresolved = nil })
                 }
-            } message: {
-                Text("\"\(unresolved ?? "")\" doesn't exist in this vault yet.")
-            }
+            )
             // A TOAST, not the "Not done" sheet this used to raise.
             //
             // The sentences are unchanged and still shown — the point of the

@@ -7,14 +7,14 @@ padding-literal 5
 spacing-literal 4
 radius-literal 2
 hex-color 0
-raw-color 2
-raw-control 9
+raw-color 1
+raw-control 5
 file-length 19
 try-bang 0
 force-cast 0
 force-unwrap 2
 print 0
-opacity-literal 22
+opacity-literal 21
 frame-literal 13
 chamfer-literal 0
 motion-literal 0

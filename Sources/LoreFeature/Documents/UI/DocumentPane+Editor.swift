@@ -232,22 +232,4 @@ extension DocumentPane {
                 }
             })
     }
-
-    /// Creates the note this dead link names, via the store's single
-    /// create-from-a-link path — see `LoreStore.createAndOpenNote(forLinkTarget:)`,
-    /// which owns the alias/fragment stripping and the folder split. The view's
-    /// only job is to show a failure instead of swallowing it.
-    ///
-    /// `.wikilink` is not a guess: this alert is reachable only from
-    /// `MarkdownEditor.Coordinator.openLink(atUTF16:)`, whose target comes from
-    /// `LinkCompletionContext.target(in:at:)` — a scanner that recognises `[[`
-    /// and `]]` and nothing else. A markdown link is not clickable here, so no
-    /// percent-decoding applies.
-    func createUnresolved(_ target: String) {
-        do {
-            try store.createAndOpenNote(forLinkTarget: target, syntax: .wikilink)
-        } catch {
-            createFailure = "Couldn't create \"\(target)\": \(error.localizedDescription)"
-        }
-    }
 }
