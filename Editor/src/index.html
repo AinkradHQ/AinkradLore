@@ -1669,32 +1669,42 @@
      derived from the theme, so the result sits correctly on a light or a dark
      surface. Same division as `MarkdownBlockBackgrounds.Palette`. */
   .cm-lore-callout {
-    --callout: hsl(var(--callout-hue) 65% 58%);
-    background: color-mix(in srgb, hsl(var(--callout-hue) 65% 58%) 9%, transparent);
-    border-left: 3px solid var(--callout);
-    padding-left: 12px;
+    --callout: hsl(var(--callout-hue) var(--lore-callout-saturation)
+                   var(--lore-callout-lightness));
+    background: color-mix(in srgb, hsl(var(--callout-hue) var(--lore-callout-saturation)
+                                       var(--lore-callout-lightness))
+                          calc(var(--ak-opacity-o09) * 100%), transparent);
+    border-left: var(--ak-size-s3) solid var(--callout);
+    padding-left: var(--ak-size-s12);
   }
-  .cm-lore-callout-head { padding-top: 6px; font-weight: 600; color: var(--callout);
-                          border-radius: 4px 4px 0 0; }
+  .cm-lore-callout-head { padding-top: var(--ak-size-s6); font-weight: 600;
+                          color: var(--callout);
+                          border-radius: var(--ak-size-s4) var(--ak-size-s4) 0 0; }
   .cm-lore-callout-body { color: var(--ak-palette-foreground); }
-  .cm-lore-callout-last { padding-bottom: 6px; border-radius: 0 0 4px 4px; }
+  .cm-lore-callout-last { padding-bottom: var(--ak-size-s6);
+                          border-radius: 0 0 var(--ak-size-s4) var(--ak-size-s4); }
   /* A one-line callout is both the first line and the last. */
-  .cm-lore-callout-head.cm-lore-callout-last { border-radius: 4px; }
-  .cm-lore-callout-icon { margin-right: 6px; }
+  .cm-lore-callout-head.cm-lore-callout-last { border-radius: var(--ak-size-s4); }
+  .cm-lore-callout-icon { margin-right: var(--ak-size-s6); }
   .cm-lore-callout-default-title { font-weight: 600; }
 
-  .cm-lore-callout-note,    .cm-lore-callout-info     { --callout-hue: 210; }
-  .cm-lore-callout-abstract, .cm-lore-callout-tip     { --callout-hue: 175; }
-  .cm-lore-callout-todo,    .cm-lore-callout-question { --callout-hue: 45; }
-  .cm-lore-callout-success                            { --callout-hue: 140; }
-  .cm-lore-callout-warning                            { --callout-hue: 30; }
-  .cm-lore-callout-failure, .cm-lore-callout-danger   { --callout-hue: 0; }
-  .cm-lore-callout-bug                                { --callout-hue: 350; }
-  .cm-lore-callout-example                            { --callout-hue: 275; }
+  /* The hue table is `MarkdownCallout.Kind.hue`, the native editor's own. */
+  .cm-lore-callout-note      { --callout-hue: var(--lore-callout-note-hue); }
+  .cm-lore-callout-info      { --callout-hue: var(--lore-callout-info-hue); }
+  .cm-lore-callout-abstract  { --callout-hue: var(--lore-callout-abstract-hue); }
+  .cm-lore-callout-tip       { --callout-hue: var(--lore-callout-tip-hue); }
+  .cm-lore-callout-todo      { --callout-hue: var(--lore-callout-todo-hue); }
+  .cm-lore-callout-question  { --callout-hue: var(--lore-callout-question-hue); }
+  .cm-lore-callout-success   { --callout-hue: var(--lore-callout-success-hue); }
+  .cm-lore-callout-warning   { --callout-hue: var(--lore-callout-warning-hue); }
+  .cm-lore-callout-failure   { --callout-hue: var(--lore-callout-failure-hue); }
+  .cm-lore-callout-danger    { --callout-hue: var(--lore-callout-danger-hue); }
+  .cm-lore-callout-bug       { --callout-hue: var(--lore-callout-bug-hue); }
+  .cm-lore-callout-example   { --callout-hue: var(--lore-callout-example-hue); }
   /* `quote` is a callout with no colour of its own — Obsidian renders it as an
      ordinary quote with a heading, so it borrows the foreground. */
   .cm-lore-callout-quote {
-    --callout: color-mix(in srgb, var(--ak-palette-foreground) 45%, transparent);
+    --callout: var(--ak-text-faint);
     background: transparent;
   }
 
