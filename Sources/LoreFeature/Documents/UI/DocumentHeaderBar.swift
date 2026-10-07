@@ -177,7 +177,7 @@ struct DocumentHeaderBar: View {
 /// Wakes once after five seconds and once after a minute, then STOPS. A
 /// repeating ticker would redraw the header forever for a label that stops
 /// changing after a minute — exactly the class of cost
-/// `OutlineRefreshDebouncer` was written to remove.
+/// `MainRunLoopDebouncer` was written to remove.
 enum RelativeClock {
     static func tick(_ update: @escaping @MainActor (Date) -> Void) async {
         for delay in [UInt64(5), UInt64(55)] {

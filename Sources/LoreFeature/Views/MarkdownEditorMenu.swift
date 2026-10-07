@@ -77,32 +77,10 @@ enum EditorSpellCheck {
 /// `MarkdownEditor.Coordinator.scheduleParse`'s debounce — rather than
 /// inventing a second scheme: a burst of caret movement costs one lookup,
 /// after it settles, not one per keypress.
-@MainActor
-final class MenuSuggestionDebouncer {
-    static let interval: TimeInterval = 0.15
-
-    // `nonisolated(unsafe)`: `deinit` on a `@MainActor` class is itself
-    // nonisolated (it may run once nothing else can reach `self`), so it
-    // cannot touch a main-actor-isolated stored property without this. Every
-    // OTHER access to `timer` is still on the main actor, through this
-    // class's own main-actor-isolated methods.
-    private nonisolated(unsafe) var timer: Timer?
-
-    deinit { timer?.invalidate() }
-
-    func schedule(
-        text: String, offset: Int, tag: Int,
-        apply: @escaping @MainActor ([String]) -> Void
-    ) {
-        timer?.invalidate()
-        let t = Timer(timeInterval: Self.interval, repeats: false) { _ in
-            MainActor.assumeIsolated {
-                apply(EditorSpellCheck.suggestions(at: offset, in: text, tag: tag)?.1 ?? [])
-            }
-        }
-        timer = t
-        RunLoop.main.add(t, forMode: .common)
-    }
+extension EditorSpellCheck {
+    /// How long the caret must rest before the lookup runs, through the
+    /// shared `MainRunLoopDebouncer`.
+    static let debounceInterval: TimeInterval = 0.15
 }
 
 /// Builds the `EditorMenuActions` the context menu runs, wired to `tv`'s own

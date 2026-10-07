@@ -39,7 +39,7 @@ struct DocumentPane: View {
     /// and `body` re-evaluates on every unrelated redraw (a banner appearing,
     /// a theme change). Same reasoning `BacklinksPanel` already applies to
     /// `backlinks`/`unresolved`. `@State`, not `let`, because a reference type
-    /// (`OutlineRefreshDebouncer`) is fine to hold across redraws but this
+    /// (`MainRunLoopDebouncer`) is fine to hold across redraws but this
     /// needs SwiftUI to redraw ON assignment.
     @State var outline: [OutlineEntry] = []
     /// Debounces the ONE trigger that can fire many times per second: typing.
@@ -51,7 +51,7 @@ struct DocumentPane: View {
     /// `Document(parsing:)`) and firing it on every keystroke, on the main
     /// actor, inside a SwiftUI `body`, is the exact regression Task 6 spent a
     /// task removing from the styling path.
-    @State var outlineDebouncer = OutlineRefreshDebouncer()
+    @State var outlineDebouncer = MainRunLoopDebouncer()
 
     /// Cached the same way `outline` is, and for the same reason: the bottom
     /// bar's badge needs a count even while the slideover is shut, but
@@ -239,30 +239,5 @@ struct DocumentPane: View {
     /// booleans are the only inputs the banner stack has.
     private var bannerSignature: [Bool] {
         [session.isReadOnly, session.conflict, session.lastSaveError != nil]
-    }
-}
-
-/// Coalesces a burst of `ctx.onChange` calls (one per keystroke) into a
-/// single refresh, exactly the shape `MarkdownEditor.Coordinator.
-/// scheduleParse` already uses for the same reason: only the LAST call in a
-/// burst should do the expensive work.
-///
-/// A class, not a struct, so `DocumentPane`'s `@State` can hold the SAME
-/// instance — and therefore the same in-flight `Timer` — across every body
-/// re-evaluation between keystrokes; a struct copy would lose the pending
-/// timer on every redraw and never coalesce anything.
-@MainActor
-final class OutlineRefreshDebouncer {
-    private var timer: Timer?
-
-    func schedule(after seconds: TimeInterval, _ action: @escaping @MainActor () -> Void) {
-        timer?.invalidate()
-        let t = Timer(timeInterval: seconds, repeats: false) { _ in
-            MainActor.assumeIsolated { action() }
-        }
-        timer = t
-        // `.common`, matching `Coordinator.scheduleParse`: the refresh must
-        // still land while the user is scrolling or holding a menu open.
-        RunLoop.main.add(t, forMode: .common)
     }
 }
