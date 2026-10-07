@@ -140,7 +140,8 @@ extension MarkdownEditor.Coordinator {
             default: continue
             }
             guard span.range.contains(index) else { continue }
-            if best == nil || span.range.count < best!.count { best = span.range }
+            if let current = best, current.count <= span.range.count { continue }
+            best = span.range
         }
         guard let best else { return nil }
         let range = NSRange(location: best.lowerBound, length: best.count)
