@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// One row in the palette, whichever mode it is in.
 ///
@@ -62,8 +62,9 @@ struct LorePalette: View {
     @Environment(\.ainkradTypography) private var typo
 
     private var items: [LorePaletteItem] {
-        Self.items(mode: mode, query: query, context: runner.context,
-                   rows: store.rows, vaultRoot: store.vaultRoot, outline: outline)
+        Self.items(
+            mode: mode, query: query, context: runner.context,
+            rows: store.rows, vaultRoot: store.vaultRoot, outline: outline)
     }
 
     var body: some View {
@@ -102,8 +103,9 @@ struct LorePalette: View {
 
             AinkradCommandMenu(
                 items: items,
-                selection: Binding(get: { selection },
-                                   set: { if let item = $0 { activate(item) } }),
+                selection: Binding(
+                    get: { selection },
+                    set: { if let item = $0 { activate(item) } }),
                 icon: { $0.systemName },
                 label: { $0.title },
                 detail: { $0.detail },
@@ -121,7 +123,10 @@ struct LorePalette: View {
         .background(theme.tokens.surfaceElevated)
         .clipShape(ChamferShape(cut: LoreMetrics.chamfer))
         .shadow(color: .black.opacity(0.35), radius: 18, y: 6)
-        .onAppear { fieldFocused = true; highlight = 0 }
+        .onAppear {
+            fieldFocused = true
+            highlight = 0
+        }
         // Retyping re-ranks the list, so a highlight left at index 7 would
         // point at a row that no longer exists — or worse, a different one.
         .onChange(of: query) { _, _ in highlight = items.isEmpty ? nil : 0 }
@@ -169,30 +174,35 @@ struct LorePalette: View {
     /// The rows for a mode and query. Pure and `static`, so the ranking is
     /// asserted directly — this project's standing rule for anything a view
     /// decides.
-    static func items(mode: LorePaletteMode, query: String,
-                      context: LoreCommands.Context, rows: [IndexRow],
-                      vaultRoot: URL?, outline: [OutlineEntry]) -> [LorePaletteItem] {
+    static func items(
+        mode: LorePaletteMode, query: String,
+        context: LoreCommands.Context, rows: [IndexRow],
+        vaultRoot: URL?, outline: [OutlineEntry]
+    ) -> [LorePaletteItem] {
         switch mode {
         case .commands:
             return LoreCommands.matching(query, in: context).map { command in
-                LorePaletteItem(id: "command:\(command.id.rawValue)",
-                                title: command.title,
-                                systemName: command.systemName,
-                                detail: command.shortcut?.display,
-                                payload: .command(command.id))
+                LorePaletteItem(
+                    id: "command:\(command.id.rawValue)",
+                    title: command.title,
+                    systemName: command.systemName,
+                    detail: command.shortcut?.display,
+                    payload: .command(command.id))
             }
         case .documents:
             return rankedDocuments(query, rows: rows, vaultRoot: vaultRoot)
         case .headings:
             let trimmed = query.trimmingCharacters(in: .whitespaces).lowercased()
-            return outline
+            return
+                outline
                 .filter { trimmed.isEmpty || $0.text.lowercased().contains(trimmed) }
                 .map { entry in
-                    LorePaletteItem(id: "heading:\(entry.utf16Offset)",
-                                    title: entry.text,
-                                    systemName: "number",
-                                    detail: "H\(entry.level)",
-                                    payload: .heading(entry.utf16Offset))
+                    LorePaletteItem(
+                        id: "heading:\(entry.utf16Offset)",
+                        title: entry.text,
+                        systemName: "number",
+                        detail: "H\(entry.level)",
+                        payload: .heading(entry.utf16Offset))
                 }
         }
     }
@@ -209,8 +219,10 @@ struct LorePalette: View {
     /// `store.search`, because this matches TITLES only — full-text search is
     /// a different question with a different surface, and mixing them would
     /// make Return unpredictable in a different way.
-    static func rankedDocuments(_ query: String, rows: [IndexRow],
-                                vaultRoot: URL?) -> [LorePaletteItem] {
+    static func rankedDocuments(
+        _ query: String, rows: [IndexRow],
+        vaultRoot: URL?
+    ) -> [LorePaletteItem] {
         let trimmed = query.trimmingCharacters(in: .whitespaces).lowercased()
         let scored: [(IndexRow, Int)] = rows.compactMap { row in
             let name = (row.title.isEmpty ? row.path.lastPathComponent : row.title)
@@ -220,23 +232,29 @@ struct LorePalette: View {
             // A match at a word boundary reads as intentional; one in the
             // middle of a word is usually incidental.
             if name.split(whereSeparator: { !$0.isLetter && !$0.isNumber })
-                .contains(where: { $0.hasPrefix(trimmed) }) { return (row, 1) }
+                .contains(where: { $0.hasPrefix(trimmed) })
+            {
+                return (row, 1)
+            }
             if name.contains(trimmed) { return (row, 2) }
             return nil
         }
-        return scored
+        return
+            scored
             .sorted {
-                $0.1 != $1.1 ? $0.1 < $1.1
+                $0.1 != $1.1
+                    ? $0.1 < $1.1
                     : $0.0.title.localizedCaseInsensitiveCompare($1.0.title) == .orderedAscending
             }
             .prefix(50)
             .map { row, _ in
-                LorePaletteItem(id: "doc:\(row.path.path)",
-                                title: row.title.isEmpty
-                                    ? row.path.lastPathComponent : row.title,
-                                systemName: LoreSidebarRow.icon(for: row),
-                                detail: folderHint(for: row.path, vaultRoot: vaultRoot),
-                                payload: .document(row.path))
+                LorePaletteItem(
+                    id: "doc:\(row.path.path)",
+                    title: row.title.isEmpty
+                        ? row.path.lastPathComponent : row.title,
+                    systemName: LoreSidebarRow.icon(for: row),
+                    detail: folderHint(for: row.path, vaultRoot: vaultRoot),
+                    payload: .document(row.path))
             }
     }
 
@@ -247,7 +265,8 @@ struct LorePalette: View {
         let root = VaultIndexCoordinator.canonical(vaultRoot).pathComponents
         let parts = VaultIndexCoordinator.canonical(url).pathComponents
         guard parts.count > root.count,
-              Array(parts.prefix(root.count)) == root else { return nil }
+            Array(parts.prefix(root.count)) == root
+        else { return nil }
         let folders = parts.dropFirst(root.count).dropLast()
         return folders.isEmpty ? nil : folders.joined(separator: "/")
     }

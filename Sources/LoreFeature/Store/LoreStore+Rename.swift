@@ -47,10 +47,12 @@ extension LoreStore {
         let canonicalSource = VaultIndexCoordinator.canonical(source)
         let parent = canonicalSource.deletingLastPathComponent()
         if let refusal = nameRejection(newName, in: parent) {
-            return RenamePlan(source: canonicalSource, destination: canonicalSource,
-                              edits: [], refusal: refusal)
+            return RenamePlan(
+                source: canonicalSource, destination: canonicalSource,
+                edits: [], refusal: refusal)
         }
-        let destination = parent
+        let destination =
+            parent
             .appendingPathComponent(newName)
             .appendingPathExtension(source.pathExtension)
         return planMove(canonicalSource, to: destination)
@@ -109,7 +111,8 @@ extension LoreStore {
             parent.appendingPathComponent(newName).standardizedFileURL)
         let components = destination.pathComponents
         guard components.count > rootComponents.count,
-              Array(components.prefix(rootComponents.count)) == rootComponents else {
+            Array(components.prefix(rootComponents.count)) == rootComponents
+        else {
             return "“\(newName)” would move it outside the vault."
         }
         return nil
@@ -137,10 +140,11 @@ extension LoreStore {
         let root = canonicalVaultRoot(fallback: canonicalSource.deletingLastPathComponent())
 
         let inbound = coordinator.inboundLinks(to: canonicalSource)
-        let plan = LinkRewriter.plan(renaming: canonicalSource,
-                                     to: canonicalDestination,
-                                     inboundLinks: inbound,
-                                     vaultRoot: root)
+        let plan = LinkRewriter.plan(
+            renaming: canonicalSource,
+            to: canonicalDestination,
+            inboundLinks: inbound,
+            vaultRoot: root)
         // Baselines are read HERE, not in `apply`. Reading them inside `apply`
         // (microseconds before comparing them) makes the external-change guard
         // tautological: it can never fire, and requirement 2 silently
@@ -202,7 +206,8 @@ extension LoreStore {
         var existingAncestor = destination.deletingLastPathComponent()
         var trailingComponents: [String] = [destination.lastPathComponent]
         while !FileManager.default.fileExists(atPath: existingAncestor.path),
-              existingAncestor.pathComponents.count > 1 {
+            existingAncestor.pathComponents.count > 1
+        {
             trailingComponents.insert(existingAncestor.lastPathComponent, at: 0)
             existingAncestor.deleteLastPathComponent()
         }
@@ -227,11 +232,11 @@ extension LoreStore {
     /// file", never as "assume it's fine, skip the collision guard".
     static func sameFileOnDisk(_ a: URL, _ b: URL) -> Bool {
         guard let attrsA = try? FileManager.default.attributesOfItem(atPath: a.path),
-              let attrsB = try? FileManager.default.attributesOfItem(atPath: b.path),
-              let inodeA = attrsA[.systemFileNumber] as? Int,
-              let inodeB = attrsB[.systemFileNumber] as? Int,
-              let deviceA = attrsA[.systemNumber] as? Int,
-              let deviceB = attrsB[.systemNumber] as? Int
+            let attrsB = try? FileManager.default.attributesOfItem(atPath: b.path),
+            let inodeA = attrsA[.systemFileNumber] as? Int,
+            let inodeB = attrsB[.systemFileNumber] as? Int,
+            let deviceA = attrsA[.systemNumber] as? Int,
+            let deviceB = attrsB[.systemNumber] as? Int
         else { return false }
         return inodeA == inodeB && deviceA == deviceB
     }
@@ -265,9 +270,11 @@ extension LoreStore {
     ///
     /// Does NOT move anything and does NOT reload anything: the caller performs
     /// its move (links first, always) and then calls `reloadRewritten`.
-    func rewriteInboundLinks(edits: [LinkEdit],
-                             baselines: [String: Date],
-                             movingPaths: Set<String>) -> LinkRewritePass {
+    func rewriteInboundLinks(
+        edits: [LinkEdit],
+        baselines: [String: Date],
+        movingPaths: Set<String>
+    ) -> LinkRewritePass {
         var pass = LinkRewritePass()
         var baselines = baselines
         // Keyed by `pathKey`, NOT by `edit.file.path`. Index-sourced edits are
@@ -326,9 +333,13 @@ extension LoreStore {
                 continue
             }
             do {
-                switch try LinkRewriter.applyEdits(fileEdits, to: file,
-                                                   baseline: baselines[path]) {
-                case .written:   pass.rewritten.append(file); pass.writtenPaths.insert(path)
+                switch try LinkRewriter.applyEdits(
+                    fileEdits, to: file,
+                    baseline: baselines[path])
+                {
+                case .written:
+                    pass.rewritten.append(file)
+                    pass.writtenPaths.insert(path)
                 case .unchanged: pass.unchanged.append(file)
                 case .skipped(let reason):
                     pass.skipped.append(SkippedFile(url: file, reason: reason))
@@ -358,9 +369,13 @@ extension LoreStore {
     /// Plan-time links that have no rewrite, as report failures. A rename that
     /// leaves a link broken must not report success.
     static func unrewritableFailures(_ links: [UnrewritableLink]) -> [(url: URL, reason: String)] {
-        links.map { ($0.sourceFile,
-                     "Could not rewrite the link “\($0.rawTarget)” — "
-                     + "the new location is outside the vault.") }
+        links.map {
+            (
+                $0.sourceFile,
+                "Could not rewrite the link “\($0.rawTarget)” — "
+                    + "the new location is outside the vault."
+            )
+        }
     }
 
     // MARK: - Applying
@@ -371,8 +386,9 @@ extension LoreStore {
     public func apply(_ plan: RenamePlan) -> RenameReport {
         // A refused plan writes nothing and creates nothing.
         if let refusal = plan.refusal {
-            return RenameReport(rewritten: [], skipped: [],
-                                failed: [(plan.source, refusal)], movedTo: nil)
+            return RenameReport(
+                rewritten: [], skipped: [],
+                failed: [(plan.source, refusal)], movedTo: nil)
         }
 
         var failed = Self.unrewritableFailures(plan.unrewritable)
@@ -438,8 +454,9 @@ extension LoreStore {
         coordinator.suppressWatcher(for: VaultIndexCoordinator.selfWriteSuppressionWindow)
 
         // Links FIRST, then the move.
-        let pass = rewriteInboundLinks(edits: plan.edits, baselines: plan.baselines,
-                                       movingPaths: isMove ? [Self.pathKey(plan.source)] : [])
+        let pass = rewriteInboundLinks(
+            edits: plan.edits, baselines: plan.baselines,
+            movingPaths: isMove ? [Self.pathKey(plan.source)] : [])
         failed += pass.failed
 
         var moved: URL?
@@ -477,9 +494,10 @@ extension LoreStore {
         let reportedRewrites = pass.rewritten.map {
             (moved != nil && $0.path == plan.source.path) ? plan.destination : $0
         }
-        return RenameReport(rewritten: reportedRewrites.sorted { $0.path < $1.path },
-                            skipped: pass.skipped.sorted { $0.url.path < $1.url.path },
-                            unchanged: pass.unchanged.sorted { $0.path < $1.path },
-                            failed: failed, movedTo: moved)
+        return RenameReport(
+            rewritten: reportedRewrites.sorted { $0.path < $1.path },
+            skipped: pass.skipped.sorted { $0.url.path < $1.url.path },
+            unchanged: pass.unchanged.sorted { $0.path < $1.path },
+            failed: failed, movedTo: moved)
     }
 }

@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 @MainActor
@@ -31,7 +32,7 @@ final class RelatedNotesTests: XCTestCase {
 
         let me = try XCTUnwrap(store.rows.first { $0.title == "Me" })
         let titles = store.relatedNotes(to: me.path).map(\.title)
-        XCTAssertEqual(Array(titles.prefix(2)).sorted(), ["Hub", "Target"])   // 3 each
-        XCTAssertEqual(Array(titles.dropFirst(2)), ["Cites", "Tagged"])        // 2, then 1
+        XCTAssertEqual(Array(titles.prefix(2)).sorted(), ["Hub", "Target"])  // 3 each
+        XCTAssertEqual(Array(titles.dropFirst(2)), ["Cites", "Tagged"])  // 2, then 1
     }
 }

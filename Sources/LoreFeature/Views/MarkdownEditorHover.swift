@@ -70,14 +70,16 @@ extension MarkdownEditor.Coordinator {
         // flight. Presenting now would show a preview for a link nobody is
         // pointing at.
         guard hoverTask?.isCancelled == false else { return }
-        let rect = tv.firstRect(forCharacterRange: NSRange(location: index, length: 0),
-                                actualRange: nil)
-        previewPanel.show(title: url.deletingPathExtension().lastPathComponent,
-                          excerpt: excerpt,
-                          target: target,
-                          tokens: tokens,
-                          near: rect,
-                          over: tv)
+        let rect = tv.firstRect(
+            forCharacterRange: NSRange(location: index, length: 0),
+            actualRange: nil)
+        previewPanel.show(
+            title: url.deletingPathExtension().lastPathComponent,
+            excerpt: excerpt,
+            target: target,
+            tokens: tokens,
+            near: rect,
+            over: tv)
     }
 
     // MARK: - The hover underline
@@ -111,15 +113,17 @@ extension MarkdownEditor.Coordinator {
             let live = NSIntersectionRange(
                 previous, NSRange(location: 0, length: (tv.string as NSString).length))
             if live.length > 0 {
-                layoutManager.removeTemporaryAttribute(.underlineStyle,
-                                                       forCharacterRange: live)
+                layoutManager.removeTemporaryAttribute(
+                    .underlineStyle,
+                    forCharacterRange: live)
             }
         }
         hoveredLinkRange = range
         guard let range else { return }
-        layoutManager.addTemporaryAttribute(.underlineStyle,
-                                            value: NSUnderlineStyle.single.rawValue,
-                                            forCharacterRange: range)
+        layoutManager.addTemporaryAttribute(
+            .underlineStyle,
+            value: NSUnderlineStyle.single.rawValue,
+            forCharacterRange: range)
     }
 
     /// The `.link`/`.wikilink` span containing `index`, as an `NSRange`.

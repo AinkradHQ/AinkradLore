@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 @MainActor
@@ -23,8 +24,10 @@ final class TransclusionLayoutTests: XCTestCase {
     }
 
     func test_everyFailureStateStillReservesVisibleHeight() {
-        for c in [TransclusionContent.circular, .tooDeep,
-                  .unreadable("nope"), .missingFragment("Body.", "abc")] {
+        for c in [
+            TransclusionContent.circular, .tooDeep,
+            .unreadable("nope"), .missingFragment("Body.", "abc"),
+        ] {
             let h = TransclusionLayout.height(for: c, width: 600, theme: theme)
             XCTAssertGreaterThan(h, 0, "\(c) reserved a blank gap")
         }

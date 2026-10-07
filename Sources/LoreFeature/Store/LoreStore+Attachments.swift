@@ -3,7 +3,7 @@ import Foundation
 /// Writing attachments dropped or pasted into a note. Task 9: an embed is
 /// only as easy to create as the file behind it is easy to place, so this
 /// exists to make "drag a PNG in" and "⌘V a screenshot" both just work.
-public extension LoreStore {
+extension LoreStore {
     /// Writes an attachment BESIDE `noteURL` and returns where it landed.
     ///
     /// Beside the note, not in a vault-wide `_attachments/`: a folder subtree
@@ -20,8 +20,10 @@ public extension LoreStore {
     /// DIRECTORY (symlink-aware, same guard `create(title:in:)` uses), not
     /// merely on the string. A name like `../../etc/passwd` or a name that is
     /// only dots must never be able to escape `noteURL`'s directory.
-    func writeAttachment(data: Data, preferredName: String,
-                         besideNote noteURL: URL) throws -> URL {
+    public func writeAttachment(
+        data: Data, preferredName: String,
+        besideNote noteURL: URL
+    ) throws -> URL {
         let directory = noteURL.deletingLastPathComponent()
         guard let root = vaultRoot, Self.isContained(directory, in: root) else {
             throw LoreError.outsideVault(noteURL)
@@ -70,10 +72,10 @@ public extension LoreStore {
     /// (directories are never indexed, so the link can never resolve). Only
     /// a regular file — or a symlink that ultimately resolves to one — is
     /// accepted; anything else is rejected before any bytes move.
-    func writeAttachment(copying sourceURL: URL, besideNote noteURL: URL) throws -> URL {
+    public func writeAttachment(copying sourceURL: URL, besideNote noteURL: URL) throws -> URL {
         var isDirectory: ObjCBool = false
         guard FileManager.default.fileExists(atPath: sourceURL.path, isDirectory: &isDirectory),
-              !isDirectory.boolValue
+            !isDirectory.boolValue
         else { throw LoreError.notARegularFile(sourceURL) }
         let directory = noteURL.deletingLastPathComponent()
         guard let root = vaultRoot, Self.isContained(directory, in: root) else {
@@ -97,8 +99,9 @@ public extension LoreStore {
         // source.
         if sourceURL.deletingLastPathComponent().standardizedFileURL.path
             == directory.standardizedFileURL.path,
-           FileManager.default.fileExists(atPath: sourceURL.path),
-           Self.sanitized(sourceURL.lastPathComponent) == sourceURL.lastPathComponent {
+            FileManager.default.fileExists(atPath: sourceURL.path),
+            Self.sanitized(sourceURL.lastPathComponent) == sourceURL.lastPathComponent
+        {
             return sourceURL
         }
         let destination = Self.nonCollidingURL(
@@ -117,7 +120,7 @@ public extension LoreStore {
     /// see `sanitized`'s doc comment. The file on disk and the link that
     /// names it must always agree, which is only true if both come from the
     /// SAME sanitized string.
-    func embedSyntax(for attachmentURL: URL) -> String {
+    public func embedSyntax(for attachmentURL: URL) -> String {
         "![[\(attachmentURL.lastPathComponent)]]"
     }
 
@@ -158,10 +161,11 @@ public extension LoreStore {
     /// that by budgeting BYTES and walking back to a scalar boundary —
     /// the exact technique `VaultIndexCoordinator.capped` already uses for
     /// the same reason, copied rather than reinvented.
-    nonisolated static func sanitized(_ name: String) -> String {
+    public nonisolated static func sanitized(_ name: String) -> String {
         let forbidden = CharacterSet(charactersIn: "/:]|#\u{0}").union(.newlines)
-        var cleaned = String(String.UnicodeScalarView(
-            name.unicodeScalars.map { forbidden.contains($0) ? "-" : $0 }))
+        var cleaned = String(
+            String.UnicodeScalarView(
+                name.unicodeScalars.map { forbidden.contains($0) ? "-" : $0 }))
         cleaned = cleaned.trimmingCharacters(in: .whitespacesAndNewlines)
         let withoutLeadingDots = cleaned.drop(while: { $0 == "." })
         guard !withoutLeadingDots.isEmpty else { return "attachment" }
@@ -202,7 +206,7 @@ public extension LoreStore {
     /// starting at `preferredName` and then trying ` 2`, ` 3`, … before the
     /// extension — Finder's own collision shape, so it reads as familiar
     /// rather than invented.
-    static func nonCollidingURL(in directory: URL, preferredName: String) -> URL {
+    public static func nonCollidingURL(in directory: URL, preferredName: String) -> URL {
         let base = (preferredName as NSString).deletingPathExtension
         let ext = (preferredName as NSString).pathExtension
         var candidate = directory.appendingPathComponent(preferredName)

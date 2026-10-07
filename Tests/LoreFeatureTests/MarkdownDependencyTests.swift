@@ -1,5 +1,6 @@
-import XCTest
 import Markdown
+import XCTest
+
 @testable import LoreFeature
 
 final class MarkdownDependencyTests: XCTestCase {

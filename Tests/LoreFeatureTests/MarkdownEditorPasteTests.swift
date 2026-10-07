@@ -1,5 +1,6 @@
-import XCTest
 import AppKit
+import XCTest
+
 @testable import LoreFeature
 
 /// `LinkTextView.paste(_:)` — the Task 9 fix-round-1 regression coverage for
@@ -56,7 +57,10 @@ final class MarkdownEditorPasteTests: XCTestCase {
         let tv = textView("before ")
         tv.setSelectedRange(NSRange(location: tv.string.utf16.count, length: 0))
         var handlerCalled = false
-        tv.onPasteImage = { _, _ in handlerCalled = true; return true }
+        tv.onPasteImage = { _, _ in
+            handlerCalled = true
+            return true
+        }
 
         tv.paste(nil)
 
@@ -106,9 +110,15 @@ final class MarkdownEditorPasteTests: XCTestCase {
 
         let tv = textView("")
         var receivedURLs: [URL]?
-        tv.onDropFileURLs = { urls in receivedURLs = urls; return true }
+        tv.onDropFileURLs = { urls in
+            receivedURLs = urls
+            return true
+        }
         var imageHandlerCalled = false
-        tv.onPasteImage = { _, _ in imageHandlerCalled = true; return true }
+        tv.onPasteImage = { _, _ in
+            imageHandlerCalled = true
+            return true
+        }
 
         tv.paste(nil)
 
@@ -151,7 +161,10 @@ final class MarkdownEditorPasteTests: XCTestCase {
 
         let tv = textView("")
         var receivedData: Data?
-        tv.onPasteImage = { data, _ in receivedData = data; return true }
+        tv.onPasteImage = { data, _ in
+            receivedData = data
+            return true
+        }
 
         tv.paste(nil)
 
@@ -173,7 +186,10 @@ final class MarkdownEditorPasteTests: XCTestCase {
         let tv = textView("before ")
         tv.setSelectedRange(NSRange(location: tv.string.utf16.count, length: 0))
         var handlerCalled = false
-        tv.onPasteImage = { _, _ in handlerCalled = true; return true }
+        tv.onPasteImage = { _, _ in
+            handlerCalled = true
+            return true
+        }
 
         tv.paste(nil)
 
@@ -200,7 +216,10 @@ final class MarkdownEditorPasteTests: XCTestCase {
         let tv = textView("before ")
         tv.setSelectedRange(NSRange(location: tv.string.utf16.count, length: 0))
         var writeAttempted = false
-        tv.onDropFileURLs = { _ in writeAttempted = true; return true }
+        tv.onDropFileURLs = { _ in
+            writeAttempted = true
+            return true
+        }
 
         tv.paste(nil)
 
@@ -225,7 +244,10 @@ final class MarkdownEditorPasteTests: XCTestCase {
 
         let tv = textView("")
         var receivedURLs: [URL]?
-        tv.onDropFileURLs = { urls in receivedURLs = urls; return true }
+        tv.onDropFileURLs = { urls in
+            receivedURLs = urls
+            return true
+        }
 
         tv.paste(nil)
 
@@ -253,7 +275,10 @@ final class MarkdownEditorPasteTests: XCTestCase {
 
         let tv = textView("")
         var receivedURLs: [URL]?
-        tv.onDropFileURLs = { urls in receivedURLs = urls; return true }
+        tv.onDropFileURLs = { urls in
+            receivedURLs = urls
+            return true
+        }
 
         tv.paste(nil)
 
@@ -268,8 +293,14 @@ final class MarkdownEditorPasteTests: XCTestCase {
         pb.setString("hello world", forType: .string)
 
         let tv = textView("")
-        tv.onDropFileURLs = { _ in XCTFail("no file URL on this pasteboard"); return false }
-        tv.onPasteImage = { _, _ in XCTFail("no image data on this pasteboard"); return false }
+        tv.onDropFileURLs = { _ in
+            XCTFail("no file URL on this pasteboard")
+            return false
+        }
+        tv.onPasteImage = { _, _ in
+            XCTFail("no image data on this pasteboard")
+            return false
+        }
 
         tv.paste(nil)
 
@@ -307,7 +338,10 @@ final class MarkdownEditorPasteTests: XCTestCase {
         // The read-only session's own shape: a non-nil closure that always
         // declines, exactly what `DocumentPane`'s `guard !session.isReadOnly
         // else { return nil }` produces.
-        coordinator.writeDroppedFile = { _ in writeAttempted = true; return nil }
+        coordinator.writeDroppedFile = { _ in
+            writeAttempted = true
+            return nil
+        }
 
         let handled = coordinator.insertAttachments(fromDroppedFiles: [fileURL])
 

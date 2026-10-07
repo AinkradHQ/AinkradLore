@@ -1,6 +1,7 @@
-import Testing
-import Foundation
 import AinkradAppKit
+import Foundation
+import Testing
+
 @testable import LoreFeature
 
 @MainActor
@@ -17,15 +18,21 @@ struct LoreSignalReporterTests {
         }
         var calls: [Call] = []
 
-        func emit(kind: String, severity: SignalSeverity, title: String, body: String?,
-                  importance: SignalImportance, deepLink: SignalDeepLink?,
-                  actions: [SignalAction], dedupeKey: String?) {
-            calls.append(Call(kind: kind, severity: severity, title: title, body: body,
-                              importance: importance, dedupeKey: dedupeKey))
+        func emit(
+            kind: String, severity: SignalSeverity, title: String, body: String?,
+            importance: SignalImportance, deepLink: SignalDeepLink?,
+            actions: [SignalAction], dedupeKey: String?
+        ) {
+            calls.append(
+                Call(
+                    kind: kind, severity: severity, title: title, body: body,
+                    importance: importance, dedupeKey: dedupeKey))
         }
         func own(limit: Int) -> [SignalEvent] { [] }
-        func handleAction(_ actionID: String,
-                          _ handler: @escaping @MainActor () async -> Void) -> AgentActionToken {
+        func handleAction(
+            _ actionID: String,
+            _ handler: @escaping @MainActor () async -> Void
+        ) -> AgentActionToken {
             AgentActionToken()
         }
         func removeActionHandler(_ token: AgentActionToken) {}

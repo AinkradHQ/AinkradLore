@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 /// The document header's two decisions — what it SAYS about the save, and what
@@ -17,8 +18,9 @@ final class DocumentHeaderTests: XCTestCase {
     /// is true in both situations, so testing it first would tell the user
     /// their work is merely waiting when it is actually not going to disk.
     func test_afailedSaveOutranksMerelyBeingDirty() {
-        let state = DocumentSaveState.of(readOnly: false, hasSaveError: true,
-                                         isDirty: true, lastSavedAt: Date())
+        let state = DocumentSaveState.of(
+            readOnly: false, hasSaveError: true,
+            isDirty: true, lastSavedAt: Date())
         XCTAssertEqual(state, .failed)
         XCTAssertTrue(state.isAlarming)
     }
@@ -27,8 +29,9 @@ final class DocumentHeaderTests: XCTestCase {
     /// which is a more important thing to know than the state of any one write.
     func test_readOnlyOutranksEverything() {
         XCTAssertEqual(
-            DocumentSaveState.of(readOnly: true, hasSaveError: true,
-                                 isDirty: true, lastSavedAt: Date()),
+            DocumentSaveState.of(
+                readOnly: true, hasSaveError: true,
+                isDirty: true, lastSavedAt: Date()),
             .readOnly)
     }
 
@@ -38,19 +41,23 @@ final class DocumentHeaderTests: XCTestCase {
     /// exists to prevent.
     func test_anUntouchedDocumentIsIdleNotSaved() {
         XCTAssertEqual(
-            DocumentSaveState.of(readOnly: false, hasSaveError: false,
-                                 isDirty: false, lastSavedAt: nil),
+            DocumentSaveState.of(
+                readOnly: false, hasSaveError: false,
+                isDirty: false, lastSavedAt: nil),
             .idle)
         XCTAssertEqual(
-            DocumentSaveState.of(readOnly: false, hasSaveError: false,
-                                 isDirty: false, lastSavedAt: nil).label(now: Date()),
+            DocumentSaveState.of(
+                readOnly: false, hasSaveError: false,
+                isDirty: false, lastSavedAt: nil
+            ).label(now: Date()),
             "", "an idle document must say nothing rather than claim a save")
     }
 
     func test_dirtyBeatsAPreviousSuccessfulSave() {
         XCTAssertEqual(
-            DocumentSaveState.of(readOnly: false, hasSaveError: false,
-                                 isDirty: true, lastSavedAt: Date()),
+            DocumentSaveState.of(
+                readOnly: false, hasSaveError: false,
+                isDirty: true, lastSavedAt: Date()),
             .unsaved)
     }
 
@@ -68,10 +75,12 @@ final class DocumentHeaderTests: XCTestCase {
     func test_savedLabelSettlesAfterAMinute() {
         let at = Date()
         XCTAssertEqual(DocumentSaveState.saved(at).label(now: at), "Saved")
-        XCTAssertEqual(DocumentSaveState.saved(at).label(now: at.addingTimeInterval(30)),
-                       "Saved just now")
-        XCTAssertEqual(DocumentSaveState.saved(at).label(now: at.addingTimeInterval(3600)),
-                       "Saved")
+        XCTAssertEqual(
+            DocumentSaveState.saved(at).label(now: at.addingTimeInterval(30)),
+            "Saved just now")
+        XCTAssertEqual(
+            DocumentSaveState.saved(at).label(now: at.addingTimeInterval(3600)),
+            "Saved")
     }
 
     // MARK: - Breadcrumb
@@ -79,15 +88,17 @@ final class DocumentHeaderTests: XCTestCase {
     func test_breadcrumbShowsTheVaultRelativePlace() {
         let root = URL(fileURLWithPath: "/tmp/MyVault")
         let url = root.appendingPathComponent("Projects/Q1.md")
-        XCTAssertEqual(DocumentHeaderBar.breadcrumb(for: url, root: root),
-                       "MyVault ▸ Projects ▸ Q1.md")
+        XCTAssertEqual(
+            DocumentHeaderBar.breadcrumb(for: url, root: root),
+            "MyVault ▸ Projects ▸ Q1.md")
     }
 
     func test_breadcrumbForADocumentAtTheVaultRoot() {
         let root = URL(fileURLWithPath: "/tmp/MyVault")
         XCTAssertEqual(
-            DocumentHeaderBar.breadcrumb(for: root.appendingPathComponent("Inbox.md"),
-                                         root: root),
+            DocumentHeaderBar.breadcrumb(
+                for: root.appendingPathComponent("Inbox.md"),
+                root: root),
             "MyVault ▸ Inbox.md")
     }
 
@@ -95,8 +106,9 @@ final class DocumentHeaderTests: XCTestCase {
     /// one would be a fiction and showing its absolute path would not fit.
     func test_breadcrumbFallsBackToTheFilenameOutsideTheVault() {
         XCTAssertEqual(
-            DocumentHeaderBar.breadcrumb(for: URL(fileURLWithPath: "/elsewhere/Stray.md"),
-                                         root: URL(fileURLWithPath: "/tmp/MyVault")),
+            DocumentHeaderBar.breadcrumb(
+                for: URL(fileURLWithPath: "/elsewhere/Stray.md"),
+                root: URL(fileURLWithPath: "/tmp/MyVault")),
             "Stray.md")
     }
 

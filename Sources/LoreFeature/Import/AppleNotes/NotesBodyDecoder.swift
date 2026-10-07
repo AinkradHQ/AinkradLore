@@ -1,5 +1,5 @@
-import Foundation
 import Compression
+import Foundation
 
 /// Unwraps an Apple Notes body blob: `ZICNOTEDATA.ZDATA` is gzip-wrapped
 /// protobuf.
@@ -44,7 +44,7 @@ public enum NotesBodyDecoder {
         // 10-byte header + 8-byte trailer, so anything at or under 18 bytes
         // cannot contain a payload.
         guard data.count > 18, data[data.startIndex] == 0x1f,
-              data[data.startIndex + 1] == 0x8b, data[data.startIndex + 2] == 0x08
+            data[data.startIndex + 1] == 0x8b, data[data.startIndex + 2] == 0x08
         else { throw DecodeError.notGzip }
 
         let flags = data[data.startIndex + 3]
@@ -53,17 +53,17 @@ public enum NotesBodyDecoder {
         func skipNulTerminated() throws {
             while offset < data.endIndex, data[offset] != 0 { offset += 1 }
             guard offset < data.endIndex else { throw DecodeError.notGzip }
-            offset += 1                                   // the NUL itself
+            offset += 1  // the NUL itself
         }
 
-        if flags & 0x04 != 0 {                            // FEXTRA: length-prefixed
+        if flags & 0x04 != 0 {  // FEXTRA: length-prefixed
             guard offset + 2 <= data.endIndex else { throw DecodeError.notGzip }
             let length = Int(data[offset]) | (Int(data[offset + 1]) << 8)
             offset += 2 + length
         }
         if flags & 0x08 != 0 { try skipNulTerminated() }  // FNAME
         if flags & 0x10 != 0 { try skipNulTerminated() }  // FCOMMENT
-        if flags & 0x02 != 0 { offset += 2 }              // FHCRC
+        if flags & 0x02 != 0 { offset += 2 }  // FHCRC
 
         guard offset < data.endIndex - 8 else { throw DecodeError.notGzip }
         let deflated = data.subdata(in: offset..<(data.endIndex - 8))
@@ -80,8 +80,9 @@ public enum NotesBodyDecoder {
             defer { out.deallocate() }
             let written = deflated.withUnsafeBytes { raw -> Int in
                 guard let base = raw.bindMemory(to: UInt8.self).baseAddress else { return 0 }
-                return compression_decode_buffer(out, capacity, base, deflated.count,
-                                                 nil, COMPRESSION_ZLIB)
+                return compression_decode_buffer(
+                    out, capacity, base, deflated.count,
+                    nil, COMPRESSION_ZLIB)
             }
             // `compression_decode_buffer` cannot distinguish "filled the
             // buffer exactly" from "ran out of room", so a full buffer is
@@ -107,7 +108,8 @@ public enum NotesBodyDecoder {
     static func extractText(_ proto: Data) throws -> String {
         var index = proto.startIndex
         func varint() -> UInt64? {
-            var value: UInt64 = 0, shift: UInt64 = 0
+            var value: UInt64 = 0
+            var shift: UInt64 = 0
             while index < proto.endIndex {
                 let byte = proto[index]
                 index += 1
@@ -135,8 +137,9 @@ public enum NotesBodyDecoder {
                 index = next
             case 2:
                 guard let length = varint(),
-                      let end = proto.index(index, offsetBy: Int(length),
-                                            limitedBy: proto.endIndex)
+                    let end = proto.index(
+                        index, offsetBy: Int(length),
+                        limitedBy: proto.endIndex)
                 else { return best ?? "" }
                 let slice = Data(proto[index..<end])
                 index = end
@@ -144,8 +147,9 @@ public enum NotesBodyDecoder {
                 // decode as UTF-8 garbage; requiring it to round-trip filters
                 // most of that out without pretending to know the schema.
                 if let text = String(data: slice, encoding: .utf8),
-                   Data(text.utf8) == slice,
-                   text.count > (best?.count ?? 0) {
+                    Data(text.utf8) == slice,
+                    text.count > (best?.count ?? 0)
+                {
                     best = text
                 }
             default:

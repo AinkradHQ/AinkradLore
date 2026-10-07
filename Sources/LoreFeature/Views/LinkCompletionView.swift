@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// Decides whether the caret sits inside an unclosed `[[`, what has been typed
 /// so far, which `[[…]]` span an offset falls inside, and what text a picked
@@ -14,8 +14,10 @@ public enum LinkCompletionContext {
     /// or `nil` when the caret is not inside an open wikilink.
     public static func activePrefix(in text: String, caret: Int) -> String? {
         guard caret >= 0,
-              let index = text.index(text.startIndex, offsetBy: caret,
-                                     limitedBy: text.endIndex) else { return nil }
+            let index = text.index(
+                text.startIndex, offsetBy: caret,
+                limitedBy: text.endIndex)
+        else { return nil }
         return activePrefix(in: text, caret: index)
     }
 
@@ -60,7 +62,10 @@ public enum LinkCompletionContext {
         while i >= 1 {
             if chars[i] == "\n" { return nil }
             if chars[i] == "]" && chars[i - 1] == "]" { return nil }
-            if chars[i] == "[" && chars[i - 1] == "[" { open = i + 1; break }
+            if chars[i] == "[" && chars[i - 1] == "[" {
+                open = i + 1
+                break
+            }
             i -= 1
         }
         guard let from = open else { return nil }
@@ -71,7 +76,10 @@ public enum LinkCompletionContext {
         while j + 1 < chars.count {
             if chars[j] == "\n" { return nil }
             if chars[j] == "[" && chars[j + 1] == "[" { return nil }
-            if chars[j] == "]" && chars[j + 1] == "]" { close = j; break }
+            if chars[j] == "]" && chars[j + 1] == "]" {
+                close = j
+                break
+            }
             j += 1
         }
         guard let to = close, to > from else { return nil }
@@ -84,13 +92,13 @@ public enum LinkCompletionContext {
     /// inner text — the brackets are the most obviously "link-ish" part of it.
     private static func normalised(_ offset: Int, in chars: [Character]) -> Int {
         if offset + 1 < chars.count, chars[offset] == "[", chars[offset + 1] == "[" {
-            return offset + 2                     // before the opening `[[`
+            return offset + 2  // before the opening `[[`
         }
         if offset > 0, offset < chars.count, chars[offset - 1] == "[", chars[offset] == "[" {
-            return offset + 1                     // between the two `[`
+            return offset + 1  // between the two `[`
         }
         if offset > 0, offset < chars.count, chars[offset - 1] == "]", chars[offset] == "]" {
-            return offset - 1                     // between the two `]`
+            return offset - 1  // between the two `]`
         }
         return offset
     }
@@ -160,8 +168,10 @@ public enum LinkCompletionContext {
     ///   - relativePath: `row`'s path relative to the vault root, without the
     ///     extension (`Projects/Design`). Empty when there is no vault root.
     ///   - resolves: the resolver, injected so this stays pure and testable.
-    public static func insertableTarget(for row: IndexRow, relativePath: String,
-                                        resolves: (String) -> URL?) -> String {
+    public static func insertableTarget(
+        for row: IndexRow, relativePath: String,
+        resolves: (String) -> URL?
+    ) -> String {
         var candidates: [String] = []
         let title = row.title.trimmingCharacters(in: .whitespaces)
         if isUsableTarget(title) { candidates.append(title) }
@@ -209,7 +219,8 @@ public enum LinkCompletionContext {
     /// the punctuation rule, so it is NOT round-trip guaranteed.
     public static func insertableTarget(for row: IndexRow) -> String {
         let title = row.title.trimmingCharacters(in: .whitespaces)
-        return isUsableTarget(title) ? title
+        return isUsableTarget(title)
+            ? title
             : row.path.deletingPathExtension().lastPathComponent
     }
 
@@ -255,8 +266,10 @@ extension LinkCompletionContext {
     /// wikilink trigger already knows how to read it (`headingQuery`).
     static func trigger(in text: String, at caret: Int) -> Trigger? {
         guard caret >= 0,
-              let index = text.index(text.startIndex, offsetBy: caret,
-                                     limitedBy: text.endIndex) else { return nil }
+            let index = text.index(
+                text.startIndex, offsetBy: caret,
+                limitedBy: text.endIndex)
+        else { return nil }
         return trigger(in: text, at: index)
     }
 
@@ -386,16 +399,25 @@ struct LinkCompletionSelection: Equatable {
     /// keystroke the row at the old index is a different document, and silently
     /// leaving the highlight there is how a user accepts the wrong note.
     mutating func update(to rows: [LinkCompletionItem]) {
-        if rows != matches { matches = rows; index = 0 }
+        if rows != matches {
+            matches = rows
+            index = 0
+        }
         index = min(index, max(0, visibleCount - 1))
     }
 
     mutating func move(by delta: Int) {
-        guard visibleCount > 0 else { index = 0; return }
+        guard visibleCount > 0 else {
+            index = 0
+            return
+        }
         index = min(max(0, index + delta), visibleCount - 1)
     }
 
-    mutating func clear() { matches = []; index = 0 }
+    mutating func clear() {
+        matches = []
+        index = 0
+    }
 }
 
 /// The `[[` completion list. Deliberately dumb: it renders rows and reports
@@ -412,7 +434,9 @@ struct LinkCompletionView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             ForEach(Array(matches.prefix(Self.maxRows).enumerated()), id: \.offset) { pair in
-                Button { onPick(pair.element) } label: {
+                Button {
+                    onPick(pair.element)
+                } label: {
                     HStack(spacing: AinkradSpacing.xs) {
                         AinkradIconGlyph(systemName: pair.element.systemName, size: 10)
                         Text(pair.element.label).lineLimit(1)
@@ -422,8 +446,9 @@ struct LinkCompletionView: View {
                     .contentShape(Rectangle())
                     .padding(.horizontal, AinkradSpacing.sm)
                     .padding(.vertical, 4)
-                    .background(pair.offset == selected
-                                ? tokens.accentPrimary.opacity(0.25) : Color.clear)
+                    .background(
+                        pair.offset == selected
+                            ? tokens.accentPrimary.opacity(0.25) : Color.clear)
                 }
                 .buttonStyle(.plain)
             }
@@ -431,8 +456,9 @@ struct LinkCompletionView: View {
         .padding(.vertical, 4)
         .frame(width: 260)
         .background(tokens.background)
-        .overlay(RoundedRectangle(cornerRadius: 6)
-            .stroke(tokens.foreground.opacity(0.2)))
+        .overlay(
+            RoundedRectangle(cornerRadius: 6)
+                .stroke(tokens.foreground.opacity(0.2)))
     }
 
 }

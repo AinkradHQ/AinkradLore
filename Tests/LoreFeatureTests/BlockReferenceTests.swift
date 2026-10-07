@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 final class BlockReferenceTests: XCTestCase {
@@ -11,22 +12,27 @@ final class BlockReferenceTests: XCTestCase {
 
     func test_index_storesAndReadsBackABlockOffset() throws {
         let idx = try LoreIndex(path: URL(fileURLWithPath: "/tmp/lore-blocks-\(UUID()).sqlite"))
-        try idx.upsert(IndexEntry(
-            url: URL(fileURLWithPath: "/tmp/v/a.md"),
-            type: "markdown",
-            payload: IndexPayload(title: "A", plaintext: "First. ^one",
-                                  blocks: [BlockAnchor(id: "one", offset: 7)]),
-            updated: Date()))
+        try idx.upsert(
+            IndexEntry(
+                url: URL(fileURLWithPath: "/tmp/v/a.md"),
+                type: "markdown",
+                payload: IndexPayload(
+                    title: "A", plaintext: "First. ^one",
+                    blocks: [BlockAnchor(id: "one", offset: 7)]),
+                updated: Date()))
         XCTAssertEqual(try idx.blockOffset(inDocumentAt: "/tmp/v/a.md", id: "one"), 7)
     }
 
     func test_index_removingADocumentDropsItsBlocks() throws {
         let idx = try LoreIndex(path: URL(fileURLWithPath: "/tmp/lore-blocks-\(UUID()).sqlite"))
         let url = URL(fileURLWithPath: "/tmp/v/a.md")
-        try idx.upsert(IndexEntry(url: url, type: "markdown",
-                                  payload: IndexPayload(title: "A", plaintext: "x ^one",
-                                                        blocks: [BlockAnchor(id: "one", offset: 2)]),
-                                  updated: Date()))
+        try idx.upsert(
+            IndexEntry(
+                url: url, type: "markdown",
+                payload: IndexPayload(
+                    title: "A", plaintext: "x ^one",
+                    blocks: [BlockAnchor(id: "one", offset: 2)]),
+                updated: Date()))
         try idx.remove(path: url)
         XCTAssertNil(try idx.blockOffset(inDocumentAt: url.path, id: "one"))
     }
@@ -37,10 +43,13 @@ final class BlockReferenceTests: XCTestCase {
         let idx = try LoreIndex(path: URL(fileURLWithPath: "/tmp/lore-blocks-\(UUID()).sqlite"))
         let url = URL(fileURLWithPath: "/tmp/v/a.md")
         func write(_ offset: Int) throws {
-            try idx.upsert(IndexEntry(url: url, type: "markdown",
-                                      payload: IndexPayload(title: "A", plaintext: "x ^one",
-                                                            blocks: [BlockAnchor(id: "one", offset: offset)]),
-                                      updated: Date()))
+            try idx.upsert(
+                IndexEntry(
+                    url: url, type: "markdown",
+                    payload: IndexPayload(
+                        title: "A", plaintext: "x ^one",
+                        blocks: [BlockAnchor(id: "one", offset: offset)]),
+                    updated: Date()))
         }
         try write(2)
         try write(40)

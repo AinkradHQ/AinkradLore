@@ -40,13 +40,18 @@ public struct FolderRenamePlan: Sendable {
     /// See `RenamePlan.refusal`. `apply` writes and creates nothing.
     public let refusal: String?
 
-    public init(source: URL, destination: URL,
-                documentMoves: [(from: URL, to: URL)] = [],
-                edits: [LinkEdit] = [], unrewritable: [UnrewritableLink] = [],
-                baselines: [String: Date] = [:], refusal: String? = nil) {
-        self.source = source; self.destination = destination
-        self.documentMoves = documentMoves; self.edits = edits
-        self.unrewritable = unrewritable; self.baselines = baselines
+    public init(
+        source: URL, destination: URL,
+        documentMoves: [(from: URL, to: URL)] = [],
+        edits: [LinkEdit] = [], unrewritable: [UnrewritableLink] = [],
+        baselines: [String: Date] = [:], refusal: String? = nil
+    ) {
+        self.source = source
+        self.destination = destination
+        self.documentMoves = documentMoves
+        self.edits = edits
+        self.unrewritable = unrewritable
+        self.baselines = baselines
         self.refusal = refusal
     }
 
@@ -95,13 +100,16 @@ extension LoreStore {
         // back. If a future change makes rows non-canonical again, the invariant
         // is the thing to restore — not this line.
         let prefix = source.path + "/"
-        let moves: [(from: URL, to: URL)] = rows
+        let moves: [(from: URL, to: URL)] =
+            rows
             .map { VaultIndexCoordinator.canonical($0.path) }
             .filter { $0.path.hasPrefix(prefix) }
             .map { path in
-                (from: path,
-                 to: destination.appendingPathComponent(
-                        String(path.path.dropFirst(prefix.count))))
+                (
+                    from: path,
+                    to: destination.appendingPathComponent(
+                        String(path.path.dropFirst(prefix.count)))
+                )
             }
 
         // One rewrite plan per moving document, merged into one edit list. A
@@ -114,18 +122,20 @@ extension LoreStore {
         var edits: [LinkEdit] = []
         var unrewritable: [UnrewritableLink] = []
         for move in moves {
-            let sub = LinkRewriter.plan(renaming: move.from, to: move.to,
-                                        inboundLinks: coordinator.inboundLinks(to: move.from),
-                                        vaultRoot: root)
+            let sub = LinkRewriter.plan(
+                renaming: move.from, to: move.to,
+                inboundLinks: coordinator.inboundLinks(to: move.from),
+                vaultRoot: root)
             edits += sub.edits
             unrewritable += sub.unrewritable
         }
         var seen = Set<String>()
         let files = edits.compactMap { seen.insert($0.file.path).inserted ? $0.file : nil }
-        return FolderRenamePlan(source: source, destination: destination,
-                                documentMoves: moves, edits: edits,
-                                unrewritable: unrewritable,
-                                baselines: Self.baselines(for: files))
+        return FolderRenamePlan(
+            source: source, destination: destination,
+            documentMoves: moves, edits: edits,
+            unrewritable: unrewritable,
+            baselines: Self.baselines(for: files))
     }
 
     /// Applies `plan`: rewrites every inbound link, then moves the directory.
@@ -138,8 +148,9 @@ extension LoreStore {
     @discardableResult
     public func apply(_ plan: FolderRenamePlan) -> RenameReport {
         if let refusal = plan.refusal {
-            return RenameReport(rewritten: [], skipped: [],
-                                failed: [(plan.source, refusal)], movedTo: nil)
+            return RenameReport(
+                rewritten: [], skipped: [],
+                failed: [(plan.source, refusal)], movedTo: nil)
         }
         var failed = Self.unrewritableFailures(plan.unrewritable)
 
@@ -147,9 +158,12 @@ extension LoreStore {
         // directory is created — nothing here leaves residue behind for an
         // operation that then declines to happen.
         var sourceIsDirectory: ObjCBool = false
-        guard FileManager.default.fileExists(atPath: plan.source.path,
-                                            isDirectory: &sourceIsDirectory),
-              sourceIsDirectory.boolValue else {
+        guard
+            FileManager.default.fileExists(
+                atPath: plan.source.path,
+                isDirectory: &sourceIsDirectory),
+            sourceIsDirectory.boolValue
+        else {
             failed.append((plan.source, "The folder no longer exists."))
             return RenameReport(rewritten: [], skipped: [], failed: failed, movedTo: nil)
         }
@@ -172,15 +186,19 @@ extension LoreStore {
             plan.destination.path.caseInsensitiveCompare(plan.source.path) == .orderedSame
             && Self.volumeIsCaseInsensitive(plan.source)
         if !isCaseOnlyRename,
-           FileManager.default.fileExists(atPath: plan.destination.path) {
+            FileManager.default.fileExists(atPath: plan.destination.path)
+        {
             failed.append((plan.destination, "A folder with that name already exists."))
             return RenameReport(rewritten: [], skipped: [], failed: failed, movedTo: nil)
         }
         let parent = plan.destination.deletingLastPathComponent()
         var parentIsDirectory: ObjCBool = false
-        guard FileManager.default.fileExists(atPath: parent.path,
-                                            isDirectory: &parentIsDirectory),
-              parentIsDirectory.boolValue else {
+        guard
+            FileManager.default.fileExists(
+                atPath: parent.path,
+                isDirectory: &parentIsDirectory),
+            parentIsDirectory.boolValue
+        else {
             failed.append((parent, "The destination folder does not exist."))
             return RenameReport(rewritten: [], skipped: [], failed: failed, movedTo: nil)
         }
@@ -202,8 +220,11 @@ extension LoreStore {
             let path = Self.pathKey(session.url)
             guard path.hasPrefix(prefix) else { continue }
             let relative = String(path.dropFirst(prefix.count))
-            following.append((session, URL(fileURLWithPath: path),
-                              plan.destination.appendingPathComponent(relative)))
+            following.append(
+                (
+                    session, URL(fileURLWithPath: path),
+                    plan.destination.appendingPathComponent(relative)
+                ))
         }
 
         // Links FIRST, then the directory move. `movingPaths` covers every file
@@ -212,8 +233,9 @@ extension LoreStore {
         // autosave disarmed before the ground moves under it.
         var movingPaths = Set(plan.documentMoves.map { Self.pathKey($0.from) })
         movingPaths.formUnion(following.map { Self.pathKey($0.from) })
-        let pass = rewriteInboundLinks(edits: plan.edits, baselines: plan.baselines,
-                                       movingPaths: movingPaths)
+        let pass = rewriteInboundLinks(
+            edits: plan.edits, baselines: plan.baselines,
+            movingPaths: movingPaths)
         failed += pass.failed
 
         var moved: URL?
@@ -255,14 +277,16 @@ extension LoreStore {
         // A rewritten file that lived inside the folder must be reported at its
         // new path: the old one no longer exists by the time the UI renders.
         let reported = pass.rewritten.map { Self.relocating($0, from: prefix, to: moved) }
-        return RenameReport(rewritten: reported.sorted { $0.path < $1.path },
-                            skipped: pass.skipped.map {
-                                SkippedFile(url: Self.relocating($0.url, from: prefix, to: moved),
-                                            reason: $0.reason)
-                            }.sorted { $0.url.path < $1.url.path },
-                            unchanged: pass.unchanged.map { Self.relocating($0, from: prefix, to: moved) }
-                                .sorted { $0.path < $1.path },
-                            failed: failed, movedTo: moved)
+        return RenameReport(
+            rewritten: reported.sorted { $0.path < $1.path },
+            skipped: pass.skipped.map {
+                SkippedFile(
+                    url: Self.relocating($0.url, from: prefix, to: moved),
+                    reason: $0.reason)
+            }.sorted { $0.url.path < $1.url.path },
+            unchanged: pass.unchanged.map { Self.relocating($0, from: prefix, to: moved) }
+                .sorted { $0.path < $1.path },
+            failed: failed, movedTo: moved)
     }
 
     private static func relocating(_ url: URL, from prefix: String, to destination: URL?) -> URL {
@@ -288,12 +312,15 @@ extension LoreStore {
     private static func volumeIsCaseInsensitive(_ url: URL) -> Bool {
         var probe = url
         while !FileManager.default.fileExists(atPath: probe.path),
-              probe.pathComponents.count > 1 {
+            probe.pathComponents.count > 1
+        {
             probe.deleteLastPathComponent()
         }
-        guard let values = try? probe.resourceValues(
+        guard
+            let values = try? probe.resourceValues(
                 forKeys: [.volumeSupportsCaseSensitiveNamesKey]),
-              let sensitive = values.volumeSupportsCaseSensitiveNames else { return false }
+            let sensitive = values.volumeSupportsCaseSensitiveNames
+        else { return false }
         return !sensitive
     }
 }

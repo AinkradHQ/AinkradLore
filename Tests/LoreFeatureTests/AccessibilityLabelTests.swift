@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 /// What VoiceOver reads for a sidebar row.
@@ -9,17 +10,21 @@ import XCTest
 @MainActor
 final class AccessibilityLabelTests: XCTestCase {
 
-    private func row(_ name: String, type: String = MarkdownEngine.identifier,
-                     title: String = "") -> IndexRow {
-        IndexRow(path: URL(fileURLWithPath: "/v/\(name)"), id: name,
-                 title: title, tags: [], aliases: [], updated: Date(),
-                 type: type, properties: [])
+    private func row(
+        _ name: String, type: String = MarkdownEngine.identifier,
+        title: String = ""
+    ) -> IndexRow {
+        IndexRow(
+            path: URL(fileURLWithPath: "/v/\(name)"), id: name,
+            title: title, tags: [], aliases: [], updated: Date(),
+            type: type, properties: [])
     }
 
     func test_aDocumentReadsAsItsTitle() {
         XCTAssertEqual(
-            LoreSidebarRow.accessibilityLabel(for: row("a.md", title: "Quarterly Plan"),
-                                              subtitle: nil, emptyTitleFallback: nil),
+            LoreSidebarRow.accessibilityLabel(
+                for: row("a.md", title: "Quarterly Plan"),
+                subtitle: nil, emptyTitleFallback: nil),
             "Quarterly Plan")
     }
 
@@ -27,13 +32,15 @@ final class AccessibilityLabelTests: XCTestCase {
     /// spoken and visible names cannot disagree.
     func test_anUntitledDocumentUsesTheDisplayedFallback() {
         XCTAssertEqual(
-            LoreSidebarRow.accessibilityLabel(for: row("draft.md"),
-                                              subtitle: nil,
-                                              emptyTitleFallback: "Untitled"),
+            LoreSidebarRow.accessibilityLabel(
+                for: row("draft.md"),
+                subtitle: nil,
+                emptyTitleFallback: "Untitled"),
             "Untitled")
         XCTAssertEqual(
-            LoreSidebarRow.accessibilityLabel(for: row("draft.md"),
-                                              subtitle: nil, emptyTitleFallback: nil),
+            LoreSidebarRow.accessibilityLabel(
+                for: row("draft.md"),
+                subtitle: nil, emptyTitleFallback: nil),
             "draft.md")
     }
 
@@ -52,16 +59,18 @@ final class AccessibilityLabelTests: XCTestCase {
     /// fragments.
     func test_tagsAreFoldedIntoTheLabel() {
         XCTAssertEqual(
-            LoreSidebarRow.accessibilityLabel(for: row("a.md", title: "Plan"),
-                                              subtitle: "#work #q1",
-                                              emptyTitleFallback: nil),
+            LoreSidebarRow.accessibilityLabel(
+                for: row("a.md", title: "Plan"),
+                subtitle: "#work #q1",
+                emptyTitleFallback: nil),
             "Plan, #work #q1")
     }
 
     func test_anEmptySubtitleAddsNothing() {
         XCTAssertEqual(
-            LoreSidebarRow.accessibilityLabel(for: row("a.md", title: "Plan"),
-                                              subtitle: "", emptyTitleFallback: nil),
+            LoreSidebarRow.accessibilityLabel(
+                for: row("a.md", title: "Plan"),
+                subtitle: "", emptyTitleFallback: nil),
             "Plan")
     }
 }

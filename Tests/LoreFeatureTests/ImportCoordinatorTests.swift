@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 /// End-to-end through the coordinator, because this is the task that makes the
@@ -18,8 +19,9 @@ final class ImportCoordinatorTests: XCTestCase {
         let root = try makeDirectory()
         for (relative, contents) in files {
             let url = root.appendingPathComponent(relative)
-            try FileManager.default.createDirectory(at: url.deletingLastPathComponent(),
-                                                    withIntermediateDirectories: true)
+            try FileManager.default.createDirectory(
+                at: url.deletingLastPathComponent(),
+                withIntermediateDirectories: true)
             try contents.write(to: url, atomically: true, encoding: .utf8)
         }
         return root
@@ -70,15 +72,17 @@ final class ImportCoordinatorTests: XCTestCase {
         let second = ImportCoordinator(vaultRoot: target)
         await second.scan(ObsidianSource(vaultURL: source), sourceRoot: source)
         let previewed = try selection(of: second.state)
-        XCTAssertTrue(previewed.plan.creating.isEmpty,
-                      "a re-import must offer nothing to create; got \(previewed.plan.creating)")
+        XCTAssertTrue(
+            previewed.plan.creating.isEmpty,
+            "a re-import must offer nothing to create; got \(previewed.plan.creating)")
 
         await second.apply(previewed.plan)
         let afterSecond = try report(of: second.state)
         XCTAssertTrue(afterSecond.imported.isEmpty)
         XCTAssertEqual(afterSecond.skipped.count, 2)
-        XCTAssertEqual(try filesIn(target), landed,
-                       "the second run must not have touched the vault")
+        XCTAssertEqual(
+            try filesIn(target), landed,
+            "the second run must not have touched the vault")
     }
 
     /// The attachment half specifically. Fixing the junk-empty-note bug removed
@@ -137,8 +141,9 @@ final class ImportCoordinatorTests: XCTestCase {
 
     func testResetReturnsToTheSourcePicker() async throws {
         let coordinator = ImportCoordinator(vaultRoot: try makeDirectory())
-        await coordinator.scan(ObsidianSource(vaultURL: try makeDirectory()),
-                               sourceRoot: nil)
+        await coordinator.scan(
+            ObsidianSource(vaultURL: try makeDirectory()),
+            sourceRoot: nil)
         coordinator.reset()
         guard case .choosingSource = coordinator.state else {
             return XCTFail("expected .choosingSource, got \(coordinator.state)")
@@ -163,8 +168,9 @@ final class ImportCoordinatorTests: XCTestCase {
     /// the Automation pane one button away instead of describing where it is.
     func testAnAutomationDenialBecomesItsOwnFixableState() async throws {
         let coordinator = ImportCoordinator(vaultRoot: try makeDirectory())
-        await coordinator.scan(AppleNotesScriptSource(runner: DenyingRunner()),
-                               sourceRoot: nil)
+        await coordinator.scan(
+            AppleNotesScriptSource(runner: DenyingRunner()),
+            sourceRoot: nil)
         guard case .needsAutomation(let detail) = coordinator.state else {
             throw WrongState(expected: ".needsAutomation", actual: "\(coordinator.state)")
         }
@@ -193,17 +199,18 @@ final class ImportCoordinatorTests: XCTestCase {
     /// the id skipping and the link rewriting true for notes as well.
     func testScriptedNotesReachTheSamePreviewAsAnyOtherSource() async throws {
         let canned = """
-        x-coredata://N1
-        Groceries
-        iCloud
-        Shopping
-        978307200
-        978307300
-        <p>milk</p>
-        """
+            x-coredata://N1
+            Groceries
+            iCloud
+            Shopping
+            978307200
+            978307300
+            <p>milk</p>
+            """
         let coordinator = ImportCoordinator(vaultRoot: try makeDirectory())
-        await coordinator.scan(AppleNotesScriptSource(runner: StubRunner(output: canned)),
-                               sourceRoot: nil)
+        await coordinator.scan(
+            AppleNotesScriptSource(runner: StubRunner(output: canned)),
+            sourceRoot: nil)
         let selection = try selection(of: coordinator.state)
         XCTAssertEqual(selection.items.map(\.title), ["Groceries"])
         XCTAssertEqual(selection.plan.creating.count, 1)
@@ -213,8 +220,9 @@ final class ImportCoordinatorTests: XCTestCase {
     /// one. The old sentence said "in that folder" for every source.
     func testAnEmptyNotesLibraryIsNotExplainedAsAnEmptyFolder() async throws {
         let coordinator = ImportCoordinator(vaultRoot: try makeDirectory())
-        await coordinator.scan(AppleNotesScriptSource(runner: StubRunner(output: "")),
-                               sourceRoot: nil)
+        await coordinator.scan(
+            AppleNotesScriptSource(runner: StubRunner(output: "")),
+            sourceRoot: nil)
         guard case .failed(let message) = coordinator.state else {
             throw WrongState(expected: ".failed", actual: "\(coordinator.state)")
         }
@@ -247,8 +255,10 @@ final class ImportCoordinatorTests: XCTestCase {
     }
 
     func testTwoUnrelatedFoldersAreNotRefused() throws {
-        XCTAssertNil(ImportCoordinator.nestingRefusal(source: try makeDirectory(),
-                                                      target: try makeDirectory()))
+        XCTAssertNil(
+            ImportCoordinator.nestingRefusal(
+                source: try makeDirectory(),
+                target: try makeDirectory()))
     }
 
     private func filesIn(_ root: URL) throws -> [String] {

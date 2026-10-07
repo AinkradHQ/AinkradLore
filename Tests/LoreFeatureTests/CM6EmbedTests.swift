@@ -1,6 +1,7 @@
 import AppKit
 import WebKit
 import XCTest
+
 @testable import LoreFeature
 
 /// E2T5: `![[picture.png]]` becomes a real image, served over `lore-asset`.
@@ -21,8 +22,9 @@ final class CM6EmbedTests: XCTestCase {
         super.setUp()
         directory = URL(fileURLWithPath: NSTemporaryDirectory())
             .appendingPathComponent("cm6-embeds-\(UUID().uuidString)")
-        try? FileManager.default.createDirectory(at: directory,
-                                                 withIntermediateDirectories: true)
+        try? FileManager.default.createDirectory(
+            at: directory,
+            withIntermediateDirectories: true)
     }
 
     override func tearDown() {
@@ -40,11 +42,12 @@ final class CM6EmbedTests: XCTestCase {
     /// 64 and failed against a perfectly correct image. A test whose expected
     /// value depends on the monitor it runs on is not a test.
     private func writePNG(named name: String, width: Int, height: Int) throws -> URL {
-        let rep = try XCTUnwrap(NSBitmapImageRep(
-            bitmapDataPlanes: nil,
-            pixelsWide: width, pixelsHigh: height,
-            bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false,
-            colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0))
+        let rep = try XCTUnwrap(
+            NSBitmapImageRep(
+                bitmapDataPlanes: nil,
+                pixelsWide: width, pixelsHigh: height,
+                bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false,
+                colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0))
         NSGraphicsContext.saveGraphicsState()
         NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: rep)
         NSColor.systemTeal.setFill()
@@ -64,10 +67,12 @@ final class CM6EmbedTests: XCTestCase {
         // Nothing here takes a path from the page.
         handler.resolve = { resolving[$0] }
         config.setURLSchemeHandler(handler, forURLScheme: CM6AssetSchemeHandler.scheme)
-        webView = WKWebView(frame: NSRect(x: 0, y: 0, width: 900, height: 700),
-                            configuration: config)
-        let window = NSWindow(contentRect: webView.frame, styleMask: [.titled],
-                              backing: .buffered, defer: false)
+        webView = WKWebView(
+            frame: NSRect(x: 0, y: 0, width: 900, height: 700),
+            configuration: config)
+        let window = NSWindow(
+            contentRect: webView.frame, styleMask: [.titled],
+            backing: .buffered, defer: false)
         window.contentView = webView
         windows.append(window)
         let index = try XCTUnwrap(CM6EditorView.Coordinator.bundledIndexURL)
@@ -81,8 +86,14 @@ final class CM6EmbedTests: XCTestCase {
 
     @MainActor @discardableResult
     private func js(_ source: String) throws -> Any? {
-        var result: Any?; var failure: Error?; var done = false
-        webView.evaluateJavaScript(source) { v, e in result = v; failure = e; done = true }
+        var result: Any?
+        var failure: Error?
+        var done = false
+        webView.evaluateJavaScript(source) { v, e in
+            result = v
+            failure = e
+            done = true
+        }
         let deadline = Date().addingTimeInterval(20)
         while !done, Date() < deadline {
             RunLoop.current.run(mode: .default, before: Date().addingTimeInterval(0.01))
@@ -112,8 +123,9 @@ final class CM6EmbedTests: XCTestCase {
     func test_anEmbeddedImageIsActuallyServedAndDecoded() throws {
         let file = try writePNG(named: "shot.png", width: 64, height: 32)
         try boot("Before.\n\n![[shot.png]]\n\nAfter.\n\n", resolving: ["shot.png": file])
-        XCTAssertEqual(try js("window.loreEditor.embedImageTargets()") as? [String],
-                       ["shot.png"])
+        XCTAssertEqual(
+            try js("window.loreEditor.embedImageTargets()") as? [String],
+            ["shot.png"])
         try waitFor("the image to decode") { (try? self.widths())?.first ?? 0 > 0 }
         XCTAssertEqual(try widths(), [64], "the served bytes must be the real image")
     }
@@ -156,14 +168,15 @@ final class CM6EmbedTests: XCTestCase {
         // `evaluateJavaScript` cannot marshal a Promise and fails the whole
         // call with "an unsupported type", which reads as the fetch having
         // been blocked when in fact nothing was ever asked.
-        _ = try js("""
-        (() => {
-          window.__status = "pending";
-          fetch("lore-asset:///..%2F..%2Fetc%2Fpasswd")
-            .then(r => { window.__status = r.status })
-            .catch(() => { window.__status = "rejected" });
-        })()
-        """)
+        _ = try js(
+            """
+            (() => {
+              window.__status = "pending";
+              fetch("lore-asset:///..%2F..%2Fetc%2Fpasswd")
+                .then(r => { window.__status = r.status })
+                .catch(() => { window.__status = "rejected" });
+            })()
+            """)
         try waitFor("the traversal attempt to resolve") {
             ((try? self.js("window.__status")) as? String) != "pending"
         }
@@ -186,10 +199,12 @@ final class CM6EmbedTests: XCTestCase {
             ((try? self.js("window.loreEditor.embedMissingTargets()")) as? [String])?
                 .isEmpty == false
         }
-        XCTAssertEqual(try js("window.loreEditor.embedMissingTargets()") as? [String],
-                       ["gone.png"])
-        XCTAssertEqual(try js("window.loreEditor.embedImageTargets()") as? [String], [],
-                       "the broken image element must be gone, not merely empty")
+        XCTAssertEqual(
+            try js("window.loreEditor.embedMissingTargets()") as? [String],
+            ["gone.png"])
+        XCTAssertEqual(
+            try js("window.loreEditor.embedImageTargets()") as? [String], [],
+            "the broken image element must be gone, not merely empty")
         let shown = try js("document.querySelector('.cm-content').innerText") as? String ?? ""
         XCTAssertTrue(shown.contains("Still here."), "the rest of the note must survive")
     }
@@ -201,8 +216,9 @@ final class CM6EmbedTests: XCTestCase {
     @MainActor
     func test_anAttachmentThatIsNotAnImageBecomesAChip() throws {
         try boot("![[Contract.pdf]]\n\n", resolving: [:])
-        XCTAssertEqual(try js("window.loreEditor.embedChipTargets()") as? [String],
-                       ["Contract.pdf"])
+        XCTAssertEqual(
+            try js("window.loreEditor.embedChipTargets()") as? [String],
+            ["Contract.pdf"])
         XCTAssertEqual(try js("window.loreEditor.embedImageTargets()") as? [String], [])
     }
 
@@ -218,8 +234,9 @@ final class CM6EmbedTests: XCTestCase {
         try boot("![[Some Note.md]]\n\nand ![[Bare Name]]\n\n", resolving: [:])
         XCTAssertEqual(try js("window.loreEditor.embedImageTargets()") as? [String], [])
         XCTAssertEqual(try js("window.loreEditor.embedChipTargets()") as? [String], [])
-        XCTAssertEqual(try js("window.loreEditor.transclusionTargets()") as? [String],
-                       ["Some Note.md", "Bare Name"])
+        XCTAssertEqual(
+            try js("window.loreEditor.transclusionTargets()") as? [String],
+            ["Some Note.md", "Bare Name"])
     }
 
     /// A remote image is not ours to serve.
@@ -242,22 +259,28 @@ final class CM6EmbedTests: XCTestCase {
     // MARK: - the encoding, both directions, without a web view
 
     func test_theTwoSidesOfTheURLAgree() {
-        for target in ["a.png", "Attachments/Screen Shot #2.png",
-                       "with space & ampersand.jpg", "café/naïve.png", "q?x=1.png"] {
+        for target in [
+            "a.png", "Attachments/Screen Shot #2.png",
+            "with space & ampersand.jpg", "café/naïve.png", "q?x=1.png",
+        ] {
             let url = try? XCTUnwrap(URL(string: CM6AssetSchemeHandler.url(forTarget: target)))
-            XCTAssertEqual(CM6AssetSchemeHandler.target(from: url!), target,
-                           "round trip failed for \(target)")
+            XCTAssertEqual(
+                CM6AssetSchemeHandler.target(from: url!), target,
+                "round trip failed for \(target)")
         }
     }
 
     func test_mimeTypesAreDerivedNotGuessed() {
-        XCTAssertEqual(CM6AssetSchemeHandler.mimeType(
-            of: URL(fileURLWithPath: "/a/b.png")), "image/png")
-        XCTAssertEqual(CM6AssetSchemeHandler.mimeType(
-            of: URL(fileURLWithPath: "/a/b.svg")), "image/svg+xml")
+        XCTAssertEqual(
+            CM6AssetSchemeHandler.mimeType(
+                of: URL(fileURLWithPath: "/a/b.png")), "image/png")
+        XCTAssertEqual(
+            CM6AssetSchemeHandler.mimeType(
+                of: URL(fileURLWithPath: "/a/b.svg")), "image/svg+xml")
         // The fallback, rather than a wrong type: a wrong MIME type is an image
         // that silently does not render.
-        XCTAssertEqual(CM6AssetSchemeHandler.mimeType(
-            of: URL(fileURLWithPath: "/a/b.notathing")), "application/octet-stream")
+        XCTAssertEqual(
+            CM6AssetSchemeHandler.mimeType(
+                of: URL(fileURLWithPath: "/a/b.notathing")), "application/octet-stream")
     }
 }

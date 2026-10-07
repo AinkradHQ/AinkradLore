@@ -1,6 +1,7 @@
-import XCTest
 import AppKit
 import SwiftUI
+import XCTest
+
 @testable import LoreFeature
 
 /// The reservation half of M7: what `TransclusionStyling.prepare` does to the
@@ -32,9 +33,11 @@ final class TransclusionStylingTests: XCTestCase {
         MarkdownDocumentModel(body: text).styleSpans
     }
 
-    private func prepare(_ text: String, selection: NSRange = NSRange(location: 0, length: 0),
-                         width: CGFloat = 600,
-                         in store: NSTextStorage) -> [MarkdownBlockBackgrounds.Region] {
+    private func prepare(
+        _ text: String, selection: NSRange = NSRange(location: 0, length: 0),
+        width: CGFloat = 600,
+        in store: NSTextStorage
+    ) -> [MarkdownBlockBackgrounds.Region] {
         TransclusionStyling.prepare(
             spans(text), selection: selection, width: width,
             theme: MarkdownTheme(tokens: TestTokens.make()),
@@ -59,15 +62,19 @@ final class TransclusionStylingTests: XCTestCase {
             for: TransclusionResolver.resolve(
                 rawTarget: "target",
                 resolver: LinkResolver(documents: [(url: target, title: "target", aliases: [])]),
-                path: []) { try String(contentsOf: $0, encoding: .utf8) },
+                path: []
+            ) { try String(contentsOf: $0, encoding: .utf8) },
             width: 600, theme: MarkdownTheme(tokens: TestTokens.make()))
         XCTAssertEqual(box.height, expected, accuracy: 0.5)
 
-        let style = store.attribute(.paragraphStyle,
-                                    at: (text as NSString).range(of: "![[target]]").location,
-                                    effectiveRange: nil) as? NSParagraphStyle
-        XCTAssertEqual(style?.minimumLineHeight ?? 0, box.height, accuracy: 0.5,
-                       "the reserved line height must be the measured height")
+        let style =
+            store.attribute(
+                .paragraphStyle,
+                at: (text as NSString).range(of: "![[target]]").location,
+                effectiveRange: nil) as? NSParagraphStyle
+        XCTAssertEqual(
+            style?.minimumLineHeight ?? 0, box.height, accuracy: 0.5,
+            "the reserved line height must be the measured height")
         XCTAssertEqual(style?.maximumLineHeight ?? 0, box.height, accuracy: 0.5)
     }
 
@@ -93,17 +100,19 @@ final class TransclusionStylingTests: XCTestCase {
         let text = "# Host\n\n![[target]]\n"
         let source = (text as NSString).range(of: "![[target]]")
         let store = storage(text)
-        let regions = prepare(text,
-                              selection: NSRange(location: source.location + 4, length: 0),
-                              in: store)
+        let regions = prepare(
+            text,
+            selection: NSRange(location: source.location + 4, length: 0),
+            in: store)
 
         XCTAssertTrue(regions.isEmpty, "a revealed embed produces no drawing region")
         // `collapse` marks hidden text with a 0.01 pt font; an untouched
         // storage keeps its own default size, which is what "still visible"
         // looks like from here.
         let font = store.attribute(.font, at: source.location, effectiveRange: nil) as? NSFont
-        XCTAssertGreaterThan(font?.pointSize ?? 12, 1,
-                             "a revealed embed's source must not be collapsed")
+        XCTAssertGreaterThan(
+            font?.pointSize ?? 12, 1,
+            "a revealed embed's source must not be collapsed")
     }
 
     /// The rule the whole editor is built on: decoration never rewrites bytes.
@@ -124,16 +133,18 @@ final class TransclusionStylingTests: XCTestCase {
 
         let first = storage(text)
         TransclusionMeasureCounter.reset()
-        _ = TransclusionStyling.prepare(spans(text), selection: NSRange(location: 99, length: 0),
-                                        width: 600, theme: theme, resolve: resolve,
-                                        cache: cache, in: first)
+        _ = TransclusionStyling.prepare(
+            spans(text), selection: NSRange(location: 99, length: 0),
+            width: 600, theme: theme, resolve: resolve,
+            cache: cache, in: first)
         let afterFirst = TransclusionMeasureCounter.count
         XCTAssertEqual(afterFirst, 1)
 
         let second = storage(text)
-        _ = TransclusionStyling.prepare(spans(text), selection: NSRange(location: 99, length: 0),
-                                        width: 600, theme: theme, resolve: resolve,
-                                        cache: cache, in: second)
+        _ = TransclusionStyling.prepare(
+            spans(text), selection: NSRange(location: 99, length: 0),
+            width: 600, theme: theme, resolve: resolve,
+            cache: cache, in: second)
         XCTAssertEqual(TransclusionMeasureCounter.count, afterFirst)
     }
 
@@ -159,15 +170,19 @@ final class TransclusionStylingTests: XCTestCase {
             resolve: resolve, cache: cache, in: narrow)
 
         guard case .transclusion(let wideBox) = wideRegions.first?.kind,
-              case .transclusion(let narrowBox) = narrowRegions.first?.kind else {
+            case .transclusion(let narrowBox) = narrowRegions.first?.kind
+        else {
             return XCTFail("expected a transclusion region at both widths")
         }
-        XCTAssertGreaterThan(narrowBox.height, wideBox.height,
-                             "a narrower measure wraps to more lines, so the reserved "
-                             + "gap must grow — a width-blind cache would reuse the old height")
-        let style = narrow.attribute(.paragraphStyle,
-                                     at: (text as NSString).range(of: "![[target]]").location,
-                                     effectiveRange: nil) as? NSParagraphStyle
+        XCTAssertGreaterThan(
+            narrowBox.height, wideBox.height,
+            "a narrower measure wraps to more lines, so the reserved "
+                + "gap must grow — a width-blind cache would reuse the old height")
+        let style =
+            narrow.attribute(
+                .paragraphStyle,
+                at: (text as NSString).range(of: "![[target]]").location,
+                effectiveRange: nil) as? NSParagraphStyle
         XCTAssertEqual(style?.minimumLineHeight ?? 0, narrowBox.height, accuracy: 0.5)
     }
 
@@ -196,11 +211,13 @@ final class TransclusionStylingTests: XCTestCase {
             resolve: resolve, cache: cache, in: large)
 
         guard case .transclusion(let smallBox) = smallRegions.first?.kind,
-              case .transclusion(let largeBox) = largeRegions.first?.kind else {
+            case .transclusion(let largeBox) = largeRegions.first?.kind
+        else {
             return XCTFail("expected a transclusion region at both sizes")
         }
-        XCTAssertGreaterThan(largeBox.height, smallBox.height,
-                             "doubling the body size must re-measure, not reuse")
+        XCTAssertGreaterThan(
+            largeBox.height, smallBox.height,
+            "doubling the body size must re-measure, not reuse")
     }
 
     // MARK: - Fix round 1, Important 2: inline embeds are not drawn
@@ -216,12 +233,16 @@ final class TransclusionStylingTests: XCTestCase {
         XCTAssertTrue(regions.isEmpty, "an inline embed produces no drawing region")
         let source = (text as NSString).range(of: "![[target]]")
         let font = store.attribute(.font, at: source.location, effectiveRange: nil) as? NSFont
-        XCTAssertGreaterThan(font?.pointSize ?? 12, 1,
-                             "an inline embed's source must not be collapsed")
-        let style = store.attribute(.paragraphStyle, at: source.location,
-                                    effectiveRange: nil) as? NSParagraphStyle
-        XCTAssertEqual(style?.minimumLineHeight ?? 0, 0, accuracy: 0.01,
-                       "an inline embed must not stretch the line it shares with prose")
+        XCTAssertGreaterThan(
+            font?.pointSize ?? 12, 1,
+            "an inline embed's source must not be collapsed")
+        let style =
+            store.attribute(
+                .paragraphStyle, at: source.location,
+                effectiveRange: nil) as? NSParagraphStyle
+        XCTAssertEqual(
+            style?.minimumLineHeight ?? 0, 0, accuracy: 0.01,
+            "an inline embed must not stretch the line it shares with prose")
     }
 
     /// Two embeds in one paragraph would fight over that paragraph's line

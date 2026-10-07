@@ -1,6 +1,7 @@
 import AppKit
 import WebKit
 import XCTest
+
 @testable import LoreFeature
 
 /// E2T6: `$inline$` and `$$block$$`, rendered by KaTeX.
@@ -14,13 +15,17 @@ final class CM6MathTests: XCTestCase {
 
     private var windows: [NSWindow] = []
     private var webView: WKWebView!
-    override func tearDown() { windows.removeAll(); super.tearDown() }
+    override func tearDown() {
+        windows.removeAll()
+        super.tearDown()
+    }
 
     @MainActor
     private func boot(_ text: String) throws {
         webView = WKWebView(frame: NSRect(x: 0, y: 0, width: 900, height: 700))
-        let window = NSWindow(contentRect: webView.frame, styleMask: [.titled],
-                              backing: .buffered, defer: false)
+        let window = NSWindow(
+            contentRect: webView.frame, styleMask: [.titled],
+            backing: .buffered, defer: false)
         window.contentView = webView
         windows.append(window)
         let index = try XCTUnwrap(CM6EditorView.Coordinator.bundledIndexURL)
@@ -45,15 +50,22 @@ final class CM6MathTests: XCTestCase {
     @MainActor
     func test_aNoteWithNoMathsNeverLoadsTheEngine() throws {
         try boot("# Just prose\n\nNo mathematics here at all.\n\n")
-        XCTAssertEqual(try js("window.loreEditor.mathEngineLoaded()") as? Bool, false,
-                       "a note without maths must not pay for KaTeX")
+        XCTAssertEqual(
+            try js("window.loreEditor.mathEngineLoaded()") as? Bool, false,
+            "a note without maths must not pay for KaTeX")
         XCTAssertEqual(try count(), 0)
     }
 
     @MainActor @discardableResult
     private func js(_ source: String) throws -> Any? {
-        var result: Any?; var failure: Error?; var done = false
-        webView.evaluateJavaScript(source) { v, e in result = v; failure = e; done = true }
+        var result: Any?
+        var failure: Error?
+        var done = false
+        webView.evaluateJavaScript(source) { v, e in
+            result = v
+            failure = e
+            done = true
+        }
         let deadline = Date().addingTimeInterval(20)
         while !done, Date() < deadline {
             RunLoop.current.run(mode: .default, before: Date().addingTimeInterval(0.01))
@@ -142,11 +154,13 @@ final class CM6MathTests: XCTestCase {
     func test_anExpressionTheEngineRefusesStaysSource() throws {
         try boot("Broken: $\\frobnicate{x}$ here.\n\n")
         XCTAssertEqual(try count(), 0, "nothing should have been replaced")
-        XCTAssertEqual(try js("window.loreEditor.mathErrorCount()") as? Int, 0,
-                       "KaTeX's red error markup must never be on screen")
+        XCTAssertEqual(
+            try js("window.loreEditor.mathErrorCount()") as? Int, 0,
+            "KaTeX's red error markup must never be on screen")
         let text = try shown()
-        XCTAssertTrue(text.contains("\\frobnicate"),
-                      "the source must still be readable: \(text)")
+        XCTAssertTrue(
+            text.contains("\\frobnicate"),
+            "the source must still be readable: \(text)")
     }
 
     // MARK: - what is not maths
@@ -155,16 +169,17 @@ final class CM6MathTests: XCTestCase {
     /// is not either — the same suppression a wikilink gets.
     @MainActor
     func test_currencyAndCodeAreNotMaths() throws {
-        try boot("""
-        It cost $5 and then $10 more.
+        try boot(
+            """
+            It cost $5 and then $10 more.
 
-        Run `echo $HOME` and also:
+            Run `echo $HOME` and also:
 
-        ```sh
-        echo $PATH $USER
-        ```
+            ```sh
+            echo $PATH $USER
+            ```
 
-        """)
+            """)
         XCTAssertEqual(try count(), 0)
     }
 
@@ -197,20 +212,21 @@ final class CM6MathTests: XCTestCase {
     @MainActor
     func test_renderingChangesNoByteOfTheDocument() throws {
         let source = """
-        Inline $\\pi r^2$ and block:
+            Inline $\\pi r^2$ and block:
 
-        $$\\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}$$
+            $$\\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}$$
 
-        And a refusal: $\\frobnicate{x}$, and $5 of currency.
+            And a refusal: $\\frobnicate{x}$, and $5 of currency.
 
-        """
+            """
         try boot(source)
         XCTAssertEqual(try js("window.loreEditor.text()") as? String, source)
         for needle in ["\\pi", "\\sum", "\\frobnicate"] {
-            _ = try js("""
-            window.loreEditor.selectAt(
-              window.loreEditor.text().indexOf(\(CM6EditorView.Coordinator.jsString(needle))))
-            """)
+            _ = try js(
+                """
+                window.loreEditor.selectAt(
+                  window.loreEditor.text().indexOf(\(CM6EditorView.Coordinator.jsString(needle))))
+                """)
         }
         XCTAssertEqual(try js("window.loreEditor.text()") as? String, source)
     }

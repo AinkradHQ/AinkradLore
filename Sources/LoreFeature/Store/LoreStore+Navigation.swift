@@ -64,7 +64,7 @@ extension LoreStore {
             // with two: it would reclaim the session the other pane is
             // displaying, out from under a document the user is reading.
             guard !visibleSessions.contains(where: { $0 === session }),
-                  !session.isDirty, !session.conflict, session.lastSaveError == nil
+                !session.isDirty, !session.conflict, session.lastSaveError == nil
             else { continue }
             session.cancelPendingSave()
             tabs.removeAll { $0 === session }

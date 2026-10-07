@@ -53,8 +53,10 @@ enum VaultWalk {
 
     private static let keys: Set<URLResourceKey> = [.isDirectoryKey, .isPackageKey]
 
-    private static func visit(_ dir: URL, relative: [String], rules: [GitignoreRules],
-                              into result: inout Result) {
+    private static func visit(
+        _ dir: URL, relative: [String], rules: [GitignoreRules],
+        into result: inout Result
+    ) {
         var rules = rules
         if let own = GitignoreRules(directory: dir, relative: relative) { rules.append(own) }
         // Names, then appended to `dir`: every URL keeps the root's canonical
@@ -115,12 +117,24 @@ struct GitignoreRules {
             while line.hasSuffix(" ") && !line.hasSuffix("\\ ") { line.removeLast() }
             if line.isEmpty || line.hasPrefix("#") { return nil }
             var rule = Rule(pattern: line, negated: false, directoryOnly: false, anchored: false)
-            if rule.pattern.hasPrefix("!") { rule.negated = true; rule.pattern.removeFirst() }
+            if rule.pattern.hasPrefix("!") {
+                rule.negated = true
+                rule.pattern.removeFirst()
+            }
             if rule.pattern.hasPrefix("\\") { rule.pattern.removeFirst() }
-            if rule.pattern.hasSuffix("/**") { rule.pattern.removeLast(3); rule.directoryOnly = true }
-            if rule.pattern.hasSuffix("/") { rule.pattern.removeLast(); rule.directoryOnly = true }
-            if rule.pattern.hasPrefix("**/") { rule.pattern.removeFirst(3) }
-            else if rule.pattern.contains("/") { rule.anchored = true }
+            if rule.pattern.hasSuffix("/**") {
+                rule.pattern.removeLast(3)
+                rule.directoryOnly = true
+            }
+            if rule.pattern.hasSuffix("/") {
+                rule.pattern.removeLast()
+                rule.directoryOnly = true
+            }
+            if rule.pattern.hasPrefix("**/") {
+                rule.pattern.removeFirst(3)
+            } else if rule.pattern.contains("/") {
+                rule.anchored = true
+            }
             if rule.pattern.hasPrefix("/") { rule.pattern.removeFirst() }
             return rule.pattern.isEmpty ? nil : rule
         }
@@ -136,11 +150,13 @@ struct GitignoreRules {
             let local = path.dropFirst(file.base.count).joined(separator: "/")
             let name = path.last ?? ""
             for rule in file.rules where !(rule.directoryOnly && !isDirectory) {
-                let matched = rule.anchored
+                let matched =
+                    rule.anchored
                     ? fnmatch(rule.pattern, local, FNM_PATHNAME) == 0
                         || (rule.pattern.contains("**")
-                            && fnmatch(rule.pattern.replacingOccurrences(of: "**/", with: "*"),
-                                       local, 0) == 0)
+                            && fnmatch(
+                                rule.pattern.replacingOccurrences(of: "**/", with: "*"),
+                                local, 0) == 0)
                     : fnmatch(rule.pattern, name, 0) == 0
                 if matched { ignored = !rule.negated }
             }

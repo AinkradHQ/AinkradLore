@@ -1,5 +1,6 @@
-import XCTest
 import GRDB
+import XCTest
+
 @testable import LoreFeature
 
 final class LoreIndexTests: XCTestCase {
@@ -7,10 +8,11 @@ final class LoreIndexTests: XCTestCase {
         try LoreIndex(path: URL(fileURLWithPath: "/tmp/lore-index-\(UUID()).sqlite"))
     }
     private func entry(_ name: String, title: String, body: String) -> IndexEntry {
-        IndexEntry(url: URL(fileURLWithPath: "/tmp/v/\(name).md"),
-                   type: "markdown",
-                   payload: IndexPayload(title: title, plaintext: body, tags: ["t"], id: name),
-                   updated: Date())
+        IndexEntry(
+            url: URL(fileURLWithPath: "/tmp/v/\(name).md"),
+            type: "markdown",
+            payload: IndexPayload(title: title, plaintext: body, tags: ["t"], id: name),
+            updated: Date())
     }
 
     func test_upsert_thenAll_returnsRow() throws {
@@ -24,30 +26,38 @@ final class LoreIndexTests: XCTestCase {
         try idx.upsert(entry("a", title: "Alpha", body: "the quick brown fox"))
         try idx.upsert(entry("b", title: "Beta", body: "lazy dog sleeps"))
         XCTAssertEqual(try idx.search("brown").map(\.id), ["a"])
-        XCTAssertEqual(try idx.search("Beta").map(\.id), ["b"])   // title is indexed too
+        XCTAssertEqual(try idx.search("Beta").map(\.id), ["b"])  // title is indexed too
     }
 
     /// A note NAMED for the query outranks one that merely mentions it.
     func test_search_ranksATitleHitAboveABodyHit() throws {
         let index = try makeIndex()
-        try index.upsert(IndexEntry(url: URL(fileURLWithPath: "/v/body.md"), type: "markdown",
-            payload: IndexPayload(title: "Notes", plaintext: "about the raven and the raven"),
-            updated: Date()))
-        try index.upsert(IndexEntry(url: URL(fileURLWithPath: "/v/title.md"), type: "markdown",
-            payload: IndexPayload(title: "Raven", plaintext: "unrelated words here"),
-            updated: Date()))
+        try index.upsert(
+            IndexEntry(
+                url: URL(fileURLWithPath: "/v/body.md"), type: "markdown",
+                payload: IndexPayload(title: "Notes", plaintext: "about the raven and the raven"),
+                updated: Date()))
+        try index.upsert(
+            IndexEntry(
+                url: URL(fileURLWithPath: "/v/title.md"), type: "markdown",
+                payload: IndexPayload(title: "Raven", plaintext: "unrelated words here"),
+                updated: Date()))
         XCTAssertEqual(try index.search("raven").map(\.title), ["Raven", "Notes"])
     }
 
     /// Among equally relevant notes, the recently edited one comes first.
     func test_search_ranksTheNewerOfTwoEqualHitsFirst() throws {
         let index = try makeIndex()
-        try index.upsert(IndexEntry(url: URL(fileURLWithPath: "/v/old.md"), type: "markdown",
-            payload: IndexPayload(title: "Old", plaintext: "quarterly planning"),
-            updated: Date().addingTimeInterval(-400 * 86_400)))
-        try index.upsert(IndexEntry(url: URL(fileURLWithPath: "/v/new.md"), type: "markdown",
-            payload: IndexPayload(title: "New", plaintext: "quarterly planning"),
-            updated: Date()))
+        try index.upsert(
+            IndexEntry(
+                url: URL(fileURLWithPath: "/v/old.md"), type: "markdown",
+                payload: IndexPayload(title: "Old", plaintext: "quarterly planning"),
+                updated: Date().addingTimeInterval(-400 * 86_400)))
+        try index.upsert(
+            IndexEntry(
+                url: URL(fileURLWithPath: "/v/new.md"), type: "markdown",
+                payload: IndexPayload(title: "New", plaintext: "quarterly planning"),
+                updated: Date()))
         XCTAssertEqual(try index.search("quarterly").map(\.title), ["New", "Old"])
     }
 
@@ -79,8 +89,9 @@ final class LoreIndexTests: XCTestCase {
         let entry = IndexEntry(
             url: URL(fileURLWithPath: "/tmp/a.md"),
             type: "markdown",
-            payload: IndexPayload(title: "A", plaintext: "b",
-                                  properties: [FrontmatterPair(key: "status", rawValue: "active")]),
+            payload: IndexPayload(
+                title: "A", plaintext: "b",
+                properties: [FrontmatterPair(key: "status", rawValue: "active")]),
             updated: Date())
         try index.replaceAll(with: [entry])
         XCTAssertEqual(try index.all().first?.properties.first?.key, "status")
@@ -108,7 +119,7 @@ final class LoreIndexTests: XCTestCase {
             try db.execute(sql: "CREATE TABLE notes(path TEXT PRIMARY KEY);")
             try db.execute(sql: "INSERT INTO notes(path) VALUES('/tmp/old.md');")
         }
-        _ = legacy   // release before reopening
+        _ = legacy  // release before reopening
 
         let index = try LoreIndex(path: dbURL)
         XCTAssertTrue(try index.all().isEmpty, "stale index should be discarded, not read")
@@ -116,21 +127,26 @@ final class LoreIndexTests: XCTestCase {
 
     // MARK: - Links
 
-    private func linkedEntry(_ path: String, title: String,
-                              links: [ResolvedLink] = []) -> IndexEntry {
-        IndexEntry(url: URL(fileURLWithPath: path), type: "markdown",
-                   payload: IndexPayload(title: title, plaintext: "x"),
-                   updated: Date(), resolvedLinks: links)
+    private func linkedEntry(
+        _ path: String, title: String,
+        links: [ResolvedLink] = []
+    ) -> IndexEntry {
+        IndexEntry(
+            url: URL(fileURLWithPath: path), type: "markdown",
+            payload: IndexPayload(title: title, plaintext: "x"),
+            updated: Date(), resolvedLinks: links)
     }
 
     func test_backlinksListDocumentsPointingAtATarget() throws {
         let index = try makeIndex()
         let target = URL(fileURLWithPath: "/v/Design.md")
         try index.replaceAll(with: [
-            linkedEntry("/v/A.md", title: "A",
-                        links: [ResolvedLink(rawTarget: "Design", targetPath: target, isEmbed: false)]),
-            linkedEntry("/v/B.md", title: "B",
-                        links: [ResolvedLink(rawTarget: "Design#Overview", targetPath: target, isEmbed: false)]),
+            linkedEntry(
+                "/v/A.md", title: "A",
+                links: [ResolvedLink(rawTarget: "Design", targetPath: target, isEmbed: false)]),
+            linkedEntry(
+                "/v/B.md", title: "B",
+                links: [ResolvedLink(rawTarget: "Design#Overview", targetPath: target, isEmbed: false)]),
             linkedEntry("/v/C.md", title: "C"),
             linkedEntry("/v/Design.md", title: "Design"),
         ])
@@ -140,23 +156,28 @@ final class LoreIndexTests: XCTestCase {
     func test_unresolvedLinksAreListedPerDocument() throws {
         let index = try makeIndex()
         try index.replaceAll(with: [
-            linkedEntry("/v/A.md", title: "A", links: [
-                ResolvedLink(rawTarget: "Missing", targetPath: nil, isEmbed: false),
-                ResolvedLink(rawTarget: "Design", targetPath: URL(fileURLWithPath: "/v/Design.md"),
-                             isEmbed: false),
-            ]),
+            linkedEntry(
+                "/v/A.md", title: "A",
+                links: [
+                    ResolvedLink(rawTarget: "Missing", targetPath: nil, isEmbed: false),
+                    ResolvedLink(
+                        rawTarget: "Design", targetPath: URL(fileURLWithPath: "/v/Design.md"),
+                        isEmbed: false),
+                ]),
             linkedEntry("/v/Design.md", title: "Design"),
         ])
-        XCTAssertEqual(try index.unresolvedLinks(from: URL(fileURLWithPath: "/v/A.md")),
-                       [UnresolvedLink(rawTarget: "Missing", syntax: .wikilink)])
+        XCTAssertEqual(
+            try index.unresolvedLinks(from: URL(fileURLWithPath: "/v/A.md")),
+            [UnresolvedLink(rawTarget: "Missing", syntax: .wikilink)])
     }
 
     func test_outgoingLinksPreserveRawTargets() throws {
         let index = try makeIndex()
         let target = URL(fileURLWithPath: "/v/Design.md")
         try index.replaceAll(with: [
-            linkedEntry("/v/A.md", title: "A",
-                        links: [ResolvedLink(rawTarget: "design", targetPath: target, isEmbed: false)]),
+            linkedEntry(
+                "/v/A.md", title: "A",
+                links: [ResolvedLink(rawTarget: "design", targetPath: target, isEmbed: false)])
         ])
         let out = try index.outgoingLinks(from: URL(fileURLWithPath: "/v/A.md"))
         XCTAssertEqual(out.map(\.rawTarget), ["design"])
@@ -167,8 +188,9 @@ final class LoreIndexTests: XCTestCase {
         let index = try makeIndex()
         let target = URL(fileURLWithPath: "/v/Design.md")
         try index.replaceAll(with: [
-            linkedEntry("/v/A.md", title: "A",
-                        links: [ResolvedLink(rawTarget: "Design", targetPath: target, isEmbed: false)]),
+            linkedEntry(
+                "/v/A.md", title: "A",
+                links: [ResolvedLink(rawTarget: "Design", targetPath: target, isEmbed: false)]),
             linkedEntry("/v/Design.md", title: "Design"),
         ])
         try index.replaceAll(with: [linkedEntry("/v/Design.md", title: "Design")])
@@ -192,10 +214,11 @@ final class LoreIndexTests: XCTestCase {
     func test_isEditableAndByteSize_roundTrip() throws {
         let index = try makeIndex()
         let url = URL(fileURLWithPath: "/tmp/lore-test/Contract.pdf")
-        try index.upsert(IndexEntry(
-            url: url, type: PDFEngine.identifier,
-            payload: IndexPayload(title: "Contract", plaintext: "revenue"),
-            updated: Date(), resolvedLinks: [], isEditable: false, byteSize: 4096))
+        try index.upsert(
+            IndexEntry(
+                url: url, type: PDFEngine.identifier,
+                payload: IndexPayload(title: "Contract", plaintext: "revenue"),
+                updated: Date(), resolvedLinks: [], isEditable: false, byteSize: 4096))
         let row = try XCTUnwrap(try index.all().first { $0.path.lastPathComponent == "Contract.pdf" })
         XCTAssertFalse(row.isEditable)
         XCTAssertEqual(row.byteSize, 4096)
@@ -212,11 +235,12 @@ final class LoreIndexTests: XCTestCase {
     func test_isTruncated_roundTrips() throws {
         let index = try makeIndex()
         let url = URL(fileURLWithPath: "/tmp/lore-test/Huge.pdf")
-        try index.upsert(IndexEntry(
-            url: url, type: PDFEngine.identifier,
-            payload: IndexPayload(title: "Huge", plaintext: "start"),
-            updated: Date(), resolvedLinks: [], isEditable: false,
-            byteSize: 90_000_000, isTruncated: true))
+        try index.upsert(
+            IndexEntry(
+                url: url, type: PDFEngine.identifier,
+                payload: IndexPayload(title: "Huge", plaintext: "start"),
+                updated: Date(), resolvedLinks: [], isEditable: false,
+                byteSize: 90_000_000, isTruncated: true))
         let row = try XCTUnwrap(try index.all().first { $0.path.lastPathComponent == "Huge.pdf" })
         XCTAssertTrue(row.isTruncated)
     }

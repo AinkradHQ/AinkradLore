@@ -1,6 +1,7 @@
-import XCTest
 import AppKit
 import SwiftUI
+import XCTest
+
 @testable import LoreFeature
 
 /// Counts first, timings second. A timing-only test passes for the wrong
@@ -33,12 +34,14 @@ final class MarkdownRevealBenchmark: XCTestCase {
         resetParseCounter()
 
         for location in stride(from: 0, to: 20_000, by: 500) {
-            _ = MarkdownReveal.hiddenMarkers(spans: spans,
-                                             selection: NSRange(location: location, length: 0),
-                                             text: body, isFocused: true)
+            _ = MarkdownReveal.hiddenMarkers(
+                spans: spans,
+                selection: NSRange(location: location, length: 0),
+                text: body, isFocused: true)
         }
-        XCTAssertEqual(MarkdownParseCounter.count, 0,
-                       "caret movement must never trigger a parse")
+        XCTAssertEqual(
+            MarkdownParseCounter.count, 0,
+            "caret movement must never trigger a parse")
     }
 
     /// Block segmentation runs on every TEXT change, so it must be cheap. It
@@ -71,7 +74,8 @@ final class MarkdownRevealBenchmark: XCTestCase {
     /// never measures anything.
     @MainActor
     private func makeTransclusionEditor(resolving: Bool = true) throws
-        -> (MarkdownEditor.Coordinator, NSTextView, URL) {
+        -> (MarkdownEditor.Coordinator, NSTextView, URL)
+    {
         let vault = FileManager.default.temporaryDirectory
             .appendingPathComponent("m7-gate-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: vault, withIntermediateDirectories: true)
@@ -81,18 +85,19 @@ final class MarkdownRevealBenchmark: XCTestCase {
         let b = vault.appendingPathComponent("target-b.md")
         try String(repeating: "Transcluded prose that has to be laid out.\n\n", count: 40)
             .write(to: a, atomically: true, encoding: .utf8)
-        try "# B\n\nAn anchored paragraph. ^anchor\n".write(to: b, atomically: true,
-                                                            encoding: .utf8)
+        try "# B\n\nAn anchored paragraph. ^anchor\n".write(
+            to: b, atomically: true,
+            encoding: .utf8)
 
         let host = """
-        # Host
+            # Host
 
-        ![[target-a]]
+            ![[target-a]]
 
-        Some prose the caret will live in.
+            Some prose the caret will live in.
 
-        ![[target-b#^anchor]]
-        """
+            ![[target-b#^anchor]]
+            """
         var stored = host
         let binding = Binding<String>(get: { stored }, set: { stored = $0 })
         let coordinator = MarkdownEditor.Coordinator(text: binding, tokens: TestTokens.make())
@@ -138,11 +143,14 @@ final class MarkdownRevealBenchmark: XCTestCase {
             tv.setSelectedRange(NSRange(location: embed.location, length: 0))
             let collapsedRegions = coordinator.transclusionRegions
             guard let region = collapsedRegions.first(where: { $0.range == embed }),
-                  case .transclusion(let box) = region.kind else {
+                case .transclusion(let box) = region.kind
+            else {
                 return XCTFail("expected the embed to be drawn from column 0")
             }
-            let reserved = (storage.attribute(.paragraphStyle, at: embed.location,
-                                              effectiveRange: nil) as? NSParagraphStyle)?
+            let reserved =
+                (storage.attribute(
+                    .paragraphStyle, at: embed.location,
+                    effectiveRange: nil) as? NSParagraphStyle)?
                 .minimumLineHeight ?? 0
             XCTAssertEqual(reserved, box.height, accuracy: 0.5)
 
@@ -150,27 +158,34 @@ final class MarkdownRevealBenchmark: XCTestCase {
             // does not change (same line), so this is the early-return branch.
             let before = coordinator.revealedRange
             tv.setSelectedRange(NSRange(location: embed.location + 1, length: 0))
-            XCTAssertEqual(coordinator.revealedRange, before,
-                           "this test is only meaningful on the `now == was` branch")
+            XCTAssertEqual(
+                coordinator.revealedRange, before,
+                "this test is only meaningful on the `now == was` branch")
             // The DOCUMENT holds a second embed, which is untouched — so the
             // claim is about THIS embed's region, not about the array.
-            XCTAssertFalse(coordinator.transclusionRegions.contains { $0.range == embed },
-                           "a revealed embed must not leave a stale panel painting "
-                           + "over the paragraph beneath it")
-            XCTAssertEqual(coordinator.transclusionRegions.count,
-                           collapsedRegions.count - 1,
-                           "only the revealed embed loses its region")
+            XCTAssertFalse(
+                coordinator.transclusionRegions.contains { $0.range == embed },
+                "a revealed embed must not leave a stale panel painting "
+                    + "over the paragraph beneath it")
+            XCTAssertEqual(
+                coordinator.transclusionRegions.count,
+                collapsedRegions.count - 1,
+                "only the revealed embed loses its region")
 
             // Back to column 0: collapsed again, and the gap must come back at
             // the measured height rather than staying shut.
             tv.setSelectedRange(NSRange(location: embed.location, length: 0))
-            XCTAssertEqual(coordinator.transclusionRegions.count, collapsedRegions.count,
-                           "the embed must be drawn again once the caret leaves it")
-            let restored = (storage.attribute(.paragraphStyle, at: embed.location,
-                                              effectiveRange: nil) as? NSParagraphStyle)?
+            XCTAssertEqual(
+                coordinator.transclusionRegions.count, collapsedRegions.count,
+                "the embed must be drawn again once the caret leaves it")
+            let restored =
+                (storage.attribute(
+                    .paragraphStyle, at: embed.location,
+                    effectiveRange: nil) as? NSParagraphStyle)?
                 .minimumLineHeight ?? 0
-            XCTAssertEqual(restored, box.height, accuracy: 0.5,
-                           "the reserved gap collapsed and was never re-opened")
+            XCTAssertEqual(
+                restored, box.height, accuracy: 0.5,
+                "the reserved gap collapsed and was never re-opened")
         }
     }
 
@@ -205,10 +220,12 @@ final class MarkdownRevealBenchmark: XCTestCase {
             }
         }
 
-        XCTAssertEqual(try rebuilds(resolving: true), try rebuilds(resolving: false),
-                       "a resolved transclusion must not cost extra decoration rebuilds")
-        XCTAssertEqual(TransclusionMeasureCounter.count, 0,
-                       "the real edit path re-measured an embed")
+        XCTAssertEqual(
+            try rebuilds(resolving: true), try rebuilds(resolving: false),
+            "a resolved transclusion must not cost extra decoration rebuilds")
+        XCTAssertEqual(
+            TransclusionMeasureCounter.count, 0,
+            "the real edit path re-measured an embed")
     }
 
     /// The per-block half of the same claim, asserted where the regression
@@ -226,16 +243,20 @@ final class MarkdownRevealBenchmark: XCTestCase {
             coordinator.blockBackgroundRefreshes = 0
             coordinator.needsTransclusionPass = false
             coordinator.restyleBlock(embedBlock, revealed: nil, in: storage)
-            XCTAssertEqual(coordinator.blockBackgroundRefreshes, 0,
-                           "restyling one block must not rebuild the whole decoration")
-            XCTAssertTrue(coordinator.needsTransclusionPass,
-                          "it must still RECORD that a transclusion pass is owed")
+            XCTAssertEqual(
+                coordinator.blockBackgroundRefreshes, 0,
+                "restyling one block must not rebuild the whole decoration")
+            XCTAssertTrue(
+                coordinator.needsTransclusionPass,
+                "it must still RECORD that a transclusion pass is owed")
 
             XCTAssertTrue(coordinator.prepareTransclusionsIfNeeded(in: storage))
-            XCTAssertFalse(coordinator.prepareTransclusionsIfNeeded(in: storage),
-                           "a drained pass must not run twice")
-            XCTAssertEqual(coordinator.blockBackgroundRefreshes, 0,
-                           "the drain reserves; the caller decides when to rebuild")
+            XCTAssertFalse(
+                coordinator.prepareTransclusionsIfNeeded(in: storage),
+                "a drained pass must not run twice")
+            XCTAssertEqual(
+                coordinator.blockBackgroundRefreshes, 0,
+                "the drain reserves; the caller decides when to rebuild")
         }
     }
 
@@ -259,9 +280,10 @@ final class MarkdownRevealBenchmark: XCTestCase {
         coordinator.applyStyles()
         coordinator.renderStyles()
         let afterFirstPass = TransclusionMeasureCounter.count
-        XCTAssertGreaterThan(afterFirstPass, 0,
-                             "the first render must actually measure the two embeds — "
-                             + "a gate that never reaches the measurement path asserts nothing")
+        XCTAssertGreaterThan(
+            afterFirstPass, 0,
+            "the first render must actually measure the two embeds — "
+                + "a gate that never reaches the measurement path asserts nothing")
 
         withExtendedLifetime(coordinator) {
             // The caret lives in the PROSE paragraph, well away from either
@@ -272,8 +294,9 @@ final class MarkdownRevealBenchmark: XCTestCase {
                 tv.insertText("x", replacementRange: tv.selectedRange())
                 coordinator.renderStyles()
             }
-            XCTAssertEqual(TransclusionMeasureCounter.count, afterFirstPass,
-                           "typing re-measured an embed")
+            XCTAssertEqual(
+                TransclusionMeasureCounter.count, afterFirstPass,
+                "typing re-measured an embed")
         }
     }
 
@@ -308,16 +331,19 @@ final class MarkdownRevealBenchmark: XCTestCase {
             // the sink firing, exactly as the watcher push does.
             coordinator.handleExternalChange(to: a)
 
-            XCTAssertGreaterThan(TransclusionMeasureCounter.count, 0,
-                                 "the changed target must be re-resolved and re-measured, "
-                                 + "not served from the stale cache entry")
-            XCTAssertGreaterThan(coordinator.blockBackgroundRefreshes, 0,
-                                 "invalidation without a repaint is exactly the failure "
-                                 + "this task exists to prevent")
+            XCTAssertGreaterThan(
+                TransclusionMeasureCounter.count, 0,
+                "the changed target must be re-resolved and re-measured, "
+                    + "not served from the stale cache entry")
+            XCTAssertGreaterThan(
+                coordinator.blockBackgroundRefreshes, 0,
+                "invalidation without a repaint is exactly the failure "
+                    + "this task exists to prevent")
             let after = try XCTUnwrap(coordinator.transclusionRegions.first)
-            XCTAssertNotEqual(before.kind, after.kind,
-                              "the drawn embed must reflect the new content, "
-                              + "not the box measured before the edit")
+            XCTAssertNotEqual(
+                before.kind, after.kind,
+                "the drawn embed must reflect the new content, "
+                    + "not the box measured before the edit")
         }
     }
 
@@ -342,12 +368,14 @@ final class MarkdownRevealBenchmark: XCTestCase {
 
             coordinator.handleExternalChange(to: unrelated)
 
-            XCTAssertEqual(coordinator.blockBackgroundRefreshes, 0,
-                           "a change to a file this document does not embed "
-                           + "must not force a decoration rebuild")
-            XCTAssertEqual(TransclusionMeasureCounter.count, 0,
-                           "a change to a file this document does not embed "
-                           + "must not re-measure anything")
+            XCTAssertEqual(
+                coordinator.blockBackgroundRefreshes, 0,
+                "a change to a file this document does not embed "
+                    + "must not force a decoration rebuild")
+            XCTAssertEqual(
+                TransclusionMeasureCounter.count, 0,
+                "a change to a file this document does not embed "
+                    + "must not re-measure anything")
         }
     }
 
@@ -372,17 +400,19 @@ final class MarkdownRevealBenchmark: XCTestCase {
             for _ in 0..<10 {
                 tv.insertText("x", replacementRange: tv.selectedRange())
             }
-            XCTAssertEqual(coordinator.externalChangeStatCalls, 0,
-                           "a keystroke must never stat an embedded target's file")
+            XCTAssertEqual(
+                coordinator.externalChangeStatCalls, 0,
+                "a keystroke must never stat an embedded target's file")
 
             // The counter itself is real, not dead code: the on-focus
             // backstop DOES use it, and stats each of the document's two
             // DISTINCT targets exactly once even though nothing in this
             // fixture repeats a target.
             coordinator.detectExternalTransclusionChanges()
-            XCTAssertEqual(coordinator.externalChangeStatCalls, 2,
-                           "the on-focus backstop must stat each distinct embedded "
-                           + "target exactly once")
+            XCTAssertEqual(
+                coordinator.externalChangeStatCalls, 2,
+                "the on-focus backstop must stat each distinct embedded "
+                    + "target exactly once")
         }
     }
 }
@@ -393,7 +423,8 @@ final class MarkdownRevealBenchmark: XCTestCase {
 final class EditorPerformanceBenchmark: XCTestCase {
 
     private func makeEditor(_ text: String)
-        -> (MarkdownEditor.Coordinator, NSTextView) {
+        -> (MarkdownEditor.Coordinator, NSTextView)
+    {
         var stored = text
         let binding = Binding<String>(get: { stored }, set: { stored = $0 })
         let coordinator = MarkdownEditor.Coordinator(text: binding, tokens: TestTokens.make())
@@ -427,8 +458,9 @@ final class EditorPerformanceBenchmark: XCTestCase {
             for character in "the quick brown fox" {
                 tv.insertText(String(character), replacementRange: tv.selectedRange())
             }
-            XCTAssertEqual(MarkdownParseCounter.count, 0,
-                           "19 keystrokes must cost zero markdown parses")
+            XCTAssertEqual(
+                MarkdownParseCounter.count, 0,
+                "19 keystrokes must cost zero markdown parses")
         }
     }
 
@@ -461,10 +493,12 @@ final class EditorPerformanceBenchmark: XCTestCase {
             }
 
             XCTAssertGreaterThan(crossings, 10, "the sweep must actually cross boundaries")
-            XCTAssertEqual(MarkdownParseCounter.count, 0,
-                           "caret movement must never trigger a parse")
-            XCTAssertEqual(coordinator.revealIndexBuilds, blockCount,
-                           "caret movement must never rescan the document for blocks")
+            XCTAssertEqual(
+                MarkdownParseCounter.count, 0,
+                "caret movement must never trigger a parse")
+            XCTAssertEqual(
+                coordinator.revealIndexBuilds, blockCount,
+                "caret movement must never rescan the document for blocks")
             // Two blocks per crossing: the one leaving reveal and the one
             // entering it. The bound is a CONSTANT multiple of the number of
             // crossings, and independent of the document's length.
@@ -476,9 +510,10 @@ final class EditorPerformanceBenchmark: XCTestCase {
             // the blocks the reveal left and entered is one block when the
             // caret moved within a block, two when it crossed a boundary.
             // Never a function of the document's length.
-            XCTAssertLessThanOrEqual(coordinator.restyledBlockCount, crossings * 2,
-                                     "a crossing may re-attribute at most the two blocks "
-                                     + "whose reveal state flipped")
+            XCTAssertLessThanOrEqual(
+                coordinator.restyledBlockCount, crossings * 2,
+                "a crossing may re-attribute at most the two blocks "
+                    + "whose reveal state flipped")
         }
     }
 
@@ -511,8 +546,9 @@ final class EditorPerformanceBenchmark: XCTestCase {
                     coordinator.revealForSelectionChange()
                 }
             }
-            XCTAssertEqual(MarkdownParseCounter.count, 0,
-                           "caret movement through embeds must never trigger a parse")
+            XCTAssertEqual(
+                MarkdownParseCounter.count, 0,
+                "caret movement through embeds must never trigger a parse")
         }
     }
 
@@ -532,16 +568,20 @@ final class EditorPerformanceBenchmark: XCTestCase {
         try withExtendedLifetime(coordinator) {
             let recorder = EditRangeRecorder()
             tv.delegate = recorder
-            tv.setSelectedRange(NSRange(location: 6, length: 0))   // end of line 1
-            XCTAssertTrue(MarkdownEditorTyping.handle(#selector(NSResponder.insertNewline(_:)),
-                                                      in: tv))
+            tv.setSelectedRange(NSRange(location: 6, length: 0))  // end of line 1
+            XCTAssertTrue(
+                MarkdownEditorTyping.handle(
+                    #selector(NSResponder.insertNewline(_:)),
+                    in: tv))
             let announced = try XCTUnwrap(recorder.lastRange)
-            XCTAssertLessThan(announced.length, 32,
-                              "the affordance must replace the changed region, "
-                              + "not the whole \((body as NSString).length)-unit document")
-            XCTAssertEqual(tv.string,
-                           "- item\n- \n" + String(repeating: "- item\n", count: 499),
-                           "and the resulting text must be exactly what the transform asked for")
+            XCTAssertLessThan(
+                announced.length, 32,
+                "the affordance must replace the changed region, "
+                    + "not the whole \((body as NSString).length)-unit document")
+            XCTAssertEqual(
+                tv.string,
+                "- item\n- \n" + String(repeating: "- item\n", count: 499),
+                "and the resulting text must be exactly what the transform asked for")
         }
     }
 
@@ -560,8 +600,9 @@ final class EditorPerformanceBenchmark: XCTestCase {
             _ = MarkdownEditorTyping.handle(#selector(NSResponder.insertNewline(_:)), in: tv)
             XCTAssertEqual(tv.string, "- alpha\n- \n- beta\n")
             tv.undoManager?.undo()
-            XCTAssertEqual(tv.string, "- alpha\n- beta\n",
-                           "one undo must restore the document exactly")
+            XCTAssertEqual(
+                tv.string, "- alpha\n- beta\n",
+                "one undo must restore the document exactly")
         }
     }
 
@@ -574,8 +615,9 @@ final class EditorPerformanceBenchmark: XCTestCase {
             tv.setSelectedRange(NSRange(location: 6, length: 0))
             _ = MarkdownEditorTyping.handle(#selector(NSResponder.insertNewline(_:)), in: tv)
             XCTAssertEqual(MarkdownParseCounter.count, 0, "Enter must not parse")
-            XCTAssertTrue(coordinator.styleCache.describes(tv.string),
-                          "the shifted cache must still describe the text on screen")
+            XCTAssertTrue(
+                coordinator.styleCache.describes(tv.string),
+                "the shifted cache must still describe the text on screen")
         }
     }
 
@@ -592,10 +634,12 @@ final class EditorPerformanceBenchmark: XCTestCase {
             let started = Date()
             coordinator.applyStyles()
             let elapsed = Date().timeIntervalSince(started)
-            XCTAssertEqual(MarkdownParseCounter.count, 0,
-                           "the open path must not parse on the main actor")
-            XCTAssertLessThan(elapsed, 0.2,
-                              "and it must therefore return promptly — took \(elapsed)s")
+            XCTAssertEqual(
+                MarkdownParseCounter.count, 0,
+                "the open path must not parse on the main actor")
+            XCTAssertLessThan(
+                elapsed, 0.2,
+                "and it must therefore return promptly — took \(elapsed)s")
         }
     }
 
@@ -608,15 +652,18 @@ final class EditorPerformanceBenchmark: XCTestCase {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { settled.fulfill() }
             wait(for: [settled], timeout: 2)
             XCTAssertTrue(coordinator.styleCache.describes(tv.string))
-            XCTAssertTrue(coordinator.cachedSpansForTesting.contains { $0.kind == .strong },
-                          "the document must end up styled")
+            XCTAssertTrue(
+                coordinator.cachedSpansForTesting.contains { $0.kind == .strong },
+                "the document must end up styled")
         }
     }
 
     private func makeEditorWithoutStyling(_ text: String)
-        -> (MarkdownEditor.Coordinator, NSTextView) {
-        let coordinator = MarkdownEditor.Coordinator(text: .constant(text),
-                                                     tokens: TestTokens.make())
+        -> (MarkdownEditor.Coordinator, NSTextView)
+    {
+        let coordinator = MarkdownEditor.Coordinator(
+            text: .constant(text),
+            tokens: TestTokens.make())
         let tv = NSTextView(frame: NSRect(x: 0, y: 0, width: 400, height: 400))
         tv.isRichText = false
         tv.delegate = coordinator
@@ -640,8 +687,10 @@ private final class UndoHost: NSObject, NSTextViewDelegate {
 @MainActor
 private final class EditRangeRecorder: NSObject, NSTextViewDelegate {
     var lastRange: NSRange?
-    func textView(_ tv: NSTextView, shouldChangeTextIn affected: NSRange,
-                  replacementString: String?) -> Bool {
+    func textView(
+        _ tv: NSTextView, shouldChangeTextIn affected: NSRange,
+        replacementString: String?
+    ) -> Bool {
         lastRange = affected
         return true
     }
@@ -656,14 +705,19 @@ final class RenameParseCountBenchmark: XCTestCase {
     /// what a `replacingOccurrences`-per-edit shape would do — would make a
     /// rename O(links) parses of every inbound file.
     func test_rewritingManyLinksInOneDocumentParsesItOnce() {
-        let body = "---\nid: a\ntitle: A\n---\n"
+        let body =
+            "---\nid: a\ntitle: A\n---\n"
             + (0..<200).map { "see [[Design]] and [[Other \($0)]]\n" }.joined()
-        let edits = [LinkEdit(file: URL(fileURLWithPath: "/tmp/a.md"),
-                              oldTarget: "Design", newTarget: "Architecture")]
+        let edits = [
+            LinkEdit(
+                file: URL(fileURLWithPath: "/tmp/a.md"),
+                oldTarget: "Design", newTarget: "Architecture")
+        ]
         resetParseCounter()
         let out = LinkRewriter.replacingLinkTargets(in: body, edits: edits)
-        XCTAssertEqual(MarkdownParseCounter.count, 1,
-                       "200 rewritten links must cost one parse, not 200")
+        XCTAssertEqual(
+            MarkdownParseCounter.count, 1,
+            "200 rewritten links must cost one parse, not 200")
         XCTAssertEqual(out.components(separatedBy: "[[Architecture]]").count - 1, 200)
         XCTAssertFalse(out.contains("[[Design]]"))
     }
@@ -679,8 +733,9 @@ final class RenameParseCountBenchmark: XCTestCase {
         var files: [URL] = []
         for index in 0..<8 {
             let url = root.appendingPathComponent("n\(index).md")
-            try ("---\nid: n\(index)\ntitle: N\(index)\n---\n"
-                 + String(repeating: "see [[Design]]\n", count: 25))
+            try
+                ("---\nid: n\(index)\ntitle: N\(index)\n---\n"
+                + String(repeating: "see [[Design]]\n", count: 25))
                 .write(to: url, atomically: true, encoding: .utf8)
             files.append(url)
         }
@@ -688,12 +743,15 @@ final class RenameParseCountBenchmark: XCTestCase {
 
         resetParseCounter()
         for file in files {
-            let edit = LinkEdit(file: file, oldTarget: "Design",
-                                newTarget: "Architecture")
-            XCTAssertEqual(try LinkRewriter.applyEdits([edit], to: file, baseline: baseline),
-                           .written)
+            let edit = LinkEdit(
+                file: file, oldTarget: "Design",
+                newTarget: "Architecture")
+            XCTAssertEqual(
+                try LinkRewriter.applyEdits([edit], to: file, baseline: baseline),
+                .written)
         }
-        XCTAssertEqual(MarkdownParseCounter.count, files.count,
-                       "each document may be parsed at most once by the rewrite")
+        XCTAssertEqual(
+            MarkdownParseCounter.count, files.count,
+            "each document may be parsed at most once by the rewrite")
     }
 }

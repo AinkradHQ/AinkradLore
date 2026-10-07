@@ -36,7 +36,8 @@ public enum Frontmatter {
 
         let now = Date()
         let body = split.body
-        let extra = entries
+        let extra =
+            entries
             .filter { !modelledKeys.contains($0.key) }
             .map { FrontmatterPair(key: $0.key, rawValue: $0.flattenedValue) }
 
@@ -151,8 +152,11 @@ public enum Frontmatter {
             case .leave:
                 continue
             case .replace(let text):
-                if let e = existing { edits.append((e.start...e.end, "\(key): \(text)")) }
-                else { appended.append("\(key): \(text)") }
+                if let e = existing {
+                    edits.append((e.start...e.end, "\(key): \(text)"))
+                } else {
+                    appended.append("\(key): \(text)")
+                }
             }
         }
 
@@ -288,21 +292,31 @@ public enum Frontmatter {
         var entries: [Entry] = []
         var i = 0
         while i < lines.count {
-            guard let (key, value) = keyValue(lines[i]) else { i += 1; continue }
+            guard let (key, value) = keyValue(lines[i]) else {
+                i += 1
+                continue
+            }
             var j = i + 1
             var last = i
             while j < lines.count {
                 let line = lines[j]
                 let trimmed = line.trimmingCharacters(in: .whitespaces)
-                if trimmed.isEmpty || trimmed.hasPrefix("#") { j += 1; continue }  // provisional
-                guard line.hasPrefix(" ") || line.hasPrefix("\t")
-                        || trimmed.hasPrefix("- ") || trimmed == "-" else { break }
+                if trimmed.isEmpty || trimmed.hasPrefix("#") {
+                    j += 1
+                    continue
+                }  // provisional
+                guard
+                    line.hasPrefix(" ") || line.hasPrefix("\t")
+                        || trimmed.hasPrefix("- ") || trimmed == "-"
+                else { break }
                 last = j
                 j += 1
             }
-            entries.append(Entry(key: key, inlineValue: value,
-                                 continuation: last > i ? Array(lines[(i + 1)...last]) : [],
-                                 start: i, end: last))
+            entries.append(
+                Entry(
+                    key: key, inlineValue: value,
+                    continuation: last > i ? Array(lines[(i + 1)...last]) : [],
+                    start: i, end: last))
             i = last + 1
         }
         return entries
@@ -313,14 +327,18 @@ public enum Frontmatter {
     private static func keyValue(_ line: String) -> (String, String)? {
         let trimmed = line.trimmingCharacters(in: .whitespaces)
         guard !trimmed.isEmpty, !trimmed.hasPrefix("#"), !trimmed.hasPrefix("- "), trimmed != "-",
-              !line.hasPrefix(" "), !line.hasPrefix("\t") else { return nil }
+            !line.hasPrefix(" "), !line.hasPrefix("\t")
+        else { return nil }
         // Prefer a colon that YAML would accept as a key terminator (followed
         // by a space or end of line) so `title: a: b` keys on the first colon
         // and `url: https://x` does not key on the scheme colon.
         let chars = Array(line)
         var colon: Int?
         for (idx, ch) in chars.enumerated() where ch == ":" {
-            if idx == chars.count - 1 || chars[idx + 1] == " " { colon = idx; break }
+            if idx == chars.count - 1 || chars[idx + 1] == " " {
+                colon = idx
+                break
+            }
         }
         guard let c = colon ?? chars.firstIndex(of: ":") else { return nil }
         let key = String(chars[..<c]).trimmingCharacters(in: .whitespaces)
@@ -343,7 +361,8 @@ public enum Frontmatter {
     /// hold for hostile input, not just tidy input. `Meeting: Q3` is an
     /// entirely ordinary title.
     static func yamlScalar(_ value: String) -> String {
-        var needsQuotes = value.isEmpty
+        var needsQuotes =
+            value.isEmpty
             || yamlKeywords.contains(value.lowercased())
             || value != value.trimmingCharacters(in: .whitespaces)
             || value.contains(where: unsafeAnywhere.contains)
@@ -417,15 +436,25 @@ public enum Frontmatter {
         var fence: Character?
         var escaped = false
         for ch in s {
-            if escaped { current.append(ch); escaped = false; continue }
-            if fence == "\"", ch == "\\" { current.append(ch); escaped = true; continue }
+            if escaped {
+                current.append(ch)
+                escaped = false
+                continue
+            }
+            if fence == "\"", ch == "\\" {
+                current.append(ch)
+                escaped = true
+                continue
+            }
             if let f = fence {
                 current.append(ch)
                 if ch == f { fence = nil }
             } else if ch == "\"" || ch == "'" {
-                fence = ch; current.append(ch)
+                fence = ch
+                current.append(ch)
             } else if ch == "," {
-                items.append(current); current = ""
+                items.append(current)
+                current = ""
             } else {
                 current.append(ch)
             }
@@ -476,9 +505,10 @@ public enum Frontmatter {
     private static func fallback(path: URL, layout: Layout) -> Note {
         let now = Date()
         let text = layout.strippedText
-        return Note(path: path, id: UUID().uuidString, title: deriveTitle(text, path: path),
-                    tags: [], aliases: [], created: now, updated: now, body: text, extra: [],
-                    rawFrontmatter: nil, lineEnding: layout.ending, hasByteOrderMark: layout.bom)
+        return Note(
+            path: path, id: UUID().uuidString, title: deriveTitle(text, path: path),
+            tags: [], aliases: [], created: now, updated: now, body: text, extra: [],
+            rawFrontmatter: nil, lineEnding: layout.ending, hasByteOrderMark: layout.bom)
     }
 
     private static func deriveTitle(_ body: String, path: URL) -> String {

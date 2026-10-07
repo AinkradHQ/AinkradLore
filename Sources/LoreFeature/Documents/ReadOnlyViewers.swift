@@ -1,7 +1,7 @@
-import SwiftUI
+import AinkradAppKit
 import AppKit
 import QuickLookUI
-import AinkradAppKit
+import SwiftUI
 
 /// QuickLook preview of an arbitrary file.
 ///

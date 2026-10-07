@@ -49,8 +49,9 @@ enum MarkdownEditorTyping {
         // restores the original text in one step — the reverse action AppKit
         // registers covers exactly the range being replaced, which is the same
         // document either way.
-        let (range, replacement) = changedRange(from: tv.string as NSString,
-                                                to: result.text as NSString)
+        let (range, replacement) = changedRange(
+            from: tv.string as NSString,
+            to: result.text as NSString)
         guard tv.shouldChangeText(in: range, replacementString: replacement) else { return false }
         tv.undoManager?.beginUndoGrouping()
         tv.textStorage?.replaceCharacters(in: range, with: replacement)
@@ -82,7 +83,8 @@ enum MarkdownEditorTyping {
     /// The two upper bounds move together, which is what keeps the untouched
     /// tails the same length in both strings and therefore keeps (1) true.
     static func changedRange(from old: NSString, to new: NSString)
-        -> (range: NSRange, replacement: String) {
+        -> (range: NSRange, replacement: String)
+    {
         var prefix = 0
         let prefixLimit = min(old.length, new.length)
         while prefix < prefixLimit, old.character(at: prefix) == new.character(at: prefix) {
@@ -91,8 +93,9 @@ enum MarkdownEditorTyping {
         var suffix = 0
         let suffixLimit = min(old.length, new.length) - prefix
         while suffix < suffixLimit,
-              old.character(at: old.length - 1 - suffix)
-                == new.character(at: new.length - 1 - suffix) {
+            old.character(at: old.length - 1 - suffix)
+                == new.character(at: new.length - 1 - suffix)
+        {
             suffix += 1
         }
 
@@ -104,8 +107,10 @@ enum MarkdownEditorTyping {
             upperOld += 1
             upperNew += 1
         }
-        return (NSRange(location: lower, length: upperOld - lower),
-                new.substring(with: NSRange(location: lower, length: upperNew - lower)))
+        return (
+            NSRange(location: lower, length: upperOld - lower),
+            new.substring(with: NSRange(location: lower, length: upperNew - lower))
+        )
     }
 
     /// Whether `offset` is a character boundary in `text`. The end of the
@@ -143,18 +148,23 @@ enum MarkdownEditorTyping {
     @MainActor
     static func typed(_ string: String, in tv: NSTextView) -> Bool {
         guard string.count == 1 else { return false }
-        guard let result = MarkdownEditing.autoPair(text: tv.string,
-                                                    selection: tv.selectedRange(),
-                                                    typing: string) else { return false }
+        guard
+            let result = MarkdownEditing.autoPair(
+                text: tv.string,
+                selection: tv.selectedRange(),
+                typing: string)
+        else { return false }
         return apply(result, to: tv)
     }
 
     /// Cmd-B / Cmd-I. Always produces a result, so it always applies.
     @MainActor
     static func toggleWrap(in tv: NSTextView, with delimiter: String) {
-        apply(MarkdownEditing.toggleWrap(text: tv.string,
-                                         selection: tv.selectedRange(),
-                                         with: delimiter),
-              to: tv)
+        apply(
+            MarkdownEditing.toggleWrap(
+                text: tv.string,
+                selection: tv.selectedRange(),
+                with: delimiter),
+            to: tv)
     }
 }

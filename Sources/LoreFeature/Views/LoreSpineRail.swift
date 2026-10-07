@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// The document's headings, as texture rather than as UI.
 ///
@@ -81,8 +81,9 @@ struct LoreSpineRail: View {
     private var ticks: some View {
         GeometryReader { geometry in
             ForEach(Array(outline.enumerated()), id: \.offset) { index, entry in
-                let fraction = LoreSpineRail.fraction(of: entry.utf16Offset,
-                                                      in: documentLength)
+                let fraction = LoreSpineRail.fraction(
+                    of: entry.utf16Offset,
+                    in: documentLength)
                 Capsule()
                     // EXEMPT from `LoreMetrics.indicatorGlyph`, deliberately.
                     //
@@ -95,14 +96,17 @@ struct LoreSpineRail: View {
                     // information the document already contains. Raising these
                     // to 0.55 was tried and makes the rail read as loud chrome
                     // beside the text rather than as the texture it is for.
-                    .fill(index == activeIndex
-                          ? theme.tokens.accentPrimary
-                          : theme.tokens.foreground.opacity(0.28))
+                    .fill(
+                        index == activeIndex
+                            ? theme.tokens.accentPrimary
+                            : theme.tokens.foreground.opacity(0.28)
+                    )
                     // Deeper headings draw shorter ticks, so nesting is
                     // legible without a single character of text.
                     .frame(width: Self.tickWidth(forLevel: entry.level), height: 2)
-                    .position(x: Self.tickWidth(forLevel: entry.level) / 2 + 2,
-                              y: geometry.size.height * fraction)
+                    .position(
+                        x: Self.tickWidth(forLevel: entry.level) / 2 + 2,
+                        y: geometry.size.height * fraction)
             }
         }
     }
@@ -112,12 +116,16 @@ struct LoreSpineRail: View {
     private var labels: some View {
         VStack(alignment: .leading, spacing: AinkradSpacing.xs) {
             ForEach(Array(outline.enumerated()), id: \.offset) { index, entry in
-                Button { onSelect(entry.utf16Offset) } label: {
+                Button {
+                    onSelect(entry.utf16Offset)
+                } label: {
                     Text(entry.text)
                         .font(AinkradFontResolver.font(.caption, typography: typo))
-                        .foregroundStyle(index == activeIndex
-                                         ? theme.tokens.accentPrimary
-                                         : theme.tokens.foreground.opacity(0.85))
+                        .foregroundStyle(
+                            index == activeIndex
+                                ? theme.tokens.accentPrimary
+                                : theme.tokens.foreground.opacity(0.85)
+                        )
                         .lineLimit(1)
                         .padding(.leading, CGFloat(max(0, entry.level - 1)) * 10)
                         .frame(maxWidth: .infinity, alignment: .leading)

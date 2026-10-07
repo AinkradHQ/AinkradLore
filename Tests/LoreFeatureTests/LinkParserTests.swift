@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 final class LinkParserTests: XCTestCase {
@@ -17,8 +18,9 @@ final class LinkParserTests: XCTestCase {
     }
 
     func test_keepsHeadingAndBlockFragmentsInTheTarget() {
-        XCTAssertEqual(targets("[[Design#Overview]] and [[Design#^abc123]]"),
-                       ["Design#Overview", "Design#^abc123"])
+        XCTAssertEqual(
+            targets("[[Design#Overview]] and [[Design#^abc123]]"),
+            ["Design#Overview", "Design#^abc123"])
     }
 
     func test_flagsEmbeds() {
@@ -37,24 +39,24 @@ final class LinkParserTests: XCTestCase {
 
     func test_ignoresLinksInsideFencedCodeBlocks() {
         let body = """
-        real [[One]]
+            real [[One]]
 
-        ```
-        not a link [[Two]]
-        ```
+            ```
+            not a link [[Two]]
+            ```
 
-        real [[Three]]
-        """
+            real [[Three]]
+            """
         XCTAssertEqual(targets(body), ["One", "Three"])
     }
 
     func test_ignoresLinksInsideTildeFencesAndInlineCode() {
         let body = """
-        ~~~
-        [[Fenced]]
-        ~~~
-        `[[Inline]]` but [[Real]]
-        """
+            ~~~
+            [[Fenced]]
+            ~~~
+            `[[Inline]]` but [[Real]]
+            """
         XCTAssertEqual(targets(body), ["Real"])
     }
 
@@ -74,61 +76,61 @@ final class LinkParserTests: XCTestCase {
 
     func test_longerFenceIsNotClosedByAShorterBareLineOfTheSameCharacter() {
         let body = """
-        real [[Before]]
+            real [[Before]]
 
-        ````
-        ```
-        not a link [[Inside]]
-        ```
-        ````
+            ````
+            ```
+            not a link [[Inside]]
+            ```
+            ````
 
-        real [[After]]
-        """
+            real [[After]]
+            """
         XCTAssertEqual(targets(body), ["Before", "After"])
     }
 
     func test_backtickFenceIsNotClosedByATildeFence() {
         let body = """
-        ```
-        [[Fenced]]
-        ~~~
-        still fenced [[AlsoFenced]]
-        ```
-        real [[Real]]
-        """
+            ```
+            [[Fenced]]
+            ~~~
+            still fenced [[AlsoFenced]]
+            ```
+            real [[Real]]
+            """
         XCTAssertEqual(targets(body), ["Real"])
     }
 
     func test_tildeFenceIsNotClosedByABacktickFence() {
         let body = """
-        ~~~
-        [[Fenced]]
-        ```
-        still fenced [[AlsoFenced]]
-        ~~~
-        real [[Real]]
-        """
+            ~~~
+            [[Fenced]]
+            ```
+            still fenced [[AlsoFenced]]
+            ~~~
+            real [[Real]]
+            """
         XCTAssertEqual(targets(body), ["Real"])
     }
 
     func test_fenceWithInfoStringOpensCorrectly() {
         let body = """
-        ```swift
-        let x = "[[NotALink]]"
-        ```
-        real [[Real]]
-        """
+            ```swift
+            let x = "[[NotALink]]"
+            ```
+            real [[Real]]
+            """
         XCTAssertEqual(targets(body), ["Real"])
     }
 
     func test_unclosedFenceSwallowsRestOfDocument() {
         let body = """
-        real [[Before]]
+            real [[Before]]
 
-        ```
-        [[Inside]]
-        still no closer, [[AlsoInside]]
-        """
+            ```
+            [[Inside]]
+            still no closer, [[AlsoInside]]
+            """
         XCTAssertEqual(targets(body), ["Before"])
     }
 
@@ -235,8 +237,9 @@ final class LinkParserTests: XCTestCase {
     /// HTML — inline or block — could ever start eating links, and it fails
     /// here.
     func test_onlyFencedAndInlineCodeSuppressLinks() {
-        XCTAssertEqual(MarkdownDocumentModel.linkSuppressingKinds,
-                       [.fencedCodeBlock, .inlineCode])
+        XCTAssertEqual(
+            MarkdownDocumentModel.linkSuppressingKinds,
+            [.fencedCodeBlock, .inlineCode])
     }
 
     /// A `[[` opened INSIDE inline code can find its `]]` in a real link later
@@ -258,19 +261,22 @@ final class LinkParserTests: XCTestCase {
     /// An indented (4-space) code block must NOT suppress: the old scanner
     /// tracked only ``` / ~~~ fences, and this keeps the vault's graph stable.
     func test_indentedCodeBlocksDoNotSuppressLinks() {
-        XCTAssertEqual(targets("para\n\n    [[Indented]]\n\nafter [[Real]]\n"),
-                       ["Indented", "Real"])
+        XCTAssertEqual(
+            targets("para\n\n    [[Indented]]\n\nafter [[Real]]\n"),
+            ["Indented", "Real"])
     }
 
     /// Tab-indented code is the same case by another spelling.
     func test_tabIndentedCodeDoesNotSuppressLinks() {
-        XCTAssertEqual(targets("para\n\n\t[[Tabbed]]\n\nafter [[Real]]\n"),
-                       ["Tabbed", "Real"])
+        XCTAssertEqual(
+            targets("para\n\n\t[[Tabbed]]\n\nafter [[Real]]\n"),
+            ["Tabbed", "Real"])
     }
 
     func test_htmlBlocksDoNotSuppressLinks() {
-        XCTAssertEqual(targets("<div>\n[[InHTMLBlock]]\n</div>\n\nafter [[Real]]\n"),
-                       ["InHTMLBlock", "Real"])
+        XCTAssertEqual(
+            targets("<div>\n[[InHTMLBlock]]\n</div>\n\nafter [[Real]]\n"),
+            ["InHTMLBlock", "Real"])
     }
 
     /// The worst case the kind restriction exists to prevent: a type-6 HTML
@@ -281,8 +287,9 @@ final class LinkParserTests: XCTestCase {
     }
 
     func test_htmlCommentsDoNotSuppressLinks() {
-        XCTAssertEqual(targets("<!--\n[[Commented]]\n-->\n\nafter [[Real]]\n"),
-                       ["Commented", "Real"])
+        XCTAssertEqual(
+            targets("<!--\n[[Commented]]\n-->\n\nafter [[Real]]\n"),
+            ["Commented", "Real"])
     }
 
     /// Markdown links, not just wikilinks, must follow the same rule.
@@ -299,22 +306,26 @@ final class LinkParserTests: XCTestCase {
     /// by the bare closing run in its own content — impossible inside a real
     /// fence, since it would have terminated it.
     func test_indentedBlockWhoseContentIsAFenceDoesNotSuppress() {
-        XCTAssertEqual(targets("para\n\n    ```\n    [[X]]\n    ```\n\nafter [[R]]"),
-                       ["X", "R"])
-        XCTAssertEqual(targets("para\n\n    ~~~\n    [[X]]\n    ~~~\n\nafter [[R]]"),
-                       ["X", "R"])
+        XCTAssertEqual(
+            targets("para\n\n    ```\n    [[X]]\n    ```\n\nafter [[R]]"),
+            ["X", "R"])
+        XCTAssertEqual(
+            targets("para\n\n    ~~~\n    [[X]]\n    ~~~\n\nafter [[R]]"),
+            ["X", "R"])
     }
 
     /// Same, but the indented block opens with an INFO-STRING fence line, which
     /// is not itself a closer — the bare closer only appears two lines down.
     func test_indentedBlockOpeningWithAnInfoStringFenceDoesNotSuppress() {
-        XCTAssertEqual(targets("para\n\n    ```swift\n    [[X]]\n    ```\n\nafter [[R]]"),
-                       ["X", "R"])
+        XCTAssertEqual(
+            targets("para\n\n    ```swift\n    [[X]]\n    ```\n\nafter [[R]]"),
+            ["X", "R"])
     }
 
     func test_markdownLinkInAnIndentedBlockOfBackticksIsKept() {
-        XCTAssertEqual(targets("para\n\n    ```\n    [t](X.md)\n    ```\n\n[t2](R.md)"),
-                       ["X.md", "R.md"])
+        XCTAssertEqual(
+            targets("para\n\n    ```\n    [t](X.md)\n    ```\n\n[t2](R.md)"),
+            ["X.md", "R.md"])
     }
 
     // MARK: - Fences the old scanner MISSED (indent > 3 on the raw line)
@@ -359,8 +370,9 @@ final class LinkParserTests: XCTestCase {
     /// The boundary of that class: give the same block a MATCHING bare closer
     /// and it is classified correctly again, agreeing with the old scanner.
     func test_knownLimit_doesNotExtendToBlocksWithAMatchingCloser() {
-        XCTAssertEqual(targets("para\n\n    ```swift\n    [[X]]\n    ```\n\nafter [[R]]"),
-                       ["X", "R"])
+        XCTAssertEqual(
+            targets("para\n\n    ```swift\n    [[X]]\n    ```\n\nafter [[R]]"),
+            ["X", "R"])
     }
 
     func test_fenceInsideABlockquoteSuppresses() {
@@ -372,11 +384,13 @@ final class LinkParserTests: XCTestCase {
     }
 
     func test_markdownLinksInMissedFencesAreAlsoSuppressed() {
-        XCTAssertEqual(targets("- a\n  - b\n\n    ```\n    [t](X.md)\n    ```\n\n[t2](R.md)"),
-                       ["R.md"])
+        XCTAssertEqual(
+            targets("- a\n  - b\n\n    ```\n    [t](X.md)\n    ```\n\n[t2](R.md)"),
+            ["R.md"])
         XCTAssertEqual(targets("> ```\n> [t](X.md)\n> ```\n\n[t2](R.md)"), ["R.md"])
-        XCTAssertEqual(targets("- a\n\n  > ```\n  > [t](X.md)\n  > ```\n\n[t2](R.md)"),
-                       ["R.md"])
+        XCTAssertEqual(
+            targets("- a\n\n  > ```\n  > [t](X.md)\n  > ```\n\n[t2](R.md)"),
+            ["R.md"])
     }
 
     /// A CRLF vault must get the same answer for the list-nested fence.
@@ -395,21 +409,24 @@ final class LinkParserTests: XCTestCase {
 
     /// An indented fence is still a fence (up to 3 spaces), and still suppresses.
     func test_indentedFenceStillSuppresses() {
-        XCTAssertEqual(targets("para\n\n   ```\n   [[Fenced]]\n   ```\n\n[[Real]]\n"),
-                       ["Real"])
+        XCTAssertEqual(
+            targets("para\n\n   ```\n   [[Fenced]]\n   ```\n\n[[Real]]\n"),
+            ["Real"])
     }
 
     /// Fenced code inside a list item is still fenced code.
     func test_fenceInsideAListItemSuppresses() {
-        XCTAssertEqual(targets("- item\n\n  ```\n  [[Fenced]]\n  ```\n\n[[Real]]\n"),
-                       ["Real"])
+        XCTAssertEqual(
+            targets("- item\n\n  ```\n  [[Fenced]]\n  ```\n\n[[Real]]\n"),
+            ["Real"])
     }
 
     /// Indented code inside a blockquote must NOT suppress — same rule as any
     /// other indented code.
     func test_indentedCodeInsideABlockquoteDoesNotSuppress() {
-        XCTAssertEqual(targets("> para\n>\n>     [[Quoted]]\n\nafter [[Real]]\n"),
-                       ["Quoted", "Real"])
+        XCTAssertEqual(
+            targets("> para\n>\n>     [[Quoted]]\n\nafter [[Real]]\n"),
+            ["Quoted", "Real"])
     }
 
     // MARK: - Inline-code shapes the old scanner got wrong
@@ -461,16 +478,16 @@ final class LinkParserTests: XCTestCase {
     /// phantom must not be a link, and the real link beside it must survive.
     func test_fenceInsideDashOpeningBodyStillSuppresses_noPhantomLink() {
         let body = """
-        ---
-        ```text
-        [[Phantom]]
-        ```
-        ---
+            ---
+            ```text
+            [[Phantom]]
+            ```
+            ---
 
-        # Real
+            # Real
 
-        See [[Actual]].
-        """
+            See [[Actual]].
+            """
         XCTAssertEqual(targets(body), ["Actual"])
     }
 

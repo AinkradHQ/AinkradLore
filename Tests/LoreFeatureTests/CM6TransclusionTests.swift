@@ -1,6 +1,7 @@
 import AppKit
 import WebKit
 import XCTest
+
 @testable import LoreFeature
 
 /// E2T1c: `![[Note.md]]` shows the note.
@@ -26,11 +27,14 @@ final class CM6TransclusionTests: XCTestCase {
         /// Withhold the answer, so the placeholder can be asserted.
         var answers = true
 
-        func userContentController(_ controller: WKUserContentController,
-                                   didReceive message: WKScriptMessage) {
+        func userContentController(
+            _ controller: WKUserContentController,
+            didReceive message: WKScriptMessage
+        ) {
             guard let body = message.body as? [String: Any],
-                  body["kind"] as? String == "transclude",
-                  let target = body["target"] as? String else { return }
+                body["kind"] as? String == "transclude",
+                let target = body["target"] as? String
+            else { return }
             requests.append(target)
             guard answers else { return }
             let known = notes[target]
@@ -38,7 +42,7 @@ final class CM6TransclusionTests: XCTestCase {
             let text = known ?? "Could not resolve \"\(target)\"."
             webView?.evaluateJavaScript(
                 "window.loreEditor.provideTransclusion(\(Self.q(target)), "
-                + "\(Self.q(kind)), \(Self.q(text)))")
+                    + "\(Self.q(kind)), \(Self.q(text)))")
         }
 
         static func q(_ value: String) -> String {
@@ -48,21 +52,28 @@ final class CM6TransclusionTests: XCTestCase {
         }
     }
 
-    override func tearDown() { windows.removeAll(); super.tearDown() }
+    override func tearDown() {
+        windows.removeAll()
+        super.tearDown()
+    }
 
     @MainActor
-    private func boot(_ text: String, notes: [String: String],
-                      answering: Bool = true) throws {
+    private func boot(
+        _ text: String, notes: [String: String],
+        answering: Bool = true
+    ) throws {
         bridge = Bridge()
         bridge.notes = notes
         bridge.answers = answering
         let config = WKWebViewConfiguration()
         config.userContentController.add(bridge, name: "lore")
-        webView = WKWebView(frame: NSRect(x: 0, y: 0, width: 900, height: 700),
-                            configuration: config)
+        webView = WKWebView(
+            frame: NSRect(x: 0, y: 0, width: 900, height: 700),
+            configuration: config)
         bridge.webView = webView
-        let window = NSWindow(contentRect: webView.frame, styleMask: [.titled],
-                              backing: .buffered, defer: false)
+        let window = NSWindow(
+            contentRect: webView.frame, styleMask: [.titled],
+            backing: .buffered, defer: false)
         window.contentView = webView
         windows.append(window)
         let index = try XCTUnwrap(CM6EditorView.Coordinator.bundledIndexURL)
@@ -85,8 +96,14 @@ final class CM6TransclusionTests: XCTestCase {
 
     @MainActor @discardableResult
     private func js(_ source: String) throws -> Any? {
-        var result: Any?; var failure: Error?; var done = false
-        webView.evaluateJavaScript(source) { v, e in result = v; failure = e; done = true }
+        var result: Any?
+        var failure: Error?
+        var done = false
+        webView.evaluateJavaScript(source) { v, e in
+            result = v
+            failure = e
+            done = true
+        }
         let deadline = Date().addingTimeInterval(20)
         while !done, Date() < deadline {
             RunLoop.current.run(mode: .default, before: Date().addingTimeInterval(0.01))
@@ -121,12 +138,14 @@ final class CM6TransclusionTests: XCTestCase {
 
     @MainActor
     func test_anEmbeddedNoteIsAskedForOnceAndThenShown() throws {
-        try boot("Before.\n\n![[Some Note.md]]\n\nAfter.\n\n",
-                 notes: ["Some Note.md": "Embedded body.\n"])
+        try boot(
+            "Before.\n\n![[Some Note.md]]\n\nAfter.\n\n",
+            notes: ["Some Note.md": "Embedded body.\n"])
         try waitForContent("Embedded body.")
         XCTAssertEqual(bridge.requests, ["Some Note.md"])
-        XCTAssertEqual(try js("window.loreEditor.transclusionTargets()") as? [String],
-                       ["Some Note.md"])
+        XCTAssertEqual(
+            try js("window.loreEditor.transclusionTargets()") as? [String],
+            ["Some Note.md"])
         // The outer document still reads normally around it.
         let shown = try js("document.querySelector('.cm-content').innerText") as? String ?? ""
         XCTAssertTrue(shown.contains("Before."))
@@ -140,8 +159,9 @@ final class CM6TransclusionTests: XCTestCase {
         try boot("![[Some Note.md]]\n\n", notes: ["Some Note.md": "Body.\n"])
         try waitForContent("Body.")
         for _ in 0..<5 { _ = try js("window.loreEditor.insertAtEnd('x')") }
-        XCTAssertEqual(bridge.requests, ["Some Note.md"],
-                       "one request, however many redraws")
+        XCTAssertEqual(
+            bridge.requests, ["Some Note.md"],
+            "one request, however many redraws")
     }
 
     /// THE reason this is a nested editor and not a second renderer: an
@@ -149,9 +169,11 @@ final class CM6TransclusionTests: XCTestCase {
     /// has to look like a link.
     @MainActor
     func test_embeddedContentIsRenderedNotShownAsSource() throws {
-        try boot("![[Some Note.md]]\n\n", notes: [
-            "Some Note.md": "## A heading\n\nWith **bold** and a [[link]].\n\n- one\n",
-        ])
+        try boot(
+            "![[Some Note.md]]\n\n",
+            notes: [
+                "Some Note.md": "## A heading\n\nWith **bold** and a [[link]].\n\n- one\n"
+            ])
         try waitForContent("A heading")
         let inner = try text(of: 0)
         XCTAssertFalse(inner.contains("##"), "the heading marker must be hidden: \(inner)")
@@ -176,14 +198,17 @@ final class CM6TransclusionTests: XCTestCase {
     /// impossible rather than merely capped.
     @MainActor
     func test_anEmbedInsideAnEmbedIsNotExpanded() throws {
-        try boot("![[Outer.md]]\n\n", notes: [
-            "Outer.md": "Outer body, embedding ![[Inner.md]] here.\n",
-            "Inner.md": "INNER CONTENT\n",
-        ])
+        try boot(
+            "![[Outer.md]]\n\n",
+            notes: [
+                "Outer.md": "Outer body, embedding ![[Inner.md]] here.\n",
+                "Inner.md": "INNER CONTENT\n",
+            ])
         try waitForContent("Outer body")
         let inner = try text(of: 0)
-        XCTAssertTrue(inner.contains("![[Inner.md]]"),
-                      "a nested embed stays source: \(inner)")
+        XCTAssertTrue(
+            inner.contains("![[Inner.md]]"),
+            "a nested embed stays source: \(inner)")
         XCTAssertFalse(inner.contains("INNER CONTENT"), "got \(inner)")
         XCTAssertEqual(bridge.requests, ["Outer.md"], "and is never even asked for")
     }
@@ -194,8 +219,9 @@ final class CM6TransclusionTests: XCTestCase {
     func test_aNoteThatEmbedsItselfDrawsOnce() throws {
         try boot("![[Self.md]]\n\n", notes: ["Self.md": "I embed ![[Self.md]].\n"])
         try waitForContent("I embed")
-        XCTAssertEqual(try js("window.loreEditor.transclusionTargets()") as? [String],
-                       ["Self.md"])
+        XCTAssertEqual(
+            try js("window.loreEditor.transclusionTargets()") as? [String],
+            ["Self.md"])
         XCTAssertEqual(bridge.requests, ["Self.md"])
     }
 

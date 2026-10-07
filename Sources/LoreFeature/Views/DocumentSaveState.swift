@@ -43,8 +43,10 @@ enum DocumentSaveState: Equatable {
     /// Conflict is not represented here: it has its own banner with its own
     /// three resolutions, and flattening it into a save state would offer the
     /// user a word where they need a choice.
-    static func of(readOnly: Bool, hasSaveError: Bool,
-                   isDirty: Bool, lastSavedAt: Date?) -> DocumentSaveState {
+    static func of(
+        readOnly: Bool, hasSaveError: Bool,
+        isDirty: Bool, lastSavedAt: Date?
+    ) -> DocumentSaveState {
         if readOnly { return .readOnly }
         if hasSaveError { return .failed }
         if isDirty { return .unsaved }

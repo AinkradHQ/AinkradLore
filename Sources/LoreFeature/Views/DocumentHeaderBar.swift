@@ -1,6 +1,6 @@
-import SwiftUI
-import AppKit
 import AinkradAppKit
+import AppKit
+import SwiftUI
 
 /// The one chrome row: where you are, how to get back, and what you can do to
 /// the open document.
@@ -47,22 +47,24 @@ struct DocumentHeaderBar: View {
 
     private var saveState: DocumentSaveState? {
         guard let session else { return nil }
-        return DocumentSaveState.of(readOnly: session.isReadOnly,
-                                    hasSaveError: session.lastSaveError != nil,
-                                    isDirty: session.isDirty,
-                                    lastSavedAt: session.lastSavedAt)
+        return DocumentSaveState.of(
+            readOnly: session.isReadOnly,
+            hasSaveError: session.lastSaveError != nil,
+            isDirty: session.isDirty,
+            lastSavedAt: session.lastSavedAt)
     }
 
     var body: some View {
         HStack(spacing: AinkradSpacing.sm) {
             AinkradIconButton(
                 systemName: store.sidebarCollapsed ? "sidebar.left" : "sidebar.leading",
-                tooltip: store.sidebarCollapsed ? "Show sidebar" : "Hide sidebar") {
-                    withAnimation(reduceMotion ? nil : AinkradMotion.hover) {
-                        store.setSidebarCollapsed(!store.sidebarCollapsed)
-                    }
+                tooltip: store.sidebarCollapsed ? "Show sidebar" : "Hide sidebar"
+            ) {
+                withAnimation(reduceMotion ? nil : AinkradMotion.hover) {
+                    store.setSidebarCollapsed(!store.sidebarCollapsed)
                 }
-                .accessibilityLabel(store.sidebarCollapsed ? "Show sidebar" : "Hide sidebar")
+            }
+            .accessibilityLabel(store.sidebarCollapsed ? "Show sidebar" : "Hide sidebar")
 
             history
 
@@ -138,9 +140,11 @@ struct DocumentHeaderBar: View {
                 // Only a FAILED save earns the danger colour. An ordinary
                 // "Saved" in an attention-grabbing tint would train the user to
                 // ignore the one reading that matters.
-                .foregroundStyle(saveState.isAlarming
-                                 ? theme.tokens.accentPrimary
-                                 : theme.tokens.foreground.opacity(LoreMetrics.secondaryText))
+                .foregroundStyle(
+                    saveState.isAlarming
+                        ? theme.tokens.accentPrimary
+                        : theme.tokens.foreground.opacity(LoreMetrics.secondaryText)
+                )
                 .accessibilityLabel(label)
             }
         }
@@ -159,7 +163,8 @@ struct DocumentHeaderBar: View {
         let rootParts = canonicalRoot.pathComponents
         let parts = canonical.pathComponents
         guard parts.count > rootParts.count,
-              Array(parts.prefix(rootParts.count)) == rootParts else { return name }
+            Array(parts.prefix(rootParts.count)) == rootParts
+        else { return name }
         // The vault's own folder name leads, so the crumb reads as a place
         // rather than as a bare path fragment.
         return ([canonicalRoot.lastPathComponent] + parts.dropFirst(rootParts.count))

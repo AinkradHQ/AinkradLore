@@ -1,11 +1,13 @@
 import XCTest
+
 @testable import LoreFeature
 
 final class LinkResolverTests: XCTestCase {
     private func resolver(_ docs: [(String, String, [String])]) -> LinkResolver {
-        LinkResolver(documents: docs.map {
-            (url: URL(fileURLWithPath: $0.0), title: $0.1, aliases: $0.2)
-        })
+        LinkResolver(
+            documents: docs.map {
+                (url: URL(fileURLWithPath: $0.0), title: $0.1, aliases: $0.2)
+            })
     }
 
     func test_resolvesByBasenameIgnoringFolderAndExtension() {
@@ -89,7 +91,7 @@ final class LinkResolverTests: XCTestCase {
     func test_resolvesAnAttachmentByFilenameWithExtension() {
         let pdf = URL(fileURLWithPath: "/v/Docs/Contract.pdf")
         let resolver = LinkResolver(documents: [
-            (url: pdf, title: "Contract.pdf", aliases: []),
+            (url: pdf, title: "Contract.pdf", aliases: [])
         ])
         XCTAssertEqual(resolver.resolve("Contract.pdf"), pdf)
     }
@@ -110,7 +112,7 @@ final class LinkResolverTests: XCTestCase {
     func test_explicitPathResolvesToAnAttachment() {
         let pdf = URL(fileURLWithPath: "/v/Docs/Contract.pdf")
         let resolver = LinkResolver(documents: [
-            (url: pdf, title: "Contract.pdf", aliases: []),
+            (url: pdf, title: "Contract.pdf", aliases: [])
         ])
         XCTAssertEqual(resolver.resolve("Docs/Contract.pdf"), pdf)
     }
@@ -155,7 +157,7 @@ final class LinkResolverTests: XCTestCase {
     func test_ignoresHeadingFragmentOnAnAttachmentTarget() {
         let pdf = URL(fileURLWithPath: "/v/Docs/Contract.pdf")
         let resolver = LinkResolver(documents: [
-            (url: pdf, title: "Contract.pdf", aliases: []),
+            (url: pdf, title: "Contract.pdf", aliases: [])
         ])
         XCTAssertEqual(resolver.resolve("Contract.pdf#Page"), pdf)
         XCTAssertEqual(resolver.resolve("Docs/Contract.pdf#Page"), pdf)

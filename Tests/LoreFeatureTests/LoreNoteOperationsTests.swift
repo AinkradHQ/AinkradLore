@@ -1,6 +1,7 @@
-import Testing
-import Foundation
 import AinkradAppKit
+import Foundation
+import Testing
+
 @testable import LoreFeature
 
 private final class MemoryDocs: PluginDocumentStore {
@@ -21,8 +22,9 @@ private func makeVault() async throws -> (URL, LoreNoteOperations, LoreStore) {
         .appendingPathComponent("lore-ops-\(UUID())", isDirectory: true)
         .appendingPathComponent("vault", isDirectory: true)
     try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
-    let store = LoreStore(documents: MemoryDocs(),
-                          indexPath: root.appendingPathComponent(".index.sqlite"))
+    let store = LoreStore(
+        documents: MemoryDocs(),
+        indexPath: root.appendingPathComponent(".index.sqlite"))
     try store.setVaultRootForTesting(root)
     // Activation starts a background rescan of the (empty) vault. Let it finish
     // before the test writes anything, or its `replaceAll` can land afterwards
@@ -32,8 +34,10 @@ private func makeVault() async throws -> (URL, LoreNoteOperations, LoreStore) {
 }
 
 @MainActor
-private func run(_ operations: LoreNoteOperations,
-                 _ object: [String: Any]) async -> (text: String, isError: Bool) {
+private func run(
+    _ operations: LoreNoteOperations,
+    _ object: [String: Any]
+) async -> (text: String, isError: Bool) {
     let json = String(decoding: try! JSONSerialization.data(withJSONObject: object), as: UTF8.self)
     let result = await operations.run(json)
     return (result.text, result.isError)
@@ -55,8 +59,9 @@ struct LoreNoteOperationsTests {
     private func vaultlessOperations() -> LoreNoteOperations {
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent("lore-novault-\(UUID())", isDirectory: true)
-        let store = LoreStore(documents: MemoryDocs(),
-                              indexPath: root.appendingPathComponent(".index.sqlite"))
+        let store = LoreStore(
+            documents: MemoryDocs(),
+            indexPath: root.appendingPathComponent(".index.sqlite"))
         return LoreNoteOperations(store: store)
     }
 
@@ -67,8 +72,9 @@ struct LoreNoteOperationsTests {
         for tool in LoreMCPServer.tools {
             let outcome = await run(operations, ["operation": tool.operation, "note": "anything"])
             #expect(outcome.isError, "\(tool.name) did not report an error without a vault")
-            #expect(outcome.text == LoreNoteOperations.noVaultMessage,
-                    "\(tool.name) gave a confusing message without a vault: \(outcome.text)")
+            #expect(
+                outcome.text == LoreNoteOperations.noVaultMessage,
+                "\(tool.name) gave a confusing message without a vault: \(outcome.text)")
         }
     }
 
@@ -131,8 +137,9 @@ struct LoreNoteOperationsTests {
         let outcome = await run(operations, ["operation": "search", "query": "needle"])
         #expect(outcome.isError == false)
         #expect(outcome.text.contains(note.id))
-        #expect(outcome.text.contains("b.txt") == false,
-                "note tools must not claim plain-text files are notes")
+        #expect(
+            outcome.text.contains("b.txt") == false,
+            "note tools must not claim plain-text files are notes")
     }
 
     @Test func searchReportsNoMatchesWithoutErroring() async throws {
@@ -167,10 +174,12 @@ struct LoreNoteOperationsTests {
         var note = try store.create(title: "Real Note")
         note.body = "zorkmid body"
         try store.save(note)
-        try "%PDF-1.4 zorkmid".write(to: root.appendingPathComponent("paper.pdf"),
-                                     atomically: true, encoding: .utf8)
-        try "pixels zorkmid".write(to: root.appendingPathComponent("image.png"),
-                                  atomically: true, encoding: .utf8)
+        try "%PDF-1.4 zorkmid".write(
+            to: root.appendingPathComponent("paper.pdf"),
+            atomically: true, encoding: .utf8)
+        try "pixels zorkmid".write(
+            to: root.appendingPathComponent("image.png"),
+            atomically: true, encoding: .utf8)
         try store.rebuild()
         #expect(store.rows.count == 3, "precondition: non-markdown rows are indexed")
 
@@ -184,9 +193,12 @@ struct LoreNoteOperationsTests {
         #expect(searched.text.contains("paper.pdf") == false)
         #expect(searched.text.contains("image.png") == false)
 
-        let resolved = await run(operations,
-                                 ["operation": "read",
-                                  "note": root.appendingPathComponent("image.png").path])
+        let resolved = await run(
+            operations,
+            [
+                "operation": "read",
+                "note": root.appendingPathComponent("image.png").path,
+            ])
         #expect(resolved.isError)
     }
 
@@ -223,8 +235,9 @@ struct LoreNoteOperationsTests {
 
         let read = await run(operations, ["operation": "read", "note": note.id])
         #expect(read.isError == false)
-        #expect(store.externalChangeDetected(for: note),
-                "read_note re-baselined the mtime — the external-change guard is now disarmed")
+        #expect(
+            store.externalChangeDetected(for: note),
+            "read_note re-baselined the mtime — the external-change guard is now disarmed")
     }
 
     @Test func listTagsAndFoldersAnswerFromTheVault() async throws {
@@ -248,9 +261,11 @@ struct LoreNoteOperationsTests {
         let (root, operations, store) = try await makeVault()
         defer { try? FileManager.default.removeItem(at: root) }
 
-        let outcome = await run(operations, [
-            "operation": "create", "title": "Made", "body": "fresh", "tags": ["x"],
-        ])
+        let outcome = await run(
+            operations,
+            [
+                "operation": "create", "title": "Made", "body": "fresh", "tags": ["x"],
+            ])
         #expect(outcome.isError == false)
         let row = try #require(store.rows.first { $0.title == "Made" })
         #expect(row.tags == ["x"])
@@ -307,9 +322,11 @@ struct LoreNoteOperationsTests {
         note.body = "keep me"
         try store.save(note)
 
-        let outcome = await run(operations, [
-            "operation": "save", "note": note.id, "tags": ["added"],
-        ])
+        let outcome = await run(
+            operations,
+            [
+                "operation": "save", "note": note.id, "tags": ["added"],
+            ])
         #expect(outcome.isError == false)
         let text = try String(contentsOf: note.path, encoding: .utf8)
         #expect(text.contains("keep me"), "an omitted body was blanked")
@@ -324,13 +341,16 @@ struct LoreNoteOperationsTests {
         try store.save(note)
         try externallyEditFile(note.path, to: "theirs")
 
-        let outcome = await run(operations, [
-            "operation": "save", "note": note.id, "body": "mine again",
-        ])
+        let outcome = await run(
+            operations,
+            [
+                "operation": "save", "note": note.id, "body": "mine again",
+            ])
         #expect(outcome.isError)
         #expect(outcome.text.contains("save_note_overwriting"))
-        #expect(try String(contentsOf: note.path, encoding: .utf8).contains("theirs"),
-                "the outside edit was destroyed by a refused save")
+        #expect(
+            try String(contentsOf: note.path, encoding: .utf8).contains("theirs"),
+            "the outside edit was destroyed by a refused save")
     }
 
     @Test func saveWithTheInjectedFlagOverwritesTheExternalChange() async throws {
@@ -341,10 +361,12 @@ struct LoreNoteOperationsTests {
         try store.save(note)
         try externallyEditFile(note.path, to: "theirs")
 
-        let outcome = await run(operations, [
-            "operation": "save", "note": note.id, "body": "mine again",
-            "overwritingExternalChanges": true,
-        ])
+        let outcome = await run(
+            operations,
+            [
+                "operation": "save", "note": note.id, "body": "mine again",
+                "overwritingExternalChanges": true,
+            ])
         #expect(outcome.isError == false)
         #expect(try String(contentsOf: note.path, encoding: .utf8).contains("mine again"))
     }
@@ -384,8 +406,9 @@ struct LoreNoteOperationsTests {
 
         // Well past the 500ms autosave debounce.
         try await Task.sleep(for: .milliseconds(900))
-        #expect(FileManager.default.fileExists(atPath: note.path.path) == false,
-                "a pending autosave resurrected a trashed note")
+        #expect(
+            FileManager.default.fileExists(atPath: note.path.path) == false,
+            "a pending autosave resurrected a trashed note")
     }
 
     /// The refusal reaches the agent through the existing error-reporting shape

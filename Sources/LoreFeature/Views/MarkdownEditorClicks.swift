@@ -71,10 +71,11 @@ final class LinkTextView: NSTextView {
         for area in trackingAreas where area.owner === self {
             removeTrackingArea(area)
         }
-        addTrackingArea(NSTrackingArea(
-            rect: bounds,
-            options: [.mouseMoved, .mouseEnteredAndExited, .activeInKeyWindow, .inVisibleRect],
-            owner: self))
+        addTrackingArea(
+            NSTrackingArea(
+                rect: bounds,
+                options: [.mouseMoved, .mouseEnteredAndExited, .activeInKeyWindow, .inVisibleRect],
+                owner: self))
     }
 
     override func mouseMoved(with event: NSEvent) {
@@ -114,7 +115,8 @@ final class LinkTextView: NSTextView {
     /// `performFindPanelAction(_:)` does.
     @objc func loreApplyFormat(_ sender: Any?) {
         guard let item = sender as? NSMenuItem,
-              let action = LoreFormatAction(rawValue: item.tag) else { return }
+            let action = LoreFormatAction(rawValue: item.tag)
+        else { return }
         LoreFormatting.apply(action, to: self)
     }
 
@@ -164,10 +166,11 @@ final class LinkTextView: NSTextView {
     override func drawBackground(in rect: NSRect) {
         super.drawBackground(in: rect)
         if let palette = blockBackgroundPalette {
-            MarkdownBlockBackgrounds.draw(blockBackgrounds, palette: palette,
-                                          font: blockBackgroundFont
-                                              ?? MarkdownStyleRenderer.fallbackFont,
-                                          in: self, dirtyRect: rect)
+            MarkdownBlockBackgrounds.draw(
+                blockBackgrounds, palette: palette,
+                font: blockBackgroundFont
+                    ?? MarkdownStyleRenderer.fallbackFont,
+                in: self, dirtyRect: rect)
         }
         drawEmbedImages(in: rect)
     }
@@ -221,20 +224,23 @@ final class LinkTextView: NSTextView {
             // used to sit.
             let containerWidth = textContainer?.size.width ?? bounds.width
             let padding = textContainer?.lineFragmentPadding ?? 0
-            let local = EmbedGeometry.drawRect(containerWidth: containerWidth,
-                                               writingDirection: region.writingDirection,
-                                               indent: region.indent,
-                                               lineFragmentPadding: padding, imageSize: region.size)
-            let drawRect = NSRect(x: local.origin.x + textContainerOrigin.x, y: rect.minY,
-                                  width: region.size.width, height: region.size.height)
+            let local = EmbedGeometry.drawRect(
+                containerWidth: containerWidth,
+                writingDirection: region.writingDirection,
+                indent: region.indent,
+                lineFragmentPadding: padding, imageSize: region.size)
+            let drawRect = NSRect(
+                x: local.origin.x + textContainerOrigin.x, y: rect.minY,
+                width: region.size.width, height: region.size.height)
             // `draw(in:)` (the single-rect convenience) does NOT respect a
             // flipped coordinate system, and `NSTextView` IS flipped — fix
             // round 1, Important 5. Without `respectFlipped: true` every
             // inline embed image renders upside down. `.sourceOver` and
             // `fraction: 1` are the same defaults `draw(in:)` uses; only the
             // flip behaviour changes.
-            region.image.draw(in: drawRect, from: .zero, operation: .sourceOver,
-                              fraction: 1.0, respectFlipped: true, hints: nil)
+            region.image.draw(
+                in: drawRect, from: .zero, operation: .sourceOver,
+                fraction: 1.0, respectFlipped: true, hints: nil)
         }
     }
 
@@ -285,7 +291,8 @@ final class LinkTextView: NSTextView {
         // select-the-word and a drag starts from a click too — neither
         // should flip a checkbox or open an embed.
         if event.clickCount == 1,
-           event.modifierFlags.intersection(Self.selectionModifiers).isEmpty {
+            event.modifierFlags.intersection(Self.selectionModifiers).isEmpty
+        {
             let index = characterIndexForInsertion(at: point)
             let optionHeld = event.modifierFlags.contains(.option)
             // ⌥-click skips `onPlainClick` entirely: none of the checkbox/
@@ -321,7 +328,8 @@ final class LinkTextView: NSTextView {
     /// described redundantly, and is allowed — refusing it would disable
     /// auto-pairing wherever AppKit chooses to spell the range out.
     override func insertText(_ string: Any, replacementRange: NSRange) {
-        let targetsSelection = replacementRange.location == NSNotFound
+        let targetsSelection =
+            replacementRange.location == NSNotFound
             || replacementRange == selectedRange()
         if targetsSelection, !hasMarkedText() {
             let typed = (string as? String) ?? (string as? NSAttributedString)?.string
@@ -341,8 +349,12 @@ final class LinkTextView: NSTextView {
         let modifiers = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
         if modifiers == .command, window?.firstResponder === self {
             switch event.charactersIgnoringModifiers {
-            case "b": MarkdownEditorTyping.toggleWrap(in: self, with: "**"); return true
-            case "i": MarkdownEditorTyping.toggleWrap(in: self, with: "*"); return true
+            case "b":
+                MarkdownEditorTyping.toggleWrap(in: self, with: "**")
+                return true
+            case "i":
+                MarkdownEditorTyping.toggleWrap(in: self, with: "*")
+                return true
             default: break
             }
         }
@@ -401,7 +413,8 @@ extension MarkdownEditor.Coordinator {
             // or over the inner half of a bracket". The bracket offsets stay
             // available for placing the caret beside the marker.
             guard index >= item.markerRangeUTF16.location,
-                  index <= item.markerRangeUTF16.location + 1 else { continue }
+                index <= item.markerRangeUTF16.location + 1
+            else { continue }
             // Located from a cached span; the live text still decides what the
             // character becomes.
             guard let (marker, replacement) = TaskCheckbox.replacement(for: item, in: ns)

@@ -67,9 +67,11 @@ public struct AppleNotesScriptSource: ImportSource {
     /// promise is about the VAULT; staging bytes outside it does not break it.
     private let stagingRoot: URL
 
-    public init(runner: ScriptRunner = OSAScriptRunner(),
-                stagingRoot: URL = FileManager.default.temporaryDirectory
-                    .appendingPathComponent("lore-notes-import-" + UUID().uuidString)) {
+    public init(
+        runner: ScriptRunner = OSAScriptRunner(),
+        stagingRoot: URL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("lore-notes-import-" + UUID().uuidString)
+    ) {
         self.runner = runner
         self.stagingRoot = stagingRoot
     }
@@ -203,11 +205,13 @@ public struct AppleNotesScriptSource: ImportSource {
             var lines = record.components(separatedBy: "\n")
                 .map { $0.hasSuffix("\r") ? String($0.dropLast()) : $0 }
             while let first = lines.first,
-                  first.trimmingCharacters(in: .whitespaces).isEmpty {
+                first.trimmingCharacters(in: .whitespaces).isEmpty
+            {
                 lines.removeFirst()
             }
             while let last = lines.last,
-                  last.trimmingCharacters(in: .whitespaces).isEmpty {
+                last.trimmingCharacters(in: .whitespaces).isEmpty
+            {
                 lines.removeLast()
             }
             guard lines.count >= 7 else { return nil }
@@ -219,7 +223,8 @@ public struct AppleNotesScriptSource: ImportSource {
             let separator = lines[bodyStart...].firstIndex { $0 == unitSeparator }
             let html = lines[bodyStart..<(separator ?? lines.endIndex)]
                 .joined(separator: "\n")
-            let (attachments, fidelity) = separator
+            let (attachments, fidelity) =
+                separator
                 .map { Self.attachments(lines[lines.index(after: $0)...]) } ?? ([], [])
             // Account first, then folder. An empty component is dropped rather
             // than turned into an empty directory name, but a note with no
@@ -252,7 +257,8 @@ public struct AppleNotesScriptSource: ImportSource {
     /// item, so the user meets it twice: as a warning in the preview before
     /// importing, and as a line in the report after.
     static func attachments(_ lines: ArraySlice<String>)
-        -> ([ImportAttachment], [FidelityWarning]) {
+        -> ([ImportAttachment], [FidelityWarning])
+    {
         var attachments: [ImportAttachment] = []
         var warnings: [FidelityWarning] = []
         for line in lines where !line.trimmingCharacters(in: .whitespaces).isEmpty {
@@ -260,16 +266,18 @@ public struct AppleNotesScriptSource: ImportSource {
             guard fields.count >= 3 else { continue }
             let (id, name, path) = (fields[0], fields[1], fields[2])
             if path.isEmpty {
-                warnings.append(FidelityWarning(
-                    kind: .attachmentUnavailable,
-                    detail: name.isEmpty
-                        ? "An attachment could not be exported from Notes and was not imported."
-                        : "“\(name)” could not be exported from Notes and was not imported."))
+                warnings.append(
+                    FidelityWarning(
+                        kind: .attachmentUnavailable,
+                        detail: name.isEmpty
+                            ? "An attachment could not be exported from Notes and was not imported."
+                            : "“\(name)” could not be exported from Notes and was not imported."))
             }
-            attachments.append(ImportAttachment(
-                sourceID: "\(identifier):\(id)",
-                preferredName: name.isEmpty ? "attachment" : name,
-                sourceURL: path.isEmpty ? nil : URL(fileURLWithPath: path)))
+            attachments.append(
+                ImportAttachment(
+                    sourceID: "\(identifier):\(id)",
+                    preferredName: name.isEmpty ? "attachment" : name,
+                    sourceURL: path.isEmpty ? nil : URL(fileURLWithPath: path)))
         }
         return (attachments, warnings)
     }

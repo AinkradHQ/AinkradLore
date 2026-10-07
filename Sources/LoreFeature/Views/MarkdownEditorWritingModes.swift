@@ -38,23 +38,29 @@ extension MarkdownEditor.Coordinator {
         layoutManager.removeTemporaryAttribute(.foregroundColor, forCharacterRange: full)
         guard settings.focusMode else { return }
 
-        let focused = WritingModes.paragraphRange(in: tv.string,
-                                                  caret: tv.selectedRange().location)
+        let focused = WritingModes.paragraphRange(
+            in: tv.string,
+            caret: tv.selectedRange().location)
         let dimmed = NSColor(tokens.foreground).withAlphaComponent(Self.unfocusedAlpha)
-        for range in [NSRange(location: 0, length: focused.location),
-                      NSRange(location: focused.location + focused.length,
-                              length: full.length - (focused.location + focused.length))]
+        for range in [
+            NSRange(location: 0, length: focused.location),
+            NSRange(
+                location: focused.location + focused.length,
+                length: full.length - (focused.location + focused.length)),
+        ]
         where range.length > 0 {
-            layoutManager.addTemporaryAttribute(.foregroundColor, value: dimmed,
-                                                forCharacterRange: range)
+            layoutManager.addTemporaryAttribute(
+                .foregroundColor, value: dimmed,
+                forCharacterRange: range)
         }
     }
 
     /// Keeps the caret at a fixed height in the viewport.
     private func applyTypewriterScroll() {
         guard settings.typewriterMode,
-              let tv = textView,
-              let scroll = tv.enclosingScrollView else { return }
+            let tv = textView,
+            let scroll = tv.enclosingScrollView
+        else { return }
         let caret = tv.firstRect(forCharacterRange: tv.selectedRange(), actualRange: nil)
         guard caret != .zero, let window = tv.window else { return }
 

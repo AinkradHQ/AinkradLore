@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// The ⋯ menu's contents, rendered INSIDE the app's own window.
 ///
@@ -42,8 +42,10 @@ struct DocumentActionsMenu: View {
         .frame(width: 240, alignment: .leading)
         .background(theme.tokens.surfaceElevated)
         .clipShape(ChamferShape(cut: LoreMetrics.chamfer))
-        .overlay(ChamferShape(cut: LoreMetrics.chamfer)
-            .strokeBorder(theme.tokens.foreground.opacity(0.15), lineWidth: 1))
+        .overlay(
+            ChamferShape(cut: LoreMetrics.chamfer)
+                .strokeBorder(theme.tokens.foreground.opacity(0.15), lineWidth: 1)
+        )
         .shadow(color: .black.opacity(0.35), radius: 12, y: 4)
         .environment(\.ainkradTheme, theme.tokens)
     }
@@ -66,9 +68,11 @@ struct DocumentActionsMenu: View {
                     AinkradKbd(shortcut)
                 }
             }
-            .foregroundStyle(item.isDestructive
-                             ? theme.tokens.accentPrimary
-                             : theme.tokens.foreground)
+            .foregroundStyle(
+                item.isDestructive
+                    ? theme.tokens.accentPrimary
+                    : theme.tokens.foreground
+            )
             .padding(.horizontal, AinkradSpacing.sm)
             .padding(.vertical, AinkradSpacing.xs)
             .frame(maxWidth: .infinity, alignment: .leading)

@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 /// Line-level formatting: lists, checkboxes, quotes and headings.
@@ -34,8 +35,9 @@ final class MarkdownLineFormattingTests: XCTestCase {
         let result = MarkdownLineFormatting.toggleLinePrefix(
             text: text, selection: NSRange(location: 0, length: (text as NSString).length),
             prefix: "- ")
-        XCTAssertEqual(result.text, "- one\n- two\n- three",
-                       "an already-prefixed line must not be double-prefixed either")
+        XCTAssertEqual(
+            result.text, "- one\n- two\n- three",
+            "an already-prefixed line must not be double-prefixed either")
     }
 
     /// Only when EVERY line has it does the toggle remove.
@@ -74,36 +76,41 @@ final class MarkdownLineFormattingTests: XCTestCase {
     // MARK: - Headings
 
     func test_setsAHeadingLevel() {
-        let result = MarkdownLineFormatting.setHeading(text: "Title", selection: caret(0),
-                                                       level: 2)
+        let result = MarkdownLineFormatting.setHeading(
+            text: "Title", selection: caret(0),
+            level: 2)
         XCTAssertEqual(result.text, "## Title")
     }
 
     /// Existing markers are REPLACED, never appended to — otherwise ⌘2 on an
     /// h1 produces `# ## Title`.
     func test_changingLevelReplacesTheExistingMarker() {
-        let result = MarkdownLineFormatting.setHeading(text: "# Title", selection: caret(0),
-                                                       level: 3)
+        let result = MarkdownLineFormatting.setHeading(
+            text: "# Title", selection: caret(0),
+            level: 3)
         XCTAssertEqual(result.text, "### Title")
     }
 
     /// The same key twice returns the line to body text, which is what every
     /// editor with heading shortcuts does.
     func test_settingTheLevelItAlreadyHasTogglesItOff() {
-        let result = MarkdownLineFormatting.setHeading(text: "## Title", selection: caret(0),
-                                                       level: 2)
+        let result = MarkdownLineFormatting.setHeading(
+            text: "## Title", selection: caret(0),
+            level: 2)
         XCTAssertEqual(result.text, "Title")
     }
 
     func test_levelZeroClearsAHeading() {
-        let result = MarkdownLineFormatting.setHeading(text: "#### Deep", selection: caret(0),
-                                                       level: 0)
+        let result = MarkdownLineFormatting.setHeading(
+            text: "#### Deep", selection: caret(0),
+            level: 0)
         XCTAssertEqual(result.text, "Deep")
     }
 
     func test_headingLevelIsClamped() {
-        let result = MarkdownLineFormatting.setHeading(text: "Title", selection: caret(0),
-                                                       level: 99)
+        let result = MarkdownLineFormatting.setHeading(
+            text: "Title", selection: caret(0),
+            level: 99)
         XCTAssertEqual(result.text, "###### Title")
     }
 

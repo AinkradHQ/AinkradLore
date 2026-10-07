@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 /// The editor's display settings, and the theme they drive.
@@ -29,10 +30,13 @@ final class EditorSettingsTests: XCTestCase {
         // pinned below, against the `.standard` measure that produces it, so
         // this suite keeps describing a document that exists.
         XCTAssertNil(theme.maxMeasure, "the default is full width")
-        XCTAssertEqual(MarkdownTheme(
-            tokens: tokens,
-            settings: EditorSettings(density: .standard, measure: .standard,
-                                     zoomStep: 0)).maxMeasure, 760)
+        XCTAssertEqual(
+            MarkdownTheme(
+                tokens: tokens,
+                settings: EditorSettings(
+                    density: .standard, measure: .standard,
+                    zoomStep: 0)
+            ).maxMeasure, 760)
     }
 
     /// The heading ramp at default settings.
@@ -52,8 +56,9 @@ final class EditorSettingsTests: XCTestCase {
         let theme = MarkdownTheme(tokens: tokens, settings: .default)
         let expected: [CGFloat] = [27, 24, 21, 18.75, 16.875, 15.75]
         for (index, size) in expected.enumerated() {
-            XCTAssertEqual(theme.headingSize(index + 1), size, accuracy: 0.001,
-                           "h\(index + 1) drifted from the intended ramp")
+            XCTAssertEqual(
+                theme.headingSize(index + 1), size, accuracy: 0.001,
+                "h\(index + 1) drifted from the intended ramp")
         }
         // Every step is a VISIBLE one, which is the property the old ramp lost
         // at the bottom and the reason this changed at all.
@@ -74,15 +79,18 @@ final class EditorSettingsTests: XCTestCase {
         for density in EditorSettings.Density.allCases {
             let settings = EditorSettings(density: density, measure: .standard, zoomStep: 0)
             let theme = MarkdownTheme(tokens: tokens, settings: settings)
-            XCTAssertEqual(theme.bodyFont.pointSize, settings.bodySize, accuracy: 0.001,
-                           "\(density) must actually change the prose size")
+            XCTAssertEqual(
+                theme.bodyFont.pointSize, settings.bodySize, accuracy: 0.001,
+                "\(density) must actually change the prose size")
             XCTAssertFalse(theme.bodyFont.isFixedPitch, "prose is proportional")
             XCTAssertTrue(theme.monoFont.isFixedPitch, "code is not")
-            XCTAssertLessThan(theme.monoFont.pointSize, theme.bodyFont.pointSize,
-                              "mono reads larger at equal points, so it is set smaller")
+            XCTAssertLessThan(
+                theme.monoFont.pointSize, theme.bodyFont.pointSize,
+                "mono reads larger at equal points, so it is set smaller")
         }
-        let zoomed = MarkdownTheme(tokens: tokens,
-                                   settings: EditorSettings.default.zoomed(by: 2))
+        let zoomed = MarkdownTheme(
+            tokens: tokens,
+            settings: EditorSettings.default.zoomed(by: 2))
         XCTAssertEqual(zoomed.bodyFont.pointSize, 18, accuracy: 0.001)
     }
 
@@ -96,11 +104,12 @@ final class EditorSettingsTests: XCTestCase {
     // MARK: - Zoom
 
     func test_zoomScalesTheWholeRampTogether() {
-        let zoomed = EditorSettings.default.zoomed(by: 2)     // ×1.2
+        let zoomed = EditorSettings.default.zoomed(by: 2)  // ×1.2
         let theme = MarkdownTheme(tokens: tokens, settings: zoomed)
         XCTAssertEqual(theme.bodySize, 18, accuracy: 0.001)
-        XCTAssertEqual(theme.headingSize(1), 18 * 1.80, accuracy: 0.001,
-                       "headings must scale with the body, not stay fixed")
+        XCTAssertEqual(
+            theme.headingSize(1), 18 * 1.80, accuracy: 0.001,
+            "headings must scale with the body, not stay fixed")
     }
 
     /// The measure scales with zoom too. A reader who doubled the text size
@@ -114,17 +123,22 @@ final class EditorSettingsTests: XCTestCase {
         let theme = MarkdownTheme(tokens: tokens, settings: settings.zoomed(by: 5))
         XCTAssertEqual(try XCTUnwrap(theme.maxMeasure), 760 * 1.5, accuracy: 0.001)
         // And full width stays full width however far it is zoomed.
-        XCTAssertNil(MarkdownTheme(tokens: tokens,
-                                   settings: EditorSettings.default.zoomed(by: 5)).maxMeasure)
+        XCTAssertNil(
+            MarkdownTheme(
+                tokens: tokens,
+                settings: EditorSettings.default.zoomed(by: 5)
+            ).maxMeasure)
     }
 
     /// Zoom is bounded, asymmetrically: zooming out hits illegibility fast,
     /// zooming in merely gets large.
     func test_zoomClampsAtBothEnds() {
-        XCTAssertEqual(EditorSettings.default.zoomed(by: -99).zoomStep,
-                       EditorSettings.minZoom)
-        XCTAssertEqual(EditorSettings.default.zoomed(by: 99).zoomStep,
-                       EditorSettings.maxZoom)
+        XCTAssertEqual(
+            EditorSettings.default.zoomed(by: -99).zoomStep,
+            EditorSettings.minZoom)
+        XCTAssertEqual(
+            EditorSettings.default.zoomed(by: 99).zoomStep,
+            EditorSettings.maxZoom)
     }
 
     func test_zoomResetReturnsToTheDensitysOwnSize() {
@@ -148,18 +162,21 @@ final class EditorSettingsTests: XCTestCase {
     /// body text must not be reachable.
     func test_densityMovesTheWholeSystem() {
         for density in EditorSettings.Density.allCases {
-            let settings = EditorSettings(density: density, measure: .standard,
-                                          zoomStep: 0)
+            let settings = EditorSettings(
+                density: density, measure: .standard,
+                zoomStep: 0)
             let theme = MarkdownTheme(tokens: tokens, settings: settings)
             XCTAssertGreaterThan(theme.lineHeightMultiple, 1)
             for level in 1...6 {
-                XCTAssertGreaterThanOrEqual(theme.headingSize(level), theme.bodySize,
-                                            "h\(level) is smaller than body text at \(density)")
+                XCTAssertGreaterThanOrEqual(
+                    theme.headingSize(level), theme.bodySize,
+                    "h\(level) is smaller than body text at \(density)")
             }
             for level in 1..<6 {
-                XCTAssertGreaterThanOrEqual(theme.headingSize(level),
-                                            theme.headingSize(level + 1),
-                                            "the ramp inverts at \(density)")
+                XCTAssertGreaterThanOrEqual(
+                    theme.headingSize(level),
+                    theme.headingSize(level + 1),
+                    "the ramp inverts at \(density)")
             }
         }
     }
@@ -177,17 +194,21 @@ final class EditorSettingsTests: XCTestCase {
             .appendingPathComponent("lore-editorsettings-\(UUID())")
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
         let docs = FakeDocs()
-        let store = LoreStore(documents: docs,
-                              indexPath: root.appendingPathComponent(".idx.sqlite"))
+        let store = LoreStore(
+            documents: docs,
+            indexPath: root.appendingPathComponent(".idx.sqlite"))
 
-        store.setEditorSettings(EditorSettings(density: .comfortable, measure: .wide,
-                                               zoomStep: 2))
+        store.setEditorSettings(
+            EditorSettings(
+                density: .comfortable, measure: .wide,
+                zoomStep: 2))
 
         // A second store over the SAME document store is what a relaunch looks
         // like — a zoom that silently resets on relaunch reads as a bug to
         // anyone who used it to make the app legible at all.
-        let reopened = LoreStore(documents: docs,
-                                 indexPath: root.appendingPathComponent(".idx.sqlite"))
+        let reopened = LoreStore(
+            documents: docs,
+            indexPath: root.appendingPathComponent(".idx.sqlite"))
         XCTAssertEqual(reopened.editorSettings.density, .comfortable)
         XCTAssertEqual(reopened.editorSettings.measure, .wide)
         XCTAssertEqual(reopened.editorSettings.zoomStep, 2)
@@ -201,8 +222,9 @@ final class EditorSettingsTests: XCTestCase {
         let docs = FakeDocs()
         docs.setData(Data("not json".utf8), forKey: "editorSettings")
 
-        let store = LoreStore(documents: docs,
-                              indexPath: root.appendingPathComponent(".idx.sqlite"))
+        let store = LoreStore(
+            documents: docs,
+            indexPath: root.appendingPathComponent(".idx.sqlite"))
         XCTAssertEqual(store.editorSettings, .default)
     }
 

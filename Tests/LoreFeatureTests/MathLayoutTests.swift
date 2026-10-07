@@ -1,5 +1,6 @@
-import XCTest
 import AppKit
+import XCTest
+
 @testable import LoreFeature
 
 /// The parser and the layout, both pure and both asserted without a screen.
@@ -11,9 +12,11 @@ import AppKit
 final class MathParserTests: XCTestCase {
 
     func test_aFractionParses() {
-        XCTAssertEqual(MathParser.parse("\\frac{a}{b}"),
-                       .fraction(numerator: .symbol("a", isVariable: true),
-                                 denominator: .symbol("b", isVariable: true)))
+        XCTAssertEqual(
+            MathParser.parse("\\frac{a}{b}"),
+            .fraction(
+                numerator: .symbol("a", isVariable: true),
+                denominator: .symbol("b", isVariable: true)))
     }
 
     func test_greekBecomesItsGlyph() {
@@ -22,10 +25,12 @@ final class MathParserTests: XCTestCase {
     }
 
     func test_scriptsBindToTheAtomBeforeThem() {
-        XCTAssertEqual(MathParser.parse("x^2"),
-                       .script(base: .symbol("x", isVariable: true),
-                               superscript: .symbol("2", isVariable: false),
-                               subscript_: nil))
+        XCTAssertEqual(
+            MathParser.parse("x^2"),
+            .script(
+                base: .symbol("x", isVariable: true),
+                superscript: .symbol("2", isVariable: false),
+                subscript_: nil))
     }
 
     /// `x^2_i` and `x_i^2` are the same expression and must parse the same.
@@ -34,22 +39,28 @@ final class MathParserTests: XCTestCase {
     }
 
     func test_bracedScriptsGroup() {
-        XCTAssertEqual(MathParser.parse("x^{10}"),
-                       .script(base: .symbol("x", isVariable: true),
-                               superscript: .row([.symbol("1", isVariable: false),
-                                                  .symbol("0", isVariable: false)]),
-                               subscript_: nil))
+        XCTAssertEqual(
+            MathParser.parse("x^{10}"),
+            .script(
+                base: .symbol("x", isVariable: true),
+                superscript: .row([
+                    .symbol("1", isVariable: false),
+                    .symbol("0", isVariable: false),
+                ]),
+                subscript_: nil))
     }
 
     func test_sourceSpacingIsNotOutputSpacing() {
-        XCTAssertEqual(MathParser.parse("x + y"), MathParser.parse("x+y"),
-                       "TeX decides gaps from what sits either side, not from "
-                       + "how many spaces were typed")
+        XCTAssertEqual(
+            MathParser.parse("x + y"), MathParser.parse("x+y"),
+            "TeX decides gaps from what sits either side, not from "
+                + "how many spaces were typed")
     }
 
     func test_lettersAreVariablesAndDigitsAreNot() {
         guard case .symbol(_, let letter)? = MathParser.parse("x"),
-              case .symbol(_, let digit)? = MathParser.parse("7") else {
+            case .symbol(_, let digit)? = MathParser.parse("7")
+        else {
             return XCTFail("both must parse")
         }
         XCTAssertTrue(letter, "a letter is an identifier, drawn italic")
@@ -66,9 +77,11 @@ final class MathParserTests: XCTestCase {
     /// fall back to source. Rendering something the author did not write is
     /// the one outcome worse than not rendering.
     func test_refusesWhatItCannotDraw() {
-        for source in ["\\begin{matrix}a\\end{matrix}", "\\unknowncommand",
-                       "\\frac{a}", "\\frac", "{unclosed", "a}", "x^", "^2",
-                       "\\left(x\\right)", ""] {
+        for source in [
+            "\\begin{matrix}a\\end{matrix}", "\\unknowncommand",
+            "\\frac{a}", "\\frac", "{unclosed", "a}", "x^", "^2",
+            "\\left(x\\right)", "",
+        ] {
             XCTAssertNil(MathParser.parse(source), "must refuse: \(source)")
         }
     }
@@ -109,19 +122,23 @@ final class MathLayoutTests: XCTestCase {
         XCTAssertEqual(fraction.rules.count, 1, "exactly one bar")
         let bar = try XCTUnwrap(fraction.rules.first)
 
-        XCTAssertGreaterThan(fraction.height, plain.height * 1.5,
-                             "a fraction must be substantially taller than one symbol")
-        XCTAssertGreaterThanOrEqual(bar.width, fraction.width - 0.5,
-                                    "the bar spans the fraction's width")
+        XCTAssertGreaterThan(
+            fraction.height, plain.height * 1.5,
+            "a fraction must be substantially taller than one symbol")
+        XCTAssertGreaterThanOrEqual(
+            bar.width, fraction.width - 0.5,
+            "the bar spans the fraction's width")
 
         // The numerator sits ABOVE the bar and the denominator BELOW it.
         let ys = fraction.glyphs.map(\.origin.y).sorted()
         let numeratorY = try XCTUnwrap(ys.last)
         let denominatorY = try XCTUnwrap(ys.first)
-        XCTAssertGreaterThan(numeratorY, bar.midY,
-                             "the numerator's baseline sits above the bar")
-        XCTAssertLessThan(denominatorY, bar.midY,
-                          "and the denominator's below it")
+        XCTAssertGreaterThan(
+            numeratorY, bar.midY,
+            "the numerator's baseline sits above the bar")
+        XCTAssertLessThan(
+            denominatorY, bar.midY,
+            "and the denominator's below it")
     }
 
     /// The wider part decides the width, and the narrower one is CENTRED
@@ -130,9 +147,10 @@ final class MathLayoutTests: XCTestCase {
         let fraction = try box("\\frac{1}{1000}")
         let numerator = fraction.glyphs.min { $0.origin.y > $1.origin.y }
         let numeratorX = try XCTUnwrap(numerator?.origin.x)
-        XCTAssertGreaterThan(numeratorX, 0,
-                             "a single-digit numerator over a four-digit denominator "
-                             + "must be indented, not flush left")
+        XCTAssertGreaterThan(
+            numeratorX, 0,
+            "a single-digit numerator over a four-digit denominator "
+                + "must be indented, not flush left")
     }
 
     func test_aSquareRootCoversItsRadicand() throws {

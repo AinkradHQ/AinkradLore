@@ -1,6 +1,7 @@
-import XCTest
 import AppKit
 import SwiftUI
+import XCTest
+
 @testable import LoreFeature
 
 /// Syntax highlighting inside a fence.
@@ -14,14 +15,23 @@ final class CodeHighlighterTests: XCTestCase {
     private func tokens(_ code: String, _ language: String) -> [(String, CodeToken.Kind)] {
         guard let grammar = CodeGrammar.named(language) else { return [] }
         let ns = code as NSString
-        return CodeHighlighter
+        return
+            CodeHighlighter
             .tokens(in: ns, range: NSRange(location: 0, length: ns.length), grammar: grammar)
-            .map { (ns.substring(with: NSRange(location: $0.range.lowerBound,
-                                               length: $0.range.count)), $0.kind) }
+            .map {
+                (
+                    ns.substring(
+                        with: NSRange(
+                            location: $0.range.lowerBound,
+                            length: $0.range.count)), $0.kind
+                )
+            }
     }
 
-    private func kinds(_ code: String, _ language: String,
-                       of text: String) -> [CodeToken.Kind] {
+    private func kinds(
+        _ code: String, _ language: String,
+        of text: String
+    ) -> [CodeToken.Kind] {
         tokens(code, language).filter { $0.0 == text }.map(\.1)
     }
 
@@ -34,24 +44,28 @@ final class CodeHighlighterTests: XCTestCase {
         let found = tokens("// don't stop here\nlet x = 1\n", "swift")
         XCTAssertEqual(found.first?.0, "// don't stop here")
         XCTAssertEqual(found.first?.1, .comment)
-        XCTAssertEqual(kinds("// don't stop here\nlet x = 1\n", "swift", of: "let"), [.keyword],
-                       "the code after the comment must still be scanned normally")
+        XCTAssertEqual(
+            kinds("// don't stop here\nlet x = 1\n", "swift", of: "let"), [.keyword],
+            "the code after the comment must still be scanned normally")
     }
 
     /// And the mirror: a comment marker inside a string is text.
     func test_aCommentMarkerInsideAStringDoesNotStartAComment() {
         let code = "let url = \"https://example.com\"\nlet y = 2\n"
         let found = tokens(code, "swift")
-        XCTAssertTrue(found.contains { $0.0 == "\"https://example.com\"" && $0.1 == .string },
-                      "the whole URL is one string; its // must not open a comment")
-        XCTAssertEqual(kinds(code, "swift", of: "let"), [.keyword, .keyword],
-                       "both lines must still scan as code")
+        XCTAssertTrue(
+            found.contains { $0.0 == "\"https://example.com\"" && $0.1 == .string },
+            "the whole URL is one string; its // must not open a comment")
+        XCTAssertEqual(
+            kinds(code, "swift", of: "let"), [.keyword, .keyword],
+            "both lines must still scan as code")
     }
 
     /// A keyword that is only PART of a word is not a keyword.
     func test_aKeywordMustBeAWholeWord() {
-        XCTAssertEqual(kinds("classy.className = 1\n", "swift", of: "class"), [],
-                       "`classy` and `className` contain `class` and are not keywords")
+        XCTAssertEqual(
+            kinds("classy.className = 1\n", "swift", of: "class"), [],
+            "`classy` and `className` contain `class` and are not keywords")
     }
 
     /// Longest-first matching, which the grammar sorts for. `--` is one SQL
@@ -80,11 +94,13 @@ final class CodeHighlighterTests: XCTestCase {
         let code = "print('it's broken)\nx = 1\ny = 2\n"
         let found = tokens(code, "python")
         for (text, kind) in found where kind == .string {
-            XCTAssertFalse(text.contains("\n"),
-                           "an unterminated single-line string must not cross a line")
+            XCTAssertFalse(
+                text.contains("\n"),
+                "an unterminated single-line string must not cross a line")
         }
-        XCTAssertEqual(kinds(code, "python", of: "1").count, 1,
-                       "code after the bad line must still scan")
+        XCTAssertEqual(
+            kinds(code, "python", of: "1").count, 1,
+            "code after the bad line must still scan")
     }
 
     /// An escaped delimiter does not close the string.
@@ -114,11 +130,14 @@ final class CodeHighlighterTests: XCTestCase {
     }
 
     func test_languageAliasesResolve() {
-        for (alias, sample) in [("js", "const"), ("ts", "interface"), ("py", "def"),
-                                ("rs", "fn"), ("yml", "true"), ("sh", "echo")] {
+        for (alias, sample) in [
+            ("js", "const"), ("ts", "interface"), ("py", "def"),
+            ("rs", "fn"), ("yml", "true"), ("sh", "echo"),
+        ] {
             XCTAssertNotNil(CodeGrammar.named(alias), "\(alias) must resolve")
-            XCTAssertEqual(kinds("\(sample) x\n", alias, of: sample), [.keyword],
-                           "\(alias) must highlight \(sample)")
+            XCTAssertEqual(
+                kinds("\(sample) x\n", alias, of: sample), [.keyword],
+                "\(alias) must highlight \(sample)")
         }
     }
 
@@ -126,17 +145,20 @@ final class CodeHighlighterTests: XCTestCase {
     /// Getting this wrong silently stops keywords being recognised after any
     /// subtraction.
     func test_hyphensJoinWordsOnlyWhereTheLanguageSaysSo() {
-        XCTAssertEqual(kinds("a { font-face: x }\n", "css", of: "font-face"), [.keyword],
-                       "font-face is ONE word in CSS, and so matches the keyword table; "
-                       + "split at the hyphen it would match nothing")
-        XCTAssertEqual(kinds("let y = count-1\nreturn y\n", "swift", of: "return"), [.keyword],
-                       "a subtraction must not glue words together in Swift")
+        XCTAssertEqual(
+            kinds("a { font-face: x }\n", "css", of: "font-face"), [.keyword],
+            "font-face is ONE word in CSS, and so matches the keyword table; "
+                + "split at the hyphen it would match nothing")
+        XCTAssertEqual(
+            kinds("let y = count-1\nreturn y\n", "swift", of: "return"), [.keyword],
+            "a subtraction must not glue words together in Swift")
     }
 
     func test_numbersAreFoundAndWordsContainingDigitsAreNot() {
         XCTAssertEqual(kinds("let a = 42\n", "swift", of: "42"), [.number])
-        XCTAssertEqual(tokens("let foo2 = 1\n", "swift").filter { $0.0 == "2" }.count, 0,
-                       "`foo2` is one identifier, not a word and a number")
+        XCTAssertEqual(
+            tokens("let foo2 = 1\n", "swift").filter { $0.0 == "2" }.count, 0,
+            "`foo2` is one identifier, not a word and a number")
     }
 
     func test_typesAreDistinguishedFromKeywords() {
@@ -176,9 +198,12 @@ final class CodeHighlighterTests: XCTestCase {
             func colour(at text: String) throws -> NSColor {
                 let range = ns.range(of: text)
                 XCTAssertNotEqual(range.location, NSNotFound, "fixture must contain \(text)")
-                return try XCTUnwrap(storage.attribute(.foregroundColor, at: range.location,
-                                                        effectiveRange: nil) as? NSColor)
-                    .usingColorSpace(.sRGB)!
+                return try XCTUnwrap(
+                    storage.attribute(
+                        .foregroundColor, at: range.location,
+                        effectiveRange: nil) as? NSColor
+                )
+                .usingColorSpace(.sRGB)!
             }
             let comment = try colour(at: "// a comment")
             let string = try colour(at: "\"hi\"")
@@ -188,18 +213,23 @@ final class CodeHighlighterTests: XCTestCase {
                 abs(a.redComponent - b.redComponent) + abs(a.greenComponent - b.greenComponent)
                     + abs(a.blueComponent - b.blueComponent)
             }
-            XCTAssertGreaterThan(distance(comment, keyword), 0.15,
-                                 "a comment and a keyword must not be the same colour")
-            XCTAssertGreaterThan(distance(string, keyword), 0.15,
-                                 "a string and a keyword must not be the same colour")
+            XCTAssertGreaterThan(
+                distance(comment, keyword), 0.15,
+                "a comment and a keyword must not be the same colour")
+            XCTAssertGreaterThan(
+                distance(string, keyword), 0.15,
+                "a string and a keyword must not be the same colour")
 
             // And the comment carries italics too, so the distinction is not
             // colour alone.
             let commentRange = ns.range(of: "// a comment")
-            let font = try XCTUnwrap(storage.attribute(.font, at: commentRange.location,
-                                                        effectiveRange: nil) as? NSFont)
-            XCTAssertTrue(font.fontDescriptor.symbolicTraits.contains(.italic),
-                          "a comment must be italic as well as tinted")
+            let font = try XCTUnwrap(
+                storage.attribute(
+                    .font, at: commentRange.location,
+                    effectiveRange: nil) as? NSFont)
+            XCTAssertTrue(
+                font.fontDescriptor.symbolicTraits.contains(.italic),
+                "a comment must be italic as well as tinted")
         }
     }
 
@@ -224,8 +254,10 @@ final class CodeHighlighterTests: XCTestCase {
             // The `let` in the PROSE line, which is an English word here.
             let prose = ns.range(of: "let me explain")
             let proseColour = try XCTUnwrap(
-                storage.attribute(.foregroundColor, at: prose.location,
-                                  effectiveRange: nil) as? NSColor).usingColorSpace(.sRGB)!
+                storage.attribute(
+                    .foregroundColor, at: prose.location,
+                    effectiveRange: nil) as? NSColor
+            ).usingColorSpace(.sRGB)!
             let bodyColour = NSColor(TestTokens.make().foreground).usingColorSpace(.sRGB)!
             XCTAssertEqual(proseColour.redComponent, bodyColour.redComponent, accuracy: 0.01)
             XCTAssertEqual(proseColour.greenComponent, bodyColour.greenComponent, accuracy: 0.01)

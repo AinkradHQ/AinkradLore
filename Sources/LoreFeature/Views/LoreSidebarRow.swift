@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// Both kinds of sidebar row, built from the SAME component so their height,
 /// padding, hover and selection cannot drift apart.
@@ -16,8 +16,10 @@ import AinkradAppKit
 enum LoreSidebarRow {
 
     @ViewBuilder
-    static func folder(name: String, depth: Int, isExpanded: Bool,
-                       onToggle: @escaping () -> Void) -> some View {
+    static func folder(
+        name: String, depth: Int, isExpanded: Bool,
+        onToggle: @escaping () -> Void
+    ) -> some View {
         AinkradListRow(
             isSelected: false,
             onTap: onToggle,
@@ -26,13 +28,14 @@ enum LoreSidebarRow {
             },
             title: name,
             subtitle: nil,
-            trailing: { EmptyView() })
-            .padding(.leading, LoreSidebarMetrics.indent(depth: depth))
-            .accessibilityElement(children: .combine)
-            // The chevron is the only thing that says expanded or collapsed,
-            // and a glyph name is not something VoiceOver can read as state.
-            .accessibilityLabel("\(name), folder, \(isExpanded ? "expanded" : "collapsed")")
-            .accessibilityAddTraits(.isButton)
+            trailing: { EmptyView() }
+        )
+        .padding(.leading, LoreSidebarMetrics.indent(depth: depth))
+        .accessibilityElement(children: .combine)
+        // The chevron is the only thing that says expanded or collapsed,
+        // and a glyph name is not something VoiceOver can read as state.
+        .accessibilityLabel("\(name), folder, \(isExpanded ? "expanded" : "collapsed")")
+        .accessibilityAddTraits(.isButton)
     }
 
     /// - Parameters:
@@ -54,11 +57,13 @@ enum LoreSidebarRow {
     ///   a highlighted excerpt is worth. Takes precedence over `subtitle`:
     ///   two subtitles on one row would bury the more useful one.
     @ViewBuilder
-    static func document(row: IndexRow, depth: Int, isSelected: Bool,
-                         subtitle: String? = nil,
-                         attributedSubtitle: AttributedString? = nil,
-                         emptyTitleFallback: String? = nil,
-                         onTap: @escaping () -> Void) -> some View {
+    static func document(
+        row: IndexRow, depth: Int, isSelected: Bool,
+        subtitle: String? = nil,
+        attributedSubtitle: AttributedString? = nil,
+        emptyTitleFallback: String? = nil,
+        onTap: @escaping () -> Void
+    ) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             AinkradListRow(
                 isSelected: isSelected,
@@ -91,8 +96,11 @@ enum LoreSidebarRow {
         // Without this VoiceOver walks the pieces separately and a row reads
         // as a stream of fragments rather than as a document.
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(accessibilityLabel(for: row, subtitle: subtitle,
-                                               emptyTitleFallback: emptyTitleFallback))
+        .accessibilityLabel(
+            accessibilityLabel(
+                for: row, subtitle: subtitle,
+                emptyTitleFallback: emptyTitleFallback)
+        )
         .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
     }
 
@@ -102,9 +110,12 @@ enum LoreSidebarRow {
     /// an attachment is named as one: "Q1, attachment" tells a screen-reader
     /// user why the row has no Delete in its menu, which the icon conveys
     /// visually and nothing conveyed otherwise.
-    static func accessibilityLabel(for row: IndexRow, subtitle: String?,
-                                   emptyTitleFallback: String?) -> String {
-        let name = row.title.isEmpty
+    static func accessibilityLabel(
+        for row: IndexRow, subtitle: String?,
+        emptyTitleFallback: String?
+    ) -> String {
+        let name =
+            row.title.isEmpty
             ? (emptyTitleFallback ?? row.path.lastPathComponent) : row.title
         var parts = [name]
         if row.type == AttachmentEngine.identifier { parts.append("attachment") }

@@ -1,6 +1,6 @@
+import AinkradAppKit
 import AppKit
 import SwiftUI
-import AinkradAppKit
 
 /// Syntax colouring inside a fenced code block.
 ///
@@ -26,23 +26,28 @@ extension MarkdownStyleRenderer {
     /// table), and the language label is restyled straight afterwards
     /// regardless — so excluding it would be bookkeeping with no observable
     /// difference.
-    static func highlightCode(in r: NSRange, grammar: CodeGrammar,
-                              storage: NSTextStorage, tokens: HostThemeTokens) {
+    static func highlightCode(
+        in r: NSRange, grammar: CodeGrammar,
+        storage: NSTextStorage, tokens: HostThemeTokens
+    ) {
         let text = storage.string as NSString
         let palette = CodePalette(tokens: tokens)
         for token in CodeHighlighter.tokens(in: text, range: r, grammar: grammar) {
-            let range = NSRange(location: token.range.lowerBound,
-                                length: token.range.count)
+            let range = NSRange(
+                location: token.range.lowerBound,
+                length: token.range.count)
             guard range.length > 0, NSMaxRange(range) <= storage.length else { continue }
-            storage.addAttribute(.foregroundColor, value: palette.colour(for: token.kind),
-                                 range: range)
+            storage.addAttribute(
+                .foregroundColor, value: palette.colour(for: token.kind),
+                range: range)
             // Comments in italic as well as colour, so they stay legible as
             // asides on a display where the tint is hard to separate — the same
             // reason the accessibility pass stopped using colour alone.
             if token.kind == .comment {
                 composeFont(in: range, storage: storage) { current in
-                    Self.applying(Self.inheritedTraits(of: current).union(.italicFontMask),
-                                  to: current)
+                    Self.applying(
+                        Self.inheritedTraits(of: current).union(.italicFontMask),
+                        to: current)
                 }
             }
         }
@@ -68,18 +73,19 @@ extension MarkdownStyleRenderer {
         init(tokens: HostThemeTokens) {
             let onDark = MarkdownBlockBackgrounds.Palette.isDarkSurface(tokens: tokens)
             func hued(_ hue: CGFloat) -> NSColor {
-                NSColor(hue: hue / 360,
-                        saturation: onDark ? 0.50 : 0.72,
-                        brightness: onDark ? 0.95 : 0.66,
-                        alpha: 1)
+                NSColor(
+                    hue: hue / 360,
+                    saturation: onDark ? 0.50 : 0.72,
+                    brightness: onDark ? 0.95 : 0.66,
+                    alpha: 1)
             }
             // Comments are quiet foreground rather than a hue: they are the one
             // token kind meant to recede.
             comment = NSColor(tokens.foreground).withAlphaComponent(0.45)
-            string = hued(140)      // green
-            number = hued(30)       // orange
-            keyword = hued(285)     // violet
-            type = hued(200)        // blue
+            string = hued(140)  // green
+            number = hued(30)  // orange
+            keyword = hued(285)  // violet
+            type = hued(200)  // blue
         }
 
         func colour(for kind: CodeToken.Kind) -> NSColor {
@@ -103,9 +109,11 @@ extension MarkdownStyleRenderer {
     /// locating the block's first line and searching it for `language`, which
     /// is safe because CommonMark's info string is exactly that word (an
     /// identifier, no spaces) immediately after the fence run.
-    static func styleLanguageLabel(_ language: String, in r: NSRange,
-                                           storage: NSTextStorage, tokens: HostThemeTokens,
-                                           theme: MarkdownTheme) {
+    static func styleLanguageLabel(
+        _ language: String, in r: NSRange,
+        storage: NSTextStorage, tokens: HostThemeTokens,
+        theme: MarkdownTheme
+    ) {
         let full = storage.string as NSString
         let limit = NSMaxRange(r)
         var lineEnd = r.location
@@ -115,18 +123,21 @@ extension MarkdownStyleRenderer {
         let lineText = full.substring(with: fenceLine)
         guard let langRange = lineText.range(of: language, options: .backwards) else { return }
         let nsLangRange = NSRange(langRange, in: lineText)
-        let labelRange = NSRange(location: fenceLine.location + nsLangRange.location,
-                                 length: nsLangRange.length)
+        let labelRange = NSRange(
+            location: fenceLine.location + nsLangRange.location,
+            length: nsLangRange.length)
         guard NSMaxRange(labelRange) <= full.length else { return }
         // A CAPTION, not a control. This was bold and `accentTertiary`, which
         // in Lore means "you can click this" — so every fence wore what looked
         // like a button in its corner. Obsidian's language label is small,
         // quiet and unmistakably inert; this is the same idea.
-        storage.addAttribute(.font,
-                             value: NSFont.systemFont(ofSize: theme.bodySize * 0.85),
-                             range: labelRange)
-        storage.addAttribute(.foregroundColor,
-                             value: NSColor(tokens.foreground).withAlphaComponent(0.45),
-                             range: labelRange)
+        storage.addAttribute(
+            .font,
+            value: NSFont.systemFont(ofSize: theme.bodySize * 0.85),
+            range: labelRange)
+        storage.addAttribute(
+            .foregroundColor,
+            value: NSColor(tokens.foreground).withAlphaComponent(0.45),
+            range: labelRange)
     }
 }

@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 /// The reader is the half of idempotency that did not exist until now: the
@@ -16,8 +17,9 @@ final class ImportIDReaderTests: XCTestCase {
 
     private func write(_ text: String, to relative: String, in root: URL) throws {
         let url = root.appendingPathComponent(relative)
-        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(),
-                                                withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(
+            at: url.deletingLastPathComponent(),
+            withIntermediateDirectories: true)
         try text.write(to: url, atomically: true, encoding: .utf8)
     }
 
@@ -26,12 +28,14 @@ final class ImportIDReaderTests: XCTestCase {
     func testReadsImportIDsFromNotesAtAnyDepth() throws {
         let root = try makeVault()
         try write("---\nlore_import_id: obsidian:A.md\n---\n\nbody", to: "A.md", in: root)
-        try write("---\nlore_import_id: obsidian:Deep/B.md\n---\n\nbody",
-                  to: "Deep/Nested/B.md", in: root)
+        try write(
+            "---\nlore_import_id: obsidian:Deep/B.md\n---\n\nbody",
+            to: "Deep/Nested/B.md", in: root)
         try write("no frontmatter here", to: "C.md", in: root)
 
-        XCTAssertEqual(ImportIDReader.read(vaultRoot: root),
-                       ["obsidian:A.md", "obsidian:Deep/B.md"])
+        XCTAssertEqual(
+            ImportIDReader.read(vaultRoot: root),
+            ["obsidian:A.md", "obsidian:Deep/B.md"])
     }
 
     /// `ObsidianSource` builds `sourceID` from a filesystem path, and a path may
@@ -41,9 +45,11 @@ final class ImportIDReaderTests: XCTestCase {
     func testReadsAnIDThatFrontmatterHadToQuote() throws {
         let root = try makeVault()
         let awkward = "obsidian:Notes/plan #1\nwith a newline.md"
-        let text = ImportApplier.frontmatterBody("body", item: ImportItem(
-            sourceID: awkward, title: "Plan", body: .markdown("body"), attachments: [],
-            folderPath: [], created: Date(), modified: Date(), fidelity: []))
+        let text = ImportApplier.frontmatterBody(
+            "body",
+            item: ImportItem(
+                sourceID: awkward, title: "Plan", body: .markdown("body"), attachments: [],
+                folderPath: [], created: Date(), modified: Date(), fidelity: []))
         try write(text, to: "Plan.md", in: root)
 
         XCTAssertTrue(ImportIDReader.read(vaultRoot: root).contains(awkward))
@@ -53,8 +59,9 @@ final class ImportIDReaderTests: XCTestCase {
         let root = try makeVault().appendingPathComponent(".hidden-parent/vault")
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
         try write("---\nlore_import_id: obsidian:A.md\n---\n", to: "A.md", in: root)
-        try write("---\nlore_import_id: obsidian:trashed.md\n---\n",
-                  to: ".trash/trashed.md", in: root)
+        try write(
+            "---\nlore_import_id: obsidian:trashed.md\n---\n",
+            to: ".trash/trashed.md", in: root)
 
         // The vault itself living under a dot-directory must not make every
         // file in it read as hidden — only components BELOW the root are judged.
@@ -66,9 +73,10 @@ final class ImportIDReaderTests: XCTestCase {
     func testTheLedgerRecordsIDsForFilesThatCannotCarryFrontmatter() throws {
         let root = try makeVault()
         try write("png bytes", to: "Media/pic.png", in: root)
-        try ImportLedger.record(id: "obsidian:Media/pic.png",
-                                landedAt: root.appendingPathComponent("Media/pic.png"),
-                                vaultRoot: root)
+        try ImportLedger.record(
+            id: "obsidian:Media/pic.png",
+            landedAt: root.appendingPathComponent("Media/pic.png"),
+            vaultRoot: root)
 
         XCTAssertEqual(ImportIDReader.read(vaultRoot: root), ["obsidian:Media/pic.png"])
     }
@@ -94,8 +102,9 @@ final class ImportIDReaderTests: XCTestCase {
         let root = try makeVault()
         let id = "obsidian:odd\tname\nsecond line\\.png"
         try write("bytes", to: "odd.png", in: root)
-        try ImportLedger.record(id: id, landedAt: root.appendingPathComponent("odd.png"),
-                                vaultRoot: root)
+        try ImportLedger.record(
+            id: id, landedAt: root.appendingPathComponent("odd.png"),
+            vaultRoot: root)
 
         XCTAssertEqual(ImportLedger.entries(vaultRoot: root).map(\.id), [id])
         XCTAssertTrue(ImportIDReader.read(vaultRoot: root).contains(id))
@@ -105,12 +114,14 @@ final class ImportIDReaderTests: XCTestCase {
         let root = try makeVault()
         for name in ["a.png", "b.png", "c.png"] {
             try write("bytes", to: name, in: root)
-            try ImportLedger.record(id: "obsidian:\(name)",
-                                    landedAt: root.appendingPathComponent(name),
-                                    vaultRoot: root)
+            try ImportLedger.record(
+                id: "obsidian:\(name)",
+                landedAt: root.appendingPathComponent(name),
+                vaultRoot: root)
         }
-        XCTAssertEqual(ImportIDReader.read(vaultRoot: root),
-                       ["obsidian:a.png", "obsidian:b.png", "obsidian:c.png"])
+        XCTAssertEqual(
+            ImportIDReader.read(vaultRoot: root),
+            ["obsidian:a.png", "obsidian:b.png", "obsidian:c.png"])
     }
 
     func testRefusesToRecordAFileOutsideTheVault() throws {
@@ -118,8 +129,10 @@ final class ImportIDReaderTests: XCTestCase {
         let elsewhere = try makeVault().appendingPathComponent("stray.png")
         try "bytes".write(to: elsewhere, atomically: true, encoding: .utf8)
 
-        XCTAssertThrowsError(try ImportLedger.record(id: "x", landedAt: elsewhere,
-                                                     vaultRoot: root))
+        XCTAssertThrowsError(
+            try ImportLedger.record(
+                id: "x", landedAt: elsewhere,
+                vaultRoot: root))
     }
 
     func testAVaultWithNoLedgerAndNoNotesReadsAsEmpty() throws {

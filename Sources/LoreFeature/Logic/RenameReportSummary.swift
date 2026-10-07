@@ -36,7 +36,8 @@ extension RenameReport {
     /// own sentence than as a bullet under "Renamed."
     public var refusalReason: String? {
         guard movedTo == nil, rewritten.isEmpty, skipped.isEmpty, unchanged.isEmpty,
-              failed.count == 1 else { return nil }
+            failed.count == 1
+        else { return nil }
         return failed[0].reason
     }
 
@@ -68,14 +69,15 @@ extension RenameReport {
             // and links in them may still name the old title.
             lines.append(
                 "No link text matched in \(Self.files(unchanged.count)), "
-                + "so nothing was rewritten there — check those links by hand.")
+                    + "so nothing was rewritten there — check those links by hand.")
         } else if skipped.isEmpty, failed.isEmpty {
             lines.append("No other document linked to it, so no links needed updating.")
         }
 
         if !rewritten.isEmpty, !unchanged.isEmpty {
-            lines.append("\(Self.files(unchanged.count).capitalizedFirst) matched no link "
-                         + "text and were left unchanged.")
+            lines.append(
+                "\(Self.files(unchanged.count).capitalizedFirst) matched no link "
+                    + "text and were left unchanged.")
         }
         return lines
     }
@@ -88,13 +90,13 @@ extension RenameReport {
         switch reason {
         case .unsavedEdits:
             return "Left alone (\(names)): an open tab still holds unsaved edits, so the "
-                 + "links were not rewritten. Save or close that tab and rename again."
+                + "links were not rewritten. Save or close that tab and rename again."
         case .changedOnDisk:
             return "Left alone (\(names)): changed outside Lore after the preview, so the "
-                 + "links were not rewritten rather than overwrite that change."
+                + "links were not rewritten rather than overwrite that change."
         case .unverifiable:
             return "Left alone (\(names)): could not be confirmed unchanged since the "
-                 + "preview, so the links were not rewritten."
+                + "preview, so the links were not rewritten."
         }
     }
 

@@ -56,7 +56,8 @@ struct PaneState {
     /// the stack with duplicates that make Back appear broken.
     mutating func recordVisit(_ url: URL, key: (URL) -> String) {
         if let historyIndex, history.indices.contains(historyIndex),
-           key(history[historyIndex]) == key(url) {
+            key(history[historyIndex]) == key(url)
+        {
             return
         }
         if let historyIndex, historyIndex + 1 < history.count {

@@ -1,5 +1,5 @@
-import Foundation
 import AinkradAppKit
+import Foundation
 
 /// The sink behind Lore's MCP tools: decodes one `{"operation": ..., ...}`
 /// payload and drives the `LoreStore` that the on-screen instance is using.
@@ -68,22 +68,23 @@ struct LoreNoteOperations {
 
     func run(_ json: String) async -> AgentActionResult {
         guard let data = json.data(using: .utf8),
-              let object = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
-              let operation = object["operation"] as? String else {
+            let object = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
+            let operation = object["operation"] as? String
+        else {
             return .failure("Lore: malformed request")
         }
         guard store.vaultRoot != nil else { return .failure(Self.noVaultMessage) }
 
         do {
             switch operation {
-            case "search":     return searchNotes(object)
-            case "read":       return try readNote(object)
-            case "listTags":   return listTags()
+            case "search": return searchNotes(object)
+            case "read": return try readNote(object)
+            case "listTags": return listTags()
             case "listFolders": return listFolders()
-            case "create":     return try createNote(object)
-            case "save":       return try saveNote(object)
-            case "delete":     return try deleteNote(object)
-            default:           return .failure("Lore: unknown operation \"\(operation)\"")
+            case "create": return try createNote(object)
+            case "save": return try saveNote(object)
+            case "delete": return try deleteNote(object)
+            default: return .failure("Lore: unknown operation \"\(operation)\"")
             }
         } catch let error as LoreError {
             return .failure(describe(error))
@@ -101,7 +102,8 @@ struct LoreNoteOperations {
         let limit = max(1, (object["limit"] as? Int) ?? 25)
         // An empty query is a browse, not a search: the FTS index has nothing
         // to match on, so answer from the already-loaded rows, newest first.
-        let rows = query.isEmpty
+        let rows =
+            query.isEmpty
             ? noteRows.sorted { $0.updated > $1.updated }
             : store.search(query).filter { $0.type == MarkdownEngine.identifier }
         guard !rows.isEmpty else {
@@ -116,7 +118,8 @@ struct LoreNoteOperations {
         let row = try resolve(object)
         let note = try parse(row)
         let tags = note.tags.isEmpty ? "(none)" : note.tags.joined(separator: ", ")
-        return .success("""
+        return .success(
+            """
             id: \(note.id)
             title: \(note.title)
             tags: \(tags)
@@ -138,16 +141,18 @@ struct LoreNoteOperations {
 
     private func listFolders() -> AgentActionResult {
         let folders = store.subfolders
-        return .success(folders.isEmpty
-            ? "The vault root has no subfolders."
-            : folders.joined(separator: "\n"))
+        return .success(
+            folders.isEmpty
+                ? "The vault root has no subfolders."
+                : folders.joined(separator: "\n"))
     }
 
     // MARK: - write
 
     private func createNote(_ object: [String: Any]) throws -> AgentActionResult {
         guard let title = object["title"] as? String,
-              !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        else {
             return .failure("create_note requires a non-empty \"title\".")
         }
         if let rejection = filenameRejection(for: title) { return .failure(rejection) }
@@ -195,9 +200,11 @@ struct LoreNoteOperations {
         // arrives here as a `LoreError`, which `run`'s existing catch turns
         // into the same `isError` result shape every other failure uses.
         let inbound = try store.trash(row)
-        let warning = inbound == 0 ? "" :
-            " \(inbound) note\(inbound == 1 ? "" : "s") still link\(inbound == 1 ? "s" : "") "
-            + "to it; those links are now unresolved."
+        let warning =
+            inbound == 0
+            ? ""
+            : " \(inbound) note\(inbound == 1 ? "" : "s") still link\(inbound == 1 ? "s" : "") "
+                + "to it; those links are now unresolved."
         return .success("Moved \"\(row.title)\" (\(relative(row.path))) to the Trash.\(warning)")
     }
 
@@ -235,7 +242,8 @@ struct LoreNoteOperations {
     /// rather than silently mangling, so the model can retry with a sane title.
     private func filenameRejection(for title: String) -> String? {
         guard let root = store.vaultRoot else { return nil }  // `run` already refused.
-        let dir = store.defaultNoteFolder.isEmpty
+        let dir =
+            store.defaultNoteFolder.isEmpty
             ? root : root.appendingPathComponent(store.defaultNoteFolder, isDirectory: true)
         let slug = Self.slug(for: title)
         // A leading dot is rejected up front: `.hidden` stays inside the vault,
@@ -289,7 +297,7 @@ struct LoreNoteOperations {
         if let row = noteRows.first(where: { $0.path.path == wanted }) { return row }
         throw OperationError.message(
             "No note in the vault has id or path \"\(identifier)\". "
-            + "Use search_notes to find the note's id.")
+                + "Use search_notes to find the note's id.")
     }
 
     private func parse(_ row: IndexRow) throws -> Note {
@@ -368,7 +376,7 @@ struct LoreNoteOperations {
     }
 }
 
-private extension AgentActionResult {
-    static func success(_ text: String) -> AgentActionResult { .init(text: text, isError: false) }
-    static func failure(_ text: String) -> AgentActionResult { .init(text: text, isError: true) }
+extension AgentActionResult {
+    fileprivate static func success(_ text: String) -> AgentActionResult { .init(text: text, isError: false) }
+    fileprivate static func failure(_ text: String) -> AgentActionResult { .init(text: text, isError: true) }
 }

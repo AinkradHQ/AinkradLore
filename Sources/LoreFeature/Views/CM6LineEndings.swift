@@ -55,12 +55,19 @@ enum CM6LineEndings {
     /// gets and what every Obsidian vault uses.
     static func dominant(in text: String) -> Ending {
         let units = Array(text.utf16)
-        var crlf = 0, lf = 0, cr = 0
+        var crlf = 0
+        var lf = 0
+        var cr = 0
         var index = 0
         while index < units.count {
             if units[index] == 0x0D {
-                if index + 1 < units.count, units[index + 1] == 0x0A { crlf += 1; index += 2 }
-                else { cr += 1; index += 1 }
+                if index + 1 < units.count, units[index + 1] == 0x0A {
+                    crlf += 1
+                    index += 2
+                } else {
+                    cr += 1
+                    index += 1
+                }
             } else {
                 if units[index] == 0x0A { lf += 1 }
                 index += 1
@@ -80,8 +87,12 @@ enum CM6LineEndings {
         while index < units.count {
             if units[index] == 0x0D {
                 if index + 1 < units.count, units[index + 1] == 0x0A {
-                    seen.insert(.crlf); index += 2
-                } else { seen.insert(.cr); index += 1 }
+                    seen.insert(.crlf)
+                    index += 2
+                } else {
+                    seen.insert(.cr)
+                    index += 1
+                }
             } else {
                 if units[index] == 0x0A { seen.insert(.lf) }
                 index += 1
@@ -106,7 +117,7 @@ enum CM6LineEndings {
     static func toLF(_ text: String) -> String {
         guard text.utf16.contains(0x0D) else { return text }
         return text.replacingOccurrences(of: "\r\n", with: "\n")
-                   .replacingOccurrences(of: "\r", with: "\n")
+            .replacingOccurrences(of: "\r", with: "\n")
     }
 
     /// Back to the document's own ending.

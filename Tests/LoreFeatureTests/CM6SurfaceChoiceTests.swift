@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 /// E3T1: which surface a document opens in, and why line endings decide it.
@@ -50,8 +51,9 @@ final class CM6SurfaceChoiceTests: XCTestCase {
             // document's own ending on the way out.
             let there = CM6LineEndings.toLF(document)
             let back = CM6LineEndings.from(there, to: ending)
-            XCTAssertEqual(back, document,
-                           "\(document.debugDescription) did not survive the round trip")
+            XCTAssertEqual(
+                back, document,
+                "\(document.debugDescription) did not survive the round trip")
         }
     }
 
@@ -76,11 +78,12 @@ final class CM6SurfaceChoiceTests: XCTestCase {
         let crlf = "a\r\nb\r\n"
         XCTAssertEqual(CM6LineEndings.from(crlf, to: .crlf), crlf)
         // The specific corruption: CR CR LF must never appear.
-        XCTAssertFalse(Array(CM6LineEndings.from(crlf, to: .crlf).utf16)
-            .indices.dropLast().contains { i in
-                let units = Array(CM6LineEndings.from(crlf, to: .crlf).utf16)
-                return units[i] == 0x0D && units[i + 1] == 0x0D
-            }, "a stray carriage return on every line")
+        XCTAssertFalse(
+            Array(CM6LineEndings.from(crlf, to: .crlf).utf16)
+                .indices.dropLast().contains { i in
+                    let units = Array(CM6LineEndings.from(crlf, to: .crlf).utf16)
+                    return units[i] == 0x0D && units[i + 1] == 0x0D
+                }, "a stray carriage return on every line")
         XCTAssertEqual(CM6LineEndings.from("a\nb\n", to: .crlf), "a\r\nb\r\n")
         XCTAssertEqual(CM6LineEndings.from("a\rb\r", to: .cr), "a\rb\r")
         XCTAssertEqual(CM6LineEndings.from("a\r\nb\r\n", to: .lf), "a\nb\n")
@@ -93,7 +96,8 @@ final class CM6SurfaceChoiceTests: XCTestCase {
         let mixed = "windows\r\nunix\nmac\r"
         let ending = CM6LineEndings.dominant(in: mixed)
         let back = CM6LineEndings.from(CM6LineEndings.toLF(mixed), to: ending)
-        XCTAssertNotEqual(back, mixed,
-                          "if this ever passes, the surface rule can be relaxed")
+        XCTAssertNotEqual(
+            back, mixed,
+            "if this ever passes, the surface rule can be relaxed")
     }
 }

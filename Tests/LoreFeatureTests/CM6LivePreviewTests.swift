@@ -1,6 +1,7 @@
 import AppKit
 import WebKit
 import XCTest
+
 @testable import LoreFeature
 
 /// E2T0 and E2T1a: syntax hides unless the caret is on its line, and a table
@@ -9,13 +10,17 @@ final class CM6LivePreviewTests: XCTestCase {
 
     private var windows: [NSWindow] = []
     private var webView: WKWebView!
-    override func tearDown() { windows.removeAll(); super.tearDown() }
+    override func tearDown() {
+        windows.removeAll()
+        super.tearDown()
+    }
 
     @MainActor
     private func boot(_ text: String) throws {
         webView = WKWebView(frame: NSRect(x: 0, y: 0, width: 900, height: 700))
-        let window = NSWindow(contentRect: webView.frame, styleMask: [.titled],
-                              backing: .buffered, defer: false)
+        let window = NSWindow(
+            contentRect: webView.frame, styleMask: [.titled],
+            backing: .buffered, defer: false)
         window.contentView = webView
         windows.append(window)
         let index = try XCTUnwrap(CM6EditorView.Coordinator.bundledIndexURL)
@@ -38,8 +43,14 @@ final class CM6LivePreviewTests: XCTestCase {
 
     @MainActor @discardableResult
     private func js(_ source: String) throws -> Any? {
-        var result: Any?; var failure: Error?; var done = false
-        webView.evaluateJavaScript(source) { v, e in result = v; failure = e; done = true }
+        var result: Any?
+        var failure: Error?
+        var done = false
+        webView.evaluateJavaScript(source) { v, e in
+            result = v
+            failure = e
+            done = true
+        }
         let deadline = Date().addingTimeInterval(20)
         while !done, Date() < deadline {
             RunLoop.current.run(mode: .default, before: Date().addingTimeInterval(0.01))
@@ -66,12 +77,13 @@ final class CM6LivePreviewTests: XCTestCase {
 
     @MainActor
     private func putCaret(inLineContaining needle: String) throws {
-        _ = try js("""
-        (() => {
-          const doc = window.loreEditor.text();
-          window.loreEditor.selectAt(doc.indexOf(\(CM6EditorView.Coordinator.jsString(needle))));
-        })()
-        """)
+        _ = try js(
+            """
+            (() => {
+              const doc = window.loreEditor.text();
+              window.loreEditor.selectAt(doc.indexOf(\(CM6EditorView.Coordinator.jsString(needle))));
+            })()
+            """)
     }
 
     // MARK: - E2T0
@@ -88,10 +100,12 @@ final class CM6LivePreviewTests: XCTestCase {
 
         try putCaret(inLineContaining: "## Section")
         shown = try rendered()
-        XCTAssertTrue(shown.contains("## Section"),
-                      "the caret's own line shows its syntax, so it can be edited")
-        XCTAssertFalse(shown.contains("# Title"),
-                       "and ONLY that line — reveal is line-scoped, not document-scoped")
+        XCTAssertTrue(
+            shown.contains("## Section"),
+            "the caret's own line shows its syntax, so it can be edited")
+        XCTAssertFalse(
+            shown.contains("# Title"),
+            "and ONLY that line — reveal is line-scoped, not document-scoped")
     }
 
     @MainActor
@@ -112,8 +126,9 @@ final class CM6LivePreviewTests: XCTestCase {
         try boot("- one\n- two\n- three\n\n")
         try putCaret(inLineContaining: "two")
         let shown = try rendered()
-        XCTAssertEqual(shown.components(separatedBy: "- ").count - 1, 1,
-                       "exactly one line shows its marker")
+        XCTAssertEqual(
+            shown.components(separatedBy: "- ").count - 1, 1,
+            "exactly one line shows its marker")
     }
 
     @MainActor
@@ -128,9 +143,11 @@ final class CM6LivePreviewTests: XCTestCase {
     @MainActor
     func test_fencedCodeGetsAPanelOnEveryLine() throws {
         try boot("intro\n\n```bash\none\ntwo\n```\n\nafter\n")
-        let panels = try js("""
-        document.querySelectorAll('.cm-lore-code, .cm-lore-code-first, .cm-lore-code-last').length
-        """) as? Int ?? 0
+        let panels =
+            try js(
+                """
+                document.querySelectorAll('.cm-lore-code, .cm-lore-code-first, .cm-lore-code-last').length
+                """) as? Int ?? 0
         XCTAssertGreaterThanOrEqual(panels, 3, "every line of the fence is on the panel")
     }
 
@@ -141,12 +158,15 @@ final class CM6LivePreviewTests: XCTestCase {
     @MainActor
     func test_tableCellsRenderTheirInlineMarkdown() throws {
         try boot("| A | B |\n|---|---|\n| **Web** | `code` |\n| *it* | plain |\n\n")
-        XCTAssertEqual(try js("document.querySelectorAll('.cm-lore-table strong').length")
-                       as? Int, 1)
-        XCTAssertEqual(try js("document.querySelectorAll('.cm-lore-table code').length")
-                       as? Int, 1)
-        XCTAssertEqual(try js("document.querySelectorAll('.cm-lore-table em').length")
-                       as? Int, 1)
+        XCTAssertEqual(
+            try js("document.querySelectorAll('.cm-lore-table strong').length")
+                as? Int, 1)
+        XCTAssertEqual(
+            try js("document.querySelectorAll('.cm-lore-table code').length")
+                as? Int, 1)
+        XCTAssertEqual(
+            try js("document.querySelectorAll('.cm-lore-table em').length")
+                as? Int, 1)
         XCTAssertFalse(try rendered().contains("**Web**"))
         // The DOCUMENT still says what the author wrote.
         let source = try js("window.loreEditor.text()") as? String ?? ""
@@ -181,31 +201,35 @@ final class CM6LivePreviewTests: XCTestCase {
     @MainActor
     func test_aThematicBreakCostsOneLineNotThree() throws {
         try boot("Paragraph before.\n\n---\n\nParagraph after.\n\n")
-        let measured = try js("""
-        (() => {
-          const hr = document.querySelector('.cm-lore-rule');
-          const all = Array.from(document.querySelectorAll('.cm-content > *'));
-          const before = all.find(l => l.innerText && l.innerText.startsWith('Paragraph before'));
-          const after = all.find(l => l.innerText && l.innerText.startsWith('Paragraph after'));
-          if (!hr || !before || !after) return -1;
-          const b = before.getBoundingClientRect(), a = after.getBoundingClientRect();
-          return Math.round(a.top - (b.top + b.height));
-        })()
-        """) as? Int ?? -1
+        let measured =
+            try js(
+                """
+                (() => {
+                  const hr = document.querySelector('.cm-lore-rule');
+                  const all = Array.from(document.querySelectorAll('.cm-content > *'));
+                  const before = all.find(l => l.innerText && l.innerText.startsWith('Paragraph before'));
+                  const after = all.find(l => l.innerText && l.innerText.startsWith('Paragraph after'));
+                  if (!hr || !before || !after) return -1;
+                  const b = before.getBoundingClientRect(), a = after.getBoundingClientRect();
+                  return Math.round(a.top - (b.top + b.height));
+                })()
+                """) as? Int ?? -1
         XCTAssertGreaterThan(measured, 0, "the rule must render at all")
-        let lineHeight = try js("""
-        (() => {
-          const all = Array.from(document.querySelectorAll('.cm-content > .cm-line'));
-          return Math.round(all[0].getBoundingClientRect().height);
-        })()
-        """) as? Int ?? -1
+        let lineHeight =
+            try js(
+                """
+                (() => {
+                  const all = Array.from(document.querySelectorAll('.cm-content > .cm-line'));
+                  return Math.round(all[0].getBoundingClientRect().height);
+                })()
+                """) as? Int ?? -1
         XCTAssertGreaterThan(lineHeight, 0)
         // Two blank lines plus the rule. Four line heights is the ceiling; the
         // inline version was five.
-        XCTAssertLessThan(measured, lineHeight * 4,
-                          "a one-pixel rule is costing \(measured)px against a "
-                          + "\(lineHeight)px line")
+        XCTAssertLessThan(
+            measured, lineHeight * 4,
+            "a one-pixel rule is costing \(measured)px against a "
+                + "\(lineHeight)px line")
     }
-
 
 }

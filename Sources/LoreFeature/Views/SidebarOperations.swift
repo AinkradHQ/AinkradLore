@@ -1,5 +1,5 @@
-import Foundation
 import AppKit
+import Foundation
 import Observation
 
 /// The state machine behind the sidebar's rename / move / trash affordances,
@@ -96,15 +96,15 @@ final class SidebarOperations {
         let name = session.title.isEmpty ? session.url.lastPathComponent : session.title
         if session.conflict {
             return "“\(name)” changed on disk outside Lore, so its unsaved edits couldn't be "
-                 + "saved. Close anyway and those edits are lost — or cancel and resolve the "
-                 + "conflict in the document."
+                + "saved. Close anyway and those edits are lost — or cancel and resolve the "
+                + "conflict in the document."
         }
         if let error = session.lastSaveError {
             return "“\(name)” couldn't be saved: \(error.localizedDescription). "
-                 + "Close anyway and its unsaved edits are lost."
+                + "Close anyway and its unsaved edits are lost."
         }
         return "“\(name)” still has unsaved changes that couldn't be saved. "
-             + "Close anyway and they are lost."
+            + "Close anyway and they are lost."
     }
 
     /// Discards the refused session's unsaved work, at the user's explicit
@@ -159,8 +159,9 @@ final class SidebarOperations {
         case .newFolder(let parent):
             do {
                 let created = try store.createFolder(named: nameText, in: parent)
-                notice = Notice(text: "Created “\(created.lastPathComponent)”.",
-                                kind: .success)
+                notice = Notice(
+                    text: "Created “\(created.lastPathComponent)”.",
+                    kind: .success)
             } catch let error as LoreError {
                 message = Self.describeCreateFolder(error)
             } catch {
@@ -168,7 +169,6 @@ final class SidebarOperations {
             }
         }
     }
-
 
     func cancelName() { nameTarget = nil }
 
@@ -204,7 +204,8 @@ final class SidebarOperations {
             try store.setVaultRoot(folder)
             message = nil
         } catch {
-            message = "“\(folder.lastPathComponent)” could not be opened as a vault: "
+            message =
+                "“\(folder.lastPathComponent)” could not be opened as a vault: "
                 + error.localizedDescription
         }
     }
@@ -261,8 +262,10 @@ final class SidebarOperations {
         // Through `SidebarDrop`, which is also what decides whether a drag
         // HIGHLIGHTS this folder — so a target that lit up cannot then refuse
         // the drop, which would read as the app changing its mind.
-        if let rejection = SidebarDrop.rejection(moving: row.path, into: folder,
-                                                 root: store.vaultRoot) {
+        if let rejection = SidebarDrop.rejection(
+            moving: row.path, into: folder,
+            root: store.vaultRoot)
+        {
             message = SidebarDrop.describe(rejection, source: row.path, folder: folder)
             return
         }
@@ -308,7 +311,8 @@ final class SidebarOperations {
             } catch let error as LoreError {
                 message = Self.describe(error, folder: plan.folder)
             } catch {
-                message = "The folder could not be moved to the Trash: "
+                message =
+                    "The folder could not be moved to the Trash: "
                     + error.localizedDescription
             }
             self.pending = nil
@@ -349,7 +353,8 @@ final class SidebarOperations {
         var text = "Move “\(name)” to the Trash?"
         let inbound = store.inboundLinkCount(to: row.path)
         if inbound > 0 {
-            text += " \(inbound) note\(inbound == 1 ? "" : "s") link here. "
+            text +=
+                " \(inbound) note\(inbound == 1 ? "" : "s") link here. "
                 + "Their links will stop resolving, and are not rewritten."
         }
         return text

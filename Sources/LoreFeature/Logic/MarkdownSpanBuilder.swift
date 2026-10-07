@@ -96,7 +96,7 @@ public struct StyleSpan: Equatable, Sendable {
             case .blockID:
                 return false
             case .heading, .listItem, .blockQuote, .callout, .calloutTitle,
-                 .table, .tableHeader, .checkbox, .marker, .thematicBreak:
+                .table, .tableHeader, .checkbox, .marker, .thematicBreak:
                 return false
             // A `$…$` expression is delimited by ONE pair, so it reveals
             // whole rather than splitting across a line break.
@@ -130,7 +130,8 @@ public struct StyleSpan: Equatable, Sendable {
     public let kind: Kind
 
     public init(range: Range<Int>, kind: Kind) {
-        self.range = range; self.kind = kind
+        self.range = range
+        self.kind = kind
     }
 
     /// Whether this span is an `![[target]]` embed's target span — the ONLY
@@ -174,8 +175,10 @@ extension MarkdownASTCollector {
     mutating func visitHeading(_ heading: Heading) {
         if let ns = resolve(heading.range) {
             styleSpans.append(StyleSpan(range: swiftRange(ns), kind: .heading(heading.level)))
-            outline.append(OutlineEntry(level: heading.level, text: heading.plainText,
-                                        utf16Offset: ns.location))
+            outline.append(
+                OutlineEntry(
+                    level: heading.level, text: heading.plainText,
+                    utf16Offset: ns.location))
             // A SETEXT heading has no `#` run, so `linePrefix` yields nothing
             // and no marker is emitted — the right answer, not a fallback.
             appendMarkers(MarkdownMarkers.linePrefix("#", in: ns, text: text), .heading)
@@ -186,8 +189,9 @@ extension MarkdownASTCollector {
     mutating func visitStrong(_ strong: Strong) {
         if let ns = resolve(strong.range) {
             styleSpans.append(StyleSpan(range: swiftRange(ns), kind: .strong))
-            appendMarkers(MarkdownMarkers.paired(anyOf: ["**", "__"], in: ns, text: text),
-                          .strong)
+            appendMarkers(
+                MarkdownMarkers.paired(anyOf: ["**", "__"], in: ns, text: text),
+                .strong)
         }
         descendInto(strong)
     }
@@ -195,8 +199,9 @@ extension MarkdownASTCollector {
     mutating func visitEmphasis(_ emphasis: Emphasis) {
         if let ns = resolve(emphasis.range) {
             styleSpans.append(StyleSpan(range: swiftRange(ns), kind: .emphasis))
-            appendMarkers(MarkdownMarkers.paired(anyOf: ["*", "_"], in: ns, text: text),
-                          .emphasis)
+            appendMarkers(
+                MarkdownMarkers.paired(anyOf: ["*", "_"], in: ns, text: text),
+                .emphasis)
         }
         descendInto(emphasis)
     }
@@ -247,8 +252,10 @@ extension MarkdownASTCollector {
                 // The delimiter row is hidden WHOLE — it is pure notation, and
                 // the rule drawn under the header says what it says.
                 if let delimiter = parsed.delimiterRow {
-                    styleSpans.append(StyleSpan(range: delimiter.range,
-                                                kind: .marker(of: .tableDelimiter)))
+                    styleSpans.append(
+                        StyleSpan(
+                            range: delimiter.range,
+                            kind: .marker(of: .tableDelimiter)))
                 }
                 // Each ROW collapses WHOLE, not just its pipes. The grid is
                 // drawn, so every character of the row is replaced by the
@@ -262,8 +269,10 @@ extension MarkdownASTCollector {
                 // back. One marker per row means the row you are editing shows
                 // its source while the rest stay drawn.
                 for row in parsed.rows {
-                    styleSpans.append(StyleSpan(range: row.range,
-                                                kind: .marker(of: .tablePipe)))
+                    styleSpans.append(
+                        StyleSpan(
+                            range: row.range,
+                            kind: .marker(of: .tablePipe)))
                 }
             }
         }
@@ -294,12 +303,15 @@ extension MarkdownASTCollector {
     /// reach the AST as an `Image` at all.
     mutating func visitImage(_ image: Image) {
         guard let range = resolve(image.range),
-              let parts = MarkdownMarkers.inlineImage(in: range, text: text)
+            let parts = MarkdownMarkers.inlineImage(in: range, text: text)
         else { return }
         let full = swiftRange(range)
-        styleSpans.append(StyleSpan(range: swiftRange(parts.source),
-                                    kind: .embed(target: text.substring(with: parts.source),
-                                                 fullRange: full)))
+        styleSpans.append(
+            StyleSpan(
+                range: swiftRange(parts.source),
+                kind: .embed(
+                    target: text.substring(with: parts.source),
+                    fullRange: full)))
         appendMarkers(parts.markers, .link)
     }
 
@@ -311,11 +323,15 @@ extension MarkdownASTCollector {
             // for why it is instead of and not as well as.
             if let header = MarkdownCallout.header(ofQuoteAt: range, in: text) {
                 styleSpans.append(StyleSpan(range: range, kind: .callout(header.kind)))
-                styleSpans.append(StyleSpan(range: header.markerRange,
-                                            kind: .marker(of: .callout)))
+                styleSpans.append(
+                    StyleSpan(
+                        range: header.markerRange,
+                        kind: .marker(of: .callout)))
                 if let title = header.titleRange {
-                    styleSpans.append(StyleSpan(range: title,
-                                                kind: .calloutTitle(header.kind)))
+                    styleSpans.append(
+                        StyleSpan(
+                            range: title,
+                            kind: .calloutTitle(header.kind)))
                 }
             } else {
                 styleSpans.append(StyleSpan(range: range, kind: .blockQuote))
@@ -335,9 +351,12 @@ extension MarkdownASTCollector {
             styleSpans.append(StyleSpan(range: swiftRange(itemRange), kind: .listItem))
             appendMarkers(MarkdownMarkers.listBullet(in: itemRange, text: text), .listBullet)
             if let checkbox = listItem.checkbox,
-               let markerRange = checkboxMarkerRange(in: itemRange) {
-                styleSpans.append(StyleSpan(range: swiftRange(markerRange),
-                                            kind: .checkbox(checkbox == .checked)))
+                let markerRange = checkboxMarkerRange(in: itemRange)
+            {
+                styleSpans.append(
+                    StyleSpan(
+                        range: swiftRange(markerRange),
+                        kind: .checkbox(checkbox == .checked)))
                 // The brackets COLLAPSE, and a real checkbox is drawn in the
                 // gutter instead — the same substitution the list bullet makes,
                 // and for the same reason: `[x]` is notation, and a reader
@@ -366,8 +385,9 @@ extension MarkdownASTCollector {
         let limit = min(itemRange.location + itemRange.length, text.length)
         while end < limit, text.character(at: end) != 0x0A { end += 1 }
         guard end > itemRange.location else { return nil }
-        let line = NSRange(location: itemRange.location,
-                           length: end - itemRange.location)
+        let line = NSRange(
+            location: itemRange.location,
+            length: end - itemRange.location)
         return ["[ ]", "[x]", "[X]"]
             .map { text.range(of: $0, options: [], range: line) }
             .filter { $0.location != NSNotFound }
@@ -434,13 +454,15 @@ enum WikilinkSpanBuilder {
         let linkSpans = scan.spans.filter { $0.link.syntax == .wikilink }
         guard !linkSpans.isEmpty else { return [] }
 
-        let utf16Offsets = scan.normalised
+        let utf16Offsets =
+            scan.normalised
             ? CharacterOffsetMap.make(for: fullText) : scan.offsets
 
         let ns = fullText as NSString
         return linkSpans.flatMap { span -> [StyleSpan] in
             guard span.targetRange.lowerBound >= 0,
-                  span.targetRange.upperBound < utf16Offsets.count else { return [] }
+                span.targetRange.upperBound < utf16Offsets.count
+            else { return [] }
             let lower = utf16Offsets[span.targetRange.lowerBound]
             let upper = utf16Offsets[span.targetRange.upperBound]
             // The CONTENT span covers the target only — the brackets sit
@@ -471,29 +493,42 @@ enum WikilinkSpanBuilder {
                     // back to the target alone with no markers, rather than
                     // dropping the span, so a broken document still gets SOME
                     // representation.
-                    return [StyleSpan(range: lower..<upper,
-                                      kind: .embed(target: span.link.rawTarget, fullRange: lower..<upper))]
+                    return [
+                        StyleSpan(
+                            range: lower..<upper,
+                            kind: .embed(target: span.link.rawTarget, fullRange: lower..<upper))
+                    ]
                 }
                 let open = brackets[0]
                 var bangStart = open.location
-                if bangStart > 0, ns.character(at: bangStart - 1) == 0x21 /* "!" */ { bangStart -= 1 }
+                if bangStart > 0, ns.character(at: bangStart - 1) == 0x21 {  // "!"
+                    bangStart -= 1
+                }
                 let close = brackets[1]
                 let fullEnd = close.location + close.length
-                let openWithBang = NSRange(location: bangStart,
-                                           length: (open.location + open.length) - bangStart)
-                return [StyleSpan(range: lower..<upper,
-                                  kind: .embed(target: span.link.rawTarget,
-                                              fullRange: bangStart..<fullEnd)),
-                        StyleSpan(range: openWithBang.location..<(openWithBang.location + openWithBang.length),
-                                  kind: .marker(of: .wikilink)),
-                        StyleSpan(range: close.location..<(close.location + close.length),
-                                  kind: .marker(of: .wikilink))]
+                let openWithBang = NSRange(
+                    location: bangStart,
+                    length: (open.location + open.length) - bangStart)
+                return [
+                    StyleSpan(
+                        range: lower..<upper,
+                        kind: .embed(
+                            target: span.link.rawTarget,
+                            fullRange: bangStart..<fullEnd)),
+                    StyleSpan(
+                        range: openWithBang.location..<(openWithBang.location + openWithBang.length),
+                        kind: .marker(of: .wikilink)),
+                    StyleSpan(
+                        range: close.location..<(close.location + close.length),
+                        kind: .marker(of: .wikilink)),
+                ]
             }
 
             return [StyleSpan(range: lower..<upper, kind: .wikilink)]
                 + brackets.map {
-                    StyleSpan(range: $0.location..<($0.location + $0.length),
-                              kind: .marker(of: .wikilink))
+                    StyleSpan(
+                        range: $0.location..<($0.location + $0.length),
+                        kind: .marker(of: .wikilink))
                 }
         }
     }

@@ -54,8 +54,8 @@ enum TaskCheckbox {
         guard span.count == 3, span.lowerBound >= 0, span.upperBound <= text.length else {
             return nil
         }
-        guard text.character(at: span.lowerBound) == 0x5B,        // [
-              text.character(at: span.upperBound - 1) == 0x5D     // ]
+        guard text.character(at: span.lowerBound) == 0x5B,  // [
+            text.character(at: span.upperBound - 1) == 0x5D  // ]
         else { return nil }
         // The `]` must be followed by whitespace or end-of-text. GFM requires a
         // space after a task-list checkbox, so every REAL marker satisfies this
@@ -92,7 +92,7 @@ enum TaskCheckbox {
     static func items(in spans: [StyleSpan], text: NSString) -> [TaskItem] {
         spans.compactMap { span in
             guard case .checkbox(let isChecked) = span.kind,
-                  let marker = markerRange(forBracketSpan: span.range, in: text)
+                let marker = markerRange(forBracketSpan: span.range, in: text)
             else { return nil }
             return TaskItem(isChecked: isChecked, markerRangeUTF16: marker)
         }
@@ -109,12 +109,13 @@ enum TaskCheckbox {
     /// and the parse is the thing that may be stale. The character actually
     /// sitting in `text` decides what it becomes.
     static func replacement(for item: TaskItem, in text: NSString)
-        -> (range: NSRange, string: String)? {
+        -> (range: NSRange, string: String)?
+    {
         let range = item.markerRangeUTF16
         guard range.length == 1, range.location >= 1, NSMaxRange(range) < text.length,
-              let marker = markerRange(
-                  forBracketSpan: (range.location - 1)..<(range.location + 2), in: text),
-              let string = toggled(text.substring(with: marker))
+            let marker = markerRange(
+                forBracketSpan: (range.location - 1)..<(range.location + 2), in: text),
+            let string = toggled(text.substring(with: marker))
         else { return nil }
         return (marker, string)
     }

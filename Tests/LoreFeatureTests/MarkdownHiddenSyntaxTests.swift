@@ -1,6 +1,7 @@
-import XCTest
 import AppKit
 import SwiftUI
+import XCTest
+
 @testable import LoreFeature
 
 /// What "hidden" actually means on screen, measured rather than argued.
@@ -14,7 +15,10 @@ import SwiftUI
 @MainActor
 final class MarkdownHiddenSyntaxTests: XCTestCase {
     private var windows: [NSWindow] = []
-    override func tearDown() { windows.removeAll(); super.tearDown() }
+    override func tearDown() {
+        windows.removeAll()
+        super.tearDown()
+    }
 
     private func makeEditor(_ text: String) -> (MarkdownEditor.Coordinator, NSTextView) {
         var stored = text
@@ -23,8 +27,9 @@ final class MarkdownHiddenSyntaxTests: XCTestCase {
         let tv = LinkTextView(frame: NSRect(x: 0, y: 0, width: 700, height: 900))
         tv.isRichText = false
         tv.delegate = coordinator
-        let window = NSWindow(contentRect: tv.frame, styleMask: [.titled],
-                              backing: .buffered, defer: false)
+        let window = NSWindow(
+            contentRect: tv.frame, styleMask: [.titled],
+            backing: .buffered, defer: false)
         window.contentView = tv
         window.makeFirstResponder(tv)
         windows.append(window)
@@ -55,15 +60,17 @@ final class MarkdownHiddenSyntaxTests: XCTestCase {
             coordinator.revealForSelectionChange()
             let markers = NSRange(location: 2, length: 2)
             let hiddenWidth = tv.firstRect(forCharacterRange: markers, actualRange: nil).width
-            XCTAssertLessThan(hiddenWidth, 0.1,
-                              "hidden syntax must take no width a reader can see")
+            XCTAssertLessThan(
+                hiddenWidth, 0.1,
+                "hidden syntax must take no width a reader can see")
 
             tv.setSelectedRange(NSRange(location: 4, length: 0))
             coordinator.revealForSelectionChange()
             let shownWidth = tv.firstRect(forCharacterRange: markers, actualRange: nil).width
-            XCTAssertGreaterThan(shownWidth, 1,
-                                 "and must come back at a real size when revealed, "
-                                 + "or the collapse is not reversible")
+            XCTAssertGreaterThan(
+                shownWidth, 1,
+                "and must come back at a real size when revealed, "
+                    + "or the collapse is not reversible")
         }
     }
 
@@ -89,10 +96,12 @@ final class MarkdownHiddenSyntaxTests: XCTestCase {
                     guard case .marker = span.kind else { continue }
                     // Only markers on the caret's OWN line are its business.
                     guard span.range.lowerBound >= line.location,
-                          span.range.upperBound <= NSMaxRange(line) else { continue }
-                    XCTAssertTrue(MarkdownReveal.isRevealed(span.range, in: revealed),
-                                  "a marker on the caret's line must be visible; "
-                                  + "caret at \(offset), marker \(span.range)")
+                        span.range.upperBound <= NSMaxRange(line)
+                    else { continue }
+                    XCTAssertTrue(
+                        MarkdownReveal.isRevealed(span.range, in: revealed),
+                        "a marker on the caret's line must be visible; "
+                            + "caret at \(offset), marker \(span.range)")
                 }
             }
         }

@@ -1,6 +1,6 @@
+import AinkradAppKit
 import SwiftUI
 import WebKit
-import AinkradAppKit
 
 /// The CodeMirror editor surface.
 ///
@@ -58,9 +58,10 @@ struct CM6EditorView: NSViewRepresentable {
     var linkTarget: (@MainActor (IndexRow) -> String)?
 
     func makeCoordinator() -> Coordinator {
-        let coordinator = Coordinator(text: $text, onOpenLink: onOpenLink,
-                                      onOpenLinkBeside: onOpenLinkBeside,
-                                      onTagClick: onTagClick)
+        let coordinator = Coordinator(
+            text: $text, onOpenLink: onOpenLink,
+            onOpenLinkBeside: onOpenLinkBeside,
+            onTagClick: onTagClick)
         coordinator.completions = completions
         coordinator.headingCompletions = headingCompletions
         coordinator.tagCompletions = tagCompletions
@@ -79,14 +80,16 @@ struct CM6EditorView: NSViewRepresentable {
             // handler twice traps. The pool reuses configurations, so the
             // handler is installed here and its RESOLVER is replaced below on
             // every borrow.
-            config.setURLSchemeHandler(CM6AssetSchemeHandler(),
-                                       forURLScheme: CM6AssetSchemeHandler.scheme)
+            config.setURLSchemeHandler(
+                CM6AssetSchemeHandler(),
+                forURLScheme: CM6AssetSchemeHandler.scheme)
         }
         if isPreloaded {
             // A reused surface already has the handler of whoever had it last
             // removed by `release`, so this one has to be installed now.
-            webView.configuration.userContentController.add(coordinator,
-                                                            name: Coordinator.bridgeName)
+            webView.configuration.userContentController.add(
+                coordinator,
+                name: Coordinator.bridgeName)
         }
         webView.navigationDelegate = coordinator
         // No bounce, no zoom: this is a text editor, not a web page.
@@ -161,10 +164,12 @@ struct CM6EditorView: NSViewRepresentable {
         /// the way in and restored on the way out — see `CM6LineEndings`.
         private var ending: CM6LineEndings.Ending = .lf
 
-        init(text: Binding<String>,
-             onOpenLink: (@MainActor (String) -> Void)? = nil,
-             onOpenLinkBeside: (@MainActor (String) -> Void)? = nil,
-             onTagClick: (@MainActor (String) -> Void)? = nil) {
+        init(
+            text: Binding<String>,
+            onOpenLink: (@MainActor (String) -> Void)? = nil,
+            onOpenLinkBeside: (@MainActor (String) -> Void)? = nil,
+            onTagClick: (@MainActor (String) -> Void)? = nil
+        ) {
             self.text = text
             self.onOpenLink = onOpenLink
             self.onOpenLinkBeside = onOpenLinkBeside
@@ -175,7 +180,10 @@ struct CM6EditorView: NSViewRepresentable {
         // MARK: - Swift to the editor
 
         func push(document: String) {
-            guard isLoaded else { pendingDocument = document; return }
+            guard isLoaded else {
+                pendingDocument = document
+                return
+            }
             // Already came from there; pushing it back is the loop.
             if document == lastFromEditor { return }
             ending = CM6LineEndings.dominant(in: document)
@@ -183,8 +191,9 @@ struct CM6EditorView: NSViewRepresentable {
                 // Declared, not hidden: this note's bytes are about to change.
                 NSLog("Lore: mixed line endings normalised to \(ending) on open")
             }
-            evaluate("window.loreEditor.setDocument("
-                     + Self.jsString(CM6LineEndings.toLF(document)) + ")")
+            evaluate(
+                "window.loreEditor.setDocument("
+                    + Self.jsString(CM6LineEndings.toLF(document)) + ")")
         }
 
         /// Set by `updateNSView` before every theme push, so it is always the
@@ -213,8 +222,10 @@ struct CM6EditorView: NSViewRepresentable {
                 documents: { self.completions?($0) ?? [] },
                 headings: { self.headingCompletions?($0, $1) },
                 tags: { self.tagCompletions?($0) ?? [] },
-                linkTarget: { self.linkTarget?($0)
-                    ?? LinkCompletionContext.insertableTarget(for: $0) },
+                linkTarget: {
+                    self.linkTarget?($0)
+                        ?? LinkCompletionContext.insertableTarget(for: $0)
+                },
                 canCreate: createLinkedNote != nil)
             evaluate("window.loreEditor.showCompletions(\(CM6Completion.json(query)))")
         }
@@ -241,10 +252,11 @@ struct CM6EditorView: NSViewRepresentable {
                     return LinkPreview.excerpt(from: contents)
                 }.value
                 guard let self, let excerpt else { return }
-                self.evaluate("window.loreEditor.showPreview("
-                              + Self.jsString(target) + ", "
-                              + Self.jsString(title) + ", "
-                              + Self.jsString(excerpt) + ")")
+                self.evaluate(
+                    "window.loreEditor.showPreview("
+                        + Self.jsString(target) + ", "
+                        + Self.jsString(title) + ", "
+                        + Self.jsString(excerpt) + ")")
             }
         }
 
@@ -256,8 +268,9 @@ struct CM6EditorView: NSViewRepresentable {
         /// `accept(_:)`.
         private func createAndComplete(name: String, from: Int, to: Int, insert: String) {
             guard createLinkedNote?(name) == true else { return }
-            evaluate("window.loreEditor.applyCompletion(\(from), \(to), "
-                     + Self.jsString(insert) + ")")
+            evaluate(
+                "window.loreEditor.applyCompletion(\(from), \(to), "
+                    + Self.jsString(insert) + ")")
         }
 
         /// Answer the page's request for a transcluded note.
@@ -270,19 +283,21 @@ struct CM6EditorView: NSViewRepresentable {
         /// would disagree with this one the first time either changed.
         private func provideTransclusion(of target: String) {
             let content = resolve(target)
-            let (kind, text): (String, String) = switch content {
-            case .content(let slice): ("content", slice)
-            case .truncated(let slice): ("truncated", slice)
-            case .missingFragment(_, let fragment):
-                ("missingFragment", "No section \"\(fragment)\" in this note.")
-            case .circular: ("error", "This note embeds itself.")
-            case .tooDeep: ("error", "Embedded too deeply.")
-            case .unreadable(let message): ("error", message)
-            }
-            evaluate("window.loreEditor.provideTransclusion("
-                     + Self.jsString(target) + ", "
-                     + Self.jsString(kind) + ", "
-                     + Self.jsString(text) + ")")
+            let (kind, text): (String, String) =
+                switch content {
+                case .content(let slice): ("content", slice)
+                case .truncated(let slice): ("truncated", slice)
+                case .missingFragment(_, let fragment):
+                    ("missingFragment", "No section \"\(fragment)\" in this note.")
+                case .circular: ("error", "This note embeds itself.")
+                case .tooDeep: ("error", "Embedded too deeply.")
+                case .unreadable(let message): ("error", message)
+                }
+            evaluate(
+                "window.loreEditor.provideTransclusion("
+                    + Self.jsString(target) + ", "
+                    + Self.jsString(kind) + ", "
+                    + Self.jsString(text) + ")")
         }
 
         private func resolve(_ target: String) -> TransclusionContent {
@@ -294,10 +309,16 @@ struct CM6EditorView: NSViewRepresentable {
             // vault index here would be a second opinion about what this embed
             // points at. Same construction as `TransclusionStyling`.
             let resolver = LinkResolver(
-                documents: [(url: url, title: LinkResolver.basename(of: target),
-                             aliases: [])])
-            return TransclusionResolver.resolve(rawTarget: target, resolver: resolver,
-                                                path: []) {
+                documents: [
+                    (
+                        url: url, title: LinkResolver.basename(of: target),
+                        aliases: []
+                    )
+                ])
+            return TransclusionResolver.resolve(
+                rawTarget: target, resolver: resolver,
+                path: []
+            ) {
                 try String(contentsOf: $0, encoding: .utf8)
             }
         }
@@ -309,8 +330,10 @@ struct CM6EditorView: NSViewRepresentable {
         /// the previous note would serve that note's attachments to this one —
         /// the same failure mode, and the same fix, as removing the script
         /// message handler by name in `CM6EditorSurfacePool.release`.
-        func adopt(assetHandlerOf webView: WKWebView,
-                   resolving resolve: (@MainActor (String) -> URL?)?) {
+        func adopt(
+            assetHandlerOf webView: WKWebView,
+            resolving resolve: (@MainActor (String) -> URL?)?
+        ) {
             let handler = webView.configuration
                 .urlSchemeHandler(forURLScheme: CM6AssetSchemeHandler.scheme)
             (handler as? CM6AssetSchemeHandler)?.resolve = resolve
@@ -318,7 +341,10 @@ struct CM6EditorView: NSViewRepresentable {
         }
 
         func push(tokens: HostThemeTokens, settings: EditorSettings) {
-            guard isLoaded else { pendingTheme = (tokens, settings); return }
+            guard isLoaded else {
+                pendingTheme = (tokens, settings)
+                return
+            }
             let theme = MarkdownTheme(tokens: tokens, settings: settings)
             // Colour stays the host's, scale stays Lore's — the same division
             // `MarkdownTheme` already encodes for the native renderer.
@@ -355,10 +381,13 @@ struct CM6EditorView: NSViewRepresentable {
 
         // MARK: - The editor to Swift
 
-        func userContentController(_ controller: WKUserContentController,
-                                   didReceive message: WKScriptMessage) {
+        func userContentController(
+            _ controller: WKUserContentController,
+            didReceive message: WKScriptMessage
+        ) {
             guard let body = message.body as? [String: Any],
-                  let kind = body["kind"] as? String else { return }
+                let kind = body["kind"] as? String
+            else { return }
             switch kind {
             case "doc":
                 guard let reported = body["text"] as? String else { return }
@@ -388,9 +417,10 @@ struct CM6EditorView: NSViewRepresentable {
                 provideCompletions(caret: caret)
             case "completionCreate":
                 guard let name = body["name"] as? String,
-                      let from = body["from"] as? Int,
-                      let to = body["to"] as? Int,
-                      let insert = body["insert"] as? String else { return }
+                    let from = body["from"] as? Int,
+                    let to = body["to"] as? Int,
+                    let insert = body["insert"] as? String
+                else { return }
                 createAndComplete(name: name, from: from, to: to, insert: insert)
             case "preview":
                 guard let target = body["target"] as? String, !target.isEmpty else { return }
@@ -421,8 +451,9 @@ struct CM6EditorView: NSViewRepresentable {
             isLoaded = true
             if let document = pendingDocument {
                 ending = CM6LineEndings.dominant(in: document)
-                evaluate("window.loreEditor.init("
-                         + Self.jsString(CM6LineEndings.toLF(document)) + ")")
+                evaluate(
+                    "window.loreEditor.init("
+                        + Self.jsString(CM6LineEndings.toLF(document)) + ")")
                 pendingDocument = nil
             }
             if let (tokens, settings) = pendingTheme {
@@ -446,7 +477,8 @@ struct CM6EditorView: NSViewRepresentable {
         /// actor to check that a backslash comes out escaped.
         nonisolated static func jsString(_ value: String) -> String {
             guard let data = try? JSONSerialization.data(withJSONObject: [value]),
-                  let array = String(data: data, encoding: .utf8) else { return "\"\"" }
+                let array = String(data: data, encoding: .utf8)
+            else { return "\"\"" }
             return String(array.dropFirst().dropLast())
         }
 
@@ -455,8 +487,9 @@ struct CM6EditorView: NSViewRepresentable {
             let r = Int((ns.redComponent * 255).rounded())
             let g = Int((ns.greenComponent * 255).rounded())
             let b = Int((ns.blueComponent * 255).rounded())
-            return alpha >= 1 ? "rgb(\(r), \(g), \(b))"
-                              : "rgba(\(r), \(g), \(b), \(alpha))"
+            return alpha >= 1
+                ? "rgb(\(r), \(g), \(b))"
+                : "rgba(\(r), \(g), \(b), \(alpha))"
         }
     }
 }

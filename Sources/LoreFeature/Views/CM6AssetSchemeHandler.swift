@@ -45,8 +45,9 @@ final class CM6AssetSchemeHandler: NSObject, WKURLSchemeHandler {
     /// contain spaces, `#`, `?` and `&`, and every one of those would otherwise
     /// truncate or re-route the request.
     nonisolated static func url(forTarget target: String) -> String {
-        let encoded = target.addingPercentEncoding(
-            withAllowedCharacters: .alphanumerics) ?? ""
+        let encoded =
+            target.addingPercentEncoding(
+                withAllowedCharacters: .alphanumerics) ?? ""
         return "\(scheme):///\(encoded)"
     }
 
@@ -59,22 +60,26 @@ final class CM6AssetSchemeHandler: NSObject, WKURLSchemeHandler {
 
     func webView(_ webView: WKWebView, start task: WKURLSchemeTask) {
         guard let url = task.request.url,
-              let target = Self.target(from: url),
-              !target.isEmpty,
-              let file = resolve?(target),
-              let data = try? Data(contentsOf: file) else {
+            let target = Self.target(from: url),
+            !target.isEmpty,
+            let file = resolve?(target),
+            let data = try? Data(contentsOf: file)
+        else {
             // A 404, not an error: an embed whose target does not resolve is an
             // ordinary state of a vault being edited, and failing the task
             // instead logs a WebKit error for every broken link in the note.
-            task.didReceive(HTTPURLResponse(url: task.request.url ?? URL(fileURLWithPath: "/"),
-                                            statusCode: 404, httpVersion: nil,
-                                            headerFields: nil)!)
+            task.didReceive(
+                HTTPURLResponse(
+                    url: task.request.url ?? URL(fileURLWithPath: "/"),
+                    statusCode: 404, httpVersion: nil,
+                    headerFields: nil)!)
             task.didFinish()
             return
         }
-        let response = URLResponse(url: url, mimeType: Self.mimeType(of: file),
-                                   expectedContentLength: data.count,
-                                   textEncodingName: nil)
+        let response = URLResponse(
+            url: url, mimeType: Self.mimeType(of: file),
+            expectedContentLength: data.count,
+            textEncodingName: nil)
         task.didReceive(response)
         task.didReceive(data)
         task.didFinish()

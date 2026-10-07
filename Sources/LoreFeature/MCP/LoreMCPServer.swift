@@ -1,5 +1,5 @@
-import Foundation
 import AinkradAppKit
+import Foundation
 
 /// Publishes Lore's note operations to the host assistant as MCP tools.
 ///
@@ -122,11 +122,13 @@ enum LoreMCPServer {
         /// covered without touching those tests.
         var injects: [GuardRule] = []
 
-        init(_ name: String, _ operation: String, _ summary: String,
-             destructive: Bool = false, readOnly: Bool = false,
-             schemaJSON: String,
-             rejects: [GuardRule] = [],
-             injects: [GuardRule] = []) {
+        init(
+            _ name: String, _ operation: String, _ summary: String,
+            destructive: Bool = false, readOnly: Bool = false,
+            schemaJSON: String,
+            rejects: [GuardRule] = [],
+            injects: [GuardRule] = []
+        ) {
             self.name = name
             self.operation = operation
             self.summary = summary
@@ -158,21 +160,21 @@ enum LoreMCPServer {
         func matches(_ any: Any) -> Bool {
             switch self {
             case .string(let s): return (any as? String) == s
-            case .bool(let b):   return (any as? Bool) == b
+            case .bool(let b): return (any as? Bool) == b
             }
         }
 
         var foundation: Any {
             switch self {
             case .string(let s): return s
-            case .bool(let b):   return b
+            case .bool(let b): return b
             }
         }
 
         var described: String {
             switch self {
             case .string(let s): return "\"\(s)\""
-            case .bool(let b):   return "\(b)"
+            case .bool(let b): return "\(b)"
             }
         }
     }
@@ -180,49 +182,55 @@ enum LoreMCPServer {
     // MARK: - the table
 
     static let tools: [Tool] = [
-        Tool("search_notes", "search",
-             "Search the Lore vault's notes by full text. Returns each match's id, title, "
-             + "tags and vault-relative path. Omit the query to list the most recently "
-             + "updated notes instead.",
-             readOnly: true,
-             schemaJSON: schema(
+        Tool(
+            "search_notes", "search",
+            "Search the Lore vault's notes by full text. Returns each match's id, title, "
+                + "tags and vault-relative path. Omit the query to list the most recently "
+                + "updated notes instead.",
+            readOnly: true,
+            schemaJSON: schema(
                 properties: [
                     ("query", "string", "Full-text query. Omit or leave empty to list recent notes."),
                     ("limit", "integer", "Maximum results (default 25)."),
                 ], required: [])),
 
-        Tool("read_note", "read",
-             "Read one note's title, tags and full body.",
-             readOnly: true,
-             schemaJSON: schema(
+        Tool(
+            "read_note", "read",
+            "Read one note's title, tags and full body.",
+            readOnly: true,
+            schemaJSON: schema(
                 properties: [noteIdentifier], required: ["note"])),
 
-        Tool("list_tags", "listTags",
-             "List every tag used across the vault.",
-             readOnly: true,
-             schemaJSON: schema(properties: [], required: [])),
+        Tool(
+            "list_tags", "listTags",
+            "List every tag used across the vault.",
+            readOnly: true,
+            schemaJSON: schema(properties: [], required: [])),
 
-        Tool("list_folders", "listFolders",
-             "List the vault root's immediate subfolders.",
-             readOnly: true,
-             schemaJSON: schema(properties: [], required: [])),
+        Tool(
+            "list_folders", "listFolders",
+            "List the vault root's immediate subfolders.",
+            readOnly: true,
+            schemaJSON: schema(properties: [], required: [])),
 
-        Tool("create_note", "create",
-             "Create a new note in the vault. The file is always written to a fresh path, "
-             + "so this never overwrites an existing note.",
-             schemaJSON: schema(
+        Tool(
+            "create_note", "create",
+            "Create a new note in the vault. The file is always written to a fresh path, "
+                + "so this never overwrites an existing note.",
+            schemaJSON: schema(
                 properties: [
                     ("title", "string", "The note's title. Also seeds its filename."),
                     ("body", "string", "Optional markdown body."),
                     ("tags", "array", "Optional list of tag strings."),
                 ], required: ["title"])),
 
-        Tool("save_note", "save",
-             "Update an existing note. Only the fields you send are changed; anything you "
-             + "omit is left exactly as it is on disk. Refuses to write if the file was "
-             + "edited outside Ainkrad since Lore last read it — use save_note_overwriting "
-             + "to discard those outside edits deliberately.",
-             schemaJSON: schema(
+        Tool(
+            "save_note", "save",
+            "Update an existing note. Only the fields you send are changed; anything you "
+                + "omit is left exactly as it is on disk. Refuses to write if the file was "
+                + "edited outside Ainkrad since Lore last read it — use save_note_overwriting "
+                + "to discard those outside edits deliberately.",
+            schemaJSON: schema(
                 properties: [
                     noteIdentifier,
                     ("title", "string", "Optional new title."),
@@ -231,15 +239,16 @@ enum LoreMCPServer {
                 ], required: ["note"],
                 trailer: "\"overwritingExternalChanges\" is refused here — call "
                     + "save_note_overwriting to discard edits made outside Ainkrad."),
-             rejects: [GuardRule("overwritingExternalChanges", .bool(true))]),
+            rejects: [GuardRule("overwritingExternalChanges", .bool(true))]),
 
-        Tool("save_note_overwriting", "save",
-             "Update an existing note, DISCARDING any edits made to its file outside "
-             + "Ainkrad since Lore last read it. Those edits are not recoverable. Prefer "
-             + "save_note, and use this only after read_note has shown you the current "
-             + "on-disk contents.",
-             destructive: true,
-             schemaJSON: schema(
+        Tool(
+            "save_note_overwriting", "save",
+            "Update an existing note, DISCARDING any edits made to its file outside "
+                + "Ainkrad since Lore last read it. Those edits are not recoverable. Prefer "
+                + "save_note, and use this only after read_note has shown you the current "
+                + "on-disk contents.",
+            destructive: true,
+            schemaJSON: schema(
                 properties: [
                     noteIdentifier,
                     ("title", "string", "Optional new title."),
@@ -247,15 +256,16 @@ enum LoreMCPServer {
                     ("tags", "array", "Optional replacement list of tag strings."),
                 ], required: ["note"],
                 trailer: "overwritingExternalChanges is always true."),
-             injects: [GuardRule("overwritingExternalChanges", .bool(true))]),
+            injects: [GuardRule("overwritingExternalChanges", .bool(true))]),
 
-        Tool("delete_note", "delete",
-             "Delete a note. The file is moved to the macOS Trash, so it can be restored "
-             + "from Finder, but nothing in Ainkrad can undo this: the note leaves the "
-             + "vault index and every link to it becomes unresolved. Refuses if the note "
-             + "is open in Lore with unsaved edits that cannot be saved.",
-             destructive: true,
-             schemaJSON: schema(properties: [noteIdentifier], required: ["note"])),
+        Tool(
+            "delete_note", "delete",
+            "Delete a note. The file is moved to the macOS Trash, so it can be restored "
+                + "from Finder, but nothing in Ainkrad can undo this: the note leaves the "
+                + "vault index and every link to it becomes unresolved. Refuses if the note "
+                + "is open in Lore with unsaved edits that cannot be saved.",
+            destructive: true,
+            schemaJSON: schema(properties: [noteIdentifier], required: ["note"])),
     ]
 
     /// Every write tool identifies its target the same way, so the description
@@ -285,28 +295,33 @@ enum LoreMCPServer {
     /// currently-open note: which note is on screen lives in the root view's
     /// selection state, which this layer has no clean handle on, and reaching
     /// for it would mean a second observable seam for one string.
-    static func make(appID: String,
-                     perform: @escaping @MainActor @Sendable (String) async -> AgentActionResult,
-                     vaultSummary: (@MainActor @Sendable () async -> String)? = nil)
-        -> (server: MCPAppServer, failures: [String]) {
+    static func make(
+        appID: String,
+        perform: @escaping @MainActor @Sendable (String) async -> AgentActionResult,
+        vaultSummary: (@MainActor @Sendable () async -> String)? = nil
+    )
+        -> (server: MCPAppServer, failures: [String])
+    {
         let server = MCPAppServer(appID: appID)
         var failures: [String] = []
         if let vaultSummary {
-            let added = server.addResource(MCPResourceSpec(
-                uri: vaultResourceURI,
-                title: "Lore vault",
-                provider: vaultSummary))
+            let added = server.addResource(
+                MCPResourceSpec(
+                    uri: vaultResourceURI,
+                    title: "Lore vault",
+                    provider: vaultSummary))
             if !added { failures.append(vaultResourceURI) }
         }
         for tool in tools {
-            let added = server.addTool(MCPToolSpec(
-                name: tool.name,
-                description: tool.summary,
-                schemaJSON: tool.schemaJSON,
-                destructive: tool.destructive,
-                readOnly: tool.readOnly,
-                handler: { arguments in await invoke(tool, arguments: arguments, perform: perform) }
-            ))
+            let added = server.addTool(
+                MCPToolSpec(
+                    name: tool.name,
+                    description: tool.summary,
+                    schemaJSON: tool.schemaJSON,
+                    destructive: tool.destructive,
+                    readOnly: tool.readOnly,
+                    handler: { arguments in await invoke(tool, arguments: arguments, perform: perform) }
+                ))
             if !added { failures.append(tool.name) }
         }
         return (server, failures)
@@ -317,11 +332,15 @@ enum LoreMCPServer {
     /// Internal rather than `private` so the tests can drive a test-only
     /// two-guard `Tool` fixture through the real gate/inject logic without
     /// bending the live `tools` table.
-    static func invoke(_ tool: Tool, arguments: String,
-                       perform: @MainActor @Sendable (String) async -> AgentActionResult)
-        async -> AgentActionResult {
+    static func invoke(
+        _ tool: Tool, arguments: String,
+        perform: @MainActor @Sendable (String) async -> AgentActionResult
+    )
+        async -> AgentActionResult
+    {
         guard let data = arguments.data(using: .utf8),
-              var object = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] else {
+            var object = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
+        else {
             return AgentActionResult(text: "\(tool.name): malformed arguments", isError: true)
         }
 
@@ -350,9 +369,11 @@ enum LoreMCPServer {
 
     /// Builds a tool's JSON Schema string from a flat property list. Returns a
     /// string so the tool table stays a `Sendable` `static let`.
-    private static func schema(properties: [(String, String, String)],
-                               required: [String],
-                               trailer: String? = nil) -> String {
+    private static func schema(
+        properties: [(String, String, String)],
+        required: [String],
+        trailer: String? = nil
+    ) -> String {
         var props: [String: Any] = [:]
         for (name, type, description) in properties {
             var entry: [String: Any] = ["type": type, "description": description]

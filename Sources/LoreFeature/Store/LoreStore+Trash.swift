@@ -64,10 +64,10 @@ extension LoreStore {
                     path,
                     session.conflict
                         ? "it has unsaved edits that cannot be saved because the file was "
-                        + "also changed outside Lore. Resolve the conflict in the open tab "
-                        + "(reload, overwrite, or save a copy), then delete it again."
+                            + "also changed outside Lore. Resolve the conflict in the open tab "
+                            + "(reload, overwrite, or save a copy), then delete it again."
                         : "it has unsaved edits that could not be saved. Resolve the open "
-                        + "tab, then delete it again.")
+                            + "tab, then delete it again.")
             }
         }
 

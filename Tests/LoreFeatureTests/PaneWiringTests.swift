@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 /// Guards against state that is DECLARED but never rendered.
@@ -30,9 +31,9 @@ final class PaneWiringTests: XCTestCase {
         // Resolved from this file's location so it works wherever the checkout
         // lives, rather than an absolute path baked into the test.
         let here = URL(fileURLWithPath: #filePath)
-        let root = here.deletingLastPathComponent()   // LoreFeatureTests
-            .deletingLastPathComponent()              // Tests
-            .deletingLastPathComponent()              // package root
+        let root = here.deletingLastPathComponent()  // LoreFeatureTests
+            .deletingLastPathComponent()  // Tests
+            .deletingLastPathComponent()  // package root
         let url = root.appendingPathComponent("Sources/LoreFeature/Views/\(name)")
         return try String(contentsOf: url, encoding: .utf8)
     }
@@ -43,19 +44,22 @@ final class PaneWiringTests: XCTestCase {
         let pane = try source("DocumentPane.swift")
         for flag in ["showingActions", "showingMentions"] {
             let uses = pane.components(separatedBy: flag).count - 1
-            XCTAssertGreaterThan(uses, 1,
-                                 "`\(flag)` is declared but never read — the control that "
-                                 + "toggles it is wired to nothing")
+            XCTAssertGreaterThan(
+                uses, 1,
+                "`\(flag)` is declared but never read — the control that "
+                    + "toggles it is wired to nothing")
         }
     }
 
     /// The two views those flags present must actually be referenced.
     func test_thePresentedViewsAreReferenced() throws {
         let pane = try source("DocumentPane.swift")
-        XCTAssertTrue(pane.contains("DocumentActionsMenu("),
-                      "the ⋯ menu is never constructed, so the button opens nothing")
-        XCTAssertTrue(pane.contains("DocumentSlideover("),
-                      "linked mentions are never constructed, so ⇧⌘B does nothing")
+        XCTAssertTrue(
+            pane.contains("DocumentActionsMenu("),
+            "the ⋯ menu is never constructed, so the button opens nothing")
+        XCTAssertTrue(
+            pane.contains("DocumentSlideover("),
+            "linked mentions are never constructed, so ⇧⌘B does nothing")
     }
 
     /// Split view added a second place the same defect can live: the column
@@ -63,27 +67,31 @@ final class PaneWiringTests: XCTestCase {
     /// invisible in exactly the same way.
     func test_theColumnRendersItsHeaderAndPane() throws {
         let column = try source("DocumentPaneColumn.swift")
-        XCTAssertTrue(column.contains("DocumentHeaderBar("),
-                      "the column renders no header, so a split pane has no breadcrumb "
-                      + "or actions menu")
-        XCTAssertTrue(column.contains("DocumentPane("),
-                      "the column renders no pane, so a split shows nothing")
+        XCTAssertTrue(
+            column.contains("DocumentHeaderBar("),
+            "the column renders no header, so a split pane has no breadcrumb "
+                + "or actions menu")
+        XCTAssertTrue(
+            column.contains("DocumentPane("),
+            "the column renders no pane, so a split shows nothing")
     }
 
     /// ⇧⌘B sets a shared flag; only the FOCUSED column may consume it, or both
     /// panes open their mentions at once.
     func test_theColumnGatesTheMentionsRequestOnFocus() throws {
         let column = try source("DocumentPaneColumn.swift")
-        XCTAssertTrue(column.contains("isFocused ? $mentionsRequest"),
-                      "an unfocused column consuming the request would open both panes' "
-                      + "mentions from one keystroke")
+        XCTAssertTrue(
+            column.contains("isFocused ? $mentionsRequest"),
+            "an unfocused column consuming the request would open both panes' "
+                + "mentions from one keystroke")
     }
 
     /// The request channel from the command/menu must be consumed, or ⇧⌘B sets
     /// a flag that is never acted on.
     func test_theMentionsRequestIsConsumed() throws {
         let pane = try source("DocumentPane.swift")
-        XCTAssertTrue(pane.contains("onChange(of: mentionsRequest)"),
-                      "nothing consumes `mentionsRequest`, so ⇧⌘B is inert")
+        XCTAssertTrue(
+            pane.contains("onChange(of: mentionsRequest)"),
+            "nothing consumes `mentionsRequest`, so ⇧⌘B is inert")
     }
 }

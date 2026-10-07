@@ -13,17 +13,21 @@ extension LoreIndex {
         let path = VaultIndexCoordinator.canonical(url).path
         return try dbQueue.read { db in
             var scores: [String: Int] = [:]
-            let outgoing = try String.fetchAll(db, sql: """
-                SELECT target_path FROM links
-                WHERE source_path = ? AND target_path IS NOT NULL AND target_path != ?
-                """, arguments: [path, path])
+            let outgoing = try String.fetchAll(
+                db,
+                sql: """
+                    SELECT target_path FROM links
+                    WHERE source_path = ? AND target_path IS NOT NULL AND target_path != ?
+                    """, arguments: [path, path])
             for target in outgoing { scores[target, default: 0] += 3 }
-            let cocited = try Row.fetchAll(db, sql: """
-                SELECT l2.source_path AS path, COUNT(*) AS shared
-                FROM links l1 JOIN links l2 ON l2.target_path = l1.target_path
-                WHERE l1.source_path = ? AND l2.source_path != ? AND l1.target_path IS NOT NULL
-                GROUP BY l2.source_path
-                """, arguments: [path, path])
+            let cocited = try Row.fetchAll(
+                db,
+                sql: """
+                    SELECT l2.source_path AS path, COUNT(*) AS shared
+                    FROM links l1 JOIN links l2 ON l2.target_path = l1.target_path
+                    WHERE l1.source_path = ? AND l2.source_path != ? AND l1.target_path IS NOT NULL
+                    GROUP BY l2.source_path
+                    """, arguments: [path, path])
             for row in cocited { scores[row["path"], default: 0] += 2 * (row["shared"] as Int) }
             return scores
         }

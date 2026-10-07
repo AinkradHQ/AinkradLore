@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 /// The `[[` popup's "Create …" row.
@@ -6,15 +7,19 @@ import XCTest
 final class CompletionCreateRowTests: XCTestCase {
 
     private func row(_ title: String) -> IndexRow {
-        IndexRow(path: URL(fileURLWithPath: "/v/\(title).md"), id: title, title: title,
-                 tags: [], aliases: [], updated: Date(),
-                 type: MarkdownEngine.identifier, properties: [])
+        IndexRow(
+            path: URL(fileURLWithPath: "/v/\(title).md"), id: title, title: title,
+            tags: [], aliases: [], updated: Date(),
+            type: MarkdownEngine.identifier, properties: [])
     }
 
-    private func items(_ prefix: String, _ matches: [IndexRow],
-                       canCreate: Bool = true) -> [LinkCompletionItem] {
-        MarkdownEditor.Coordinator.completionItems(for: prefix, matches: matches,
-                                                   canCreate: canCreate)
+    private func items(
+        _ prefix: String, _ matches: [IndexRow],
+        canCreate: Bool = true
+    ) -> [LinkCompletionItem] {
+        MarkdownEditor.Coordinator.completionItems(
+            for: prefix, matches: matches,
+            canCreate: canCreate)
     }
 
     func test_typingSomethingNewOffersToCreateIt() {
@@ -74,8 +79,9 @@ final class CompletionCreateRowTests: XCTestCase {
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent("lore-createrow-\(UUID())")
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
-        let store = LoreStore(documents: FakeDocs(),
-                              indexPath: root.appendingPathComponent(".idx.sqlite"))
+        let store = LoreStore(
+            documents: FakeDocs(),
+            indexPath: root.appendingPathComponent(".idx.sqlite"))
         try store.setVaultRootForTesting(root)
         await store.settleForTesting()
 
@@ -92,8 +98,9 @@ final class CompletionCreateRowTests: XCTestCase {
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent("lore-createopen-\(UUID())")
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
-        let store = LoreStore(documents: FakeDocs(),
-                              indexPath: root.appendingPathComponent(".idx.sqlite"))
+        let store = LoreStore(
+            documents: FakeDocs(),
+            indexPath: root.appendingPathComponent(".idx.sqlite"))
         try store.setVaultRootForTesting(root)
         await store.settleForTesting()
 
@@ -104,7 +111,8 @@ final class CompletionCreateRowTests: XCTestCase {
         // ("Followed"). Asserting they match exactly tests the slug rule, not
         // the navigation this test is about.
         let opened = try XCTUnwrap(store.selectedTab)
-        XCTAssertEqual(opened.url.deletingPathExtension().lastPathComponent
-                        .compare("Followed", options: .caseInsensitive), .orderedSame)
+        XCTAssertEqual(
+            opened.url.deletingPathExtension().lastPathComponent
+                .compare("Followed", options: .caseInsensitive), .orderedSame)
     }
 }

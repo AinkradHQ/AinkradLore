@@ -1,6 +1,6 @@
-import SwiftUI
-import PDFKit
 import AinkradAppKit
+import PDFKit
+import SwiftUI
 
 /// PDFs: viewable and full-text searchable, never editable.
 ///
@@ -25,8 +25,10 @@ public final class PDFEngine: DocumentEngine {
     /// after, so this is the only place that comparison can happen.
     public private(set) var isContentTruncated: Bool
 
-    private init(sourceURL: URL, extractedText: String,
-                 loadFailure: String?, metadataTitle: String?, isContentTruncated: Bool = false) {
+    private init(
+        sourceURL: URL, extractedText: String,
+        loadFailure: String?, metadataTitle: String?, isContentTruncated: Bool = false
+    ) {
         self.sourceURL = sourceURL
         self.extractedText = extractedText
         self.loadFailure = loadFailure
@@ -40,14 +42,16 @@ public final class PDFEngine: DocumentEngine {
 
     public static func load(_ url: URL) throws -> PDFEngine {
         guard let document = PDFDocument(url: url) else {
-            return PDFEngine(sourceURL: url, extractedText: "",
-                             loadFailure: "This PDF could not be read. It may be damaged.",
-                             metadataTitle: nil)
+            return PDFEngine(
+                sourceURL: url, extractedText: "",
+                loadFailure: "This PDF could not be read. It may be damaged.",
+                metadataTitle: nil)
         }
         if document.isLocked {
-            return PDFEngine(sourceURL: url, extractedText: "",
-                             loadFailure: "This PDF is password-protected.",
-                             metadataTitle: nil)
+            return PDFEngine(
+                sourceURL: url, extractedText: "",
+                loadFailure: "This PDF is password-protected.",
+                metadataTitle: nil)
         }
         // `document.string` concatenates every page — the expensive walk this
         // cache exists to skip on an unchanged file. It is called ONLY inside
@@ -67,9 +71,10 @@ public final class PDFEngine: DocumentEngine {
         }
         let title = (document.documentAttributes?[PDFDocumentAttribute.titleAttribute] as? String)?
             .trimmingCharacters(in: .whitespacesAndNewlines)
-        return PDFEngine(sourceURL: url, extractedText: extraction.text, loadFailure: nil,
-                         metadataTitle: (title?.isEmpty == false) ? title : nil,
-                         isContentTruncated: extraction.isTruncated)
+        return PDFEngine(
+            sourceURL: url, extractedText: extraction.text, loadFailure: nil,
+            metadataTitle: (title?.isEmpty == false) ? title : nil,
+            isContentTruncated: extraction.isTruncated)
     }
 
     public func save(to url: URL) throws {
@@ -96,15 +101,18 @@ public final class PDFEngine: DocumentEngine {
 
     @MainActor public func makeEditor(_ ctx: EditorContext) -> AnyView {
         if let loadFailure {
-            return AnyView(DocumentErrorCard(url: sourceURL, message: loadFailure,
-                                             theme: ctx.theme))
+            return AnyView(
+                DocumentErrorCard(
+                    url: sourceURL, message: loadFailure,
+                    theme: ctx.theme))
         }
         var view = AnyView(PDFViewer(url: sourceURL).background(ctx.theme.tokens.background))
         if isContentTruncated {
-            view = AnyView(VStack(spacing: 0) {
-                TruncationNotice(theme: ctx.theme)
-                view
-            })
+            view = AnyView(
+                VStack(spacing: 0) {
+                    TruncationNotice(theme: ctx.theme)
+                    view
+                })
         }
         return view
     }

@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 extension XCTestCase {
@@ -43,8 +44,10 @@ extension XCTestCase {
     /// The cap is a backstop, not a timeout to rely on. Reaching it means work
     /// is still arriving after two seconds, which is a real problem worth
     /// seeing as a failure rather than papering over with a longer wait.
-    func resetParseCounter(quietFor quiet: TimeInterval = 0.15,
-                           cap: TimeInterval = 2.0) {
+    func resetParseCounter(
+        quietFor quiet: TimeInterval = 0.15,
+        cap: TimeInterval = 2.0
+    ) {
         let deadline = Date().addingTimeInterval(cap)
         var lastCount = MarkdownParseCounter.count
         var quietSince = Date()

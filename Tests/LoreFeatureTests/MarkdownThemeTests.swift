@@ -1,6 +1,7 @@
-import XCTest
 import AppKit
 import SwiftUI
+import XCTest
+
 @testable import LoreFeature
 
 final class MarkdownThemeTests: XCTestCase {
@@ -13,17 +14,19 @@ final class MarkdownThemeTests: XCTestCase {
         for (a, b) in zip(sizes, sizes.dropFirst()) {
             XCTAssertGreaterThan(a, b, "each heading level must be smaller than the one above")
         }
-        XCTAssertGreaterThan(try XCTUnwrap(sizes.last), theme.bodySize,
-                             "even h6 must outrank body text")
+        XCTAssertGreaterThan(
+            try XCTUnwrap(sizes.last), theme.bodySize,
+            "even h6 must outrank body text")
     }
 
     /// Rhythm: space before a heading exceeds space after it, so a heading
     /// binds to the text it introduces rather than floating between blocks.
     func test_headingBindsToTheTextBelowIt() {
         for level in 1...6 {
-            XCTAssertGreaterThan(theme.headingSpacingBefore(level),
-                                 theme.headingSpacingAfter(level),
-                                 "h\(level) must sit closer to what follows it")
+            XCTAssertGreaterThan(
+                theme.headingSpacingBefore(level),
+                theme.headingSpacingAfter(level),
+                "h\(level) must sit closer to what follows it")
         }
     }
 
@@ -44,8 +47,9 @@ extension MarkdownThemeTests {
     /// which is most of "lists are unstyled".
     func test_listItemHangsWrappedLinesUnderTheText() {
         let s = style(.listItem(depth: 0))
-        XCTAssertGreaterThan(s.headIndent, s.firstLineHeadIndent,
-                             "wrapped lines must be indented past the bullet")
+        XCTAssertGreaterThan(
+            s.headIndent, s.firstLineHeadIndent,
+            "wrapped lines must be indented past the bullet")
     }
 
     func test_nestedListsStepByDepth() {
@@ -116,9 +120,10 @@ extension MarkdownThemeTests {
         let tokens = TestTokens.make()
         let theme = MarkdownTheme(tokens: tokens)
         let storage = NSTextStorage(string: "# T")
-        MarkdownStyleRenderer.apply([StyleSpan(range: 0..<3, kind: .heading(1))],
-                                    to: storage, tokens: tokens,
-                                    theme: theme, limitedTo: nil)
+        MarkdownStyleRenderer.apply(
+            [StyleSpan(range: 0..<3, kind: .heading(1))],
+            to: storage, tokens: tokens,
+            theme: theme, limitedTo: nil)
         let font = storage.attribute(.font, at: 2, effectiveRange: nil) as? NSFont
         XCTAssertEqual(try XCTUnwrap(font).pointSize, theme.headingSize(1), accuracy: 0.01)
     }
@@ -133,21 +138,26 @@ extension MarkdownThemeTests {
             [StyleSpan(range: 0..<21, kind: .codeBlock(language: nil))],
             to: storage, tokens: tokens,
             theme: MarkdownTheme(tokens: tokens), limitedTo: nil)
-        XCTAssertNil(storage.attribute(.backgroundColor, at: 0, effectiveRange: nil),
-                     "code panels are drawn, not attributed")
+        XCTAssertNil(
+            storage.attribute(.backgroundColor, at: 0, effectiveRange: nil),
+            "code panels are drawn, not attributed")
     }
 
     /// The drawn regions are derived from the block spans, and only those.
     func test_regionsCoverCodeAndQuotesOnly() {
-        let spans = [StyleSpan(range: 0..<5, kind: .codeBlock(language: nil)),
-                     StyleSpan(range: 5..<9, kind: .blockQuote),
-                     StyleSpan(range: 9..<12, kind: .heading(2)),
-                     StyleSpan(range: 12..<40, kind: .blockQuote)]   // past the end
+        let spans = [
+            StyleSpan(range: 0..<5, kind: .codeBlock(language: nil)),
+            StyleSpan(range: 5..<9, kind: .blockQuote),
+            StyleSpan(range: 9..<12, kind: .heading(2)),
+            StyleSpan(range: 12..<40, kind: .blockQuote),
+        ]  // past the end
         let regions = MarkdownBlockBackgrounds.regions(for: spans, length: 12)
-        XCTAssertEqual(regions, [
-            .init(kind: .codePanel, range: NSRange(location: 0, length: 5)),
-            .init(kind: .quoteBar, range: NSRange(location: 5, length: 4))
-        ])
+        XCTAssertEqual(
+            regions,
+            [
+                .init(kind: .codePanel, range: NSRange(location: 0, length: 5)),
+                .init(kind: .quoteBar, range: NSRange(location: 5, length: 4)),
+            ])
     }
 
     /// Requirement 2. The owner's complaint was that text runs edge to edge.
@@ -168,8 +178,9 @@ extension MarkdownThemeTests {
         let theme = MarkdownTheme(tokens: TestTokens.make())
         let width: CGFloat = 2000
         let inset = MarkdownEditorLayout.containerInset(forViewWidth: width, theme: theme)
-        XCTAssertEqual(inset.width, theme.contentInset, accuracy: 0.01,
-                       "a wide view must not grow its inset to centre the column")
+        XCTAssertEqual(
+            inset.width, theme.contentInset, accuracy: 0.01,
+            "a wide view must not grow its inset to centre the column")
     }
 
     /// The cap must never make the margin smaller than the theme's floor on a
@@ -189,26 +200,32 @@ extension MarkdownThemeTests {
         // An explicitly CAPPED measure: the default is `.full` since the owner
         // asked for the full width, and this test is about a column that has a
         // cap to track. With the default it unwrapped nil and proved nothing.
-        let theme = MarkdownTheme(tokens: TestTokens.make(),
-                                  settings: EditorSettings(density: .standard,
-                                                           measure: .standard,
-                                                           zoomStep: 0))
+        let theme = MarkdownTheme(
+            tokens: TestTokens.make(),
+            settings: EditorSettings(
+                density: .standard,
+                measure: .standard,
+                zoomStep: 0))
         let measure = try XCTUnwrap(theme.maxMeasure)
         let width: CGFloat = 2000
         let tv = LinkTextView(frame: NSRect(x: 0, y: 0, width: width, height: 400))
         tv.isHorizontallyResizable = false
-        tv.textContainerInset = MarkdownEditorLayout.containerInset(forViewWidth: width,
-                                                                    theme: theme)
+        tv.textContainerInset = MarkdownEditorLayout.containerInset(
+            forViewWidth: width,
+            theme: theme)
         tv.textContainer?.widthTracksTextView = false
         tv.textContainer?.size = NSSize(width: measure, height: .greatestFiniteMagnitude)
         let x = MarkdownBlockBackgrounds.columnX(in: tv)
         let columnWidth = MarkdownBlockBackgrounds.columnWidth(in: tv)
-        XCTAssertEqual(x, tv.textContainerOrigin.x, accuracy: 0.5,
-                       "decoration must use the same origin the text rects use")
-        XCTAssertEqual(x, theme.contentInset, accuracy: 0.5,
-                       "a left-aligned column starts at the bare inset, not centred")
-        XCTAssertEqual(columnWidth, measure, accuracy: 0.5,
-                       "the panel's width must come from the capped container, not the view")
+        XCTAssertEqual(
+            x, tv.textContainerOrigin.x, accuracy: 0.5,
+            "decoration must use the same origin the text rects use")
+        XCTAssertEqual(
+            x, theme.contentInset, accuracy: 0.5,
+            "a left-aligned column starts at the bare inset, not centred")
+        XCTAssertEqual(
+            columnWidth, measure, accuracy: 0.5,
+            "the panel's width must come from the capped container, not the view")
     }
 
     /// Requirement 6. `MarkdownParagraphStyles` has taken a depth since Task 5;
@@ -218,26 +235,33 @@ extension MarkdownThemeTests {
         let body = "- outer\n    - inner\n"
         let model = MarkdownDocumentModel(body: body)
         let storage = NSTextStorage(string: body)
-        MarkdownStyleRenderer.apply(model.styleSpans, to: storage, tokens: tokens,
-                                    theme: MarkdownTheme(tokens: tokens), limitedTo: nil)
-        let outer = try XCTUnwrap(storage.attribute(
-            .paragraphStyle, at: (body as NSString).range(of: "outer").location,
-            effectiveRange: nil) as? NSParagraphStyle)
-        let inner = try XCTUnwrap(storage.attribute(
-            .paragraphStyle, at: (body as NSString).range(of: "inner").location,
-            effectiveRange: nil) as? NSParagraphStyle)
-        XCTAssertGreaterThan(outer.firstLineHeadIndent, 0,
-                             "even a top-level item must indent")
-        XCTAssertGreaterThan(inner.firstLineHeadIndent, outer.firstLineHeadIndent,
-                             "a nested item must indent past its parent")
+        MarkdownStyleRenderer.apply(
+            model.styleSpans, to: storage, tokens: tokens,
+            theme: MarkdownTheme(tokens: tokens), limitedTo: nil)
+        let outer = try XCTUnwrap(
+            storage.attribute(
+                .paragraphStyle, at: (body as NSString).range(of: "outer").location,
+                effectiveRange: nil) as? NSParagraphStyle)
+        let inner = try XCTUnwrap(
+            storage.attribute(
+                .paragraphStyle, at: (body as NSString).range(of: "inner").location,
+                effectiveRange: nil) as? NSParagraphStyle)
+        XCTAssertGreaterThan(
+            outer.firstLineHeadIndent, 0,
+            "even a top-level item must indent")
+        XCTAssertGreaterThan(
+            inner.firstLineHeadIndent, outer.firstLineHeadIndent,
+            "a nested item must indent past its parent")
     }
 
     /// Depth is DERIVED from containment, so a second top-level item after a
     /// nested one must fall back to depth 0 rather than inheriting the nesting.
     func test_listDepthReturnsToZeroAfterANestedItem() {
-        let spans = [StyleSpan(range: 0..<20, kind: .listItem),
-                     StyleSpan(range: 5..<15, kind: .listItem),
-                     StyleSpan(range: 20..<30, kind: .listItem)]
+        let spans = [
+            StyleSpan(range: 0..<20, kind: .listItem),
+            StyleSpan(range: 5..<15, kind: .listItem),
+            StyleSpan(range: 20..<30, kind: .listItem),
+        ]
         XCTAssertEqual(MarkdownListDepth.depths(of: spans), [0, 1, 0])
     }
 
@@ -250,18 +274,21 @@ extension MarkdownThemeTests {
         let body = "- outer\n    - inner text long enough to wrap\n"
         let model = MarkdownDocumentModel(body: body)
         let storage = NSTextStorage(string: body)
-        MarkdownStyleRenderer.apply(model.styleSpans, to: storage, tokens: tokens,
-                                    theme: MarkdownTheme(tokens: tokens), limitedTo: nil)
-        let inner = try XCTUnwrap(storage.attribute(
-            .paragraphStyle, at: (body as NSString).range(of: "inner").location,
-            effectiveRange: nil) as? NSParagraphStyle)
+        MarkdownStyleRenderer.apply(
+            model.styleSpans, to: storage, tokens: tokens,
+            theme: MarkdownTheme(tokens: tokens), limitedTo: nil)
+        let inner = try XCTUnwrap(
+            storage.attribute(
+                .paragraphStyle, at: (body as NSString).range(of: "inner").location,
+                effectiveRange: nil) as? NSParagraphStyle)
         // Four spaces of source indent, in the THEME's body font — which is
         // now proportional and moves with density and zoom. Leading indentation
         // is spaces and tabs only, so one advance times the count stays exact.
         let space = MarkdownTheme(tokens: tokens).spaceAdvance
-        XCTAssertEqual(inner.headIndent, inner.firstLineHeadIndent + space * 4,
-                       accuracy: 0.5,
-                       "the hang must clear the source indentation, not ignore it")
+        XCTAssertEqual(
+            inner.headIndent, inner.firstLineHeadIndent + space * 4,
+            accuracy: 0.5,
+            "the hang must clear the source indentation, not ignore it")
         XCTAssertGreaterThan(inner.headIndent, inner.firstLineHeadIndent)
     }
 
@@ -269,18 +296,22 @@ extension MarkdownThemeTests {
     /// answer, and only the new entry point derives the hang.
     func test_theDerivedHangIsRelativeToTheItemsOwnIndent() {
         let theme = MarkdownTheme(tokens: TestTokens.make())
-        let flat = MarkdownParagraphStyles.listItemStyle(depth: 0, leadingIndent: 0,
-                                                         theme: theme)
-        XCTAssertEqual(flat.headIndent, flat.firstLineHeadIndent, accuracy: 0.01,
-                       "wrapped lines align under the first line's text")
+        let flat = MarkdownParagraphStyles.listItemStyle(
+            depth: 0, leadingIndent: 0,
+            theme: theme)
+        XCTAssertEqual(
+            flat.headIndent, flat.firstLineHeadIndent, accuracy: 0.01,
+            "wrapped lines align under the first line's text")
         // The collapsed bullet is no longer NOTHING: `MarkdownBlockBackgrounds`
         // draws a substitute in the space to the LEFT of where the text starts,
         // so that space has to exist.
-        XCTAssertGreaterThan(flat.firstLineHeadIndent,
-                             MarkdownBlockBackgrounds.listMarkerGap,
-                             "a list item needs a gutter for its drawn marker")
-        let nested = MarkdownParagraphStyles.listItemStyle(depth: 1, leadingIndent: 40,
-                                                           theme: theme)
+        XCTAssertGreaterThan(
+            flat.firstLineHeadIndent,
+            MarkdownBlockBackgrounds.listMarkerGap,
+            "a list item needs a gutter for its drawn marker")
+        let nested = MarkdownParagraphStyles.listItemStyle(
+            depth: 1, leadingIndent: 40,
+            theme: theme)
         XCTAssertEqual(nested.headIndent - nested.firstLineHeadIndent, 40, accuracy: 0.01)
     }
 
@@ -332,12 +363,14 @@ extension MarkdownThemeTests {
     func test_withoutTheDocumentNoListMarkersAreEmitted() {
         let body = "- alpha\n"
         let model = MarkdownDocumentModel(body: body)
-        let regions = MarkdownBlockBackgrounds.regions(for: model.styleSpans,
-                                                       length: (body as NSString).length)
-        XCTAssertTrue(regions.allSatisfy {
-            if case .listMarker = $0.kind { return false }
-            return true
-        })
+        let regions = MarkdownBlockBackgrounds.regions(
+            for: model.styleSpans,
+            length: (body as NSString).length)
+        XCTAssertTrue(
+            regions.allSatisfy {
+                if case .listMarker = $0.kind { return false }
+                return true
+            })
     }
 
     /// A marker is two or three characters, so a HALF marker is meaningless:
@@ -349,10 +382,11 @@ extension MarkdownThemeTests {
         let regions = MarkdownBlockBackgrounds.regions(
             for: model.styleSpans, length: (body as NSString).length,
             limitedTo: NSRange(location: 0, length: 1), in: body as NSString)
-        XCTAssertTrue(regions.allSatisfy {
-            if case .listMarker = $0.kind { return false }
-            return true
-        })
+        XCTAssertTrue(
+            regions.allSatisfy {
+                if case .listMarker = $0.kind { return false }
+                return true
+            })
     }
 
     /// FINDING 5. A fence INSIDE a list item is indented, so its paragraph's
@@ -367,14 +401,17 @@ extension MarkdownThemeTests {
         let body = "- item\n\n    ```\n    let x = 1\n    ```\n"
         let model = MarkdownDocumentModel(body: body)
         let storage = NSTextStorage(string: body)
-        MarkdownStyleRenderer.apply(model.styleSpans, to: storage, tokens: tokens,
-                                    theme: theme, limitedTo: nil)
-        let code = try XCTUnwrap(storage.attribute(
-            .paragraphStyle, at: (body as NSString).range(of: "let x").location,
-            effectiveRange: nil) as? NSParagraphStyle)
+        MarkdownStyleRenderer.apply(
+            model.styleSpans, to: storage, tokens: tokens,
+            theme: theme, limitedTo: nil)
+        let code = try XCTUnwrap(
+            storage.attribute(
+                .paragraphStyle, at: (body as NSString).range(of: "let x").location,
+                effectiveRange: nil) as? NSParagraphStyle)
         let expected = MarkdownParagraphStyles.style(for: .codeBlock, theme: theme)
-        XCTAssertEqual(code.lineHeightMultiple, expected.lineHeightMultiple, accuracy: 0.01,
-                       "the code block's own rhythm must survive the enclosing item")
+        XCTAssertEqual(
+            code.lineHeightMultiple, expected.lineHeightMultiple, accuracy: 0.01,
+            "the code block's own rhythm must survive the enclosing item")
         XCTAssertEqual(code.paragraphSpacing, expected.paragraphSpacing, accuracy: 0.01)
     }
 
@@ -385,29 +422,37 @@ extension MarkdownThemeTests {
         let body = "- item\n\n    > quoted line\n"
         let model = MarkdownDocumentModel(body: body)
         let storage = NSTextStorage(string: body)
-        MarkdownStyleRenderer.apply(model.styleSpans, to: storage, tokens: tokens,
-                                    theme: theme, limitedTo: nil)
-        let quote = try XCTUnwrap(storage.attribute(
-            .paragraphStyle, at: (body as NSString).range(of: "quoted").location,
-            effectiveRange: nil) as? NSParagraphStyle)
+        MarkdownStyleRenderer.apply(
+            model.styleSpans, to: storage, tokens: tokens,
+            theme: theme, limitedTo: nil)
+        let quote = try XCTUnwrap(
+            storage.attribute(
+                .paragraphStyle, at: (body as NSString).range(of: "quoted").location,
+                effectiveRange: nil) as? NSParagraphStyle)
         let expected = MarkdownParagraphStyles.style(for: .blockQuote, theme: theme)
-        XCTAssertEqual(quote.firstLineHeadIndent, expected.firstLineHeadIndent,
-                       accuracy: 0.01,
-                       "the quote's own indent must survive the enclosing item")
+        XCTAssertEqual(
+            quote.firstLineHeadIndent, expected.firstLineHeadIndent,
+            accuracy: 0.01,
+            "the quote's own indent must survive the enclosing item")
     }
 
     /// Requirement 4. Regions are derived from ALL spans while attributes are
     /// windowed, so an unclipped panel could be painted behind text that was
     /// never styled.
     func test_regionsAreClippedToTheViewportWindow() {
-        let spans = [StyleSpan(range: 0..<10, kind: .codeBlock(language: nil)),
-                     StyleSpan(range: 100..<120, kind: .blockQuote)]
+        let spans = [
+            StyleSpan(range: 0..<10, kind: .codeBlock(language: nil)),
+            StyleSpan(range: 100..<120, kind: .blockQuote),
+        ]
         let window = NSRange(location: 0, length: 50)
-        let regions = MarkdownBlockBackgrounds.regions(for: spans, length: 200,
-                                                       limitedTo: window)
-        XCTAssertEqual(regions, [
-            .init(kind: .codePanel, range: NSRange(location: 0, length: 10))
-        ], "a region outside the styled window must not be drawn")
+        let regions = MarkdownBlockBackgrounds.regions(
+            for: spans, length: 200,
+            limitedTo: window)
+        XCTAssertEqual(
+            regions,
+            [
+                .init(kind: .codePanel, range: NSRange(location: 0, length: 10))
+            ], "a region outside the styled window must not be drawn")
     }
 
     /// A region straddling the window edge is clipped, not dropped — the
@@ -416,9 +461,11 @@ extension MarkdownThemeTests {
         let spans = [StyleSpan(range: 40..<200, kind: .codeBlock(language: nil))]
         let regions = MarkdownBlockBackgrounds.regions(
             for: spans, length: 200, limitedTo: NSRange(location: 0, length: 50))
-        XCTAssertEqual(regions, [
-            .init(kind: .codePanel, range: NSRange(location: 40, length: 10))
-        ])
+        XCTAssertEqual(
+            regions,
+            [
+                .init(kind: .codePanel, range: NSRange(location: 40, length: 10))
+            ])
     }
 
     /// Body text gets real line height even with no spans at all — the rhythm
@@ -427,11 +474,15 @@ extension MarkdownThemeTests {
         let tokens = TestTokens.make()
         let theme = MarkdownTheme(tokens: tokens)
         let storage = NSTextStorage(string: "just prose")
-        MarkdownStyleRenderer.apply([], to: storage, tokens: tokens,
-                                    theme: theme, limitedTo: nil)
-        let style = storage.attribute(.paragraphStyle, at: 0,
-                                      effectiveRange: nil) as? NSParagraphStyle
-        XCTAssertEqual(try XCTUnwrap(style).lineHeightMultiple,
-                       theme.lineHeightMultiple, accuracy: 0.01)
+        MarkdownStyleRenderer.apply(
+            [], to: storage, tokens: tokens,
+            theme: theme, limitedTo: nil)
+        let style =
+            storage.attribute(
+                .paragraphStyle, at: 0,
+                effectiveRange: nil) as? NSParagraphStyle
+        XCTAssertEqual(
+            try XCTUnwrap(style).lineHeightMultiple,
+            theme.lineHeightMultiple, accuracy: 0.01)
     }
 }

@@ -1,6 +1,7 @@
-import Testing
-import Foundation
 import AinkradAppKit
+import Foundation
+import Testing
+
 @testable import LoreFeature
 
 private final class MemoryDocs: PluginDocumentStore {
@@ -18,8 +19,9 @@ private func makeVault() async throws -> (URL, LoreStore) {
         .appendingPathComponent("lore-fp-\(UUID())", isDirectory: true)
         .appendingPathComponent("vault", isDirectory: true)
     try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
-    let store = LoreStore(documents: MemoryDocs(),
-                          indexPath: root.appendingPathComponent(".index.sqlite"))
+    let store = LoreStore(
+        documents: MemoryDocs(),
+        indexPath: root.appendingPathComponent(".index.sqlite"))
     try store.setVaultRootForTesting(root)
     await store.settleForTesting()
     return (root, store)
@@ -143,8 +145,9 @@ struct VaultFingerprintTests {
         store.rebuildInBackground()
         await store.settleForTesting()
 
-        #expect(store.coordinator.rebuildsPerformedForTesting == before,
-               "an unchanged vault triggered a full rescan")
+        #expect(
+            store.coordinator.rebuildsPerformedForTesting == before,
+            "an unchanged vault triggered a full rescan")
     }
 
     /// A content-only edit re-indexes just that file: no full rescan, the new
@@ -157,13 +160,14 @@ struct VaultFingerprintTests {
         try store.rebuild()
         let full = store.coordinator.rebuildsPerformedForTesting
 
-        try await Task.sleep(for: .milliseconds(20))   // a distinct mtime
+        try await Task.sleep(for: .milliseconds(20))  // a distinct mtime
         try write(root, "b.md", "---\nid: b\ntitle: B\n---\nsee [[A]] zorkmid")
         store.rebuildInBackground()
         await store.settleForTesting()
 
-        #expect(store.coordinator.rebuildsPerformedForTesting == full,
-               "a content edit took the full rescan")
+        #expect(
+            store.coordinator.rebuildsPerformedForTesting == full,
+            "a content edit took the full rescan")
         #expect(store.coordinator.incrementalRebuildsForTesting == 1)
         #expect(store.search("zorkmid").map(\.title) == ["B"])
         let a = try #require(store.rows.first { $0.title == "A" })
@@ -201,8 +205,9 @@ struct VaultFingerprintTests {
         store.rebuildInBackground()
         await store.settleForTesting()
 
-        #expect(store.coordinator.rebuildsPerformedForTesting == before + 1,
-               "an added file did not trigger a full rescan")
+        #expect(
+            store.coordinator.rebuildsPerformedForTesting == before + 1,
+            "an added file did not trigger a full rescan")
         #expect(store.rows.count == 2)
     }
 
@@ -229,14 +234,18 @@ struct VaultFingerprintTests {
         let freshStore = LoreStore(documents: MemoryDocs(), indexPath: indexPath)
         freshStore.coordinator.suppressWatcher(for: 60)
         try freshStore.setVaultRootForTesting(root)
-        #expect(freshStore.coordinator.directoryPaths.isEmpty,
-               "the fresh coordinator's in-memory directoryPaths must start empty, or this test isn't reproducing the production shape")
+        #expect(
+            freshStore.coordinator.directoryPaths.isEmpty,
+            "the fresh coordinator's in-memory directoryPaths must start empty, or this test isn't reproducing the production shape"
+        )
         await freshStore.settleForTesting()
 
-        #expect(freshStore.coordinator.rebuildsPerformedForTesting == 0,
-               "a fresh coordinator over an already-indexed, unchanged vault performed a full rescan")
-        #expect(!freshStore.coordinator.directoryPaths.isEmpty,
-               "the fast-path hit must still publish the persisted directory set into memory")
+        #expect(
+            freshStore.coordinator.rebuildsPerformedForTesting == 0,
+            "a fresh coordinator over an already-indexed, unchanged vault performed a full rescan")
+        #expect(
+            !freshStore.coordinator.directoryPaths.isEmpty,
+            "the fast-path hit must still publish the persisted directory set into memory")
     }
 
     /// A directory whose NAME CONTAINS A COMMA must survive the round-trip.
@@ -251,8 +260,9 @@ struct VaultFingerprintTests {
             "Sessions/2026-07-18 sweep — closed #245, shipped #285", isDirectory: true)
         try FileManager.default.createDirectory(at: commaDir, withIntermediateDirectories: true)
 
-        let index = try LoreIndex(path: root.deletingLastPathComponent()
-            .appendingPathComponent(".index-\(UUID()).sqlite"))
+        let index = try LoreIndex(
+            path: root.deletingLastPathComponent()
+                .appendingPathComponent(".index-\(UUID()).sqlite"))
         let scanned = Set(VaultIndexCoordinator.scanDirectories(under: root))
         try index.setIndexedDirectories(scanned)
 
@@ -279,7 +289,8 @@ struct VaultFingerprintTests {
         store.rebuildInBackground()
         await store.settleForTesting()
 
-        #expect(store.coordinator.rebuildsPerformedForTesting == before,
-               "an unchanged vault with a comma in a directory name triggered a full rescan")
+        #expect(
+            store.coordinator.rebuildsPerformedForTesting == before,
+            "an unchanged vault with a comma in a directory name triggered a full rescan")
     }
 }

@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// What else in the vault points at this document.
 ///
@@ -31,15 +31,17 @@ struct DocumentMentionsList: View {
 
     @Environment(\.ainkradTypography) private var typo
 
-
     /// Collapsed by default, and summarised in one line.
     ///
     /// The summary is the point: "7 linked mentions · 2 unresolved" answers the
     /// question most of the time without expanding anything, which is why the
     /// old panel's count badge was most of what it actually provided.
     private var summary: String {
-        var parts = [backlinks.count == 1 ? "1 linked mention"
-                                          : "\(backlinks.count) linked mentions"]
+        var parts = [
+            backlinks.count == 1
+                ? "1 linked mention"
+                : "\(backlinks.count) linked mentions"
+        ]
         if !unresolved.isEmpty { parts.append("\(unresolved.count) unresolved") }
         return parts.joined(separator: " · ")
     }
@@ -69,7 +71,9 @@ struct DocumentMentionsList: View {
     @ViewBuilder private var details: some View {
         VStack(alignment: .leading, spacing: AinkradSpacing.sm) {
             ForEach(backlinks) { link in
-                Button { onOpen(link.row.path) } label: {
+                Button {
+                    onOpen(link.row.path)
+                } label: {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(link.row.title)
                             .font(AinkradFontResolver.font(.headline, typography: typo))
@@ -94,7 +98,9 @@ struct DocumentMentionsList: View {
             if !related.isEmpty {
                 AinkradSectionHeader(title: "Related notes")
                 ForEach(related, id: \.path) { row in
-                    Button { onOpen(row.path) } label: {
+                    Button {
+                        onOpen(row.path)
+                    } label: {
                         Text(row.title)
                             .font(AinkradFontResolver.font(.headline, typography: typo))
                             .lineLimit(1)

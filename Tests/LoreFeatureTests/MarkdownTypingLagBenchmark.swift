@@ -1,6 +1,7 @@
-import XCTest
 import AppKit
 import SwiftUI
+import XCTest
+
 @testable import LoreFeature
 
 /// Task 10, Step 2: WHERE does a keystroke's time go?
@@ -29,8 +30,9 @@ final class MarkdownTypingLagBenchmark: XCTestCase {
         while out.count < lines {
             out.append("## Section \(index)")
             out.append("")
-            out.append("Some **bold** and _italic_ prose with a [[Link \(index)]] "
-                       + "and `inline code` in it.")
+            out.append(
+                "Some **bold** and _italic_ prose with a [[Link \(index)]] "
+                    + "and `inline code` in it.")
             out.append("")
             out.append("- a list item with [[Another \(index)]]")
             out.append("- a second item")
@@ -69,8 +71,9 @@ final class MarkdownTypingLagBenchmark: XCTestCase {
         tv.isRichText = false
         tv.allowsUndo = true
         tv.delegate = coordinator
-        let window = NSWindow(contentRect: tv.frame, styleMask: [.titled],
-                              backing: .buffered, defer: false)
+        let window = NSWindow(
+            contentRect: tv.frame, styleMask: [.titled],
+            backing: .buffered, defer: false)
         window.contentView = tv
         window.makeFirstResponder(tv)
         windows.append(window)
@@ -130,16 +133,19 @@ final class MarkdownTypingLagBenchmark: XCTestCase {
                 // unconditionally, so the old per-keystroke cost was this
                 // keystroke plus exactly one whole-document render.
                 let fullRender = time { for _ in 0..<10 { coordinator.renderStyles() } } / 10
-                print("TYPING-RENDERS lines=\(lines) index-builds-per-keystroke=\(renders) "
-                      + "one-full-render=\(String(format: "%.2f", fullRender * 1000))ms "
-                      + "before≈\(String(format: "%.2f", (perKeystroke + fullRender) * 1000))ms")
-                print("TYPING-BLOCKS lines=\(lines) restyled-per-keystroke="
-                      + "\(Double(coordinator.restyledBlockCount - restyledBefore) / 20)")
-                print("TYPING-LAG lines=\(lines) "
-                      + "utf16=\((tv.string as NSString).length) "
-                      + "spans=\(coordinator.cachedSpansForTesting.count) "
-                      + "per-keystroke=\(String(format: "%.2f", perKeystroke * 1000))ms "
-                      + "parses=\(MarkdownParseCounter.count)")
+                print(
+                    "TYPING-RENDERS lines=\(lines) index-builds-per-keystroke=\(renders) "
+                        + "one-full-render=\(String(format: "%.2f", fullRender * 1000))ms "
+                        + "before≈\(String(format: "%.2f", (perKeystroke + fullRender) * 1000))ms")
+                print(
+                    "TYPING-BLOCKS lines=\(lines) restyled-per-keystroke="
+                        + "\(Double(coordinator.restyledBlockCount - restyledBefore) / 20)")
+                print(
+                    "TYPING-LAG lines=\(lines) "
+                        + "utf16=\((tv.string as NSString).length) "
+                        + "spans=\(coordinator.cachedSpansForTesting.count) "
+                        + "per-keystroke=\(String(format: "%.2f", perKeystroke * 1000))ms "
+                        + "parses=\(MarkdownParseCounter.count)")
                 // 21 = the warm keystroke plus the twenty measured, one BLOCK
                 // parse each. This used to assert zero, and the zero was the
                 // defect rather than the achievement: a keystroke path that
@@ -151,11 +157,13 @@ final class MarkdownTypingLagBenchmark: XCTestCase {
                 // loop asserts it in the only way that settles it: the same
                 // count at 200 lines and at 5,000, alongside the wall-clock
                 // ratio below.
-                XCTAssertEqual(MarkdownParseCounter.count, 21,
-                               "one block parse per keystroke at \(lines) lines — "
-                               + "unchanged by document size")
-                XCTAssertTrue(coordinator.lastEditTookFastPath,
-                              "ordinary prose typing must take the single-block path")
+                XCTAssertEqual(
+                    MarkdownParseCounter.count, 21,
+                    "one block parse per keystroke at \(lines) lines — "
+                        + "unchanged by document size")
+                XCTAssertTrue(
+                    coordinator.lastEditTookFastPath,
+                    "ordinary prose typing must take the single-block path")
                 // The improvement, asserted where the lag was unmistakable.
                 // A ratio, not a wall-clock ceiling, so it means the same thing
                 // on faster silicon than this was measured on.
@@ -209,12 +217,14 @@ final class MarkdownTypingLagBenchmark: XCTestCase {
                 // whole-document render would produce — which is the claim
                 // this assertion exists to make.
                 if lines >= 1_000 {
-                    XCTAssertLessThan(perKeystroke, fullRender / 2,
-                                      "at \(lines) lines a keystroke must cost far less than "
-                                      + "the whole-document render it used to do")
+                    XCTAssertLessThan(
+                        perKeystroke, fullRender / 2,
+                        "at \(lines) lines a keystroke must cost far less than "
+                            + "the whole-document render it used to do")
                 }
-                XCTAssertLessThan(perKeystroke, 1.0,
-                                  "a single character must not cost a whole second")
+                XCTAssertLessThan(
+                    perKeystroke, 1.0,
+                    "a single character must not cost a whole second")
             }
         }
     }
@@ -234,8 +244,9 @@ final class MarkdownTypingLagBenchmark: XCTestCase {
             let elapsed = time {
                 for _ in 0..<20 { tv.insertText("x", replacementRange: tv.selectedRange()) }
             }
-            print("TYPING-CONTROL lines=\(lines) per-keystroke="
-                  + String(format: "%.2f", elapsed / 20 * 1000) + "ms")
+            print(
+                "TYPING-CONTROL lines=\(lines) per-keystroke="
+                    + String(format: "%.2f", elapsed / 20 * 1000) + "ms")
         }
     }
 
@@ -255,41 +266,47 @@ final class MarkdownTypingLagBenchmark: XCTestCase {
                 let selection = NSRange(location: (text as NSString).length / 2, length: 0)
 
                 @MainActor func average(_ label: String, _ body: () -> Void) {
-                    body()                                   // warm
+                    body()  // warm
                     let elapsed = time { for _ in 0..<10 { body() } } / 10
-                    print("TYPING-PHASE lines=\(lines) \(label)="
-                          + String(format: "%.2f", elapsed * 1000) + "ms")
+                    print(
+                        "TYPING-PHASE lines=\(lines) \(label)="
+                            + String(format: "%.2f", elapsed * 1000) + "ms")
                 }
 
                 var blocks: [Range<Int>] = []
                 average("MarkdownStyleRenderer.apply") {
-                    MarkdownStyleRenderer.apply(spans, to: storage, tokens: tokens,
-                                                theme: theme, limitedTo: nil)
+                    MarkdownStyleRenderer.apply(
+                        spans, to: storage, tokens: tokens,
+                        theme: theme, limitedTo: nil)
                 }
                 average("MarkdownReveal.blocks") { blocks = MarkdownReveal.blocks(in: text) }
                 average("MarkdownEditorReveal.index") {
                     _ = MarkdownEditorReveal.index(text: text, spans: spans)
                 }
                 average("MarkdownReveal.hiddenMarkers") {
-                    _ = MarkdownReveal.hiddenMarkers(spans: spans, selection: selection,
-                                                     text: text, isFocused: true)
+                    _ = MarkdownReveal.hiddenMarkers(
+                        spans: spans, selection: selection,
+                        text: text, isFocused: true)
                 }
                 average("MarkdownStyleRenderer.collapse") {
-                    let hidden = MarkdownReveal.hiddenMarkers(spans: spans, selection: selection,
-                                                             text: text, isFocused: true)
+                    let hidden = MarkdownReveal.hiddenMarkers(
+                        spans: spans, selection: selection,
+                        text: text, isFocused: true)
                     MarkdownStyleRenderer.collapse(hidden, in: storage)
                 }
                 average("EmbedGeometry.strongWritingDirection") {
                     _ = EmbedGeometry.strongWritingDirection(of: text)
                 }
                 average("MarkdownBlockBackgrounds.regions") {
-                    _ = MarkdownBlockBackgrounds.regions(for: spans, length: storage.length,
-                                                         limitedTo: nil,
-                                                         in: storage.string as NSString)
+                    _ = MarkdownBlockBackgrounds.regions(
+                        for: spans, length: storage.length,
+                        limitedTo: nil,
+                        in: storage.string as NSString)
                 }
                 average("renderStyles (whole)") { coordinator.renderStyles() }
-                print("TYPING-PHASE lines=\(lines) spans=\(spans.count) "
-                      + "utf16=\((text as NSString).length)")
+                print(
+                    "TYPING-PHASE lines=\(lines) spans=\(spans.count) "
+                        + "utf16=\((text as NSString).length)")
             }
         }
     }
@@ -306,8 +323,9 @@ final class MarkdownTypingLagBenchmark: XCTestCase {
             tv.setSelectedRange(NSRange(location: middle, length: 0))
             tv.insertText("x", replacementRange: tv.selectedRange())
             print("TYPING-SCOPE blocks-in-document=\(blocks) blocks-changed-by-one-char=1")
-            XCTAssertGreaterThan(blocks, 100,
-                                 "the fixture must have enough blocks for the ratio to matter")
+            XCTAssertGreaterThan(
+                blocks, 100,
+                "the fixture must have enough blocks for the ratio to matter")
         }
     }
 }

@@ -1,6 +1,6 @@
-import SwiftUI
-import AppKit
 import AinkradAppKit
+import AppKit
+import SwiftUI
 
 /// Floats a document's opening text beside a hovered `[[link]]`.
 ///
@@ -18,9 +18,14 @@ final class LinkPreviewPanel {
     /// The link currently previewed, so an unchanged hover does not rebuild.
     private(set) var shownTarget: String?
 
-    func show(title: String, excerpt: String, target: String,
-              tokens: HostThemeTokens, near rect: NSRect, over view: NSView) {
-        guard let window = view.window else { hide(); return }
+    func show(
+        title: String, excerpt: String, target: String,
+        tokens: HostThemeTokens, near rect: NSRect, over view: NSView
+    ) {
+        guard let window = view.window else {
+            hide()
+            return
+        }
         shownTarget = target
         let content = LinkPreviewView(title: title, excerpt: excerpt, tokens: tokens)
         if let host {
@@ -45,9 +50,10 @@ final class LinkPreviewPanel {
     }
 
     private func makePanel(attachedTo window: NSWindow) -> NSPanel {
-        let panel = NSPanel(contentRect: .zero,
-                            styleMask: [.borderless, .nonactivatingPanel],
-                            backing: .buffered, defer: true)
+        let panel = NSPanel(
+            contentRect: .zero,
+            styleMask: [.borderless, .nonactivatingPanel],
+            backing: .buffered, defer: true)
         panel.isFloatingPanel = true
         panel.hidesOnDeactivate = true
         panel.becomesKeyOnlyIfNeeded = true
@@ -105,8 +111,10 @@ private struct LinkPreviewView: View {
         .frame(width: 320, alignment: .leading)
         .background(tokens.surfaceElevated)
         .clipShape(ChamferShape(cut: LoreMetrics.chamfer))
-        .overlay(ChamferShape(cut: LoreMetrics.chamfer)
-            .strokeBorder(tokens.foreground.opacity(0.15), lineWidth: 1))
+        .overlay(
+            ChamferShape(cut: LoreMetrics.chamfer)
+                .strokeBorder(tokens.foreground.opacity(0.15), lineWidth: 1)
+        )
         .environment(\.ainkradTheme, tokens)
     }
 }

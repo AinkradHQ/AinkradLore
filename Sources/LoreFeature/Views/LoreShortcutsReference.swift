@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// The keyboard-shortcuts reference, GENERATED from `LoreCommands.all`.
 ///
@@ -44,10 +44,12 @@ struct LoreShortcutsReference: View {
             }
             HStack(spacing: AinkradSpacing.sm) {
                 AinkradIconGlyph(systemName: "arrow.turn.right.down", size: 11)
-                Text("Click a footnote reference to jump to its definition, "
-                     + "and back")
-                    .font(AinkradFontResolver.font(.body, typography: typo))
-                    .foregroundStyle(theme.tokens.foreground.opacity(0.85))
+                Text(
+                    "Click a footnote reference to jump to its definition, "
+                        + "and back"
+                )
+                .font(AinkradFontResolver.font(.body, typography: typo))
+                .foregroundStyle(theme.tokens.foreground.opacity(0.85))
                 Spacer(minLength: 0)
             }
             HStack(spacing: AinkradSpacing.sm) {
@@ -79,7 +81,8 @@ struct LoreShortcutsReference: View {
             }
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(command.shortcut.map { "\(command.title), \($0.display)" }
-                            ?? "\(command.title), no shortcut, available in the command palette")
+        .accessibilityLabel(
+            command.shortcut.map { "\(command.title), \($0.display)" }
+                ?? "\(command.title), no shortcut, available in the command palette")
     }
 }

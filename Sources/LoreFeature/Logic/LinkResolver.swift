@@ -60,9 +60,11 @@ public struct LinkResolver: Sendable {
             // is what the file is called, while a note is written without one.
             // Registering only the extension-stripped form is why every
             // attachment link resolved to nothing before M3.
-            var keys = [doc.url.deletingPathExtension().lastPathComponent,
-                        doc.url.lastPathComponent,
-                        doc.title]
+            var keys = [
+                doc.url.deletingPathExtension().lastPathComponent,
+                doc.url.lastPathComponent,
+                doc.title,
+            ]
             keys.append(contentsOf: doc.aliases)
             for key in keys where !key.isEmpty {
                 map[key.lowercased(), default: []].append(doc.url)
@@ -159,8 +161,9 @@ public struct LinkResolver: Sendable {
             let withExtension = "/" + lowered
             let targetHasExtension = !(lowered as NSString).pathExtension.isEmpty
             if targetHasExtension,
-               let match = byKey[(lowered as NSString).lastPathComponent]?
-                   .first(where: { $0.path.lowercased().hasSuffix(withExtension) }) {
+                let match = byKey[(lowered as NSString).lastPathComponent]?
+                    .first(where: { $0.path.lowercased().hasSuffix(withExtension) })
+            {
                 return match
             }
             let stem = (lowered as NSString).deletingPathExtension

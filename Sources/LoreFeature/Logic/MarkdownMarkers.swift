@@ -52,8 +52,10 @@ enum MarkdownMarkers {
     /// Paired delimiters at both ends of `range`, e.g. `**…**`. The FIRST
     /// candidate that matches at both ends wins, so `strong` can pass
     /// `["**", "__"]` and get whichever spelling the author actually used.
-    static func paired(anyOf delimiters: [String], in range: NSRange,
-                       text: NSString) -> [NSRange] {
+    static func paired(
+        anyOf delimiters: [String], in range: NSRange,
+        text: NSString
+    ) -> [NSRange] {
         for delimiter in delimiters {
             let found = paired(delimiter, in: range, text: text)
             if !found.isEmpty { return found }
@@ -68,12 +70,13 @@ enum MarkdownMarkers {
     static func paired(_ delimiter: String, in range: NSRange, text: NSString) -> [NSRange] {
         let n = (delimiter as NSString).length
         guard n > 0, range.length >= n * 2,
-              range.location >= 0, range.location + range.length <= text.length
+            range.location >= 0, range.location + range.length <= text.length
         else { return [] }
         let open = NSRange(location: range.location, length: n)
         let close = NSRange(location: range.location + range.length - n, length: n)
         guard text.substring(with: open) == delimiter,
-              text.substring(with: close) == delimiter else { return [] }
+            text.substring(with: close) == delimiter
+        else { return [] }
         return [open, close]
     }
 
@@ -83,7 +86,8 @@ enum MarkdownMarkers {
     /// would be reported as both the opening and the closing marker.
     static func backtickPair(in range: NSRange, text: NSString) -> [NSRange] {
         guard range.location >= 0, range.length > 0,
-              range.location + range.length <= text.length else { return [] }
+            range.location + range.length <= text.length
+        else { return [] }
         let end = range.location + range.length
         var open = range.location
         while open < end, text.character(at: open) == 0x60 { open += 1 }
@@ -92,17 +96,22 @@ enum MarkdownMarkers {
         let openLength = open - range.location
         let closeLength = end - close
         guard openLength > 0, openLength == closeLength, open <= close else { return [] }
-        return [NSRange(location: range.location, length: openLength),
-                NSRange(location: close, length: closeLength)]
+        return [
+            NSRange(location: range.location, length: openLength),
+            NSRange(location: close, length: closeLength),
+        ]
     }
 
     /// A run of `character` at the start of `range`, plus one trailing space —
     /// `### `, `> `. The space belongs to the marker: hiding the hashes but
     /// keeping the space indents the line by one, which reads as a bug.
-    static func linePrefix(_ character: Character, in range: NSRange,
-                           text: NSString) -> [NSRange] {
+    static func linePrefix(
+        _ character: Character, in range: NSRange,
+        text: NSString
+    ) -> [NSRange] {
         guard range.location >= 0, range.location < text.length,
-              let scalar = character.unicodeScalars.first?.value else { return [] }
+            let scalar = character.unicodeScalars.first?.value
+        else { return [] }
         var end = range.location
         let limit = min(range.location + range.length, text.length)
         while end < limit, text.character(at: end) == scalar { end += 1 }
@@ -123,14 +132,15 @@ enum MarkdownMarkers {
         let limit = min(range.location + range.length, text.length)
         var end = range.location
         let first = text.character(at: end)
-        if first == 0x2D || first == 0x2A || first == 0x2B {           // - * +
+        if first == 0x2D || first == 0x2A || first == 0x2B {  // - * +
             end += 1
-        } else if first >= 0x30, first <= 0x39 {                       // 0-9
+        } else if first >= 0x30, first <= 0x39 {  // 0-9
             while end < limit, text.character(at: end) >= 0x30,
-                  text.character(at: end) <= 0x39 { end += 1 }
+                text.character(at: end) <= 0x39
+            { end += 1 }
             guard end < limit else { return [] }
             let delimiter = text.character(at: end)
-            guard delimiter == 0x2E || delimiter == 0x29 else { return [] } // . )
+            guard delimiter == 0x2E || delimiter == 0x29 else { return [] }  // . )
             end += 1
         } else {
             return []
@@ -148,7 +158,8 @@ enum MarkdownMarkers {
     /// fence yields one marker rather than a guessed second one.
     static func fences(in range: NSRange, text: NSString) -> [NSRange] {
         guard range.location >= 0, range.length > 0,
-              range.location + range.length <= text.length else { return [] }
+            range.location + range.length <= text.length
+        else { return [] }
         let limit = range.location + range.length
 
         func line(at start: Int) -> NSRange {
@@ -171,8 +182,8 @@ enum MarkdownMarkers {
         }
         let closing = line(at: closeStart)
         guard closing.location > opening.location + opening.length,
-              closing.length > 0, isFenceLine(closing)
-        else { return [opening] }   // an unterminated fence has one marker, not two
+            closing.length > 0, isFenceLine(closing)
+        else { return [opening] }  // an unterminated fence has one marker, not two
         return [opening, closing]
     }
 
@@ -183,16 +194,20 @@ enum MarkdownMarkers {
     /// reference link or anything else yields nothing rather than a guess.
     static func inlineLink(in range: NSRange, text: NSString) -> [NSRange] {
         guard range.location >= 0, range.length >= 4,
-              range.location + range.length <= text.length else { return [] }
+            range.location + range.length <= text.length
+        else { return [] }
         let limit = range.location + range.length
-        guard text.character(at: range.location) == 0x5B,          // [
-              text.character(at: limit - 1) == 0x29 else { return [] }  // )
+        guard text.character(at: range.location) == 0x5B,  // [
+            text.character(at: limit - 1) == 0x29
+        else { return [] }  // )
         // Search backwards: the LAST `](` in the range opens the destination.
         let body = NSRange(location: range.location + 1, length: range.length - 1)
         let divider = text.range(of: "](", options: .backwards, range: body)
         guard divider.location != NSNotFound else { return [] }
-        return [NSRange(location: range.location, length: 1),
-                NSRange(location: divider.location, length: limit - divider.location)]
+        return [
+            NSRange(location: range.location, length: 1),
+            NSRange(location: divider.location, length: limit - divider.location),
+        ]
     }
 
     /// An inline image `![alt](source)`, split into the source's own range and
@@ -214,13 +229,16 @@ enum MarkdownMarkers {
     /// a wrong marker range HIDES the user's content once collapsed, so
     /// "emit nothing" is the only safe failure.
     static func inlineImage(in range: NSRange, text: NSString)
-        -> (source: NSRange, markers: [NSRange])? {
+        -> (source: NSRange, markers: [NSRange])?
+    {
         guard range.location >= 0, range.length >= 5,
-              range.location + range.length <= text.length else { return nil }
+            range.location + range.length <= text.length
+        else { return nil }
         let limit = range.location + range.length
-        guard text.character(at: range.location) == 0x21,          // !
-              text.character(at: range.location + 1) == 0x5B,      // [
-              text.character(at: limit - 1) == 0x29 else { return nil }   // )
+        guard text.character(at: range.location) == 0x21,  // !
+            text.character(at: range.location + 1) == 0x5B,  // [
+            text.character(at: limit - 1) == 0x29
+        else { return nil }  // )
         // The LAST `](` opens the destination, so an alt text containing
         // brackets does not shear the split.
         let body = NSRange(location: range.location + 1, length: range.length - 1)
@@ -231,9 +249,13 @@ enum MarkdownMarkers {
         let sourceEnd = limit - 1
         guard sourceEnd > sourceStart else { return nil }
         let source = NSRange(location: sourceStart, length: sourceEnd - sourceStart)
-        return (source,
-                [NSRange(location: range.location, length: sourceStart - range.location),
-                 NSRange(location: sourceEnd, length: 1)])
+        return (
+            source,
+            [
+                NSRange(location: range.location, length: sourceStart - range.location),
+                NSRange(location: sourceEnd, length: 1),
+            ]
+        )
     }
 
     /// `[[` and `]]` around a wikilink whose CONTENT span covers only the
@@ -242,19 +264,23 @@ enum MarkdownMarkers {
     /// else. A `]]` on a later line belongs to some other link.
     static func wikilinkBrackets(around target: NSRange, text: NSString) -> [NSRange] {
         guard target.location >= 0, target.length >= 0,
-              target.location + target.length <= text.length else { return [] }
+            target.location + target.length <= text.length
+        else { return [] }
         // Skip back over the whitespace `[[  Target  ]]` trims off the target.
         var open = target.location
-        while open > 0, text.character(at: open - 1) == 0x20
-            || text.character(at: open - 1) == 0x09 { open -= 1 }
+        while open > 0,
+            text.character(at: open - 1) == 0x20
+                || text.character(at: open - 1) == 0x09
+        { open -= 1 }
         guard open >= 2,
-              text.substring(with: NSRange(location: open - 2, length: 2)) == "[["
+            text.substring(with: NSRange(location: open - 2, length: 2)) == "[["
         else { return [] }
 
         var lineEnd = target.location + target.length
         while lineEnd < text.length, text.character(at: lineEnd) != 0x0A { lineEnd += 1 }
-        let tail = NSRange(location: target.location + target.length,
-                           length: lineEnd - (target.location + target.length))
+        let tail = NSRange(
+            location: target.location + target.length,
+            length: lineEnd - (target.location + target.length))
         let close = text.range(of: "]]", options: [], range: tail)
         guard close.location != NSNotFound else { return [] }
         return [NSRange(location: open - 2, length: 2), close]

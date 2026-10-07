@@ -12,7 +12,8 @@ import AppKit
 /// the PDF and attachment engines, which have no text to format, and it is
 /// already carrying sixteen members.
 enum LoreFormatAction: Int {
-    case bold = 1, italic, inlineCode, link, bulletList, taskList, quote
+    case bold = 1
+    case italic, inlineCode, link, bulletList, taskList, quote
     case heading1, heading2, heading3, heading4, heading5, heading6, body
 }
 
@@ -29,8 +30,9 @@ enum LoreFormatting {
     static func perform(_ action: LoreFormatAction) -> Bool {
         let sender = NSMenuItem()
         sender.tag = action.rawValue
-        return NSApp.sendAction(#selector(LinkTextView.loreApplyFormat(_:)),
-                                to: nil, from: sender)
+        return NSApp.sendAction(
+            #selector(LinkTextView.loreApplyFormat(_:)),
+            to: nil, from: sender)
     }
 
     /// Performs `action` on `tv`.
@@ -74,18 +76,20 @@ enum LoreFormatting {
     @MainActor
     private static func applyLinePrefix(_ prefix: String, to tv: NSTextView) {
         _ = MarkdownEditorTyping.apply(
-            MarkdownLineFormatting.toggleLinePrefix(text: tv.string,
-                                                    selection: tv.selectedRange(),
-                                                    prefix: prefix),
+            MarkdownLineFormatting.toggleLinePrefix(
+                text: tv.string,
+                selection: tv.selectedRange(),
+                prefix: prefix),
             to: tv)
     }
 
     @MainActor
     private static func applyHeading(_ level: Int, to tv: NSTextView) {
         _ = MarkdownEditorTyping.apply(
-            MarkdownLineFormatting.setHeading(text: tv.string,
-                                              selection: tv.selectedRange(),
-                                              level: level),
+            MarkdownLineFormatting.setHeading(
+                text: tv.string,
+                selection: tv.selectedRange(),
+                level: level),
             to: tv)
     }
 }

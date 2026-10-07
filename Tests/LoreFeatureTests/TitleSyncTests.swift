@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 /// Task E (M3): title and filename stay in sync. Both directions drive the
@@ -105,10 +106,12 @@ final class TitleSyncTests: XCTestCase {
                 XCTFail("“\(illegal)” must be refused, got \(outcome)")
                 continue
             }
-            XCTAssertTrue(FileManager.default.fileExists(atPath: noteURL.path),
-                          "“\(illegal)” must not move the original file")
-            XCTAssertFalse(FileManager.default.fileExists(
-                atPath: root.appendingPathComponent(illegal + ".md").path),
+            XCTAssertTrue(
+                FileManager.default.fileExists(atPath: noteURL.path),
+                "“\(illegal)” must not move the original file")
+            XCTAssertFalse(
+                FileManager.default.fileExists(
+                    atPath: root.appendingPathComponent(illegal + ".md").path),
                 "“\(illegal)” must not create a new file")
         }
     }
@@ -134,8 +137,9 @@ final class TitleSyncTests: XCTestCase {
         }
 
         XCTAssertTrue(FileManager.default.fileExists(atPath: noteURL.path), "Note A must still exist")
-        XCTAssertTrue(FileManager.default.fileExists(
-            atPath: root.appendingPathComponent("Note B.md").path), "Note B must still exist")
+        XCTAssertTrue(
+            FileManager.default.fileExists(
+                atPath: root.appendingPathComponent("Note B.md").path), "Note B must still exist")
         let aText = try String(contentsOf: noteURL, encoding: .utf8)
         XCTAssertTrue(aText.contains("title: Note A"), "Note A's own title must be untouched")
     }
@@ -180,10 +184,12 @@ final class TitleSyncTests: XCTestCase {
         XCTAssertEqual(outcome, .success)
 
         let expected = root.appendingPathComponent("Chapter 2.0.md")
-        XCTAssertTrue(FileManager.default.fileExists(atPath: expected.path),
-                      "must land at exactly Chapter 2.0.md, not a nested path or double extension")
-        XCTAssertFalse(FileManager.default.fileExists(
-            atPath: root.appendingPathComponent("Chapter 2.0.md.md").path))
+        XCTAssertTrue(
+            FileManager.default.fileExists(atPath: expected.path),
+            "must land at exactly Chapter 2.0.md, not a nested path or double extension")
+        XCTAssertFalse(
+            FileManager.default.fileExists(
+                atPath: root.appendingPathComponent("Chapter 2.0.md.md").path))
         let onDisk = try String(contentsOf: expected, encoding: .utf8)
         XCTAssertTrue(onDisk.contains("title: Chapter 2.0"))
     }
@@ -194,7 +200,8 @@ final class TitleSyncTests: XCTestCase {
         let root = tempDir()
         let store = try makeStore(root)
         await store.settleForTesting()
-        let noteURL = try write(root, "Original.md",
+        let noteURL = try write(
+            root, "Original.md",
             "---\nid: n\ntitle: Original\ncustom_field: keep-me\nanother: 42\n---\nbody")
         try store.rebuild()
 
@@ -249,7 +256,8 @@ final class TitleSyncTests: XCTestCase {
         let root = tempDir()
         let store = try makeStore(root)
         await store.settleForTesting()
-        let noteURL = try write(root, "Old Self.md",
+        let noteURL = try write(
+            root, "Old Self.md",
             "---\nid: s\ntitle: Old Self\n---\nSee also [[Old Self]] for more.")
         try store.rebuild()
 
@@ -263,8 +271,9 @@ final class TitleSyncTests: XCTestCase {
 
         let destination = root.appendingPathComponent("New Self.md")
         let onDisk = try String(contentsOf: destination, encoding: .utf8)
-        XCTAssertTrue(onDisk.contains("title: New Self"),
-                      "the persisted title must be the NEW one, not reloaded-old: \(onDisk)")
+        XCTAssertTrue(
+            onDisk.contains("title: New Self"),
+            "the persisted title must be the NEW one, not reloaded-old: \(onDisk)")
         XCTAssertFalse(onDisk.contains("title: Old Self"))
         XCTAssertTrue(onDisk.contains("[[New Self]]"), "the self-link must also be rewritten: \(onDisk)")
     }
@@ -317,8 +326,9 @@ final class TitleSyncTests: XCTestCase {
         await store.settleForTesting()
 
         let afterOpenAndRebuild = try String(contentsOf: url, encoding: .utf8)
-        XCTAssertEqual(before, afterOpenAndRebuild,
-                       "opening/indexing a divergent note must not sync it")
+        XCTAssertEqual(
+            before, afterOpenAndRebuild,
+            "opening/indexing a divergent note must not sync it")
         XCTAssertTrue(afterOpenAndRebuild.contains("title: A Totally Different Title"))
         XCTAssertTrue(FileManager.default.fileExists(atPath: url.path))
     }
@@ -334,9 +344,11 @@ final class TitleSyncTests: XCTestCase {
         let root = tempDir()
         let store = try makeStore(root)
         await store.settleForTesting()
-        let url = try write(root, "filename-one.md",
+        let url = try write(
+            root, "filename-one.md",
             "---\nid: n\ntitle: A Totally Different Title\n---\nbody")
-        try write(root, "Referrer.md",
+        try write(
+            root, "Referrer.md",
             "---\nid: r\ntitle: Referrer\n---\nSee [[A Totally Different Title]].")
         try store.rebuild()
 
@@ -353,8 +365,9 @@ final class TitleSyncTests: XCTestCase {
         let outcome = store.commitTitleChange(for: session, to: noteTitle)
         XCTAssertEqual(outcome, .success, "an unedited commit must be a no-op, not a refusal either")
 
-        XCTAssertTrue(FileManager.default.fileExists(atPath: url.path),
-                      "the original file must not have been moved")
+        XCTAssertTrue(
+            FileManager.default.fileExists(atPath: url.path),
+            "the original file must not have been moved")
         let after = try String(contentsOf: url, encoding: .utf8)
         XCTAssertEqual(before, after, "an unedited commit must not rewrite the file")
         let referrerAfter = try String(
@@ -420,9 +433,11 @@ final class TitleSyncTests: XCTestCase {
         let root = tempDir()
         let store = try makeStore(root)
         await store.settleForTesting()
-        let url = try write(root, "filename-one.md",
+        let url = try write(
+            root, "filename-one.md",
             "---\nid: n\ntitle: A Totally Different Title\n---\nbody")
-        try write(root, "Referrer.md",
+        try write(
+            root, "Referrer.md",
             "---\nid: r\ntitle: Referrer\n---\nSee [[A Totally Different Title]].")
         try store.rebuild()
 

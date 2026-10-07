@@ -1,6 +1,6 @@
+import AinkradAppKit
 import AppKit
 import SwiftUI
-import AinkradAppKit
 
 /// Preparing and painting a pipe table's drawn grid.
 ///
@@ -63,23 +63,30 @@ enum MarkdownTableStyling {
     /// Also reserves each row's height, because the two must be decided from
     /// the SAME layout — a grid measured one way and reserved another is how a
     /// table ends up drawn over the paragraph beneath it.
-    static func prepare(_ spans: [StyleSpan], revealed: Range<Int>?, maxWidth: CGFloat,
-                        bodyFont: NSFont,
-                        in storage: NSTextStorage) -> [MarkdownBlockBackgrounds.Region] {
+    static func prepare(
+        _ spans: [StyleSpan], revealed: Range<Int>?, maxWidth: CGFloat,
+        bodyFont: NSFont,
+        in storage: NSTextStorage
+    ) -> [MarkdownBlockBackgrounds.Region] {
         let text = storage.string as NSString
         var out: [MarkdownBlockBackgrounds.Region] = []
         for span in spans {
             guard case .table = span.kind,
-                  let table = MarkdownTable.parse(range: span.range, in: text),
-                  let box = MarkdownTableLayout.layout(table, in: storage,
-                                                       maxWidth: maxWidth,
-                                                       bodyFont: bodyFont)
+                let table = MarkdownTable.parse(range: span.range, in: text),
+                let box = MarkdownTableLayout.layout(
+                    table, in: storage,
+                    maxWidth: maxWidth,
+                    bodyFont: bodyFont)
             else { continue }
             reserveRows(box, revealed: revealed, in: storage)
-            out.append(MarkdownBlockBackgrounds.Region(
-                kind: .table(box, marker: NSRange(location: span.range.lowerBound,
-                                                  length: 1)),
-                range: NSRange(location: span.range.lowerBound, length: span.range.count)))
+            out.append(
+                MarkdownBlockBackgrounds.Region(
+                    kind: .table(
+                        box,
+                        marker: NSRange(
+                            location: span.range.lowerBound,
+                            length: 1)),
+                    range: NSRange(location: span.range.lowerBound, length: span.range.count)))
         }
         return out
     }
@@ -93,22 +100,27 @@ enum MarkdownTableStyling {
     ///
     /// Runs AFTER `collapse`, like every other reservation here — that pass
     /// resets attributes on the ranges this writes to.
-    static func reserveRows(_ box: TableBox, revealed: Range<Int>?,
-                            in storage: NSTextStorage) {
+    static func reserveRows(
+        _ box: TableBox, revealed: Range<Int>?,
+        in storage: NSTextStorage
+    ) {
         for row in box.rows {
             guard NSMaxRange(row.sourceRange) <= storage.length else { continue }
             // A revealed table shows its source and must keep the source's own
             // line heights, or the rows stand apart while being edited.
             if isRevealed(row.sourceRange, in: revealed) { continue }
-            let style = (storage.attribute(.paragraphStyle, at: row.sourceRange.location,
-                                           effectiveRange: nil) as? NSParagraphStyle)?
+            let style =
+                (storage.attribute(
+                    .paragraphStyle, at: row.sourceRange.location,
+                    effectiveRange: nil) as? NSParagraphStyle)?
                 .mutableCopy() as? NSMutableParagraphStyle ?? NSMutableParagraphStyle()
             style.minimumLineHeight = row.height
             style.maximumLineHeight = row.height
             storage.addAttribute(.paragraphStyle, value: style, range: row.sourceRange)
         }
         if let delimiter = box.delimiterRange, NSMaxRange(delimiter) <= storage.length,
-           !isRevealed(delimiter, in: revealed) {
+            !isRevealed(delimiter, in: revealed)
+        {
             let style = NSMutableParagraphStyle()
             style.minimumLineHeight = 1
             style.maximumLineHeight = 1
@@ -129,11 +141,14 @@ enum MarkdownTableStyling {
     /// bold, inline code, a wikilink's colour and a collapsed `**` all render
     /// exactly as the rest of the editor renders them. Drawing plain text here
     /// would mean a second, divergent idea of what a cell looks like.
-    static func draw(_ box: TableBox, tint: NSColor, rule: NSColor,
-                     in textView: NSTextView, origin: NSPoint, dirtyRect: NSRect) {
+    static func draw(
+        _ box: TableBox, tint: NSColor, rule: NSColor,
+        in textView: NSTextView, origin: NSPoint, dirtyRect: NSRect
+    ) {
         for row in box.rows {
-            var rect = MarkdownBlockBackgrounds.boundingRect(of: row.sourceRange,
-                                                             in: textView)
+            var rect = MarkdownBlockBackgrounds.boundingRect(
+                of: row.sourceRange,
+                in: textView)
             guard !rect.isNull, !rect.isEmpty else { continue }
             rect = rect.offsetBy(dx: origin.x, dy: origin.y)
             guard rect.intersects(dirtyRect.insetBy(dx: -400, dy: -400)) else { continue }
@@ -141,8 +156,9 @@ enum MarkdownTableStyling {
             // A row showing its SOURCE must not also be drawn over. Measured
             // from the row's first character, which is 0.01 pt while collapsed
             // and a real glyph once the caret reveals it.
-            guard MarkdownMathStyling.drawsExpression(
-                at: NSRange(location: row.sourceRange.location, length: 1), in: textView)
+            guard
+                MarkdownMathStyling.drawsExpression(
+                    at: NSRange(location: row.sourceRange.location, length: 1), in: textView)
             else { continue }
 
             for cell in row.cells where cell.column < box.columnWidths.count {
@@ -152,18 +168,22 @@ enum MarkdownTableStyling {
                 guard text.length > 0 else { continue }
                 let size = text.boundingRect(
                     with: CGSize(width: inner, height: .greatestFiniteMagnitude),
-                    options: [.usesLineFragmentOrigin, .usesFontLeading]).size
+                    options: [.usesLineFragmentOrigin, .usesFontLeading]
+                ).size
 
                 // Alignment decides where the text sits in the slack, which is
                 // the same question the kern version answered with padding.
                 let slack = max(0, inner - size.width)
-                let alignment = cell.column < box.columnAlignments.count
+                let alignment =
+                    cell.column < box.columnAlignments.count
                     ? box.columnAlignments[cell.column] : .left
                 let offset = cellOffset(for: alignment, slack: slack)
                 let x = rect.minX + box.columnOrigin(cell.column) + cellPaddingH + offset
-                text.draw(with: CGRect(x: x, y: rect.minY + cellPaddingV,
-                                       width: inner, height: rect.height),
-                          options: [.usesLineFragmentOrigin, .usesFontLeading])
+                text.draw(
+                    with: CGRect(
+                        x: x, y: rect.minY + cellPaddingV,
+                        width: inner, height: rect.height),
+                    options: [.usesLineFragmentOrigin, .usesFontLeading])
             }
 
             // A GRID, not a set of underlines.
@@ -176,12 +196,16 @@ enum MarkdownTableStyling {
             // borders ARE the structure.
             rule.setFill()
             let thickness: CGFloat = row.isHeader ? 1 : 0.5
-            NSRect(x: rect.minX, y: rect.maxY - thickness,
-                   width: box.totalWidth, height: thickness).fill()
+            NSRect(
+                x: rect.minX, y: rect.maxY - thickness,
+                width: box.totalWidth, height: thickness
+            ).fill()
             // The row's top edge, so the first row is closed rather than open.
             if row.isHeader {
-                NSRect(x: rect.minX, y: rect.minY,
-                       width: box.totalWidth, height: thickness).fill()
+                NSRect(
+                    x: rect.minX, y: rect.minY,
+                    width: box.totalWidth, height: thickness
+                ).fill()
             }
             // One vertical per column boundary, plus the two outer edges.
             // Hairlines throughout: a table wants to be read across, and
@@ -199,8 +223,10 @@ enum MarkdownTableStyling {
     /// version of this decision was testable on screen — the padding moved real
     /// glyphs — but a drawn grid puts the text somewhere no character rect can
     /// report, so the arithmetic has to be checkable on its own.
-    static func cellOffset(for alignment: MarkdownTable.Alignment,
-                           slack: CGFloat) -> CGFloat {
+    static func cellOffset(
+        for alignment: MarkdownTable.Alignment,
+        slack: CGFloat
+    ) -> CGFloat {
         switch alignment {
         case .left: return 0
         case .right: return slack

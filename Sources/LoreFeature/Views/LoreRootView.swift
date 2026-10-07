@@ -1,6 +1,6 @@
-import SwiftUI
-import AppKit
 import AinkradAppKit
+import AppKit
+import SwiftUI
 
 struct LoreRootView: View {
     @Bindable var store: LoreStore
@@ -99,15 +99,16 @@ struct LoreRootView: View {
                 }
             }
             content
-            // Attached HERE, not at the root, on purpose: `loreSidebarOperations`
-            // already owns a `.sheet` on the root view, and two `.sheet`
-            // modifiers on the same view are unreliable on macOS — with the
-            // failure mode being a dialog that silently never appears (see
-            // `SidebarOperationsPresentation`).
-            .sheet(item: $importing) { coordinator in
-                ImportEntryView(coordinator: coordinator, theme: theme,
-                                onClose: { importing = nil })
-            }
+                // Attached HERE, not at the root, on purpose: `loreSidebarOperations`
+                // already owns a `.sheet` on the root view, and two `.sheet`
+                // modifiers on the same view are unreliable on macOS — with the
+                // failure mode being a dialog that silently never appears (see
+                // `SidebarOperationsPresentation`).
+                .sheet(item: $importing) { coordinator in
+                    ImportEntryView(
+                        coordinator: coordinator, theme: theme,
+                        onClose: { importing = nil })
+                }
         }
         .background(theme.tokens.background)
         .environment(\.ainkradTheme, theme.tokens)
@@ -130,12 +131,16 @@ struct LoreRootView: View {
         // transient surface over the work, which is what an overlay reads as.
         .overlay {
             if let mode = palette {
-                LorePalette(mode: mode, store: store, runner: runner, theme: theme,
-                            outline: outline,
-                            onDismiss: { palette = nil },
-                            onJumpToOffset: { jumpToOffset?($0) })
-                    .transition(reduceMotion ? .opacity
-                                : .opacity.combined(with: .scale(scale: 0.98)))
+                LorePalette(
+                    mode: mode, store: store, runner: runner, theme: theme,
+                    outline: outline,
+                    onDismiss: { palette = nil },
+                    onJumpToOffset: { jumpToOffset?($0) }
+                )
+                .transition(
+                    reduceMotion
+                        ? .opacity
+                        : .opacity.combined(with: .scale(scale: 0.98)))
             }
         }
         .animation(reduceMotion ? nil : AinkradMotion.materialize, value: palette)
@@ -189,8 +194,10 @@ struct LoreRootView: View {
                 // otherwise sit above a list that is not the tree, next to
                 // rows it cannot affect.
                 if effectiveSidebarMode == .tree, let root = store.vaultRoot {
-                    AinkradIconButton(systemName: "folder.badge.plus",
-                                     tooltip: "New Folder") {
+                    AinkradIconButton(
+                        systemName: "folder.badge.plus",
+                        tooltip: "New Folder"
+                    ) {
                         ops.beginNewFolder(in: root)
                     }
                     // A tooltip is not a label: it needs a pointer to hover,
@@ -199,8 +206,10 @@ struct LoreRootView: View {
                     .accessibilityLabel("New folder")
                 }
                 if let root = store.vaultRoot {
-                    AinkradIconButton(systemName: "square.and.arrow.down",
-                                     tooltip: "Import…") {
+                    AinkradIconButton(
+                        systemName: "square.and.arrow.down",
+                        tooltip: "Import…"
+                    ) {
                         importing = ImportCoordinator(vaultRoot: root)
                     }
                     .accessibilityLabel("Import notes")
@@ -225,7 +234,10 @@ struct LoreRootView: View {
                 selection: Binding(
                     get: { effectiveSidebarMode },
                     set: { mode in
-                        if mode == .tree { query = ""; activeTag = nil }
+                        if mode == .tree {
+                            query = ""
+                            activeTag = nil
+                        }
                         store.setSidebarMode(mode)
                     })
             ) { mode in mode == .tree ? "Folders" : "All notes" }
@@ -239,25 +251,31 @@ struct LoreRootView: View {
                     .padding(.horizontal, AinkradSpacing.md)
             }
 
-            SidebarPinnedSection(store: store, theme: theme, selected: $selected,
-                                    onSelect: openRow, ops: ops)
+            SidebarPinnedSection(
+                store: store, theme: theme, selected: $selected,
+                onSelect: openRow, ops: ops)
 
             if effectiveSidebarMode == .tree {
-                FolderTreeView(store: store, theme: theme, selected: $selected,
-                              onSelect: openRow, ops: ops)
+                FolderTreeView(
+                    store: store, theme: theme, selected: $selected,
+                    onSelect: openRow, ops: ops)
             } else {
-                NoteListView(store: store, query: $query, selected: $selected, theme: theme,
-                            onSelect: openRow, onNew: quickCapture, ops: ops,
-                            activeTag: $activeTag, focusRequest: $listFocusRequest)
+                NoteListView(
+                    store: store, query: $query, selected: $selected, theme: theme,
+                    onSelect: openRow, onNew: quickCapture, ops: ops,
+                    activeTag: $activeTag, focusRequest: $listFocusRequest)
             }
         }
     }
 
     @ViewBuilder private var content: some View {
         if let failure = store.openError, failure.url == attempted {
-            emptyStateChrome { DocumentErrorCard(url: failure.url,
-                                                 message: "Lore couldn't open this document.",
-                                                 theme: theme) }
+            emptyStateChrome {
+                DocumentErrorCard(
+                    url: failure.url,
+                    message: "Lore couldn't open this document.",
+                    theme: theme)
+            }
         } else if let primary = store.pane.session {
             // One column, or two. Each owns its own header, actions menu and
             // mentions slideover — see `DocumentPaneColumn`.
@@ -306,14 +324,15 @@ struct LoreRootView: View {
         @ViewBuilder _ body: () -> Content
     ) -> some View {
         VStack(spacing: 0) {
-            DocumentHeaderBar(session: nil, store: store, theme: theme,
-                              row: nil, ops: ops, showingActions: $showingActions)
+            DocumentHeaderBar(
+                session: nil, store: store, theme: theme,
+                row: nil, ops: ops, showingActions: $showingActions)
             body()
         }
     }
 
     @ViewBuilder private var emptyState: some View {
-            switch Self.emptyState(for: store) {
+        switch Self.emptyState(for: store) {
         case .noVault:
             // Offering "New note" here was the whole bug: with no vault the
             // click could not succeed, and the copy told the user to press

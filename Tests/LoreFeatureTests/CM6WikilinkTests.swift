@@ -1,6 +1,7 @@
 import AppKit
 import WebKit
 import XCTest
+
 @testable import LoreFeature
 
 /// E2T1b: `[[wikilinks]]` render, and clicking one opens its target.
@@ -13,13 +14,17 @@ final class CM6WikilinkTests: XCTestCase {
 
     private var windows: [NSWindow] = []
     private var webView: WKWebView!
-    override func tearDown() { windows.removeAll(); super.tearDown() }
+    override func tearDown() {
+        windows.removeAll()
+        super.tearDown()
+    }
 
     @MainActor
     private func boot(_ text: String) throws {
         webView = WKWebView(frame: NSRect(x: 0, y: 0, width: 900, height: 700))
-        let window = NSWindow(contentRect: webView.frame, styleMask: [.titled],
-                              backing: .buffered, defer: false)
+        let window = NSWindow(
+            contentRect: webView.frame, styleMask: [.titled],
+            backing: .buffered, defer: false)
         window.contentView = webView
         windows.append(window)
         let index = try XCTUnwrap(CM6EditorView.Coordinator.bundledIndexURL)
@@ -36,8 +41,14 @@ final class CM6WikilinkTests: XCTestCase {
 
     @MainActor @discardableResult
     private func js(_ source: String) throws -> Any? {
-        var result: Any?; var failure: Error?; var done = false
-        webView.evaluateJavaScript(source) { v, e in result = v; failure = e; done = true }
+        var result: Any?
+        var failure: Error?
+        var done = false
+        webView.evaluateJavaScript(source) { v, e in
+            result = v
+            failure = e
+            done = true
+        }
         let deadline = Date().addingTimeInterval(20)
         while !done, Date() < deadline {
             RunLoop.current.run(mode: .default, before: Date().addingTimeInterval(0.01))
@@ -93,12 +104,13 @@ final class CM6WikilinkTests: XCTestCase {
     func test_theCaretsOwnLineShowsTheSource() throws {
         try boot("See [[Design Doc]] here.\n\nAnd [[Other]] there.\n\n")
         XCTAssertEqual(try targets().sorted(), ["Design Doc", "Other"])
-        _ = try js("""
-        (() => {
-          const doc = window.loreEditor.text();
-          window.loreEditor.selectAt(doc.indexOf("Design Doc"));
-        })()
-        """)
+        _ = try js(
+            """
+            (() => {
+              const doc = window.loreEditor.text();
+              window.loreEditor.selectAt(doc.indexOf("Design Doc"));
+            })()
+            """)
         // The caret's line reverts to source; the other line stays rendered.
         XCTAssertEqual(try targets(), ["Other"])
     }
@@ -130,13 +142,15 @@ final class CM6WikilinkTests: XCTestCase {
     @MainActor
     func test_anEmbedIsNeverRenderedAsAPlainLink() throws {
         try boot("An embed: ![[Some Note.md]]\n\n")
-        XCTAssertEqual(try targets(), [],
-                       "an embed must never appear among the plain wikilinks")
+        XCTAssertEqual(
+            try targets(), [],
+            "an embed must never appear among the plain wikilinks")
         // A markdown target is a transclusion. There is no bridge in this
         // harness, so the box stays a placeholder — which still has to name the
         // note rather than show nothing.
-        XCTAssertEqual(try js("window.loreEditor.transclusionTargets()") as? [String],
-                       ["Some Note.md"])
+        XCTAssertEqual(
+            try js("window.loreEditor.transclusionTargets()") as? [String],
+            ["Some Note.md"])
     }
 
     /// A link in a table cell, which the table widget renders itself.
@@ -151,13 +165,14 @@ final class CM6WikilinkTests: XCTestCase {
         let cell = try js("document.querySelector('.cm-lore-table td').innerText") as? String ?? ""
         XCTAssertFalse(cell.contains("[["), "the cell must not show brackets: \(cell)")
 
-        _ = try js("""
-        (() => {
-          window.__posted = [];
-          window.webkit = { messageHandlers: { lore: {
-            postMessage: m => window.__posted.push(m) } } };
-        })()
-        """)
+        _ = try js(
+            """
+            (() => {
+              window.__posted = [];
+              window.webkit = { messageHandlers: { lore: {
+                postMessage: m => window.__posted.push(m) } } };
+            })()
+            """)
         _ = try js("window.loreEditor.clickWikilink(0, false)")
         XCTAssertEqual(try js("window.__posted[0].target") as? String, "Design Doc")
     }
@@ -178,13 +193,14 @@ final class CM6WikilinkTests: XCTestCase {
         try boot("See [[Projects/Design Doc|the design]].\n\n")
         // The bridge is not installed in this harness, so the post is captured
         // rather than delivered — the assertion is about WHAT is sent.
-        _ = try js("""
-        (() => {
-          window.__posted = [];
-          window.webkit = { messageHandlers: { lore: {
-            postMessage: m => window.__posted.push(m) } } };
-        })()
-        """)
+        _ = try js(
+            """
+            (() => {
+              window.__posted = [];
+              window.webkit = { messageHandlers: { lore: {
+                postMessage: m => window.__posted.push(m) } } };
+            })()
+            """)
         XCTAssertEqual(try js("window.loreEditor.clickWikilink(0, false)") as? Bool, true)
         XCTAssertEqual(try js("window.__posted.length") as? Int, 1)
         XCTAssertEqual(try js("window.__posted[0].kind") as? String, "openLink")
@@ -195,13 +211,14 @@ final class CM6WikilinkTests: XCTestCase {
     @MainActor
     func test_cmdClickAsksForTheLinkBeside() throws {
         try boot("See [[Design Doc]].\n\n")
-        _ = try js("""
-        (() => {
-          window.__posted = [];
-          window.webkit = { messageHandlers: { lore: {
-            postMessage: m => window.__posted.push(m) } } };
-        })()
-        """)
+        _ = try js(
+            """
+            (() => {
+              window.__posted = [];
+              window.webkit = { messageHandlers: { lore: {
+                postMessage: m => window.__posted.push(m) } } };
+            })()
+            """)
         _ = try js("window.loreEditor.clickWikilink(0, true)")
         XCTAssertEqual(try js("window.__posted[0].beside") as? Bool, true)
     }
@@ -214,26 +231,27 @@ final class CM6WikilinkTests: XCTestCase {
     @MainActor
     func test_renderingChangesNoByteOfTheDocument() throws {
         let source = """
-        # Notes
+            # Notes
 
-        See [[Design Doc]] and [[Projects/Other|other]] and ![[img.png]].
+            See [[Design Doc]] and [[Projects/Other|other]] and ![[img.png]].
 
-        Write `[[NotALink]]` for the syntax.
+            Write `[[NotALink]]` for the syntax.
 
-        | A | B |
-        |---|---|
-        | [[In A Cell]] | two |
+            | A | B |
+            |---|---|
+            | [[In A Cell]] | two |
 
-        """
+            """
         try boot(source)
         XCTAssertEqual(try js("window.loreEditor.text()") as? String, source)
         // And still unchanged after the caret has moved through every link,
         // because a reveal is a decoration change and must not be an edit.
         for needle in ["Design Doc", "other", "img.png", "NotALink", "In A Cell"] {
-            _ = try js("""
-            window.loreEditor.selectAt(
-              window.loreEditor.text().indexOf(\(CM6EditorView.Coordinator.jsString(needle))))
-            """)
+            _ = try js(
+                """
+                window.loreEditor.selectAt(
+                  window.loreEditor.text().indexOf(\(CM6EditorView.Coordinator.jsString(needle))))
+                """)
         }
         XCTAssertEqual(try js("window.loreEditor.text()") as? String, source)
     }

@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 /// Task 9: the code-block span's info string, and the exact range it covers.
@@ -34,10 +35,15 @@ final class CodeBlockLanguageTests: XCTestCase {
         let text = "```swift\nlet x = 1\n```\n"
         let ns = text as NSString
         let span = MarkdownDocumentModel(fullText: text).styleSpans
-            .first { if case .codeBlock = $0.kind { return true }; return false }
+            .first {
+                if case .codeBlock = $0.kind { return true }
+                return false
+            }
         XCTAssertNotNil(span)
-        let covered = ns.substring(with: NSRange(location: span!.range.lowerBound,
-                                                  length: span!.range.count))
+        let covered = ns.substring(
+            with: NSRange(
+                location: span!.range.lowerBound,
+                length: span!.range.count))
         XCTAssertEqual(covered, "```swift\nlet x = 1\n```")
     }
 }

@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 /// The PATCH axis: what happens when a modelled value CHANGES, and on document
@@ -11,8 +12,10 @@ import XCTest
 final class FrontmatterPatchTests: XCTestCase {
     private let path = URL(fileURLWithPath: "/tmp/lore/sample.md")
 
-    private func assertByteExact(_ text: String, _ message: String = "",
-                                 line: UInt = #line) {
+    private func assertByteExact(
+        _ text: String, _ message: String = "",
+        line: UInt = #line
+    ) {
         let out = Frontmatter.serialize(Frontmatter.parse(text, path: path))
         XCTAssertEqual(out, text, message, line: line)
     }
@@ -37,8 +40,9 @@ final class FrontmatterPatchTests: XCTestCase {
         XCTAssertEqual(note.lineEnding, "\r\n")
         XCTAssertEqual(note.title, "Old")
         note.title = "New"
-        XCTAssertEqual(Frontmatter.serialize(note),
-                       "---\r\nid: a\r\ntitle: New\r\naliases:\r\n  - one\r\n---\r\nbody")
+        XCTAssertEqual(
+            Frontmatter.serialize(note),
+            "---\r\nid: a\r\ntitle: New\r\naliases:\r\n  - one\r\n---\r\nbody")
     }
 
     func test_lf_documentKeepsLFLineEndings() {
@@ -77,8 +81,9 @@ final class FrontmatterPatchTests: XCTestCase {
         let text = "\u{FEFF}---\nid: a\ntitle: Old\nstatus: x\n---\nb"
         var note = Frontmatter.parse(text, path: path)
         note.title = "New"
-        XCTAssertEqual(Frontmatter.serialize(note),
-                       "\u{FEFF}---\nid: a\ntitle: New\nstatus: x\n---\nb")
+        XCTAssertEqual(
+            Frontmatter.serialize(note),
+            "\u{FEFF}---\nid: a\ntitle: New\nstatus: x\n---\nb")
     }
 
     /// Both preservation mechanisms composing.
@@ -168,12 +173,12 @@ final class FrontmatterPatchTests: XCTestCase {
 
     func test_quotedTitle_isUnquotedOnReadAndStillByteExact() {
         let text = """
-        ---
-        id: "quoted-id"
-        title: "Quoted"
-        ---
-        body
-        """
+            ---
+            id: "quoted-id"
+            title: "Quoted"
+            ---
+            body
+            """
         let note = Frontmatter.parse(text, path: path)
         XCTAssertEqual(note.title, "Quoted")
         XCTAssertEqual(note.id, "quoted-id")
@@ -183,55 +188,62 @@ final class FrontmatterPatchTests: XCTestCase {
     // MARK: - patching a block sequence (review findings: Important 3 & 5)
 
     func test_mutatingBlockSequenceTags_replacesTheWholeBlock() {
-        let note0 = Frontmatter.parse("""
-        ---
-        id: a
-        tags:
-          - one
-          - two
-        status: active
-        ---
-        body
-        """, path: path)
+        let note0 = Frontmatter.parse(
+            """
+            ---
+            id: a
+            tags:
+              - one
+              - two
+            status: active
+            ---
+            body
+            """, path: path)
         var note = note0
         note.tags = ["z"]
-        XCTAssertEqual(Frontmatter.serialize(note), """
-        ---
-        id: a
-        tags: [z]
-        status: active
-        ---
-        body
-        """)
+        XCTAssertEqual(
+            Frontmatter.serialize(note),
+            """
+            ---
+            id: a
+            tags: [z]
+            status: active
+            ---
+            body
+            """)
     }
 
     func test_mutatingBlockSequenceTags_withInteriorComment_leavesNoOrphans() {
-        var note = Frontmatter.parse("""
-        ---
-        id: a
-        tags:
-          - one
-        # c
-          - two
-        status: active
-        ---
-        body
-        """, path: path)
+        var note = Frontmatter.parse(
+            """
+            ---
+            id: a
+            tags:
+              - one
+            # c
+              - two
+            status: active
+            ---
+            body
+            """, path: path)
         XCTAssertEqual(note.tags, ["one", "two"], "an interior comment must not truncate the list")
         note.tags = ["z"]
-        XCTAssertEqual(Frontmatter.serialize(note), """
-        ---
-        id: a
-        tags: [z]
-        status: active
-        ---
-        body
-        """)
+        XCTAssertEqual(
+            Frontmatter.serialize(note),
+            """
+            ---
+            id: a
+            tags: [z]
+            status: active
+            ---
+            body
+            """)
     }
 
     func test_mutatingBlockSequenceTags_withInteriorBlankLine_leavesNoOrphans() {
-        var note = Frontmatter.parse("---\nid: a\ntags:\n  - one\n\n  - two\nstatus: active\n---\nbody",
-                                     path: path)
+        var note = Frontmatter.parse(
+            "---\nid: a\ntags:\n  - one\n\n  - two\nstatus: active\n---\nbody",
+            path: path)
         XCTAssertEqual(note.tags, ["one", "two"])
         note.tags = ["z"]
         XCTAssertEqual(Frontmatter.serialize(note), "---\nid: a\ntags: [z]\nstatus: active\n---\nbody")
@@ -239,43 +251,49 @@ final class FrontmatterPatchTests: XCTestCase {
 
     /// A comment AFTER the last item belongs to nobody and must not be eaten.
     func test_trailingCommentIsNotSwallowedByThePrecedingBlock() {
-        var note = Frontmatter.parse("""
-        ---
-        id: a
-        tags:
-          - one
-        # trailing
-        ---
-        body
-        """, path: path)
+        var note = Frontmatter.parse(
+            """
+            ---
+            id: a
+            tags:
+              - one
+            # trailing
+            ---
+            body
+            """, path: path)
         note.tags = ["z"]
-        XCTAssertEqual(Frontmatter.serialize(note), """
-        ---
-        id: a
-        tags: [z]
-        # trailing
-        ---
-        body
-        """)
+        XCTAssertEqual(
+            Frontmatter.serialize(note),
+            """
+            ---
+            id: a
+            tags: [z]
+            # trailing
+            ---
+            body
+            """)
     }
 
     func test_changedIsoUpdated_keepsItsIsoFormat() {
-        var note = Frontmatter.parse("""
-        ---
-        id: a
-        updated: 2026-01-02T10:00:00Z
-        ---
-        body
-        """, path: path)
+        var note = Frontmatter.parse(
+            """
+            ---
+            id: a
+            updated: 2026-01-02T10:00:00Z
+            ---
+            body
+            """, path: path)
         note.updated = Date(timeIntervalSince1970: 1_767_434_445)  // 2026-01-03T10:00:45Z
         // Not truncated to `2026-01-03`: external tools sort on this field.
-        XCTAssertEqual(Frontmatter.serialize(note), """
-        ---
-        id: a
-        updated: 2026-01-03T10:00:45Z
-        ---
-        body
-        """)
+        XCTAssertEqual(
+            Frontmatter.serialize(note),
+            """
+            ---
+            id: a
+            updated: 2026-01-03T10:00:45Z
+            ---
+            body
+            """)
     }
 
 }

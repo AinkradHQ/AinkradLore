@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 /// The interaction tests. Each one covers a failure no single-unit test catches
@@ -19,8 +20,9 @@ final class ImportAcceptanceTests: XCTestCase {
         let root = try makeVault()
         for (relative, contents) in files {
             let url = root.appendingPathComponent(relative)
-            try FileManager.default.createDirectory(at: url.deletingLastPathComponent(),
-                                                    withIntermediateDirectories: true)
+            try FileManager.default.createDirectory(
+                at: url.deletingLastPathComponent(),
+                withIntermediateDirectories: true)
             try contents.write(to: url, atomically: true, encoding: .utf8)
         }
         return root
@@ -53,8 +55,9 @@ final class ImportAcceptanceTests: XCTestCase {
     /// `[[Plan]]` now resolves to the user's OWN unrelated Plan.
     func testALinkFollowsANoteThatWasRenamedForACollision() async throws {
         let target = try makeVault()
-        try "the user's own file".write(to: target.appendingPathComponent("Plan.md"),
-                                        atomically: true, encoding: .utf8)
+        try "the user's own file".write(
+            to: target.appendingPathComponent("Plan.md"),
+            atomically: true, encoding: .utf8)
         let source = try makeObsidianVault([
             "Plan.md": "the imported plan",
             "Index.md": "see [[Plan]] for details",
@@ -64,26 +67,30 @@ final class ImportAcceptanceTests: XCTestCase {
             ImportPlanner.plan(items: items, vaultRoot: target, existingImportIDs: []))
         XCTAssertEqual(report.failed.count, 0)
 
-        let index = try XCTUnwrap(report.imported.first {
-            $0.lastPathComponent.hasPrefix("Index")
-        })
+        let index = try XCTUnwrap(
+            report.imported.first {
+                $0.lastPathComponent.hasPrefix("Index")
+            })
         do {
             let body = try text(at: index)
-            XCTAssertTrue(body.contains("[[Plan 2]]"),
-                          "the link must follow the note; got: \(body)")
+            XCTAssertTrue(
+                body.contains("[[Plan 2]]"),
+                "the link must follow the note; got: \(body)")
         }
         // And the user's own file is untouched — the whole reason the note had
         // to move in the first place.
-        XCTAssertEqual(try text(at: target.appendingPathComponent("Plan.md")),
-                       "the user's own file")
+        XCTAssertEqual(
+            try text(at: target.appendingPathComponent("Plan.md")),
+            "the user's own file")
     }
 
     /// The attachment half, which is the one with no ambiguity at all: an embed
     /// pointing at a renamed image is orphaned outright, rendering as nothing.
     func testAnEmbedFollowsAnAttachmentThatWasRenamedForACollision() async throws {
         let target = try makeVault()
-        try "the user's own picture".write(to: target.appendingPathComponent("pic.png"),
-                                           atomically: true, encoding: .utf8)
+        try "the user's own picture".write(
+            to: target.appendingPathComponent("pic.png"),
+            atomically: true, encoding: .utf8)
         let source = try makeObsidianVault([
             "pic.png": "imported bytes",
             "Album.md": "here it is: ![[pic.png]]",
@@ -92,16 +99,19 @@ final class ImportAcceptanceTests: XCTestCase {
         let report = await ImportApplier(vaultRoot: target).apply(
             ImportPlanner.plan(items: items, vaultRoot: target, existingImportIDs: []))
 
-        let album = try XCTUnwrap(report.imported.first {
-            $0.lastPathComponent.hasPrefix("Album")
-        })
+        let album = try XCTUnwrap(
+            report.imported.first {
+                $0.lastPathComponent.hasPrefix("Album")
+            })
         do {
             let body = try text(at: album)
-            XCTAssertTrue(body.contains("![[pic 2.png]]"),
-                          "the embed must follow the image; got: \(body)")
+            XCTAssertTrue(
+                body.contains("![[pic 2.png]]"),
+                "the embed must follow the image; got: \(body)")
         }
-        XCTAssertEqual(try text(at: target.appendingPathComponent("pic.png")),
-                       "the user's own picture")
+        XCTAssertEqual(
+            try text(at: target.appendingPathComponent("pic.png")),
+            "the user's own picture")
     }
 
     /// The rewrite must not reach into places that only LOOK like links.
@@ -109,8 +119,9 @@ final class ImportAcceptanceTests: XCTestCase {
     /// is what earns this — a hand-rolled string replace would fail it.
     func testTheRewriteLeavesCodeBlocksAlone() async throws {
         let target = try makeVault()
-        try "own".write(to: target.appendingPathComponent("Plan.md"),
-                        atomically: true, encoding: .utf8)
+        try "own".write(
+            to: target.appendingPathComponent("Plan.md"),
+            atomically: true, encoding: .utf8)
         let source = try makeObsidianVault([
             "Plan.md": "imported",
             "Doc.md": "```\n[[Plan]]\n```\n\nand a real [[Plan]]",
@@ -119,11 +130,14 @@ final class ImportAcceptanceTests: XCTestCase {
         let report = await ImportApplier(vaultRoot: target).apply(
             ImportPlanner.plan(items: items, vaultRoot: target, existingImportIDs: []))
 
-        let doc = try text(at: try XCTUnwrap(report.imported.first {
-            $0.lastPathComponent.hasPrefix("Doc")
-        }))
-        XCTAssertTrue(doc.contains("```\n[[Plan]]\n```"),
-                      "the fenced sample must be untouched; got: \(doc)")
+        let doc = try text(
+            at: try XCTUnwrap(
+                report.imported.first {
+                    $0.lastPathComponent.hasPrefix("Doc")
+                }))
+        XCTAssertTrue(
+            doc.contains("```\n[[Plan]]\n```"),
+            "the fenced sample must be untouched; got: \(doc)")
         XCTAssertTrue(doc.contains("a real [[Plan 2]]"), "got: \(doc)")
     }
 
@@ -157,8 +171,9 @@ final class ImportAcceptanceTests: XCTestCase {
         let report = await ImportApplier(vaultRoot: target).apply(previewed)
         XCTAssertEqual(Set(report.imported), Set(previewed.creating.map(\.targetURL)))
         XCTAssertTrue(report.renamed.isEmpty)
-        XCTAssertFalse(FileManager.default.fileExists(
-            atPath: target.appendingPathComponent("B.md").path))
+        XCTAssertFalse(
+            FileManager.default.fileExists(
+                atPath: target.appendingPathComponent("B.md").path))
     }
 
     /// And the other half of that contract: when reality DOES diverge — the
@@ -167,12 +182,14 @@ final class ImportAcceptanceTests: XCTestCase {
     /// path would be a report that lied.
     func testADivergenceFromThePreviewedPathIsReported() async throws {
         let target = try makeVault()
-        try "own".write(to: target.appendingPathComponent("Plan.md"),
-                        atomically: true, encoding: .utf8)
+        try "own".write(
+            to: target.appendingPathComponent("Plan.md"),
+            atomically: true, encoding: .utf8)
         let source = try makeObsidianVault(["Plan.md": "imported"])
         let items = try await ObsidianSource(vaultURL: source).scan()
-        let previewed = ImportPlanner.plan(items: items, vaultRoot: target,
-                                           existingImportIDs: [])
+        let previewed = ImportPlanner.plan(
+            items: items, vaultRoot: target,
+            existingImportIDs: [])
         let report = await ImportApplier(vaultRoot: target).apply(previewed)
 
         XCTAssertNotEqual(Set(report.imported), Set(previewed.creating.map(\.targetURL)))
@@ -188,19 +205,24 @@ final class ImportAcceptanceTests: XCTestCase {
         let target = try makeVault()
         let items = try await ObsidianSource(vaultURL: source).scan()
         let applier = ImportApplier(vaultRoot: target)
-        _ = await applier.apply(ImportPlanner.plan(items: items, vaultRoot: target,
-                                                   existingImportIDs: []))
+        _ = await applier.apply(
+            ImportPlanner.plan(
+                items: items, vaultRoot: target,
+                existingImportIDs: []))
         let after = try FileManager.default.contentsOfDirectory(atPath: target.path).sorted()
 
         // Read the ids back off disk rather than reusing the in-memory set —
         // that round trip through the vault is the thing being tested.
         let seen = ImportIDReader.read(vaultRoot: target)
-        let second = await applier.apply(ImportPlanner.plan(items: items, vaultRoot: target,
-                                                            existingImportIDs: seen))
+        let second = await applier.apply(
+            ImportPlanner.plan(
+                items: items, vaultRoot: target,
+                existingImportIDs: seen))
         XCTAssertTrue(second.imported.isEmpty)
         XCTAssertEqual(second.skipped.count, 2)
-        XCTAssertEqual(try FileManager.default.contentsOfDirectory(atPath: target.path).sorted(),
-                       after)
+        XCTAssertEqual(
+            try FileManager.default.contentsOfDirectory(atPath: target.path).sorted(),
+            after)
     }
 
     /// A vault of binaries must import as binaries — not as binaries PLUS a
@@ -216,8 +238,9 @@ final class ImportAcceptanceTests: XCTestCase {
             ImportPlanner.plan(items: items, vaultRoot: target, existingImportIDs: []))
 
         XCTAssertEqual(report.failed.count, 0)
-        XCTAssertEqual(try FileManager.default
-            .contentsOfDirectory(atPath: target.appendingPathComponent("Media").path).sorted(),
-                       ["one.png", "two.pdf"])
+        XCTAssertEqual(
+            try FileManager.default
+                .contentsOfDirectory(atPath: target.appendingPathComponent("Media").path).sorted(),
+            ["one.png", "two.pdf"])
     }
 }

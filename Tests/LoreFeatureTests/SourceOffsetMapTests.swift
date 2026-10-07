@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 final class SourceOffsetMapTests: XCTestCase {
@@ -42,16 +43,16 @@ final class SourceOffsetMapTests: XCTestCase {
     func test_multiByteScalarShiftsColumnsOnItsLine() {
         // "é" is 2 UTF-8 bytes but 1 UTF-16 unit. cmark columns count bytes.
         let map = SourceOffsetMap(body: "é x\n", bodyUTF16Offset: 0)
-        XCTAssertEqual(map.utf16Offset(line: 1, column: 1), 0)   // é
-        XCTAssertEqual(map.utf16Offset(line: 1, column: 3), 1)   // space (byte 3)
-        XCTAssertEqual(map.utf16Offset(line: 1, column: 4), 2)   // x
+        XCTAssertEqual(map.utf16Offset(line: 1, column: 1), 0)  // é
+        XCTAssertEqual(map.utf16Offset(line: 1, column: 3), 1)  // space (byte 3)
+        XCTAssertEqual(map.utf16Offset(line: 1, column: 4), 2)  // x
     }
 
     func test_emojiIsTwoUTF16Units() {
         // "👍" is 4 UTF-8 bytes and 2 UTF-16 units.
         let map = SourceOffsetMap(body: "👍x\n", bodyUTF16Offset: 0)
         XCTAssertEqual(map.utf16Offset(line: 1, column: 1), 0)
-        XCTAssertEqual(map.utf16Offset(line: 1, column: 5), 2)   // x
+        XCTAssertEqual(map.utf16Offset(line: 1, column: 5), 2)  // x
     }
 
     func test_emptyBody() {

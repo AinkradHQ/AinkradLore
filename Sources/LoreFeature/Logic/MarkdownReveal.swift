@@ -108,8 +108,9 @@ enum MarkdownReveal {
         let ns = text as NSString
         return spans.compactMap { span in
             guard span.kind.revealsWholeOnCaretEntry,
-                  span.range.lowerBound >= 0, span.range.upperBound <= ns.length,
-                  span.range.lowerBound < span.range.upperBound else { return nil }
+                span.range.lowerBound >= 0, span.range.upperBound <= ns.length,
+                span.range.lowerBound < span.range.upperBound
+            else { return nil }
             let range = NSRange(location: span.range.lowerBound, length: span.range.count)
             // A span inside one line can never widen past that line, so it
             // cannot affect the answer and does not need to be carried.
@@ -118,15 +119,20 @@ enum MarkdownReveal {
         }
     }
 
-    static func revealedRange(in text: String, selection: NSRange,
-                              spans: [StyleSpan], isFocused: Bool) -> Range<Int>? {
-        revealedRange(in: text, selection: selection,
-                      wideSpans: wideSpans(in: text, spans: spans), isFocused: isFocused)
+    static func revealedRange(
+        in text: String, selection: NSRange,
+        spans: [StyleSpan], isFocused: Bool
+    ) -> Range<Int>? {
+        revealedRange(
+            in: text, selection: selection,
+            wideSpans: wideSpans(in: text, spans: spans), isFocused: isFocused)
     }
 
     /// The same, for a caller holding the cached `wideSpans` — the caret path.
-    static func revealedRange(in text: String, selection: NSRange,
-                              wideSpans: [Range<Int>], isFocused: Bool) -> Range<Int>? {
+    static func revealedRange(
+        in text: String, selection: NSRange,
+        wideSpans: [Range<Int>], isFocused: Bool
+    ) -> Range<Int>? {
         guard isFocused else { return nil }
         let ns = text as NSString
         guard ns.length > 0 else { return nil }
@@ -153,8 +159,14 @@ enum MarkdownReveal {
                 // back in through the exception. Caught by
                 // `test_revealingOneLineLeavesTheRestOfTheParagraphRendered`.
                 guard span.lowerBound < upper && lower < span.upperBound else { continue }
-                if span.lowerBound < lower { lower = span.lowerBound; widened = true }
-                if span.upperBound > upper { upper = span.upperBound; widened = true }
+                if span.lowerBound < lower {
+                    lower = span.lowerBound
+                    widened = true
+                }
+                if span.upperBound > upper {
+                    upper = span.upperBound
+                    widened = true
+                }
             }
         }
         return lower..<upper
@@ -166,10 +178,13 @@ enum MarkdownReveal {
     /// Containment rather than overlap: half a `**` is not something anyone can
     /// edit, and a marker that straddled the boundary would flicker as the
     /// caret crossed it.
-    static func hiddenMarkers(spans: [StyleSpan], selection: NSRange,
-                              text: String, isFocused: Bool) -> [Range<Int>] {
-        let revealed = revealedRange(in: text, selection: selection,
-                                     spans: spans, isFocused: isFocused)
+    static func hiddenMarkers(
+        spans: [StyleSpan], selection: NSRange,
+        text: String, isFocused: Bool
+    ) -> [Range<Int>] {
+        let revealed = revealedRange(
+            in: text, selection: selection,
+            spans: spans, isFocused: isFocused)
         return spans.compactMap { span in
             guard case .marker = span.kind else { return nil }
             return isRevealed(span.range, in: revealed) ? nil : span.range

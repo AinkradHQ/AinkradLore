@@ -1,6 +1,7 @@
 import AppKit
 import Foundation
 import XCTest
+
 @testable import LoreFeature
 
 /// The M6 final review, Finding 2: `handlePlainClick`, `jumpFootnote` and
@@ -82,7 +83,7 @@ final class MarkdownNavigationTests: XCTestCase {
         // An orphan reference with no definition anywhere: emit nothing
         // rather than jump somewhere wrong.
         let spans: [StyleSpan] = [
-            StyleSpan(range: 5..<9, kind: .footnoteReference(label: "orphan")),
+            StyleSpan(range: 5..<9, kind: .footnoteReference(label: "orphan"))
         ]
         XCTAssertNil(MarkdownNavigation.footnoteJumpTarget(in: spans, at: 6))
     }
@@ -98,7 +99,7 @@ final class MarkdownNavigationTests: XCTestCase {
 
     func test_clickOutsideAnySpan_doesNothing() {
         let spans: [StyleSpan] = [
-            StyleSpan(range: 5..<9, kind: .footnoteReference(label: "1")),
+            StyleSpan(range: 5..<9, kind: .footnoteReference(label: "1"))
         ]
         XCTAssertNil(MarkdownNavigation.footnoteJumpTarget(in: spans, at: 100))
     }
@@ -174,8 +175,9 @@ extension MarkdownNavigationTests {
         tv.isVerticallyResizable = true
         tv.isHorizontallyResizable = false
         tv.textContainer?.widthTracksTextView = true
-        tv.textContainer?.containerSize = NSSize(width: 0,
-                                                 height: CGFloat.greatestFiniteMagnitude)
+        tv.textContainer?.containerSize = NSSize(
+            width: 0,
+            height: CGFloat.greatestFiniteMagnitude)
         tv.isRichText = false
         tv.string = body
         let coordinator = MarkdownEditor.Coordinator(text: .constant(body), tokens: tokens)
@@ -196,7 +198,7 @@ extension MarkdownNavigationTests {
         coordinator.onTagClick = { clicked = $0 }
 
         let ns = body as NSString
-        let tagOffset = ns.range(of: "#idea").location + 1   // inside "idea"
+        let tagOffset = ns.range(of: "#idea").location + 1  // inside "idea"
         let handled = coordinator.handlePlainClick(atUTF16: tagOffset)
 
         XCTAssertEqual(clicked, "idea")
@@ -272,8 +274,9 @@ extension MarkdownNavigationTests {
         let caret = ns.range(of: "#idea").location + ns.range(of: "#idea").length
         tv.setSelectedRange(NSRange(location: caret, length: 0))
 
-        XCTAssertNil(coordinator.activeTrigger(in: tv),
-                     "a `#tag` inside a fence must not trigger tag completion")
+        XCTAssertNil(
+            coordinator.activeTrigger(in: tv),
+            "a `#tag` inside a fence must not trigger tag completion")
     }
 
     /// The mirror, inside `$…$` math.
@@ -284,8 +287,9 @@ extension MarkdownNavigationTests {
         let caret = ns.range(of: "#idea").location + ns.range(of: "#idea").length
         tv.setSelectedRange(NSRange(location: caret, length: 0))
 
-        XCTAssertNil(coordinator.activeTrigger(in: tv),
-                     "a `#tag` inside math must not trigger tag completion")
+        XCTAssertNil(
+            coordinator.activeTrigger(in: tv),
+            "a `#tag` inside math must not trigger tag completion")
     }
 
     /// The control: the SAME `#idea` in ordinary prose still triggers.

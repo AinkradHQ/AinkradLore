@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 /// `LoreStore.forTesting(vaultRoot:)` named in the Task 10 brief does not
@@ -16,8 +17,9 @@ final class FolderOperationsTests: XCTestCase {
     }
 
     private func store(_ root: URL) throws -> LoreStore {
-        let s = LoreStore(documents: FakeDocs(),
-                          indexPath: root.appendingPathComponent(".idx.sqlite"))
+        let s = LoreStore(
+            documents: FakeDocs(),
+            indexPath: root.appendingPathComponent(".idx.sqlite"))
         try s.setVaultRootForTesting(root)
         return s
     }
@@ -29,8 +31,9 @@ final class FolderOperationsTests: XCTestCase {
         let s = try store(root)
         let created = try s.createFolder(named: "Projects", in: root)
         var isDirectory: ObjCBool = false
-        XCTAssertTrue(FileManager.default.fileExists(
-            atPath: created.path, isDirectory: &isDirectory))
+        XCTAssertTrue(
+            FileManager.default.fileExists(
+                atPath: created.path, isDirectory: &isDirectory))
         XCTAssertTrue(isDirectory.boolValue)
         XCTAssertThrowsError(try s.createFolder(named: "Projects", in: root))
     }
@@ -53,8 +56,10 @@ final class FolderOperationsTests: XCTestCase {
         let root = try vault()
         let s = try store(root)
         for name in [".hidden", ".", "..", "..."] {
-            XCTAssertThrowsError(try s.createFolder(named: name, in: root),
-                                 "expected \(name) to be rejected") { error in
+            XCTAssertThrowsError(
+                try s.createFolder(named: name, in: root),
+                "expected \(name) to be rejected"
+            ) { error in
                 guard case LoreError.invalidName = error else {
                     return XCTFail("expected .invalidName for \(name), got \(error)")
                 }
@@ -80,7 +85,8 @@ final class FolderOperationsTests: XCTestCase {
     func test_planTrashFolder_refusesTheVaultRootItself() async throws {
         let root = try vault()
         let s = try store(root)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
         let plan = s.planTrashFolder(root)
         XCTAssertNotNil(plan.refusal)
         XCTAssertThrowsError(try s.applyTrashFolder(plan))
@@ -88,9 +94,10 @@ final class FolderOperationsTests: XCTestCase {
 
     func test_planTrashFolder_refusesATargetOutsideTheVault() async throws {
         let root = try vault()
-        let outside = try vault() // a second, unrelated temp directory
+        let outside = try vault()  // a second, unrelated temp directory
         let s = try store(root)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
         let plan = s.planTrashFolder(outside)
         XCTAssertNotNil(plan.refusal)
         XCTAssertThrowsError(try s.applyTrashFolder(plan)) { error in
@@ -108,7 +115,8 @@ final class FolderOperationsTests: XCTestCase {
     func test_applyTrashFolder_refusesAForgedPlanTargetingTheRoot() async throws {
         let root = try vault()
         let s = try store(root)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
         let forged = FolderTrashPlan(folder: VaultIndexCoordinator.canonical(root))
         XCTAssertThrowsError(try s.applyTrashFolder(forged)) { error in
             guard case LoreError.outsideVault = error else {
@@ -130,7 +138,8 @@ final class FolderOperationsTests: XCTestCase {
         try "---\nid: b\ntitle: B\n---\nb".write(
             to: folder.appendingPathComponent("b.md"), atomically: true, encoding: .utf8)
         let s = try store(root)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
         let plan = s.planTrashFolder(folder)
         XCTAssertNil(plan.refusal)
         XCTAssertEqual(plan.documents.count, 2)
@@ -157,7 +166,8 @@ final class FolderOperationsTests: XCTestCase {
         let file = folder.appendingPathComponent("target.md")
         try "---\nid: t\ntitle: Target\n---\nx".write(to: file, atomically: true, encoding: .utf8)
         let s = try store(root)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
         XCTAssertEqual(s.rows.count, 1)
 
         // WRONG ORDER: the move happens, THEN the row is canonicalized and
@@ -167,9 +177,10 @@ final class FolderOperationsTests: XCTestCase {
         try FileManager.default.trashItem(at: folder, resultingItemURL: nil)
         try? s.coordinator.removeFromIndex(file)
 
-        XCTAssertFalse(s.rows.isEmpty,
-                       "removal AFTER the move should MISS the row (asserting the hazard, "
-                       + "not the fix — see test_orderingRule_canonicalizingBeforeTheMoveFindsTheRow)")
+        XCTAssertFalse(
+            s.rows.isEmpty,
+            "removal AFTER the move should MISS the row (asserting the hazard, "
+                + "not the fix — see test_orderingRule_canonicalizingBeforeTheMoveFindsTheRow)")
     }
 
     /// The correct order, same setup, same raw `file` URL: canonicalizing
@@ -184,7 +195,8 @@ final class FolderOperationsTests: XCTestCase {
         let file = folder.appendingPathComponent("target.md")
         try "---\nid: t\ntitle: Target\n---\nx".write(to: file, atomically: true, encoding: .utf8)
         let s = try store(root)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
         XCTAssertEqual(s.rows.count, 1)
 
         // RIGHT ORDER: canonicalize/remove first, move second.
@@ -208,7 +220,8 @@ final class FolderOperationsTests: XCTestCase {
         try "---\nid: t\ntitle: Target\n---\ngone".write(
             to: folder.appendingPathComponent("target.md"), atomically: true, encoding: .utf8)
         let s = try store(root)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
         XCTAssertEqual(s.rows.count, 1)
 
         let trashed = try s.applyTrashFolder(s.planTrashFolder(folder))
@@ -229,7 +242,8 @@ final class FolderOperationsTests: XCTestCase {
         try "---\nid: k\ntitle: Keeps\n---\nsee [[Target]]".write(
             to: referrer, atomically: true, encoding: .utf8)
         let s = try store(root)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
 
         _ = try s.applyTrashFolder(s.planTrashFolder(folder))
         XCTAssertFalse(FileManager.default.fileExists(atPath: folder.path))
@@ -249,7 +263,8 @@ final class FolderOperationsTests: XCTestCase {
         let doc = folder.appendingPathComponent("a.md")
         try "---\nid: a\ntitle: A\n---\nx".write(to: doc, atomically: true, encoding: .utf8)
         let s = try store(root)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
         s.open(url: doc)
         XCTAssertEqual(s.tabs.count, 1)
 
@@ -271,7 +286,8 @@ final class FolderOperationsTests: XCTestCase {
         let doc = folder.appendingPathComponent("a.md")
         try "---\nid: a\ntitle: A\n---\nx".write(to: doc, atomically: true, encoding: .utf8)
         let s = try store(root)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
         s.open(url: doc)
         let session = try XCTUnwrap(s.selectedTab)
         let engine = try XCTUnwrap(session.engine as? MarkdownEngine)
@@ -293,8 +309,9 @@ final class FolderOperationsTests: XCTestCase {
             }
         }
 
-        XCTAssertTrue(FileManager.default.fileExists(atPath: folder.path),
-                      "the folder was trashed despite the refusal")
+        XCTAssertTrue(
+            FileManager.default.fileExists(atPath: folder.path),
+            "the folder was trashed despite the refusal")
         XCTAssertEqual(s.tabs.count, 1, "the tab was closed despite the refusal")
         XCTAssertTrue(session.isDirty)
         XCTAssertEqual(engine.note.body, "unsaved edit", "the unsaved text was destroyed")
@@ -309,7 +326,8 @@ final class FolderOperationsTests: XCTestCase {
         let doc = folder.appendingPathComponent("a.md")
         try "---\nid: a\ntitle: A\n---\nx".write(to: doc, atomically: true, encoding: .utf8)
         let s = try store(root)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
         s.open(url: doc)
         let session = try XCTUnwrap(s.selectedTab)
         (session.engine as? MarkdownEngine)?.note.body = "unsaved"
@@ -332,14 +350,16 @@ final class FolderOperationsTests: XCTestCase {
         let indexed = folder.appendingPathComponent("indexed.md")
         try "---\nid: i\ntitle: I\n---\nx".write(to: indexed, atomically: true, encoding: .utf8)
         let s = try store(root)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
 
         // Created AFTER the rescan: it is a real open tab, but not in `rows`.
         let fresh = folder.appendingPathComponent("fresh.md")
         try "---\nid: f\ntitle: F\n---\nx".write(to: fresh, atomically: true, encoding: .utf8)
         s.open(url: fresh)
-        XCTAssertFalse(s.rows.contains { $0.path.lastPathComponent == "fresh.md" },
-                       "the fixture must NOT be indexed yet, or this test proves nothing")
+        XCTAssertFalse(
+            s.rows.contains { $0.path.lastPathComponent == "fresh.md" },
+            "the fixture must NOT be indexed yet, or this test proves nothing")
         XCTAssertEqual(s.tabs.count, 1)
 
         _ = try s.applyTrashFolder(s.planTrashFolder(folder))
@@ -358,7 +378,8 @@ final class FolderOperationsTests: XCTestCase {
         let siblingDoc = sibling.appendingPathComponent("keep.md")
         try "---\nid: k\ntitle: K\n---\nx".write(to: siblingDoc, atomically: true, encoding: .utf8)
         let s = try store(root)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
         s.open(url: siblingDoc)
 
         _ = try s.applyTrashFolder(s.planTrashFolder(folder))
@@ -396,20 +417,23 @@ final class FolderOperationsTests: XCTestCase {
         let folder = root.appendingPathComponent("Old")
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         let s = try store(root)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
 
         // Created AFTER the rescan: a real file, but NOT in `s.rows`.
         let doc = folder.appendingPathComponent("fresh.md")
         try "---\nid: f\ntitle: F\n---\nx".write(to: doc, atomically: true, encoding: .utf8)
-        XCTAssertFalse(s.rows.contains { $0.path.lastPathComponent == "fresh.md" },
-                       "the fixture must NOT be indexed yet, or this test proves nothing")
+        XCTAssertFalse(
+            s.rows.contains { $0.path.lastPathComponent == "fresh.md" },
+            "the fixture must NOT be indexed yet, or this test proves nothing")
 
         // Populate the legacy mtime baseline directly, keyed CANONICALLY —
         // `load` only needs a row SHAPED like the file, not one that is
         // actually present in `s.rows`.
         let canonicalDoc = VaultIndexCoordinator.canonical(doc)
-        let manualRow = IndexRow(path: canonicalDoc, id: "f", title: "F", tags: [], aliases: [],
-                                 updated: Date(), type: MarkdownEngine.identifier, properties: [])
+        let manualRow = IndexRow(
+            path: canonicalDoc, id: "f", title: "F", tags: [], aliases: [],
+            updated: Date(), type: MarkdownEngine.identifier, properties: [])
         _ = try s.load(manualRow)
 
         // Opened via the RAW (non-canonical) `doc` URL — the exact condition
@@ -424,9 +448,10 @@ final class FolderOperationsTests: XCTestCase {
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         try "---\nid: f\ntitle: F\n---\nrestored".write(to: doc, atomically: true, encoding: .utf8)
         let restored = Frontmatter.parse(try String(contentsOf: doc, encoding: .utf8), path: doc)
-        XCTAssertFalse(s.externalChangeDetected(for: restored),
-                       "a stale mtime baseline survived the trash and misfired on the "
-                       + "recreated file — forgetOpenMTime(session.url) likely ran too late")
+        XCTAssertFalse(
+            s.externalChangeDetected(for: restored),
+            "a stale mtime baseline survived the trash and misfired on the "
+                + "recreated file — forgetOpenMTime(session.url) likely ran too late")
     }
 
     /// A forged `FolderTrashPlan` — a legitimate, in-vault `folder` paired
@@ -441,15 +466,18 @@ final class FolderOperationsTests: XCTestCase {
         let outsider = root.appendingPathComponent("elsewhere.md")
         try "---\nid: e\ntitle: E\n---\nx".write(to: outsider, atomically: true, encoding: .utf8)
         let s = try store(root)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
         let outsiderRow = try XCTUnwrap(s.rows.first { $0.path.lastPathComponent == "elsewhere.md" })
 
-        let forged = FolderTrashPlan(folder: VaultIndexCoordinator.canonical(folder),
-                                     documents: [outsiderRow])
+        let forged = FolderTrashPlan(
+            folder: VaultIndexCoordinator.canonical(folder),
+            documents: [outsiderRow])
         _ = try s.applyTrashFolder(forged)
 
-        XCTAssertTrue(s.rows.contains { $0.path.lastPathComponent == "elsewhere.md" },
-                      "a document outside the trashed folder was removed from the index")
+        XCTAssertTrue(
+            s.rows.contains { $0.path.lastPathComponent == "elsewhere.md" },
+            "a document outside the trashed folder was removed from the index")
         XCTAssertTrue(FileManager.default.fileExists(atPath: outsider.path))
     }
 
@@ -469,17 +497,20 @@ final class FolderOperationsTests: XCTestCase {
         let child = parent.appendingPathComponent("Q1")
         try FileManager.default.createDirectory(at: child, withIntermediateDirectories: true)
         let s = try store(root)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
         XCTAssertTrue(s.directoryPaths.contains("Parent/Q1"))
 
         _ = try s.applyTrashFolder(s.planTrashFolder(parent))
 
         XCTAssertFalse(FileManager.default.fileExists(atPath: parent.path))
-        XCTAssertFalse(s.directoryPaths.contains("Parent"),
-                       "the trashed folder must not survive as a ghost node: \(s.directoryPaths)")
-        XCTAssertFalse(s.directoryPaths.contains("Parent/Q1"),
-                       "a subfolder of the trashed folder must not survive either: "
-                       + "\(s.directoryPaths)")
+        XCTAssertFalse(
+            s.directoryPaths.contains("Parent"),
+            "the trashed folder must not survive as a ghost node: \(s.directoryPaths)")
+        XCTAssertFalse(
+            s.directoryPaths.contains("Parent/Q1"),
+            "a subfolder of the trashed folder must not survive either: "
+                + "\(s.directoryPaths)")
     }
 
     /// Renaming a folder must retire the OLD name from `directoryPaths` and
@@ -491,7 +522,8 @@ final class FolderOperationsTests: XCTestCase {
         let child = parent.appendingPathComponent("Q1")
         try FileManager.default.createDirectory(at: child, withIntermediateDirectories: true)
         let s = try store(root)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
         XCTAssertTrue(s.directoryPaths.contains("Parent/Q1"))
 
         let plan = s.plan(renameFolder: parent, to: "Renamed")
@@ -499,14 +531,18 @@ final class FolderOperationsTests: XCTestCase {
         let report = s.apply(plan)
         XCTAssertTrue(report.failed.isEmpty, "rename must not fail: \(report.failed)")
 
-        XCTAssertFalse(s.directoryPaths.contains("Parent"),
-                       "the old folder name must not survive as a ghost node: \(s.directoryPaths)")
-        XCTAssertFalse(s.directoryPaths.contains("Parent/Q1"),
-                       "nor should its old-named subfolder: \(s.directoryPaths)")
-        XCTAssertTrue(s.directoryPaths.contains("Renamed"),
-                      "the new name must be visible: \(s.directoryPaths)")
-        XCTAssertTrue(s.directoryPaths.contains("Renamed/Q1"),
-                      "and its empty subfolder must have moved with it, not gone missing: "
-                      + "\(s.directoryPaths)")
+        XCTAssertFalse(
+            s.directoryPaths.contains("Parent"),
+            "the old folder name must not survive as a ghost node: \(s.directoryPaths)")
+        XCTAssertFalse(
+            s.directoryPaths.contains("Parent/Q1"),
+            "nor should its old-named subfolder: \(s.directoryPaths)")
+        XCTAssertTrue(
+            s.directoryPaths.contains("Renamed"),
+            "the new name must be visible: \(s.directoryPaths)")
+        XCTAssertTrue(
+            s.directoryPaths.contains("Renamed/Q1"),
+            "and its empty subfolder must have moved with it, not gone missing: "
+                + "\(s.directoryPaths)")
     }
 }

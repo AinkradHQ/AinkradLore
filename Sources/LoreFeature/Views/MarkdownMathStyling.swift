@@ -1,6 +1,6 @@
+import AinkradAppKit
 import AppKit
 import SwiftUI
-import AinkradAppKit
 
 /// Makes room for a drawn expression, and paints it.
 ///
@@ -21,8 +21,10 @@ enum MarkdownMathStyling {
     /// - Parameter revealed: an expression inside it shows its source, so it
     ///   gets no reservation at all: the real characters are back at full width
     ///   and reserving space as well would push the rest of the line aside.
-    static func reserveSpace(_ spans: [StyleSpan], revealed: Range<Int>?,
-                             font: NSFont, in storage: NSTextStorage) {
+    static func reserveSpace(
+        _ spans: [StyleSpan], revealed: Range<Int>?,
+        font: NSFont, in storage: NSTextStorage
+    ) {
         let text = storage.string as NSString
         for span in spans {
             guard case .math(let isRendered) = span.kind, isRendered else { continue }
@@ -43,12 +45,15 @@ enum MarkdownMathStyling {
             guard box.height > lineHeight else { continue }
             let paragraph = text.paragraphRange(
                 for: NSRange(location: span.range.lowerBound, length: 0))
-            let existing = storage.attribute(.paragraphStyle, at: paragraph.location,
-                                             effectiveRange: nil) as? NSParagraphStyle
+            let existing =
+                storage.attribute(
+                    .paragraphStyle, at: paragraph.location,
+                    effectiveRange: nil) as? NSParagraphStyle
             // COPIED, never replaced: the paragraph may already carry a list
             // indent or a quote's head indent, and dropping those to make room
             // for a fraction would move the whole block.
-            let style = (existing?.mutableCopy() as? NSMutableParagraphStyle)
+            let style =
+                (existing?.mutableCopy() as? NSMutableParagraphStyle)
                 ?? NSMutableParagraphStyle()
             style.minimumLineHeight = max(style.minimumLineHeight, box.height + 2)
             storage.addAttribute(.paragraphStyle, value: style, range: paragraph)
@@ -62,11 +67,14 @@ enum MarkdownMathStyling {
     /// render while reveal changes on every caret move, so a stored flag is
     /// stale exactly when the caret enters the expression. That mistake put a
     /// callout's heading on top of its own source on 2026-08-17.
-    static func regions(for spans: [StyleSpan], font: NSFont,
-                        in text: NSString) -> [MarkdownBlockBackgrounds.Region] {
+    static func regions(
+        for spans: [StyleSpan], font: NSFont,
+        in text: NSString
+    ) -> [MarkdownBlockBackgrounds.Region] {
         spans.compactMap { span in
             guard case .math(let isRendered) = span.kind, isRendered,
-                  let box = box(for: span.range, in: text, font: font) else { return nil }
+                let box = box(for: span.range, in: text, font: font)
+            else { return nil }
             return MarkdownBlockBackgrounds.Region(
                 kind: .math(box),
                 range: NSRange(location: span.range.lowerBound, length: span.range.count))
@@ -75,12 +83,17 @@ enum MarkdownMathStyling {
 
     /// Parses and lays out one expression. `nil` when it is not drawable after
     /// all, which keeps every caller on the "show the source" path.
-    private static func box(for range: Range<Int>, in text: NSString,
-                            font: NSFont) -> MathBox? {
+    private static func box(
+        for range: Range<Int>, in text: NSString,
+        font: NSFont
+    ) -> MathBox? {
         guard range.lowerBound >= 0, range.upperBound <= text.length,
-              range.lowerBound < range.upperBound else { return nil }
-        let whole = text.substring(with: NSRange(location: range.lowerBound,
-                                                 length: range.count))
+            range.lowerBound < range.upperBound
+        else { return nil }
+        let whole = text.substring(
+            with: NSRange(
+                location: range.lowerBound,
+                length: range.count))
         // Strip the `$` or `$$` delimiters, which are notation rather than
         // mathematics.
         let width = whole.hasPrefix("$$") ? 2 : 1
@@ -122,9 +135,11 @@ enum MarkdownMathStyling {
     /// `NSTextView` is flipped, so y grows down on screen. Hence the
     /// subtraction — get this backwards and a fraction renders upside down,
     /// which is at least an obvious failure rather than a subtle one.
-    static func draw(_ box: MathBox, at range: NSRange, tint: NSColor,
-                     font: NSFont,
-                     in textView: NSTextView, origin: NSPoint, dirtyRect: NSRect) {
+    static func draw(
+        _ box: MathBox, at range: NSRange, tint: NSColor,
+        font: NSFont,
+        in textView: NSTextView, origin: NSPoint, dirtyRect: NSRect
+    ) {
         let rect = MarkdownBlockBackgrounds.boundingRect(of: range, in: textView)
         guard !rect.isNull, !rect.isEmpty else { return }
         let placed = rect.offsetBy(dx: origin.x, dy: origin.y)
@@ -132,20 +147,27 @@ enum MarkdownMathStyling {
 
         // The baseline of the line the expression sits on. The collapsed run
         // has no useful height of its own, so the LINE's rect provides it.
-        let baselineY = placed.maxY - (placed.height - (font.ascender - font.descender)) / 2
+        let baselineY =
+            placed.maxY - (placed.height - (font.ascender - font.descender)) / 2
             + font.descender
 
         for glyph in box.glyphs {
-            let point = CGPoint(x: placed.minX + glyph.origin.x,
-                                y: baselineY - glyph.origin.y - glyph.font.ascender)
-            (glyph.text as NSString).draw(at: point,
-                                          withAttributes: [.font: glyph.font,
-                                                           .foregroundColor: tint])
+            let point = CGPoint(
+                x: placed.minX + glyph.origin.x,
+                y: baselineY - glyph.origin.y - glyph.font.ascender)
+            (glyph.text as NSString).draw(
+                at: point,
+                withAttributes: [
+                    .font: glyph.font,
+                    .foregroundColor: tint,
+                ])
         }
         tint.setFill()
         for rule in box.rules {
-            NSRect(x: placed.minX + rule.minX, y: baselineY - rule.maxY,
-                   width: rule.width, height: rule.height).fill()
+            NSRect(
+                x: placed.minX + rule.minX, y: baselineY - rule.maxY,
+                width: rule.width, height: rule.height
+            ).fill()
         }
     }
 }

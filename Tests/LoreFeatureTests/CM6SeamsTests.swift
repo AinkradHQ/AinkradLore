@@ -1,6 +1,7 @@
 import AppKit
 import WebKit
 import XCTest
+
 @testable import LoreFeature
 
 /// E3T2: the seams that must not move.
@@ -23,7 +24,10 @@ final class CM6SeamsTests: XCTestCase {
 
     private var windows: [NSWindow] = []
     private var webView: WKWebView!
-    override func tearDown() { windows.removeAll(); super.tearDown() }
+    override func tearDown() {
+        windows.removeAll()
+        super.tearDown()
+    }
 
     /// Documents chosen for the things that break offsets: astral characters,
     /// combining marks, RTL text, tabs, trailing whitespace, no final newline,
@@ -52,8 +56,9 @@ final class CM6SeamsTests: XCTestCase {
     @MainActor
     private func roundTrip(_ text: String) throws -> String {
         webView = WKWebView(frame: NSRect(x: 0, y: 0, width: 900, height: 700))
-        let window = NSWindow(contentRect: webView.frame, styleMask: [.titled],
-                              backing: .buffered, defer: false)
+        let window = NSWindow(
+            contentRect: webView.frame, styleMask: [.titled],
+            backing: .buffered, defer: false)
         window.contentView = webView
         windows.append(window)
         let index = try XCTUnwrap(CM6EditorView.Coordinator.bundledIndexURL)
@@ -63,8 +68,9 @@ final class CM6SeamsTests: XCTestCase {
         }
         // Exactly what the coordinator does on both legs.
         let ending = CM6LineEndings.dominant(in: text)
-        _ = try js("window.loreEditor.init("
-                   + CM6EditorView.Coordinator.jsString(CM6LineEndings.toLF(text)) + ")")
+        _ = try js(
+            "window.loreEditor.init("
+                + CM6EditorView.Coordinator.jsString(CM6LineEndings.toLF(text)) + ")")
         // Move the caret through the document so every decoration is built and
         // torn down — a rendering pass is where a mutation would come from.
         _ = try js("window.loreEditor.selectAt(0)")
@@ -76,8 +82,14 @@ final class CM6SeamsTests: XCTestCase {
 
     @MainActor @discardableResult
     private func js(_ source: String) throws -> Any? {
-        var result: Any?; var failure: Error?; var done = false
-        webView.evaluateJavaScript(source) { v, e in result = v; failure = e; done = true }
+        var result: Any?
+        var failure: Error?
+        var done = false
+        webView.evaluateJavaScript(source) { v, e in
+            result = v
+            failure = e
+            done = true
+        }
         let deadline = Date().addingTimeInterval(20)
         while !done, Date() < deadline {
             RunLoop.current.run(mode: .default, before: Date().addingTimeInterval(0.01))
@@ -106,8 +118,9 @@ final class CM6SeamsTests: XCTestCase {
             // UTF-16 length too: an equal String comparison would still pass
             // for a canonically-equivalent but differently-composed string,
             // and every offset the index holds is measured in UTF-16 units.
-            XCTAssertEqual(back.utf16.count, document.utf16.count,
-                           "\(name) changed length in UTF-16 units")
+            XCTAssertEqual(
+                back.utf16.count, document.utf16.count,
+                "\(name) changed length in UTF-16 units")
         }
     }
 
@@ -125,10 +138,12 @@ final class CM6SeamsTests: XCTestCase {
             let after = LinkParser.spans(in: back)
             XCTAssertEqual(before.count, after.count, "\(name): link count changed")
             for (a, b) in zip(before, after) {
-                XCTAssertEqual(a.targetRange, b.targetRange,
-                               "\(name): a link moved")
-                XCTAssertEqual(a.link.rawTarget, b.link.rawTarget,
-                               "\(name): a link target changed")
+                XCTAssertEqual(
+                    a.targetRange, b.targetRange,
+                    "\(name): a link moved")
+                XCTAssertEqual(
+                    a.link.rawTarget, b.link.rawTarget,
+                    "\(name): a link target changed")
                 XCTAssertEqual(a.link.isEmbed, b.link.isEmbed, "\(name)")
                 XCTAssertEqual(a.link.syntax, b.link.syntax, "\(name)")
             }
@@ -140,8 +155,9 @@ final class CM6SeamsTests: XCTestCase {
     func test_theDocumentsOutboundLinksAreUnchanged() throws {
         for (name, document) in Self.corpus {
             let back = try roundTrip(document)
-            XCTAssertEqual(LinkParser.links(in: document), LinkParser.links(in: back),
-                           "\(name): the link graph would change")
+            XCTAssertEqual(
+                LinkParser.links(in: document), LinkParser.links(in: back),
+                "\(name): the link graph would change")
         }
     }
 }

@@ -1,6 +1,6 @@
+import AinkradAppKit
 import AppKit
 import SwiftUI
-import AinkradAppKit
 
 /// Turns style spans into text attributes.
 ///
@@ -39,19 +39,22 @@ enum MarkdownStyleRenderer {
     /// bold on screen — which is the exact failure this guards. `setAttributes`
     /// over the full range collapses the storage to one run, so the clear is
     /// cheap regardless of how much was styled before.
-    static func apply(_ spans: [StyleSpan], to storage: NSTextStorage,
-                      tokens: HostThemeTokens, theme: MarkdownTheme,
-                      limitedTo window: NSRange?) {
+    static func apply(
+        _ spans: [StyleSpan], to storage: NSTextStorage,
+        tokens: HostThemeTokens, theme: MarkdownTheme,
+        limitedTo window: NSRange?
+    ) {
         let full = NSRange(location: 0, length: storage.length)
         storage.beginEditing()
-        storage.setAttributes([
-            .font: theme.bodyFont,
-            .foregroundColor: NSColor(tokens.foreground),
-            // Body rhythm as the FLOOR, so line height and paragraph spacing
-            // exist for ordinary prose — which is most of a note — and each
-            // block kind then overrides only what it needs.
-            .paragraphStyle: MarkdownParagraphStyles.style(for: .body, theme: theme)
-        ], range: full)
+        storage.setAttributes(
+            [
+                .font: theme.bodyFont,
+                .foregroundColor: NSColor(tokens.foreground),
+                // Body rhythm as the FLOOR, so line height and paragraph spacing
+                // exist for ordinary prose — which is most of a note — and each
+                // block kind then overrides only what it needs.
+                .paragraphStyle: MarkdownParagraphStyles.style(for: .body, theme: theme),
+            ], range: full)
 
         // Derived over ALL spans, before any windowing: nesting depth is a
         // property of the document, and counting only the spans that survive
@@ -62,7 +65,8 @@ enum MarkdownStyleRenderer {
             let r = NSRange(location: span.range.lowerBound, length: span.range.count)
             guard r.length > 0, NSMaxRange(r) <= full.length else { continue }
             if let window, NSIntersectionRange(r, window).length == 0 { continue }
-            add(span.kind, in: r, to: storage, tokens: tokens, theme: theme,
+            add(
+                span.kind, in: r, to: storage, tokens: tokens, theme: theme,
                 listDepth: depths[index])
         }
         storage.endEditing()
@@ -86,24 +90,29 @@ enum MarkdownStyleRenderer {
     ///
     /// - Parameter spanIndices: positions into `spans`, so the caller's cached
     ///   per-block index and its globally-derived `depths` stay aligned.
-    static func restyle(_ spans: [StyleSpan], at spanIndices: [Int],
-                        depths: [Int], in range: NSRange, to storage: NSTextStorage,
-                        tokens: HostThemeTokens, theme: MarkdownTheme) {
-        let clamped = NSIntersectionRange(range,
-                                          NSRange(location: 0, length: storage.length))
+    static func restyle(
+        _ spans: [StyleSpan], at spanIndices: [Int],
+        depths: [Int], in range: NSRange, to storage: NSTextStorage,
+        tokens: HostThemeTokens, theme: MarkdownTheme
+    ) {
+        let clamped = NSIntersectionRange(
+            range,
+            NSRange(location: 0, length: storage.length))
         guard clamped.length > 0 else { return }
         storage.beginEditing()
-        storage.setAttributes([
-            .font: theme.bodyFont,
-            .foregroundColor: NSColor(tokens.foreground),
-            .paragraphStyle: MarkdownParagraphStyles.style(for: .body, theme: theme)
-        ], range: clamped)
+        storage.setAttributes(
+            [
+                .font: theme.bodyFont,
+                .foregroundColor: NSColor(tokens.foreground),
+                .paragraphStyle: MarkdownParagraphStyles.style(for: .body, theme: theme),
+            ], range: clamped)
         for index in spanIndices {
             guard index < spans.count else { continue }
             let span = spans[index]
             let r = NSRange(location: span.range.lowerBound, length: span.range.count)
             guard r.length > 0, NSMaxRange(r) <= storage.length else { continue }
-            add(span.kind, in: r, to: storage, tokens: tokens, theme: theme,
+            add(
+                span.kind, in: r, to: storage, tokens: tokens, theme: theme,
                 listDepth: index < depths.count ? depths[index] : 0)
         }
         storage.endEditing()
@@ -130,8 +139,10 @@ enum MarkdownStyleRenderer {
     /// is file-scoped, and comments need italics composed onto the monospaced
     /// font the same way every other kind composes its traits. Still an
     /// implementation detail outside this module.
-    static func composeFont(in r: NSRange, storage: NSTextStorage,
-                                    _ transform: (NSFont) -> NSFont) {
+    static func composeFont(
+        in r: NSRange, storage: NSTextStorage,
+        _ transform: (NSFont) -> NSFont
+    ) {
         var runs: [(NSRange, NSFont)] = []
         storage.enumerateAttribute(.font, in: r) { value, sub, _ in
             runs.append((sub, (value as? NSFont) ?? fallbackFont))
@@ -184,9 +195,11 @@ enum MarkdownStyleRenderer {
 
     /// Syntax markers stay VISIBLE — this is Live Preview, not WYSIWYG — so
     /// every case styles the span's whole source range, markers included.
-    private static func add(_ kind: StyleSpan.Kind, in r: NSRange,
-                            to storage: NSTextStorage, tokens: HostThemeTokens,
-                            theme: MarkdownTheme, listDepth: Int) {
+    private static func add(
+        _ kind: StyleSpan.Kind, in r: NSRange,
+        to storage: NSTextStorage, tokens: HostThemeTokens,
+        theme: MarkdownTheme, listDepth: Int
+    ) {
         switch kind {
         case .heading(let level):
             // Foreground, not accentPrimary. Size and weight carry hierarchy;
@@ -198,19 +211,22 @@ enum MarkdownStyleRenderer {
             // the top and the bottom of the ramp. Inherited traits still compose,
             // so `# A *b*` keeps its italic.
             composeFont(in: r, storage: storage) { current in
-                Self.applying(Self.inheritedTraits(of: current),
-                              to: .systemFont(ofSize: theme.headingSize(level),
-                                              weight: theme.headingWeight(level)))
+                Self.applying(
+                    Self.inheritedTraits(of: current),
+                    to: .systemFont(
+                        ofSize: theme.headingSize(level),
+                        weight: theme.headingWeight(level)))
             }
             // h1–h3 at full foreground; h4–h6 faded slightly. Size separates the
             // top of the ramp on its own, and the bottom — where the steps are
             // 1–2 pt — needs a second signal. A FADE rather than a hue, so the
             // rule that accent means "you can click this" is untouched.
-            storage.addAttribute(.foregroundColor,
-                                 value: level <= 3
-                                     ? NSColor(tokens.foreground)
-                                     : NSColor(tokens.foreground).withAlphaComponent(0.85),
-                                 range: r)
+            storage.addAttribute(
+                .foregroundColor,
+                value: level <= 3
+                    ? NSColor(tokens.foreground)
+                    : NSColor(tokens.foreground).withAlphaComponent(0.85),
+                range: r)
             let full = storage.string as NSString
             let paragraph = full.paragraphRange(for: r)
             storage.addAttribute(
@@ -231,35 +247,40 @@ enum MarkdownStyleRenderer {
         // model being followed.
         case .strong:
             composeFont(in: r, storage: storage) { current in
-                Self.applying(Self.inheritedTraits(of: current).union(.boldFontMask),
-                              to: current)
+                Self.applying(
+                    Self.inheritedTraits(of: current).union(.boldFontMask),
+                    to: current)
             }
 
         case .emphasis:
             composeFont(in: r, storage: storage) { current in
-                Self.applying(Self.inheritedTraits(of: current).union(.italicFontMask),
-                              to: current)
+                Self.applying(
+                    Self.inheritedTraits(of: current).union(.italicFontMask),
+                    to: current)
             }
 
         case .strikethrough:
-            storage.addAttribute(.strikethroughStyle,
-                                 value: NSUnderlineStyle.single.rawValue,
-                                 range: r)
+            storage.addAttribute(
+                .strikethroughStyle,
+                value: NSUnderlineStyle.single.rawValue,
+                range: r)
             // Struck text recedes as well as being crossed out, which is what
             // Obsidian's `--text-faint` does for it. A line through text at
             // full contrast reads as emphasis; the point of the construct is
             // the opposite.
-            storage.addAttribute(.foregroundColor,
-                                 value: NSColor(tokens.foreground).withAlphaComponent(0.55),
-                                 range: r)
+            storage.addAttribute(
+                .foregroundColor,
+                value: NSColor(tokens.foreground).withAlphaComponent(0.55),
+                range: r)
 
         case .highlight:
             // A tinted BACKGROUND, not a foreground change: highlighted text
             // must stay as readable as the prose around it, which a colour
             // swap does not guarantee against every theme.
-            storage.addAttribute(.backgroundColor,
-                                 value: NSColor(tokens.accentSecondary).withAlphaComponent(0.28),
-                                 range: r)
+            storage.addAttribute(
+                .backgroundColor,
+                value: NSColor(tokens.accentSecondary).withAlphaComponent(0.28),
+                range: r)
 
         case .footnoteReference:
             // A real superscript: raised AND reduced. Both are drawing changes,
@@ -272,14 +293,16 @@ enum MarkdownStyleRenderer {
             // 17 pt body a fixed 4 pt barely clears the baseline.
             composeFont(in: r, storage: storage) { $0.withSize($0.pointSize * 0.75) }
             storage.addAttribute(.baselineOffset, value: theme.bodySize * 0.28, range: r)
-            storage.addAttribute(.foregroundColor,
-                                 value: NSColor(tokens.accentPrimary), range: r)
+            storage.addAttribute(
+                .foregroundColor,
+                value: NSColor(tokens.accentPrimary), range: r)
 
         case .footnoteDefinition:
-            storage.addAttribute(.foregroundColor,
-                                 value: NSColor(tokens.foreground)
-                                     .withAlphaComponent(LoreMetrics.secondaryText),
-                                 range: r)
+            storage.addAttribute(
+                .foregroundColor,
+                value: NSColor(tokens.foreground)
+                    .withAlphaComponent(LoreMetrics.secondaryText),
+                range: r)
 
         case .tag:
             // The `#` STAYS VISIBLE — Obsidian keeps it, and without it a tag
@@ -288,37 +311,40 @@ enum MarkdownStyleRenderer {
             // `theme.renderTagsAsChips`, not `settings` — `settings` is never
             // in scope here; `MarkdownTheme` resolves it at construction. See
             // `EditorSettings.renderTagsAsChips`.
-            storage.addAttribute(.foregroundColor,
-                                 value: NSColor(tokens.accentPrimary), range: r)
-            // The chip itself is DRAWN — see `MarkdownBlockBackgrounds.Kind
-            // .tagPill`. It used to be a `.backgroundColor` here, which is a
-            // per-glyph attribute and therefore cannot round its corners or
-            // pad its ends: the result was a tight rectangle around the
-            // letters that read as a selection, not as a tag. Nothing is
-            // written here for the chip any more; the setting is honoured
-            // where the region is built.
+            storage.addAttribute(
+                .foregroundColor,
+                value: NSColor(tokens.accentPrimary), range: r)
+        // The chip itself is DRAWN — see `MarkdownBlockBackgrounds.Kind
+        // .tagPill`. It used to be a `.backgroundColor` here, which is a
+        // per-glyph attribute and therefore cannot round its corners or
+        // pad its ends: the result was a tight rectangle around the
+        // letters that read as a selection, not as a tag. Nothing is
+        // written here for the chip any more; the setting is honoured
+        // where the region is built.
 
         case .blockID:
             // Near-invisible when the caret is elsewhere. It is machinery the
             // author needs to be able to find, not something to read past.
-            storage.addAttribute(.foregroundColor,
-                                 value: NSColor(tokens.foreground).withAlphaComponent(0.25),
-                                 range: r)
+            storage.addAttribute(
+                .foregroundColor,
+                value: NSColor(tokens.foreground).withAlphaComponent(0.25),
+                range: r)
 
         case .inlineCode:
             composeFont(in: r, storage: storage) { current in
-                Self.applying(Self.inheritedTraits(of: current),
-                              to: .monospacedSystemFont(
-                                    ofSize: Self.monoSize(replacing: current, theme: theme),
-                                    weight: .regular))
+                Self.applying(
+                    Self.inheritedTraits(of: current),
+                    to: .monospacedSystemFont(
+                        ofSize: Self.monoSize(replacing: current, theme: theme),
+                        weight: .regular))
             }
-            // The pill is DRAWN — see `MarkdownBlockBackgrounds.Kind
-            // .inlineCodePill`. It was a `.backgroundColor` here, which is a
-            // per-glyph attribute: it cannot round its corners, cannot pad its
-            // ends, and fills the whole LINE BOX rather than the text. At a
-            // 1.5 line height that is half again as tall as the glyphs, which
-            // is why the highlight looked like it belonged to the line above.
-            // Nothing is written here for it any more.
+        // The pill is DRAWN — see `MarkdownBlockBackgrounds.Kind
+        // .inlineCodePill`. It was a `.backgroundColor` here, which is a
+        // per-glyph attribute: it cannot round its corners, cannot pad its
+        // ends, and fills the whole LINE BOX rather than the text. At a
+        // 1.5 line height that is half again as tall as the glyphs, which
+        // is why the highlight looked like it belonged to the line above.
+        // Nothing is written here for it any more.
 
         case .codeBlock(let language):
             // REVISITED, not ignored. M2a defended an `accentSecondary` tint
@@ -331,10 +357,11 @@ enum MarkdownStyleRenderer {
             // `.backgroundColor` is not used here either: it stops at the end of
             // each line, giving a ragged staircase instead of a panel.
             composeFont(in: r, storage: storage) { current in
-                Self.applying(Self.inheritedTraits(of: current),
-                              to: .monospacedSystemFont(
-                                    ofSize: Self.monoSize(replacing: current, theme: theme),
-                                    weight: .regular))
+                Self.applying(
+                    Self.inheritedTraits(of: current),
+                    to: .monospacedSystemFont(
+                        ofSize: Self.monoSize(replacing: current, theme: theme),
+                        weight: .regular))
             }
             // Over the PARAGRAPH, for the same reason the list case is — and
             // now for a reason that is reachable rather than theoretical. A
@@ -343,20 +370,24 @@ enum MarkdownStyleRenderer {
             // listItem style; `endEditing` then extends that over the fence and
             // the code style loses. Nothing made that possible until list items
             // started writing a paragraph style at all.
-            storage.addAttribute(.paragraphStyle,
-                                 value: MarkdownParagraphStyles.style(for: .codeBlock,
-                                                                      theme: theme),
-                                 range: (storage.string as NSString).paragraphRange(for: r))
+            storage.addAttribute(
+                .paragraphStyle,
+                value: MarkdownParagraphStyles.style(
+                    for: .codeBlock,
+                    theme: theme),
+                range: (storage.string as NSString).paragraphRange(for: r))
             // Token colouring BEFORE the language label, so the label — which
             // sits on the opening fence line and is styled as a label, not as
             // code — wins where the two overlap.
             if let language, !language.isEmpty,
-               let grammar = CodeGrammar.named(language) {
+                let grammar = CodeGrammar.named(language)
+            {
                 highlightCode(in: r, grammar: grammar, storage: storage, tokens: tokens)
             }
             if let language, !language.isEmpty {
-                styleLanguageLabel(language, in: r, storage: storage, tokens: tokens,
-                                   theme: theme)
+                styleLanguageLabel(
+                    language, in: r, storage: storage, tokens: tokens,
+                    theme: theme)
             }
 
         // Both links: colour at rest, underline ON HOVER only — see
@@ -396,34 +427,41 @@ enum MarkdownStyleRenderer {
             // reader is meant to read. The bar and the indent already say
             // "quote"; dimming below the floor as well was saying it twice, the
             // second time by making it harder to read.
-            storage.addAttribute(.foregroundColor,
-                                 value: NSColor(tokens.foreground).withAlphaComponent(0.85),
-                                 range: r)
+            storage.addAttribute(
+                .foregroundColor,
+                value: NSColor(tokens.foreground).withAlphaComponent(0.85),
+                range: r)
             // The indent leaves room for the bar `MarkdownBlockBackgrounds`
             // draws in the margin; the bar is what says "quote". Paragraph
             // scoped for the same reason as the code case above: a quote nested
             // in a list item is indented, and its paragraph's first character
             // belongs to the item.
-            storage.addAttribute(.paragraphStyle,
-                                 value: MarkdownParagraphStyles.style(for: .blockQuote,
-                                                                      theme: theme),
-                                 range: (storage.string as NSString).paragraphRange(for: r))
+            storage.addAttribute(
+                .paragraphStyle,
+                value: MarkdownParagraphStyles.style(
+                    for: .blockQuote,
+                    theme: theme),
+                range: (storage.string as NSString).paragraphRange(for: r))
 
         case .callout(let kind):
             // NOT the quote's dimmed foreground: a callout is emphasis, and
             // greying its body would work against the panel drawn behind it.
             storage.addAttribute(.foregroundColor, value: NSColor(tokens.foreground), range: r)
-            storage.addAttribute(.paragraphStyle,
-                                 value: MarkdownParagraphStyles.style(for: .callout(kind),
-                                                                      theme: theme),
-                                 range: (storage.string as NSString).paragraphRange(for: r))
+            storage.addAttribute(
+                .paragraphStyle,
+                value: MarkdownParagraphStyles.style(
+                    for: .callout(kind),
+                    theme: theme),
+                range: (storage.string as NSString).paragraphRange(for: r))
 
         case .calloutTitle(let kind):
             storage.addAttribute(.font, value: theme.boldBodyFont, range: r)
-            storage.addAttribute(.foregroundColor,
-                                 value: MarkdownBlockBackgrounds.Palette.calloutTint(kind,
-                                                                                     tokens: tokens),
-                                 range: r)
+            storage.addAttribute(
+                .foregroundColor,
+                value: MarkdownBlockBackgrounds.Palette.calloutTint(
+                    kind,
+                    tokens: tokens),
+                range: r)
 
         case .thematicBreak:
             // No text styling at all: every character of the line is notation,
@@ -431,9 +469,10 @@ enum MarkdownStyleRenderer {
             // `MarkdownBlockBackgrounds` draws. Reserving the line's HEIGHT is
             // the one thing needed here, or a collapsed rule leaves a 0.01 pt
             // line with a rule painted through the paragraph below it.
-            storage.addAttribute(.paragraphStyle,
-                                 value: MarkdownParagraphStyles.thematicBreakStyle(theme: theme),
-                                 range: (storage.string as NSString).paragraphRange(for: r))
+            storage.addAttribute(
+                .paragraphStyle,
+                value: MarkdownParagraphStyles.thematicBreakStyle(theme: theme),
+                range: (storage.string as NSString).paragraphRange(for: r))
 
         case .table:
             // The table itself carries no text styling: its cells are ordinary
@@ -444,8 +483,9 @@ enum MarkdownStyleRenderer {
 
         case .tableHeader:
             composeFont(in: r, storage: storage) { current in
-                Self.applying(Self.inheritedTraits(of: current).union(.boldFontMask),
-                              to: current)
+                Self.applying(
+                    Self.inheritedTraits(of: current).union(.boldFontMask),
+                    to: current)
             }
 
         case .math(let isRendered):
@@ -454,10 +494,11 @@ enum MarkdownStyleRenderer {
             // thing that happens to it — its `$` and its commands stay visible,
             // which is the honest presentation of something this editor cannot
             // draw. See `MarkdownMath`.
-            storage.addAttribute(.foregroundColor,
-                                 value: NSColor(tokens.accentSecondary)
-                                     .withAlphaComponent(isRendered ? 1.0 : 0.85),
-                                 range: r)
+            storage.addAttribute(
+                .foregroundColor,
+                value: NSColor(tokens.accentSecondary)
+                    .withAlphaComponent(isRendered ? 1.0 : 0.85),
+                range: r)
 
         case .checkbox(let done):
             storage.addAttribute(.foregroundColor, value: NSColor(tokens.accentTertiary), range: r)
@@ -473,11 +514,13 @@ enum MarkdownStyleRenderer {
             // a finished task keeps its colour and merely gains the line.
             guard done else { break }
             let paragraph = (storage.string as NSString).paragraphRange(for: r)
-            storage.addAttribute(.strikethroughStyle,
-                                 value: NSUnderlineStyle.single.rawValue, range: paragraph)
-            storage.addAttribute(.foregroundColor,
-                                 value: NSColor(tokens.foreground).withAlphaComponent(0.55),
-                                 range: paragraph)
+            storage.addAttribute(
+                .strikethroughStyle,
+                value: NSUnderlineStyle.single.rawValue, range: paragraph)
+            storage.addAttribute(
+                .foregroundColor,
+                value: NSColor(tokens.foreground).withAlphaComponent(0.55),
+                range: paragraph)
 
         case .listItem:
             // Foreground unchanged by design: a list item is most of a note, and
@@ -504,14 +547,16 @@ enum MarkdownStyleRenderer {
             // so its first line starts at `firstLineHeadIndent` PLUS the width
             // of that whitespace — and a fixed `headIndent` therefore put every
             // wrapped nested line to the LEFT of the text it should hang under.
-            let leading = leadingIndentWidth(from: paragraph.location,
-                                             upTo: r.location, in: full,
-                                             spaceAdvance: theme.spaceAdvance)
-            storage.addAttribute(.paragraphStyle,
-                                 value: MarkdownParagraphStyles.listItemStyle(
-                                    depth: listDepth, leadingIndent: leading,
-                                    theme: theme),
-                                 range: paragraph)
+            let leading = leadingIndentWidth(
+                from: paragraph.location,
+                upTo: r.location, in: full,
+                spaceAdvance: theme.spaceAdvance)
+            storage.addAttribute(
+                .paragraphStyle,
+                value: MarkdownParagraphStyles.listItemStyle(
+                    depth: listDepth, leadingIndent: leading,
+                    theme: theme),
+                range: paragraph)
 
         case .marker:
             // Syntax recedes. Obsidian dims revealed markers rather than
@@ -528,9 +573,10 @@ enum MarkdownStyleRenderer {
             // reads. These are syntax characters standing next to their own
             // content, and the same exemption `.blockID` (0.25) already takes
             // applies: they must be findable, not readable.
-            storage.addAttribute(.foregroundColor,
-                                 value: NSColor(tokens.foreground).withAlphaComponent(0.40),
-                                 range: r)
+            storage.addAttribute(
+                .foregroundColor,
+                value: NSColor(tokens.foreground).withAlphaComponent(0.40),
+                range: r)
         }
     }
 
@@ -549,9 +595,11 @@ enum MarkdownStyleRenderer {
     /// document; `MarkdownTheme.spaceAdvance` measures it once per theme
     /// instead. A non-whitespace character before `end` means this is not
     /// leading indentation and the answer is zero.
-    private static func leadingIndentWidth(from start: Int, upTo end: Int,
-                                           in text: NSString,
-                                           spaceAdvance: CGFloat) -> CGFloat {
+    private static func leadingIndentWidth(
+        from start: Int, upTo end: Int,
+        in text: NSString,
+        spaceAdvance: CGFloat
+    ) -> CGFloat {
         guard end > start, end <= text.length else { return 0 }
         var count = 0
         for offset in start..<end {
@@ -564,7 +612,6 @@ enum MarkdownStyleRenderer {
         }
         return CGFloat(count) * spaceAdvance
     }
-
 
     // MARK: - Collapsing hidden markers
 
@@ -582,8 +629,9 @@ enum MarkdownStyleRenderer {
     /// describe one contiguous stretch of hidden syntax.
     static func coalesce(_ ranges: [Range<Int>]) -> [Range<Int>] {
         let sorted = ranges.filter { !$0.isEmpty }.sorted {
-            $0.lowerBound == $1.lowerBound ? $0.upperBound < $1.upperBound
-                                           : $0.lowerBound < $1.lowerBound
+            $0.lowerBound == $1.lowerBound
+                ? $0.upperBound < $1.upperBound
+                : $0.lowerBound < $1.lowerBound
         }
         var merged: [Range<Int>] = []
         for range in sorted {
@@ -639,4 +687,3 @@ enum MarkdownStyleRenderer {
     }
 
 }
-

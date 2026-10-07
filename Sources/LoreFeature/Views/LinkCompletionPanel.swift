@@ -1,6 +1,6 @@
-import SwiftUI
-import AppKit
 import AinkradAppKit
+import AppKit
+import SwiftUI
 
 /// Floats `LinkCompletionView` over the editor without stealing focus.
 ///
@@ -30,9 +30,14 @@ final class LinkCompletionPanel {
 
     /// - Parameter caretRect: the caret rect in SCREEN coordinates, as returned
     ///   by `NSTextView.firstRect(forCharacterRange:actualRange:)`.
-    func show(matches: [LinkCompletionItem], tokens: HostThemeTokens,
-              caretRect: NSRect, over view: NSView) {
-        guard !matches.isEmpty, let window = view.window else { hide(); return }
+    func show(
+        matches: [LinkCompletionItem], tokens: HostThemeTokens,
+        caretRect: NSRect, over view: NSView
+    ) {
+        guard !matches.isEmpty, let window = view.window else {
+            hide()
+            return
+        }
         selection.update(to: matches)
         self.tokens = tokens
 
@@ -77,10 +82,14 @@ final class LinkCompletionPanel {
 
     private func render(into panel: NSPanel) {
         guard let tokens else { return }
-        let root = LinkCompletionView(matches: selection.matches,
-                                      selected: selection.index,
-                                      tokens: tokens) { [weak self] row in self?.onPick?(row) }
-        if let host { host.rootView = root } else {
+        let root = LinkCompletionView(
+            matches: selection.matches,
+            selected: selection.index,
+            tokens: tokens
+        ) { [weak self] row in self?.onPick?(row) }
+        if let host {
+            host.rootView = root
+        } else {
             let controller = NSHostingController(rootView: root)
             host = controller
             panel.contentViewController = controller
@@ -95,15 +104,19 @@ final class LinkCompletionPanel {
         let screen = window.screen ?? NSScreen.main
         let below = caretRect.minY - 4
         let fitsBelow = (screen.map { below - size.height >= $0.visibleFrame.minY }) ?? true
-        panel.setFrameTopLeftPoint(NSPoint(x: caretRect.minX,
-                                           y: fitsBelow ? below
-                                                        : caretRect.maxY + 4 + size.height))
+        panel.setFrameTopLeftPoint(
+            NSPoint(
+                x: caretRect.minX,
+                y: fitsBelow
+                    ? below
+                    : caretRect.maxY + 4 + size.height))
     }
 
     private func makePanel(attachedTo window: NSWindow) -> NSPanel {
-        let panel = NonKeyPanel(contentRect: NSRect(x: 0, y: 0, width: 260, height: 100),
-                                styleMask: [.borderless, .nonactivatingPanel],
-                                backing: .buffered, defer: false)
+        let panel = NonKeyPanel(
+            contentRect: NSRect(x: 0, y: 0, width: 260, height: 100),
+            styleMask: [.borderless, .nonactivatingPanel],
+            backing: .buffered, defer: false)
         panel.becomesKeyOnlyIfNeeded = true
         panel.isFloatingPanel = true
         panel.level = .popUpMenu

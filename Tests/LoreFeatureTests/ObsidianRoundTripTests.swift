@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 /// The milestone's headline claim, asserted rather than assumed: a vault
@@ -17,31 +18,31 @@ final class ObsidianRoundTripTests: XCTestCase {
     /// fence that must suppress all of them, CRLF, and an emoji whose UTF-16
     /// width is not its character width.
     private let document = """
-    ---
-    title: Round trip
-    tags: [alpha, beta]
-    ---
-    # Heading with a ^caret and #tag
+        ---
+        title: Round trip
+        tags: [alpha, beta]
+        ---
+        # Heading with a ^caret and #tag
 
-    Prose with ~~strike~~, ==highlight==, a #tag/nested, a [[wikilink]],
-    a footnote[^note], and math $\\frac{a}{b}$ inline. Emoji 🎯 then more.
+        Prose with ~~strike~~, ==highlight==, a #tag/nested, a [[wikilink]],
+        a footnote[^note], and math $\\frac{a}{b}$ inline. Emoji 🎯 then more.
 
-    > [!note] A callout
-    > with ==highlight== inside it.
+        > [!note] A callout
+        > with ==highlight== inside it.
 
-    | col | alignment |
-    |:----|----------:|
-    | a   | b         |
+        | col | alignment |
+        |:----|----------:|
+        | a   | b         |
 
-    ```swift
-    // none of these render: ~~x~~ ==y== #z ^id [^fn]
-    let s = "==not a highlight=="
-    ```
+        ```swift
+        // none of these render: ~~x~~ ==y== #z ^id [^fn]
+        let s = "==not a highlight=="
+        ```
 
-    A block anchor line. ^block-id
+        A block anchor line. ^block-id
 
-    [^note]: The footnote definition, with ==highlight== in it.
-    """
+        [^note]: The footnote definition, with ==highlight== in it.
+        """
 
     /// Parsing must not rewrite, normalise or reorder a single byte.
     func test_modelDoesNotMutateTheSource() {
@@ -68,13 +69,16 @@ final class ObsidianRoundTripTests: XCTestCase {
             let model = MarkdownDocumentModel(body: source)
             let length = (source as NSString).length
             for span in model.extensionSpans {
-                XCTAssertLessThanOrEqual(span.range.upperBound, length,
-                                         "span \(span.kind) runs past the end")
-                XCTAssertLessThanOrEqual(span.range.lowerBound, span.range.upperBound,
-                                         "span \(span.kind) is inverted")
-                XCTAssertTrue(span.range.lowerBound <= span.content.lowerBound
-                              && span.content.upperBound <= span.range.upperBound,
-                              "span \(span.kind) content escapes its own range")
+                XCTAssertLessThanOrEqual(
+                    span.range.upperBound, length,
+                    "span \(span.kind) runs past the end")
+                XCTAssertLessThanOrEqual(
+                    span.range.lowerBound, span.range.upperBound,
+                    "span \(span.kind) is inverted")
+                XCTAssertTrue(
+                    span.range.lowerBound <= span.content.lowerBound
+                        && span.content.upperBound <= span.range.upperBound,
+                    "span \(span.kind) content escapes its own range")
             }
         }
     }
@@ -101,16 +105,16 @@ final class ObsidianRoundTripTests: XCTestCase {
     /// around.
     func test_aDocumentWithEmbedsStillRoundTrips() {
         let source = """
-        # Host
+            # Host
 
-        ![[target]]
+            ![[target]]
 
-        ![[target#heading]]
+            ![[target#heading]]
 
-        ![[target#^anchor]]
+            ![[target#^anchor]]
 
-        Prose after.
-        """
+            Prose after.
+            """
         let model = MarkdownDocumentModel(body: source)
         _ = model.styleSpans
         XCTAssertEqual(model.fullText, source)
@@ -121,21 +125,22 @@ final class ObsidianRoundTripTests: XCTestCase {
     /// re-deriving its own (possibly disagreeing) notion of "inside a fence".
     func test_noTransclusionIsEmittedInsideACodeFence() {
         let source = """
-        Real one:
+            Real one:
 
-        ![[target]]
+            ![[target]]
 
-        ```markdown
-        ![[not-an-embed]]
-        ```
-        """
+            ```markdown
+            ![[not-an-embed]]
+            ```
+            """
         let model = MarkdownDocumentModel(body: source)
         let ns = source as NSString
         let fenceStart = ns.range(of: "```markdown").location
         let fenceEnd = ns.range(of: "```", options: .backwards).location + 3
 
         for span in model.styleSpans where span.isTransclusionEmbed {
-            let inside = span.range.lowerBound >= fenceStart
+            let inside =
+                span.range.lowerBound >= fenceStart
                 && span.range.upperBound <= fenceEnd
             XCTAssertFalse(inside, "a fenced ![[…]] was treated as a transclusion")
         }

@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 /// Keyboard movement in a list, asserted as arithmetic.
@@ -55,17 +56,20 @@ final class LoreListNavigationTests: XCTestCase {
     func test_focusFollowsTheItemWhenTheListReRanks() {
         let before = ["a.md", "b.md", "c.md"]
         let after = ["c.md", "a.md", "b.md"]
-        let focused = before[2]                      // "c.md"
-        XCTAssertEqual(LoreListNavigation.reconciled(previous: focused, ids: after), 0,
-                       "focus must follow c.md to its new position, not stay at index 2")
+        let focused = before[2]  // "c.md"
+        XCTAssertEqual(
+            LoreListNavigation.reconciled(previous: focused, ids: after), 0,
+            "focus must follow c.md to its new position, not stay at index 2")
     }
 
     /// When the focused item is gone — deleted, or filtered out by the next
     /// keystroke — focus falls to the first row rather than to nil, so the
     /// next ↓ continues from somewhere visible.
     func test_focusFallsToTheFirstRowWhenTheItemIsGone() {
-        XCTAssertEqual(LoreListNavigation.reconciled(previous: "gone.md",
-                                                     ids: ["a.md", "b.md"]), 0)
+        XCTAssertEqual(
+            LoreListNavigation.reconciled(
+                previous: "gone.md",
+                ids: ["a.md", "b.md"]), 0)
     }
 
     func test_reconcilingAnEmptyListYieldsNothing() {
@@ -74,7 +78,9 @@ final class LoreListNavigationTests: XCTestCase {
 
     /// Nothing focused, then a list arrives: start at the top.
     func test_reconcilingWithNoPreviousFocusStartsAtTheTop() {
-        XCTAssertEqual(LoreListNavigation.reconciled(previous: String?.none,
-                                                     ids: ["a.md", "b.md"]), 0)
+        XCTAssertEqual(
+            LoreListNavigation.reconciled(
+                previous: String?.none,
+                ids: ["a.md", "b.md"]), 0)
     }
 }

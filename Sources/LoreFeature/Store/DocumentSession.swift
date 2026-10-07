@@ -267,8 +267,10 @@ public final class DocumentSession: Identifiable {
     public func adoptRenamed(_ newURL: URL) {
         let unresolvedConflict = conflict && isDirty
         url = newURL
-        baseline = unresolvedConflict ? .distantPast
-                                      : (Self.mtime(of: newURL) ?? .distantPast)
+        baseline =
+            unresolvedConflict
+            ? .distantPast
+            : (Self.mtime(of: newURL) ?? .distantPast)
         conflict = unresolvedConflict
         if !unresolvedConflict { lastSaveError = nil }
     }

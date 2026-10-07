@@ -20,8 +20,9 @@ public final class NotesStoreSnapshot {
     public init(copying storeURL: URL) throws {
         directory = FileManager.default.temporaryDirectory
             .appendingPathComponent("lore-notes-snapshot-\(UUID().uuidString)")
-        try FileManager.default.createDirectory(at: directory,
-                                                withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(
+            at: directory,
+            withIntermediateDirectories: true)
         let name = storeURL.lastPathComponent
         url = directory.appendingPathComponent(name)
 

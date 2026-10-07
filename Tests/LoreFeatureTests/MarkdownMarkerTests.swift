@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 /// Marker ranges must cover the SYNTAX CHARACTERS ONLY. A marker span that
@@ -12,8 +13,12 @@ final class MarkdownMarkerTests: XCTestCase {
         let ns = body as NSString
         return model.styleSpans.compactMap { span in
             guard case .marker(let owner) = span.kind else { return nil }
-            return (ns.substring(with: NSRange(location: span.range.lowerBound,
-                                               length: span.range.count)), owner)
+            return (
+                ns.substring(
+                    with: NSRange(
+                        location: span.range.lowerBound,
+                        length: span.range.count)), owner
+            )
         }
     }
 
@@ -42,18 +47,21 @@ final class MarkdownMarkerTests: XCTestCase {
     }
 
     func test_wikilinkMarkersAreTheBracketsOnly() {
-        XCTAssertEqual(markers("see [[Target]] now").filter { $0.1 == .wikilink }.map(\.0),
-                       ["[[", "]]"])
+        XCTAssertEqual(
+            markers("see [[Target]] now").filter { $0.1 == .wikilink }.map(\.0),
+            ["[[", "]]"])
     }
 
     func test_aliasedWikilinkClosesPastTheDisplayText() {
-        XCTAssertEqual(markers("see [[Target|Shown]] now").filter { $0.1 == .wikilink }.map(\.0),
-                       ["[[", "]]"])
+        XCTAssertEqual(
+            markers("see [[Target|Shown]] now").filter { $0.1 == .wikilink }.map(\.0),
+            ["[[", "]]"])
     }
 
     func test_inlineCodeMarkersAreTheBackticks() {
-        XCTAssertEqual(markers("a `code` b").filter { $0.1 == .inlineCode }.map(\.0),
-                       ["`", "`"])
+        XCTAssertEqual(
+            markers("a `code` b").filter { $0.1 == .inlineCode }.map(\.0),
+            ["`", "`"])
     }
 
     func test_inlineLinkMarkersHideTheDestination() {
@@ -89,25 +97,29 @@ final class MarkdownMarkerTests: XCTestCase {
     /// but TWO UTF-16 units, so any marker arithmetic done in Characters is
     /// wrong for a Windows-authored note.
     func test_markersAreCorrectInACRLFDocument() {
-        XCTAssertEqual(markers("# A\r\n\r\n**b**").filter { $0.1 == .strong }.map(\.0),
-                       ["**", "**"])
+        XCTAssertEqual(
+            markers("# A\r\n\r\n**b**").filter { $0.1 == .strong }.map(\.0),
+            ["**", "**"])
     }
 
     func test_wikilinkMarkersAreCorrectInACRLFDocument() {
-        XCTAssertEqual(markers("# A\r\n\r\nsee [[T]]").filter { $0.1 == .wikilink }.map(\.0),
-                       ["[[", "]]"])
+        XCTAssertEqual(
+            markers("# A\r\n\r\nsee [[T]]").filter { $0.1 == .wikilink }.map(\.0),
+            ["[[", "]]"])
     }
 
     /// Emoji are multi-unit in UTF-16; a marker offset computed in Characters
     /// lands mid-content after one.
     func test_markersAreCorrectAfterAnEmoji() {
-        XCTAssertEqual(markers("🎉 **bold**").filter { $0.1 == .strong }.map(\.0),
-                       ["**", "**"])
+        XCTAssertEqual(
+            markers("🎉 **bold**").filter { $0.1 == .strong }.map(\.0),
+            ["**", "**"])
     }
 
     func test_wikilinkMarkersAreCorrectAfterAnEmoji() {
-        XCTAssertEqual(markers("🎉 [[Target]]").filter { $0.1 == .wikilink }.map(\.0),
-                       ["[[", "]]"])
+        XCTAssertEqual(
+            markers("🎉 [[Target]]").filter { $0.1 == .wikilink }.map(\.0),
+            ["[[", "]]"])
     }
 
     /// Markers of UNNESTED constructs do not overlap each other.
@@ -133,8 +145,9 @@ final class MarkdownMarkerTests: XCTestCase {
         XCTAssertFalse(markerRanges.isEmpty)
         for m in markerRanges {
             for other in markerRanges where other != m {
-                XCTAssertTrue(m.upperBound <= other.lowerBound || other.upperBound <= m.lowerBound,
-                              "markers must not overlap each other: \(m) vs \(other)")
+                XCTAssertTrue(
+                    m.upperBound <= other.lowerBound || other.upperBound <= m.lowerBound,
+                    "markers must not overlap each other: \(m) vs \(other)")
             }
         }
     }
@@ -159,8 +172,9 @@ final class MarkdownMarkerTests: XCTestCase {
                 a != b && a.lowerBound < b.upperBound && b.lowerBound < a.upperBound
             }
         }
-        XCTAssertTrue(overlapping,
-                      "nested blockquote markers overlap: \(markerRanges)")
+        XCTAssertTrue(
+            overlapping,
+            "nested blockquote markers overlap: \(markerRanges)")
     }
 
     /// Marker spans are ADDITIVE: every content span keeps the range it had.
@@ -173,8 +187,10 @@ final class MarkdownMarkerTests: XCTestCase {
         }
         func text(_ kind: StyleSpan.Kind) -> [String] {
             content.filter { $0.kind == kind }.map {
-                ns.substring(with: NSRange(location: $0.range.lowerBound,
-                                           length: $0.range.count))
+                ns.substring(
+                    with: NSRange(
+                        location: $0.range.lowerBound,
+                        length: $0.range.count))
             }
         }
         XCTAssertEqual(text(.heading(2)), ["## Head"])
@@ -189,17 +205,21 @@ final class MarkdownMarkerTests: XCTestCase {
         let model = MarkdownDocumentModel(body: "a ~~gone~~ b")
         let spans = model.styleSpans
 
-        XCTAssertTrue(spans.contains { $0.kind == .strikethrough && $0.range == 2..<10 },
-                      "expected a strikethrough span covering `~~gone~~`, got \(spans)")
-        let markers = spans.filter { $0.kind == .marker(of: .strikethrough) }.map(\.range).sorted { $0.lowerBound < $1.lowerBound }
+        XCTAssertTrue(
+            spans.contains { $0.kind == .strikethrough && $0.range == 2..<10 },
+            "expected a strikethrough span covering `~~gone~~`, got \(spans)")
+        let markers = spans.filter { $0.kind == .marker(of: .strikethrough) }.map(\.range).sorted {
+            $0.lowerBound < $1.lowerBound
+        }
         XCTAssertEqual(markers, [2..<4, 8..<10])
     }
 
     func test_strikethrough_nestedEmphasisStillStyles() {
         // Proves `descendInto` was not forgotten.
         let model = MarkdownDocumentModel(body: "~~a **b** c~~")
-        XCTAssertTrue(model.styleSpans.contains { $0.kind == .strong },
-                      "nested strong was not visited — did visitStrikethrough call descendInto?")
+        XCTAssertTrue(
+            model.styleSpans.contains { $0.kind == .strong },
+            "nested strong was not visited — did visitStrikethrough call descendInto?")
     }
 
     func test_strikethrough_singleTildeIsNotStrikethrough() {

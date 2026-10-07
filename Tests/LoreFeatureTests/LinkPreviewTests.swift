@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 /// What a hover preview shows.
@@ -6,13 +7,13 @@ final class LinkPreviewTests: XCTestCase {
 
     func test_frontmatterIsNotThePreview() {
         let contents = """
-        ---
-        id: a
-        title: Alpha
-        tags: [work]
-        ---
-        The actual first sentence.
-        """
+            ---
+            id: a
+            title: Alpha
+            tags: [work]
+            ---
+            The actual first sentence.
+            """
         XCTAssertEqual(LinkPreview.excerpt(from: contents), "The actual first sentence.")
     }
 

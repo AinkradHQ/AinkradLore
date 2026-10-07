@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 /// The spine rail's arithmetic: where each tick sits, and which one is active.
@@ -69,10 +70,12 @@ final class SpineRailTests: XCTestCase {
     /// A malformed level from a broken document must not produce a negative
     /// width, which is a layout crash rather than a wrong-looking tick.
     func test_tickWidthClampsMalformedLevels() {
-        XCTAssertEqual(LoreSpineRail.tickWidth(forLevel: 0),
-                       LoreSpineRail.tickWidth(forLevel: 1))
-        XCTAssertEqual(LoreSpineRail.tickWidth(forLevel: 99),
-                       LoreSpineRail.tickWidth(forLevel: 6))
+        XCTAssertEqual(
+            LoreSpineRail.tickWidth(forLevel: 0),
+            LoreSpineRail.tickWidth(forLevel: 1))
+        XCTAssertEqual(
+            LoreSpineRail.tickWidth(forLevel: 99),
+            LoreSpineRail.tickWidth(forLevel: 6))
         XCTAssertGreaterThan(LoreSpineRail.tickWidth(forLevel: -3), 0)
     }
 }

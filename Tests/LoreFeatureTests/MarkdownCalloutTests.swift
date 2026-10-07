@@ -1,6 +1,7 @@
-import XCTest
 import AppKit
 import SwiftUI
+import XCTest
+
 @testable import LoreFeature
 
 /// Obsidian callouts: `> [!note] Title`.
@@ -30,13 +31,19 @@ final class MarkdownCalloutTests: XCTestCase {
         let head = try XCTUnwrap(header(body))
         XCTAssertEqual(head.kind, .warning)
         let ns = body as NSString
-        XCTAssertEqual(ns.substring(with: NSRange(location: head.markerRange.lowerBound,
-                                                  length: head.markerRange.count)),
-                       "[!warning]")
+        XCTAssertEqual(
+            ns.substring(
+                with: NSRange(
+                    location: head.markerRange.lowerBound,
+                    length: head.markerRange.count)),
+            "[!warning]")
         let title = try XCTUnwrap(head.titleRange)
-        XCTAssertEqual(ns.substring(with: NSRange(location: title.lowerBound,
-                                                  length: title.count)),
-                       "Mind the gap")
+        XCTAssertEqual(
+            ns.substring(
+                with: NSRange(
+                    location: title.lowerBound,
+                    length: title.count)),
+            "Mind the gap")
     }
 
     /// No title is the common case — `> [!note]` on its own — and the one that
@@ -61,10 +68,12 @@ final class MarkdownCalloutTests: XCTestCase {
             "example": .example, "cite": .quote, "quote": .quote,
         ]
         for (spelling, kind) in expected {
-            XCTAssertEqual(MarkdownCallout.Kind.named(spelling), kind,
-                           "[!\(spelling)] must resolve")
-            XCTAssertEqual(header("> [!\(spelling)] t\n")?.kind, kind,
-                           "[!\(spelling)] must parse out of a quote")
+            XCTAssertEqual(
+                MarkdownCallout.Kind.named(spelling), kind,
+                "[!\(spelling)] must resolve")
+            XCTAssertEqual(
+                header("> [!\(spelling)] t\n")?.kind, kind,
+                "[!\(spelling)] must parse out of a quote")
         }
     }
 
@@ -81,13 +90,19 @@ final class MarkdownCalloutTests: XCTestCase {
         let head = try XCTUnwrap(header(body))
         XCTAssertTrue(head.isFoldable)
         let ns = body as NSString
-        XCTAssertEqual(ns.substring(with: NSRange(location: head.markerRange.lowerBound,
-                                                  length: head.markerRange.count)),
-                       "[!note]-")
+        XCTAssertEqual(
+            ns.substring(
+                with: NSRange(
+                    location: head.markerRange.lowerBound,
+                    length: head.markerRange.count)),
+            "[!note]-")
         let title = try XCTUnwrap(head.titleRange)
-        XCTAssertEqual(ns.substring(with: NSRange(location: title.lowerBound,
-                                                  length: title.count)),
-                       "Collapsed by default")
+        XCTAssertEqual(
+            ns.substring(
+                with: NSRange(
+                    location: title.lowerBound,
+                    length: title.count)),
+            "Collapsed by default")
     }
 
     /// The header is read on the FIRST line only. A `[!note]` further down is
@@ -112,15 +127,15 @@ final class MarkdownCalloutTests: XCTestCase {
     func test_aCalloutReplacesTheBlockQuoteSpan() {
         let found = spans("> [!danger] Careful\n> body\n")
         XCTAssertTrue(found.contains { $0.kind == .callout(.danger) })
-        XCTAssertFalse(found.contains { $0.kind == .blockQuote },
-                       "a callout must not also be styled as a plain quote")
+        XCTAssertFalse(
+            found.contains { $0.kind == .blockQuote },
+            "a callout must not also be styled as a plain quote")
     }
 
     func test_aPlainQuoteStillEmitsBlockQuote() {
         let found = spans("> ordinary\n")
         XCTAssertTrue(found.contains { $0.kind == .blockQuote })
-        XCTAssertFalse(found.contains { if case .callout = $0.kind { return true }
-                                        else { return false } })
+        XCTAssertFalse(found.contains { if case .callout = $0.kind { return true } else { return false } })
     }
 
     /// The `[!type]` is a MARKER, so the same machinery that hides `**` hides
@@ -130,13 +145,16 @@ final class MarkdownCalloutTests: XCTestCase {
         let body = "intro\n\n> [!tip] Handy\n> body\n"
         let hidden = MarkdownReveal.hiddenMarkers(
             spans: spans(body),
-            selection: NSRange(location: 0, length: 0),   // caret far away
+            selection: NSRange(location: 0, length: 0),  // caret far away
             text: body, isFocused: true)
         let ns = body as NSString
         let marker = ns.range(of: "[!tip]")
-        XCTAssertTrue(hidden.contains { $0.lowerBound == marker.location
-                                        && $0.upperBound == NSMaxRange(marker) },
-                      "[!tip] must be collapsed when the caret is elsewhere")
+        XCTAssertTrue(
+            hidden.contains {
+                $0.lowerBound == marker.location
+                    && $0.upperBound == NSMaxRange(marker)
+            },
+            "[!tip] must be collapsed when the caret is elsewhere")
     }
 
     /// And it comes back when the caret is on its line, or the syntax could
@@ -149,8 +167,9 @@ final class MarkdownCalloutTests: XCTestCase {
             spans: spans(body),
             selection: NSRange(location: marker.location + 2, length: 0),
             text: body, isFocused: true)
-        XCTAssertFalse(hidden.contains { $0.lowerBound == marker.location },
-                       "[!tip] must be visible when the caret is on its line")
+        XCTAssertFalse(
+            hidden.contains { $0.lowerBound == marker.location },
+            "[!tip] must be visible when the caret is on its line")
     }
 
     func test_theAuthorsOwnTitleIsStyled() {
@@ -177,8 +196,9 @@ final class MarkdownCalloutTests: XCTestCase {
         let tv = LinkTextView(frame: NSRect(x: 0, y: 0, width: 700, height: 900))
         tv.isRichText = false
         tv.delegate = coordinator
-        let window = NSWindow(contentRect: tv.frame, styleMask: [.titled],
-                              backing: .buffered, defer: false)
+        let window = NSWindow(
+            contentRect: tv.frame, styleMask: [.titled],
+            backing: .buffered, defer: false)
         window.contentView = tv
         window.makeFirstResponder(tv)
         tv.string = body
@@ -187,17 +207,19 @@ final class MarkdownCalloutTests: XCTestCase {
 
         try withExtendedLifetime((coordinator, window)) {
             let regions = tv.blockBackgrounds
-            let callout = try XCTUnwrap(regions.first { region in
-                if case .callout = region.kind { return true }
-                return false
-            }, "the editor must hand the drawing layer a callout region")
+            let callout = try XCTUnwrap(
+                regions.first { region in
+                    if case .callout = region.kind { return true }
+                    return false
+                }, "the editor must hand the drawing layer a callout region")
             guard case .callout(let kind, let title, _) = callout.kind else {
                 return XCTFail("unreachable")
             }
             XCTAssertEqual(kind, .danger)
             XCTAssertNil(title, "the author wrote a title, so none is drawn over it")
-            XCTAssertTrue(tv.blockBackgroundPalette != nil,
-                          "and a palette to draw it with")
+            XCTAssertTrue(
+                tv.blockBackgroundPalette != nil,
+                "and a palette to draw it with")
         }
     }
 
@@ -218,16 +240,18 @@ final class MarkdownCalloutTests: XCTestCase {
         coordinator.applyStyles()
 
         try withExtendedLifetime(coordinator) {
-            let callout = try XCTUnwrap(tv.blockBackgrounds.first { region in
-                if case .callout = region.kind { return true }
-                return false
-            })
+            let callout = try XCTUnwrap(
+                tv.blockBackgrounds.first { region in
+                    if case .callout = region.kind { return true }
+                    return false
+                })
             guard case .callout(let kind, let title, _) = callout.kind else {
                 return XCTFail("unreachable")
             }
             XCTAssertEqual(kind, .note)
-            XCTAssertEqual(title, "Note",
-                           "with no title written, the type's name must be drawn")
+            XCTAssertEqual(
+                title, "Note",
+                "with no title written, the type's name must be drawn")
         }
     }
 
@@ -237,10 +261,12 @@ final class MarkdownCalloutTests: XCTestCase {
     @MainActor
     func test_everyKindsIconExists() {
         for kind in MarkdownCallout.Kind.allCases {
-            XCTAssertNotNil(NSImage(systemSymbolName: kind.symbolName,
-                                    accessibilityDescription: nil),
-                            "\(kind) declares symbol \"\(kind.symbolName)\", "
-                            + "which this system cannot render")
+            XCTAssertNotNil(
+                NSImage(
+                    systemSymbolName: kind.symbolName,
+                    accessibilityDescription: nil),
+                "\(kind) declares symbol \"\(kind.symbolName)\", "
+                    + "which this system cannot render")
         }
     }
 
@@ -259,15 +285,17 @@ final class MarkdownCalloutTests: XCTestCase {
         func redPixelCount(body: String) throws -> Int {
             var stored = body
             let binding = Binding<String>(get: { stored }, set: { stored = $0 })
-            let coordinator = MarkdownEditor.Coordinator(text: binding,
-                                                         tokens: TestTokens.make())
+            let coordinator = MarkdownEditor.Coordinator(
+                text: binding,
+                tokens: TestTokens.make())
             let tv = LinkTextView(frame: NSRect(x: 0, y: 0, width: 600, height: 300))
             tv.isRichText = false
             tv.delegate = coordinator
             tv.drawsBackground = true
             tv.backgroundColor = .black
-            let window = NSWindow(contentRect: tv.frame, styleMask: [.titled],
-                                  backing: .buffered, defer: false)
+            let window = NSWindow(
+                contentRect: tv.frame, styleMask: [.titled],
+                backing: .buffered, defer: false)
             window.contentView = tv
             tv.string = body
             coordinator.textView = tv
@@ -280,11 +308,16 @@ final class MarkdownCalloutTests: XCTestCase {
                 var reds = 0
                 for x in stride(from: 0, to: rep.pixelsWide, by: 3) {
                     for y in stride(from: 0, to: rep.pixelsHigh, by: 3) {
-                        guard let colour = rep.colorAt(x: x, y: y)?
-                            .usingColorSpace(.sRGB) else { continue }
+                        guard
+                            let colour = rep.colorAt(x: x, y: y)?
+                                .usingColorSpace(.sRGB)
+                        else { continue }
                         // The `danger` wash: red clearly ahead of both others.
                         if colour.redComponent > colour.greenComponent + 0.04,
-                           colour.redComponent > colour.blueComponent + 0.04 { reds += 1 }
+                            colour.redComponent > colour.blueComponent + 0.04
+                        {
+                            reds += 1
+                        }
                     }
                 }
                 return reds
@@ -296,10 +329,11 @@ final class MarkdownCalloutTests: XCTestCase {
         // comparison rather than assumed absent.
         let withCallout = try redPixelCount(body: "> [!danger] Careful\n> body text here\n")
         let plainQuote = try redPixelCount(body: "> Careful\n> body text here\n")
-        XCTAssertGreaterThan(withCallout, plainQuote + 50,
-                             "a danger callout must paint visibly more red than the "
-                             + "same text as a plain quote (callout=\(withCallout), "
-                             + "quote=\(plainQuote))")
+        XCTAssertGreaterThan(
+            withCallout, plainQuote + 50,
+            "a danger callout must paint visibly more red than the "
+                + "same text as a plain quote (callout=\(withCallout), "
+                + "quote=\(plainQuote))")
     }
 
     /// The text indent and the drawn decoration must agree about where the
@@ -318,16 +352,19 @@ final class MarkdownCalloutTests: XCTestCase {
         let theme = MarkdownTheme(tokens: TestTokens.make())
         let iconSize = theme.bodyFont.pointSize
         let indent = MarkdownBlockBackgrounds.calloutTextIndent(iconSize: iconSize)
-        let needed = MarkdownBlockBackgrounds.barWidth
+        let needed =
+            MarkdownBlockBackgrounds.barWidth
             + MarkdownBlockBackgrounds.calloutIconGap
             + iconSize
             + MarkdownBlockBackgrounds.calloutIconGap
-        XCTAssertEqual(indent, needed, accuracy: 0.001,
-                       "the indent must be the decoration's own width, not a guess")
+        XCTAssertEqual(
+            indent, needed, accuracy: 0.001,
+            "the indent must be the decoration's own width, not a guess")
 
         let style = MarkdownParagraphStyles.style(for: .callout(.note), theme: theme)
-        XCTAssertEqual(style.firstLineHeadIndent, indent, accuracy: 0.001,
-                       "and the paragraph must use that same number")
+        XCTAssertEqual(
+            style.firstLineHeadIndent, indent, accuracy: 0.001,
+            "and the paragraph must use that same number")
         XCTAssertEqual(style.headIndent, indent, accuracy: 0.001)
     }
 
@@ -343,8 +380,9 @@ final class MarkdownCalloutTests: XCTestCase {
         let tv = LinkTextView(frame: NSRect(x: 0, y: 0, width: 700, height: 400))
         tv.isRichText = false
         tv.delegate = coordinator
-        let window = NSWindow(contentRect: tv.frame, styleMask: [.titled],
-                              backing: .buffered, defer: false)
+        let window = NSWindow(
+            contentRect: tv.frame, styleMask: [.titled],
+            backing: .buffered, defer: false)
         window.contentView = tv
         window.makeFirstResponder(tv)
         tv.string = body
@@ -355,8 +393,9 @@ final class MarkdownCalloutTests: XCTestCase {
             let storage = try XCTUnwrap(tv.textStorage)
             let header = (body as NSString).range(of: "> [!note]")
             func indent() -> CGFloat {
-                (storage.attribute(.paragraphStyle, at: header.location,
-                                   effectiveRange: nil) as? NSParagraphStyle)?
+                (storage.attribute(
+                    .paragraphStyle, at: header.location,
+                    effectiveRange: nil) as? NSParagraphStyle)?
                     .headIndent ?? -1
             }
             tv.setSelectedRange(NSRange(location: 0, length: 0))
@@ -364,8 +403,9 @@ final class MarkdownCalloutTests: XCTestCase {
             let hidden = indent()
             tv.setSelectedRange(NSRange(location: header.location + 3, length: 0))
             coordinator.revealForSelectionChange()
-            XCTAssertEqual(hidden, indent(), accuracy: 0.001,
-                           "the callout must not shift sideways as the caret enters it")
+            XCTAssertEqual(
+                hidden, indent(), accuracy: 0.001,
+                "the callout must not shift sideways as the caret enters it")
         }
     }
 
@@ -381,11 +421,14 @@ final class MarkdownCalloutTests: XCTestCase {
             let srgb = tint.usingColorSpace(.sRGB)
             XCTAssertNotNil(srgb, "\(kind) must resolve in sRGB")
             if kind.isNeutral {
-                let components = [srgb?.redComponent, srgb?.greenComponent,
-                                  srgb?.blueComponent].compactMap { $0 }
+                let components = [
+                    srgb?.redComponent, srgb?.greenComponent,
+                    srgb?.blueComponent,
+                ].compactMap { $0 }
                 let spread = (components.max() ?? 0) - (components.min() ?? 0)
-                XCTAssertLessThan(spread, 0.05,
-                                  "a quote callout must stay neutral, not tinted")
+                XCTAssertLessThan(
+                    spread, 0.05,
+                    "a quote callout must stay neutral, not tinted")
             }
         }
     }
@@ -403,8 +446,10 @@ final class MarkdownCalloutTests: XCTestCase {
             (.danger, .success), (.warning, .info), (.note, .bug), (.example, .tip),
         ]
         for (a, b) in pairs {
-            let first = tint(a), second = tint(b)
-            let distance = abs(first.redComponent - second.redComponent)
+            let first = tint(a)
+            let second = tint(b)
+            let distance =
+                abs(first.redComponent - second.redComponent)
                 + abs(first.greenComponent - second.greenComponent)
                 + abs(first.blueComponent - second.blueComponent)
             XCTAssertGreaterThan(distance, 0.2, "\(a) and \(b) must be distinguishable")

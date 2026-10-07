@@ -1,25 +1,31 @@
 import XCTest
+
 @testable import LoreFeature
 
 final class ImportPlannerTests: XCTestCase {
-    private func item(_ id: String, _ title: String,
-                      folders: [String] = []) -> ImportItem {
-        ImportItem(sourceID: id, title: title, body: .markdown("x"), attachments: [],
-                   folderPath: folders, created: Date(), modified: Date(), fidelity: [])
+    private func item(
+        _ id: String, _ title: String,
+        folders: [String] = []
+    ) -> ImportItem {
+        ImportItem(
+            sourceID: id, title: title, body: .markdown("x"), attachments: [],
+            folderPath: folders, created: Date(), modified: Date(), fidelity: [])
     }
 
     private var vault: URL { URL(fileURLWithPath: "/vault") }
 
     func testMapsFolderPathOntoTargetDirectories() {
-        let plan = ImportPlanner.plan(items: [item("a", "Plan", folders: ["Ideas"])],
-                                      vaultRoot: vault, existingImportIDs: [])
+        let plan = ImportPlanner.plan(
+            items: [item("a", "Plan", folders: ["Ideas"])],
+            vaultRoot: vault, existingImportIDs: [])
         XCTAssertEqual(plan.items[0].targetURL.path, "/vault/Ideas/Plan.md")
         XCTAssertEqual(plan.items[0].disposition, .create)
     }
 
     func testRenamesTheSecondOfTwoCollidingTitles() {
-        let plan = ImportPlanner.plan(items: [item("a", "Plan"), item("b", "Plan")],
-                                      vaultRoot: vault, existingImportIDs: [])
+        let plan = ImportPlanner.plan(
+            items: [item("a", "Plan"), item("b", "Plan")],
+            vaultRoot: vault, existingImportIDs: [])
         XCTAssertEqual(plan.items[0].targetURL.lastPathComponent, "Plan.md")
         XCTAssertNotEqual(plan.items[1].targetURL.lastPathComponent, "Plan.md")
         guard case .renamedToAvoidCollision(let original) = plan.items[1].disposition else {
@@ -29,14 +35,16 @@ final class ImportPlannerTests: XCTestCase {
     }
 
     func testMarksAlreadyImportedItemsInsteadOfDuplicatingThem() {
-        let plan = ImportPlanner.plan(items: [item("a", "Plan")],
-                                      vaultRoot: vault, existingImportIDs: ["a"])
+        let plan = ImportPlanner.plan(
+            items: [item("a", "Plan")],
+            vaultRoot: vault, existingImportIDs: ["a"])
         XCTAssertEqual(plan.items[0].disposition, .alreadyImported)
     }
 
     func testSanitisesTitlesThatAreNotLegalFilenames() {
-        let plan = ImportPlanner.plan(items: [item("a", "Q3/Q4: plan")],
-                                      vaultRoot: vault, existingImportIDs: [])
+        let plan = ImportPlanner.plan(
+            items: [item("a", "Q3/Q4: plan")],
+            vaultRoot: vault, existingImportIDs: [])
         let name = plan.items[0].targetURL.lastPathComponent
         XCTAssertFalse(name.contains("/"))
         XCTAssertFalse(name.contains(":"))
@@ -46,16 +54,19 @@ final class ImportPlannerTests: XCTestCase {
         let all = [item("a", "Plan"), item("b", "Plan"), item("c", "Other")]
         let full = ImportPlanner.plan(items: all, vaultRoot: vault, existingImportIDs: [])
         // With both present, the second "Plan" is renamed out of the way.
-        XCTAssertEqual(full.items[1].disposition,
-                       .renamedToAvoidCollision(original: "Plan.md"))
+        XCTAssertEqual(
+            full.items[1].disposition,
+            .renamedToAvoidCollision(original: "Plan.md"))
 
         // Dropping it must give the survivor the clean name back — planning is
         // recomputed from the selection, never patched. This is the property the
         // dry-run promise rests on: what you approved is what executes.
-        let subset = ImportPlanner.plan(items: [all[0], all[2]], vaultRoot: vault,
-                                        existingImportIDs: [])
-        XCTAssertEqual(subset.items.map(\.targetURL.lastPathComponent),
-                       ["Plan.md", "Other.md"])
+        let subset = ImportPlanner.plan(
+            items: [all[0], all[2]], vaultRoot: vault,
+            existingImportIDs: [])
+        XCTAssertEqual(
+            subset.items.map(\.targetURL.lastPathComponent),
+            ["Plan.md", "Other.md"])
         XCTAssertEqual(subset.items.map(\.disposition), [.create, .create])
     }
 
@@ -65,8 +76,9 @@ final class ImportPlannerTests: XCTestCase {
     /// treated as a collision — the `taken` set is keyed on the resolved
     /// path, not on title equality.
     func testDifferentTitlesThatSanitizeToTheSameNameStillCollide() {
-        let plan = ImportPlanner.plan(items: [item("a", "A/B"), item("b", "A:B")],
-                                      vaultRoot: vault, existingImportIDs: [])
+        let plan = ImportPlanner.plan(
+            items: [item("a", "A/B"), item("b", "A:B")],
+            vaultRoot: vault, existingImportIDs: [])
         XCTAssertEqual(plan.items[0].targetURL.lastPathComponent, "A-B.md")
         XCTAssertEqual(plan.items[0].disposition, .create)
         guard case .renamedToAvoidCollision(let original) = plan.items[1].disposition else {
@@ -80,8 +92,9 @@ final class ImportPlannerTests: XCTestCase {
     /// characters) must not produce a bare `.md` target — `sanitized`
     /// already falls back to a fixed placeholder for this case.
     func testTitleThatSanitizesToEmptyDoesNotProduceABareExtension() {
-        let plan = ImportPlanner.plan(items: [item("a", "...")],
-                                      vaultRoot: vault, existingImportIDs: [])
+        let plan = ImportPlanner.plan(
+            items: [item("a", "...")],
+            vaultRoot: vault, existingImportIDs: [])
         let name = plan.items[0].targetURL.lastPathComponent
         XCTAssertNotEqual(name, ".md")
         XCTAssertFalse(name.hasPrefix("."))
@@ -103,16 +116,18 @@ final class ImportPlannerTests: XCTestCase {
     /// `folderPath` components are sanitized too: a folder named "Q3/Q4"
     /// must not escape into a nested directory via the slash.
     func testFolderPathComponentsAreSanitized() {
-        let plan = ImportPlanner.plan(items: [item("a", "Note", folders: ["Q3/Q4"])],
-                                      vaultRoot: vault, existingImportIDs: [])
+        let plan = ImportPlanner.plan(
+            items: [item("a", "Note", folders: ["Q3/Q4"])],
+            vaultRoot: vault, existingImportIDs: [])
         XCTAssertEqual(plan.items[0].targetURL.path, "/vault/Q3-Q4/Note.md")
     }
 
     /// A `folderPath` containing `..` must not be able to plan a target
     /// outside the vault root.
     func testFolderPathTraversalCannotEscapeTheVaultRoot() {
-        let plan = ImportPlanner.plan(items: [item("a", "Note", folders: ["..", "..", "etc"])],
-                                      vaultRoot: vault, existingImportIDs: [])
+        let plan = ImportPlanner.plan(
+            items: [item("a", "Note", folders: ["..", "..", "etc"])],
+            vaultRoot: vault, existingImportIDs: [])
         let targetPath = plan.items[0].targetURL.standardizedFileURL.path
         XCTAssertTrue(targetPath.hasPrefix(vault.standardizedFileURL.path + "/"))
     }
@@ -128,8 +143,9 @@ final class ImportPlannerTests: XCTestCase {
     func testPlanIsCallableFromANonisolatedDetachedContext() async {
         let items = [item("a", "Plan"), item("b", "Plan")]
         let names: [String] = await Task.detached {
-            let plan = ImportPlanner.plan(items: items, vaultRoot: URL(fileURLWithPath: "/vault"),
-                                          existingImportIDs: [])
+            let plan = ImportPlanner.plan(
+                items: items, vaultRoot: URL(fileURLWithPath: "/vault"),
+                existingImportIDs: [])
             return plan.items.map(\.targetURL.lastPathComponent)
         }.value
         XCTAssertEqual(names, ["Plan.md", "Plan 2.md"])

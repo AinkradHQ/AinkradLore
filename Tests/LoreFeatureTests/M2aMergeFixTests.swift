@@ -1,6 +1,7 @@
-import XCTest
 import AppKit
 import GRDB
+import XCTest
+
 @testable import LoreFeature
 
 /// Covering tests for the M2a whole-branch merge review. Each one pins a
@@ -13,8 +14,9 @@ final class M2aSchemaVersionTests: XCTestCase {
     /// graph when renaming. The version bump is the discard-and-rebuild the
     /// constant exists for.
     func test_theSchemaVersionWasBumpedForTheNewLinkExtractor() {
-        XCTAssertGreaterThanOrEqual(LoreIndex.schemaVersion, 6,
-                       "M2a changed link extraction; a version-5 index holds an M1 graph")
+        XCTAssertGreaterThanOrEqual(
+            LoreIndex.schemaVersion, 6,
+            "M2a changed link extraction; a version-5 index holds an M1 graph")
     }
 
     /// The bump is only worth anything if a version-5 file is actually thrown
@@ -52,8 +54,9 @@ final class M2aIndexPayloadParseCountTests: XCTestCase {
         let engine = try engine()
         resetParseCounter()
         _ = engine.indexPayload
-        XCTAssertEqual(MarkdownParseCounter.count, 1,
-                       "the outline and the link scan must share one parse")
+        XCTAssertEqual(
+            MarkdownParseCounter.count, 1,
+            "the outline and the link scan must share one parse")
     }
 
     /// The saved parse must not have cost an answer. Both halves are compared
@@ -62,8 +65,9 @@ final class M2aIndexPayloadParseCountTests: XCTestCase {
         let payload = try engine().indexPayload
         XCTAssertEqual(payload.links.map(\.rawTarget), LinkParser.links(in: body).map(\.rawTarget))
         XCTAssertEqual(payload.outline, MarkdownDocumentModel(body: body).outline)
-        XCTAssertEqual(payload.links.map(\.rawTarget), ["A"],
-                       "the fenced [[NotALink]] is still suppressed")
+        XCTAssertEqual(
+            payload.links.map(\.rawTarget), ["A"],
+            "the fenced [[NotALink]] is still suppressed")
     }
 
     /// A CRLF body deliberately still parses twice: the model withholds its
@@ -115,8 +119,9 @@ final class M2aSavePathParseCountTests: XCTestCase {
 
         resetParseCounter()
         try session.saveNow()
-        XCTAssertEqual(MarkdownParseCounter.count, 1,
-                       "one save, one parse — it used to be four")
+        XCTAssertEqual(
+            MarkdownParseCounter.count, 1,
+            "one save, one parse — it used to be four")
         XCTAssertEqual(session.title, "T")
     }
 
@@ -149,9 +154,10 @@ final class M2aFontCompositionTests: XCTestCase {
 
     private func styled(_ text: String) -> NSTextStorage {
         let storage = NSTextStorage(string: text)
-        MarkdownStyleRenderer.apply(MarkdownStyleCache.derive(text).spans,
-                                    to: storage, tokens: TestTokens.make(),
-                                    theme: Self.theme, limitedTo: nil)
+        MarkdownStyleRenderer.apply(
+            MarkdownStyleCache.derive(text).spans,
+            to: storage, tokens: TestTokens.make(),
+            theme: Self.theme, limitedTo: nil)
         return storage
     }
 
@@ -167,12 +173,14 @@ final class M2aFontCompositionTests: XCTestCase {
     func test_boldInsideAHeadingKeepsTheHeadingSize() {
         let text = "# A **B** C\n"
         let storage = styled(text)
-        let headingSize = font(storage, at: 2).pointSize     // the "A"
-        let boldSize = font(storage, at: 7).pointSize        // the "B"
-        XCTAssertEqual(headingSize, Self.theme.headingSize(1), accuracy: 0.01,
-                       "level-1 heading size now comes from MarkdownTheme")
-        XCTAssertEqual(boldSize, headingSize,
-                       "the child span overwrote the heading's font")
+        let headingSize = font(storage, at: 2).pointSize  // the "A"
+        let boldSize = font(storage, at: 7).pointSize  // the "B"
+        XCTAssertEqual(
+            headingSize, Self.theme.headingSize(1), accuracy: 0.01,
+            "level-1 heading size now comes from MarkdownTheme")
+        XCTAssertEqual(
+            boldSize, headingSize,
+            "the child span overwrote the heading's font")
         XCTAssertTrue(traits(font(storage, at: 7)).contains(.boldFontMask))
     }
 
@@ -180,12 +188,14 @@ final class M2aFontCompositionTests: XCTestCase {
     func test_emphasisInsideStrongIsBothBoldAndItalic() {
         let text = "**bold _and_ italic**\n"
         let storage = styled(text)
-        let inner = font(storage, at: 9)                     // inside "and"
+        let inner = font(storage, at: 9)  // inside "and"
         XCTAssertTrue(traits(inner).contains(.italicFontMask))
-        XCTAssertTrue(traits(inner).contains(.boldFontMask),
-                      "emphasis replaced the surrounding strong instead of adding to it")
-        XCTAssertTrue(traits(font(storage, at: 3)).contains(.boldFontMask),
-                      "and the outer run is still bold")
+        XCTAssertTrue(
+            traits(inner).contains(.boldFontMask),
+            "emphasis replaced the surrounding strong instead of adding to it")
+        XCTAssertTrue(
+            traits(font(storage, at: 3)).contains(.boldFontMask),
+            "and the outer run is still bold")
     }
 
     /// Inline code in a heading must be monospaced AT THE HEADING'S SIZE, not
@@ -194,13 +204,14 @@ final class M2aFontCompositionTests: XCTestCase {
         let text = "# A `code` C\n"
         let storage = styled(text)
         let headingSize = font(storage, at: 2).pointSize
-        let code = font(storage, at: 6)                      // inside "code"
+        let code = font(storage, at: 6)  // inside "code"
         XCTAssertEqual(headingSize, Self.theme.headingSize(1), accuracy: 0.01)
         // Scaled to the HEADING, not snapped back to body-code size — the
         // point M2a fixed. The mono ratio applies either way, so the code in a
         // 27 pt heading is 27 × 0.92 rather than 27 exactly.
-        XCTAssertEqual(code.pointSize, headingSize * MarkdownTheme.monoRatio,
-                       accuracy: 0.01)
+        XCTAssertEqual(
+            code.pointSize, headingSize * MarkdownTheme.monoRatio,
+            accuracy: 0.01)
         XCTAssertTrue(code.isFixedPitch, "inline code must still be monospaced")
     }
 
@@ -231,8 +242,9 @@ final class M2aFontCompositionTests: XCTestCase {
         let italic = font(storage, at: 13)
         XCTAssertTrue(traits(bold).contains(.boldFontMask))
         XCTAssertTrue(traits(italic).contains(.italicFontMask))
-        XCTAssertEqual(bold.familyName, body.familyName,
-                       "bold must be the body FAMILY with a trait added")
+        XCTAssertEqual(
+            bold.familyName, body.familyName,
+            "bold must be the body FAMILY with a trait added")
         XCTAssertEqual(italic.familyName, body.familyName)
 
         // Inline code is the one run that changes family, which is now the
@@ -251,18 +263,25 @@ final class M2aCheckboxBracketGuardTests: XCTestCase {
 
     func test_aMarkdownLinkIsNotAToggleableCheckbox() {
         let text = "[x](url) and more\n" as NSString
-        XCTAssertNil(TaskCheckbox.markerRange(forBracketSpan: 0..<3, in: text),
-                     "`(` after `]` is not a task item; toggling would rewrite the link text")
+        XCTAssertNil(
+            TaskCheckbox.markerRange(forBracketSpan: 0..<3, in: text),
+            "`(` after `]` is not a task item; toggling would rewrite the link text")
     }
 
     /// The guard must still admit every real shape: a space follows the `]` in
     /// GFM, and the document may simply end there.
     func test_realCheckboxesStillPass() {
-        XCTAssertNotNil(TaskCheckbox.markerRange(forBracketSpan: 2..<5,
-                                                 in: "- [ ] a\n" as NSString))
-        XCTAssertNotNil(TaskCheckbox.markerRange(forBracketSpan: 2..<5,
-                                                 in: "- [x]" as NSString))
-        XCTAssertNotNil(TaskCheckbox.markerRange(forBracketSpan: 2..<5,
-                                                 in: "- [x]\n" as NSString))
+        XCTAssertNotNil(
+            TaskCheckbox.markerRange(
+                forBracketSpan: 2..<5,
+                in: "- [ ] a\n" as NSString))
+        XCTAssertNotNil(
+            TaskCheckbox.markerRange(
+                forBracketSpan: 2..<5,
+                in: "- [x]" as NSString))
+        XCTAssertNotNil(
+            TaskCheckbox.markerRange(
+                forBracketSpan: 2..<5,
+                in: "- [x]\n" as NSString))
     }
 }

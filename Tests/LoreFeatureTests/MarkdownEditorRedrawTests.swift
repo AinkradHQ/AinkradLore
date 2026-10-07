@@ -1,8 +1,9 @@
-import XCTest
+import AinkradAppKit
 import AppKit
 import SwiftUI
+import XCTest
+
 @testable import LoreFeature
-import AinkradAppKit
 
 /// Task 10, Part 2: does `updateNSView` actually run per keystroke?
 ///
@@ -49,24 +50,30 @@ final class MarkdownEditorRedrawTests: XCTestCase {
     /// evidence for the right one. `MarkdownEditFastPathTests` asserts the same
     /// thing for the same reason.
     private func hostEditor(_ text: String) throws
-        -> (MarkdownEditor.Coordinator, NSTextView, NSWindow, NSHostingView<Host>) {
+        -> (MarkdownEditor.Coordinator, NSTextView, NSWindow, NSHostingView<Host>)
+    {
         let hosting = NSHostingView(rootView: Host(text: text))
         hosting.frame = NSRect(x: 0, y: 0, width: 700, height: 900)
-        let window = NSWindow(contentRect: hosting.frame,
-                              styleMask: [.titled], backing: .buffered, defer: false)
+        let window = NSWindow(
+            contentRect: hosting.frame,
+            styleMask: [.titled], backing: .buffered, defer: false)
         window.contentView = hosting
         hosting.layoutSubtreeIfNeeded()
         pump()
-        let tv = try XCTUnwrap(Self.firstTextView(in: hosting),
-                              "the hosted editor must have produced an NSTextView")
-        let coordinator = try XCTUnwrap(tv.delegate as? MarkdownEditor.Coordinator,
-                                       "the text view's delegate must be the coordinator")
+        let tv = try XCTUnwrap(
+            Self.firstTextView(in: hosting),
+            "the hosted editor must have produced an NSTextView")
+        let coordinator = try XCTUnwrap(
+            tv.delegate as? MarkdownEditor.Coordinator,
+            "the text view's delegate must be the coordinator")
         window.makeFirstResponder(tv)
-        XCTAssertTrue(window.firstResponder === tv,
-                      "the hosted editor must be focused, or this measures the "
-                      + "unfocused reveal path instead of the one a typist uses")
-        XCTAssertTrue(coordinator.isTextViewFocused,
-                      "and the coordinator must agree that it is")
+        XCTAssertTrue(
+            window.firstResponder === tv,
+            "the hosted editor must be focused, or this measures the "
+                + "unfocused reveal path instead of the one a typist uses")
+        XCTAssertTrue(
+            coordinator.isTextViewFocused,
+            "and the coordinator must agree that it is")
         return (coordinator, tv, window, hosting)
     }
 
@@ -94,16 +101,18 @@ final class MarkdownEditorRedrawTests: XCTestCase {
         let body = MarkdownTypingLagBenchmark.fixture(lines: 200)
         let (coordinator, tv, window, hosting) = try hostEditor(body)
         try withExtendedLifetime((window, hosting)) {
-            pump(0.6)                                   // open parse lands
-            tv.setSelectedRange(NSRange(location: (tv.string as NSString).length / 2,
-                                        length: 0))
+            pump(0.6)  // open parse lands
+            tv.setSelectedRange(
+                NSRange(
+                    location: (tv.string as NSString).length / 2,
+                    length: 0))
             let callsBefore = coordinator.applyStylesCalls
             let appliedBefore = coordinator.applyStylesRenders
             let rendersBefore = coordinator.revealIndexBuilds
 
             for _ in 0..<10 {
                 tv.insertText("x", replacementRange: tv.selectedRange())
-                pump(0.02)                              // let SwiftUI run
+                pump(0.02)  // let SwiftUI run
             }
             pump(0.3)
 
@@ -117,24 +126,28 @@ final class MarkdownEditorRedrawTests: XCTestCase {
             // fraction of those that render; the index-build count going 2.1 →
             // 1.1 is the observable consequence, since the removed call was a
             // full render either way.
-            print("REDRAW applyStyles-per-keystroke=\(calls) "
-                  + "applyStyles-renders-per-keystroke=\(applied) "
-                  + "index-builds-per-keystroke=\(renders)")
-            XCTAssertGreaterThan((tv.string as NSString).length,
-                                 (body as NSString).length,
-                                 "the keystrokes must have actually landed")
+            print(
+                "REDRAW applyStyles-per-keystroke=\(calls) "
+                    + "applyStyles-renders-per-keystroke=\(applied) "
+                    + "index-builds-per-keystroke=\(renders)")
+            XCTAssertGreaterThan(
+                (tv.string as NSString).length,
+                (body as NSString).length,
+                "the keystrokes must have actually landed")
             // The sharp form of the claim, and the one that does not depend on
             // reading a ratio: SwiftUI still calls `applyStyles()` once per
             // keystroke — that is the framework's scheduling and the guard does
             // not change it — but not one of those calls now renders. Before
             // the guard every one of them did, which is where the second
             // whole-document render per typed character came from.
-            XCTAssertEqual(calls, 1.0,
-                           "SwiftUI must still be redrawing once per keystroke, "
-                           + "or this test has stopped measuring the app's path")
-            XCTAssertEqual(applied, 0.0,
-                           "and none of those redraws may render: each one used to be "
-                           + "a full whole-document render")
+            XCTAssertEqual(
+                calls, 1.0,
+                "SwiftUI must still be redrawing once per keystroke, "
+                    + "or this test has stopped measuring the app's path")
+            XCTAssertEqual(
+                applied, 0.0,
+                "and none of those redraws may render: each one used to be "
+                    + "a full whole-document render")
         }
     }
 
@@ -149,8 +162,9 @@ final class MarkdownEditorRedrawTests: XCTestCase {
             pump(0.6)
             let before = coordinator.revealIndexBuilds
             for _ in 0..<10 { coordinator.applyStyles() }
-            XCTAssertEqual(coordinator.revealIndexBuilds, before,
-                           "a redundant redraw must cost zero full renders")
+            XCTAssertEqual(
+                coordinator.revealIndexBuilds, before,
+                "a redundant redraw must cost zero full renders")
         }
     }
 
@@ -168,8 +182,9 @@ final class MarkdownEditorRedrawTests: XCTestCase {
                 surfaceElevated: .gray, accentPrimary: .red, accentSecondary: .orange,
                 accentTertiary: .yellow, foreground: .black)
             coordinator.applyStyles()
-            XCTAssertEqual(coordinator.revealIndexBuilds, before + 1,
-                           "a theme change must still re-render")
+            XCTAssertEqual(
+                coordinator.revealIndexBuilds, before + 1,
+                "a theme change must still re-render")
         }
     }
 
@@ -182,8 +197,9 @@ final class MarkdownEditorRedrawTests: XCTestCase {
             let before = coordinator.revealIndexBuilds
             tv.string = "# Something Else\n\n**bold**\n"
             coordinator.applyStyles()
-            XCTAssertGreaterThan(coordinator.revealIndexBuilds, before,
-                                 "externally replaced text must re-render")
+            XCTAssertGreaterThan(
+                coordinator.revealIndexBuilds, before,
+                "externally replaced text must re-render")
         }
     }
 }

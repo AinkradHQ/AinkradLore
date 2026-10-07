@@ -30,22 +30,29 @@ final class Assets: NSObject, WKURLSchemeHandler {
 
     func webView(_ webView: WKWebView, start task: WKURLSchemeTask) {
         guard let url = task.request.url,
-              let target = String(url.path.dropFirst()).removingPercentEncoding,
-              let root,
-              case let file = root.appendingPathComponent(target),
-              // A preview tool still does not serve outside its own folder.
-              file.standardizedFileURL.path.hasPrefix(root.standardizedFileURL.path),
-              let data = try? Data(contentsOf: file) else {
-            task.didReceive(HTTPURLResponse(url: task.request.url!, statusCode: 404,
-                                            httpVersion: nil, headerFields: nil)!)
+            let target = String(url.path.dropFirst()).removingPercentEncoding,
+            let root,
+            case let file = root.appendingPathComponent(target),
+            // A preview tool still does not serve outside its own folder.
+            file.standardizedFileURL.path.hasPrefix(root.standardizedFileURL.path),
+            let data = try? Data(contentsOf: file)
+        else {
+            task.didReceive(
+                HTTPURLResponse(
+                    url: task.request.url!, statusCode: 404,
+                    httpVersion: nil, headerFields: nil)!)
             task.didFinish()
             return
         }
-        let type = UTType(filenameExtension: root.appendingPathComponent(target)
-                            .pathExtension)?.preferredMIMEType ?? "application/octet-stream"
-        task.didReceive(URLResponse(url: url, mimeType: type,
-                                    expectedContentLength: data.count,
-                                    textEncodingName: nil))
+        let type =
+            UTType(
+                filenameExtension: root.appendingPathComponent(target)
+                    .pathExtension)?.preferredMIMEType ?? "application/octet-stream"
+        task.didReceive(
+            URLResponse(
+                url: url, mimeType: type,
+                expectedContentLength: data.count,
+                textEncodingName: nil))
         task.didReceive(data)
         task.didFinish()
     }
@@ -63,11 +70,13 @@ final class Delegate: NSObject, NSApplicationDelegate, WKNavigationDelegate {
 
     func applicationDidFinishLaunching(_ note: Notification) {
         if let index = CommandLine.arguments.firstIndex(of: "--shot"),
-           index + 1 < CommandLine.arguments.count {
+            index + 1 < CommandLine.arguments.count
+        {
             shotPath = CommandLine.arguments[index + 1]
         }
         if CommandLine.arguments.count > 1,
-           let text = try? String(contentsOfFile: CommandLine.arguments[1], encoding: .utf8) {
+            let text = try? String(contentsOfFile: CommandLine.arguments[1], encoding: .utf8)
+        {
             // Body only: the editor is bound to `note.body`, so previewing the
             // frontmatter would be previewing something the editor never sees.
             document = Self.body(of: text)
@@ -79,34 +88,40 @@ final class Delegate: NSObject, NSApplicationDelegate, WKNavigationDelegate {
 
         let config = WKWebViewConfiguration()
         config.setURLSchemeHandler(assets, forURLScheme: "lore-asset")
-        webView = WKWebView(frame: NSRect(x: 0, y: 0, width: 1000, height: 800),
-                            configuration: config)
+        webView = WKWebView(
+            frame: NSRect(x: 0, y: 0, width: 1000, height: 800),
+            configuration: config)
         webView.navigationDelegate = self
-        window = NSWindow(contentRect: webView.frame,
-                          styleMask: [.titled, .closable, .resizable],
-                          backing: .buffered, defer: false)
+        window = NSWindow(
+            contentRect: webView.frame,
+            styleMask: [.titled, .closable, .resizable],
+            backing: .buffered, defer: false)
         window.title = "Lore — CodeMirror surface"
         window.contentView = webView
         window.center()
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
-        webView.loadFileURL(dist.appendingPathComponent("index.html"),
-                            allowingReadAccessTo: dist)
+        webView.loadFileURL(
+            dist.appendingPathComponent("index.html"),
+            allowingReadAccessTo: dist)
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        let json = String(data: try! JSONSerialization.data(withJSONObject: [document]),
-                          encoding: .utf8)!
+        let json = String(
+            data: try! JSONSerialization.data(withJSONObject: [document]),
+            encoding: .utf8)!
         let arg = String(json.dropFirst().dropLast())
         // The caret parks at the END. At offset 0 line 1 is the caret's line,
         // so its syntax is correctly REVEALED — and a snapshot then shows the
         // first line as source while every other line is rendered, which reads
         // as the first line being broken. Cost two rounds of looking at `#` and
         // at unrendered tags before the cause was the caret.
-        webView.evaluateJavaScript("""
-        window.loreEditor.init(\(arg));
-        window.loreEditor.selectAt(window.loreEditor.text().length);
-        """) { _, _ in
+        webView.evaluateJavaScript(
+            """
+            window.loreEditor.init(\(arg));
+            window.loreEditor.selectAt(window.loreEditor.text().length);
+            """
+        ) { _, _ in
             guard let path = self.shotPath else { return }
             // One turn of the run loop after init, so the decorations the
             // document produces have been laid out. Snapshotting immediately
@@ -116,9 +131,9 @@ final class Delegate: NSObject, NSApplicationDelegate, WKNavigationDelegate {
                 self.webView.takeSnapshot(with: nil) { image, error in
                     defer { NSApp.terminate(nil) }
                     guard let image,
-                          let tiff = image.tiffRepresentation,
-                          let rep = NSBitmapImageRep(data: tiff),
-                          let png = rep.representation(using: .png, properties: [:])
+                        let tiff = image.tiffRepresentation,
+                        let rep = NSBitmapImageRep(data: tiff),
+                        let png = rep.representation(using: .png, properties: [:])
                     else {
                         FileHandle.standardError.write(
                             Data("snapshot failed: \(error.map(String.init(describing:)) ?? "no image")\n".utf8))

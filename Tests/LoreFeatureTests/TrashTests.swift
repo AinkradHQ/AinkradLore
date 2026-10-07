@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 @MainActor
@@ -7,8 +8,9 @@ final class TrashTests: XCTestCase {
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent("lore-trash-\(UUID())")
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
-        let s = LoreStore(documents: FakeDocs(),
-                          indexPath: root.appendingPathComponent(".idx.sqlite"))
+        let s = LoreStore(
+            documents: FakeDocs(),
+            indexPath: root.appendingPathComponent(".idx.sqlite"))
         try s.setVaultRootForTesting(root)
         return (root, s)
     }
@@ -17,7 +19,8 @@ final class TrashTests: XCTestCase {
         let (root, s) = try vault()
         let url = root.appendingPathComponent("gone.md")
         try "---\nid: g\ntitle: Gone\n---\nx".write(to: url, atomically: true, encoding: .utf8)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
 
         _ = try s.trash(s.rows.first { $0.path.lastPathComponent == "gone.md" }!)
         XCTAssertFalse(FileManager.default.fileExists(atPath: url.path))
@@ -30,7 +33,8 @@ final class TrashTests: XCTestCase {
         try "---\nid: a\ntitle: A\n---\nsee [[Gone]]".write(to: a, atomically: true, encoding: .utf8)
         let gone = root.appendingPathComponent("Gone.md")
         try "---\nid: g\ntitle: Gone\n---\nx".write(to: gone, atomically: true, encoding: .utf8)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
 
         XCTAssertEqual(s.inboundLinkCount(to: gone), 1)
         let warned = try s.trash(s.rows.first { $0.path.lastPathComponent == "Gone.md" }!)
@@ -44,7 +48,8 @@ final class TrashTests: XCTestCase {
         let (root, s) = try vault()
         let url = root.appendingPathComponent("gone.md")
         try "---\nid: g\ntitle: Gone\n---\nx".write(to: url, atomically: true, encoding: .utf8)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
         s.open(url: url)
         XCTAssertEqual(s.tabs.count, 1)
         _ = try s.trash(s.rows.first { $0.path.lastPathComponent == "gone.md" }!)
@@ -58,7 +63,8 @@ final class TrashTests: XCTestCase {
         let (root, s) = try vault()
         let url = root.appendingPathComponent("gone.md")
         try "---\nid: g\ntitle: Gone\n---\nx".write(to: url, atomically: true, encoding: .utf8)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
         let row = try XCTUnwrap(s.rows.first { $0.path.lastPathComponent == "gone.md" })
         s.open(row)
         let session = try XCTUnwrap(s.selectedTab)
@@ -84,7 +90,8 @@ final class TrashTests: XCTestCase {
         let (root, s) = try vault()
         let url = root.appendingPathComponent("gone.md")
         try "---\nid: g\ntitle: Gone\n---\nx".write(to: url, atomically: true, encoding: .utf8)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
         let row = try XCTUnwrap(s.rows.first { $0.path.lastPathComponent == "gone.md" })
         s.open(row)
         let session = try XCTUnwrap(s.selectedTab)
@@ -107,8 +114,9 @@ final class TrashTests: XCTestCase {
             XCTAssertTrue(reason.contains("unsaved edits"), reason)
         }
 
-        XCTAssertTrue(FileManager.default.fileExists(atPath: url.path),
-                      "the file was trashed despite the refusal")
+        XCTAssertTrue(
+            FileManager.default.fileExists(atPath: url.path),
+            "the file was trashed despite the refusal")
         XCTAssertEqual(try String(contentsOf: url, encoding: .utf8), external)
         XCTAssertEqual(s.tabs.count, 1, "the tab was closed despite the refusal")
         XCTAssertTrue(session.isDirty)
@@ -123,7 +131,8 @@ final class TrashTests: XCTestCase {
         let (root, s) = try vault()
         let url = root.appendingPathComponent("gone.md")
         try "---\nid: g\ntitle: Gone\n---\nx".write(to: url, atomically: true, encoding: .utf8)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
         let row = try XCTUnwrap(s.rows.first { $0.path.lastPathComponent == "gone.md" })
         // The row is now stale: the file it names is gone from under it.
         try FileManager.default.removeItem(at: url)
@@ -145,7 +154,8 @@ final class TrashTests: XCTestCase {
         let (root, s) = try vault()
         let url = root.appendingPathComponent("gone.md")
         try "---\nid: g\ntitle: Gone\n---\nx".write(to: url, atomically: true, encoding: .utf8)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
         let row = try XCTUnwrap(s.rows.first { $0.path.lastPathComponent == "gone.md" })
         s.open(url: url)
         XCTAssertEqual(s.tabs.count, 1, "premise: the document is open")
@@ -161,7 +171,8 @@ final class TrashTests: XCTestCase {
         let (root, s) = try vault()
         let url = root.appendingPathComponent("bye.md")
         try "---\nid: b\ntitle: Bye\n---\nx".write(to: url, atomically: true, encoding: .utf8)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
         s.open(url: url)
         XCTAssertEqual(s.tabs.count, 1)
 
@@ -179,7 +190,8 @@ final class TrashTests: XCTestCase {
         let (root, s) = try vault()
         let url = root.appendingPathComponent("oops.md")
         try "---\nid: o\ntitle: Oops\n---\nkeep me".write(to: url, atomically: true, encoding: .utf8)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
 
         _ = try s.trash(try XCTUnwrap(s.rows.first { $0.path.lastPathComponent == "oops.md" }))
         XCTAssertFalse(FileManager.default.fileExists(atPath: url.path))
@@ -188,8 +200,9 @@ final class TrashTests: XCTestCase {
         try s.undoTrash()
         XCTAssertTrue(FileManager.default.fileExists(atPath: url.path))
         XCTAssertEqual(try String(contentsOf: url, encoding: .utf8).contains("keep me"), true)
-        XCTAssertTrue(s.rows.contains { $0.path.lastPathComponent == "oops.md" },
-                      "the file is back on disk but missing from the index")
+        XCTAssertTrue(
+            s.rows.contains { $0.path.lastPathComponent == "oops.md" },
+            "the file is back on disk but missing from the index")
     }
 
     /// The record is one deep and is CONSUMED, so the same delete cannot be
@@ -199,7 +212,8 @@ final class TrashTests: XCTestCase {
         let (root, s) = try vault()
         let url = root.appendingPathComponent("once.md")
         try "---\nid: o\ntitle: Once\n---\nx".write(to: url, atomically: true, encoding: .utf8)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
 
         _ = try s.trash(try XCTUnwrap(s.rows.first { $0.path.lastPathComponent == "once.md" }))
         try s.undoTrash()
@@ -214,7 +228,8 @@ final class TrashTests: XCTestCase {
         let (root, s) = try vault()
         let url = root.appendingPathComponent("taken.md")
         try "---\nid: t\ntitle: Old\n---\nold".write(to: url, atomically: true, encoding: .utf8)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
         _ = try s.trash(try XCTUnwrap(s.rows.first { $0.path.lastPathComponent == "taken.md" }))
 
         // A different file now occupies the restored path.
@@ -227,8 +242,9 @@ final class TrashTests: XCTestCase {
         // `/var/…` spelling. Asserting on the raw URL tests the test's own
         // spelling, not the behaviour.
         XCTAssertThrowsError(try s.undoTrash()) { error in
-            XCTAssertEqual(error as? LoreError,
-                           .restoreBlocked(VaultIndexCoordinator.canonical(url)))
+            XCTAssertEqual(
+                error as? LoreError,
+                .restoreBlocked(VaultIndexCoordinator.canonical(url)))
         }
         // The newer file is untouched.
         XCTAssertEqual(try String(contentsOf: url, encoding: .utf8).contains("new"), true)
@@ -241,7 +257,8 @@ final class TrashTests: XCTestCase {
         let (root, s) = try vault()
         let url = root.appendingPathComponent("shut.md")
         try "---\nid: s\ntitle: Shut\n---\nx".write(to: url, atomically: true, encoding: .utf8)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
         s.open(url: url)
         _ = try s.trash(try XCTUnwrap(s.rows.first { $0.path.lastPathComponent == "shut.md" }))
         XCTAssertTrue(s.tabs.isEmpty)
@@ -256,7 +273,8 @@ final class TrashTests: XCTestCase {
         let (root, s) = try vault()
         let url = root.appendingPathComponent("data.png")
         try Data([0x50, 0x4B, 0x03, 0x04]).write(to: url)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
 
         _ = try s.trash(try XCTUnwrap(s.rows.first { $0.path.lastPathComponent == "data.png" }))
         try s.undoTrash()

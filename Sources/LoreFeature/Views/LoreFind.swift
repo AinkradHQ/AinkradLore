@@ -30,7 +30,8 @@ enum LoreFind {
     static func perform(_ action: NSTextFinder.Action) -> Bool {
         let sender = NSMenuItem()
         sender.tag = action.rawValue
-        return NSApp.sendAction(#selector(NSTextView.performFindPanelAction(_:)),
-                                to: nil, from: sender)
+        return NSApp.sendAction(
+            #selector(NSTextView.performFindPanelAction(_:)),
+            to: nil, from: sender)
     }
 }

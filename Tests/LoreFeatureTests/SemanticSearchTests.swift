@@ -1,5 +1,6 @@
-import XCTest
 import NaturalLanguage
+import XCTest
+
 @testable import LoreFeature
 
 @MainActor

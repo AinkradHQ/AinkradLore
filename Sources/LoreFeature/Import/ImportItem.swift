@@ -20,14 +20,17 @@ public struct ImportAttachment: Sendable, Equatable {
 
 public struct FidelityWarning: Sendable, Equatable {
     public enum Kind: String, Sendable, Equatable {
-        case unsupportedElement      // converter met markup it does not model
-        case attachmentUnavailable   // referenced media could not be read
-        case lockedNote              // encrypted; skipped by design
-        case pluginSyntax            // Dataview/callout copied through verbatim
+        case unsupportedElement  // converter met markup it does not model
+        case attachmentUnavailable  // referenced media could not be read
+        case lockedNote  // encrypted; skipped by design
+        case pluginSyntax  // Dataview/callout copied through verbatim
     }
     public let kind: Kind
     public let detail: String
-    public init(kind: Kind, detail: String) { self.kind = kind; self.detail = detail }
+    public init(kind: Kind, detail: String) {
+        self.kind = kind
+        self.detail = detail
+    }
 }
 
 /// What an item IS, as declared by the source that produced it.
@@ -70,10 +73,12 @@ public struct ImportItem: Sendable, Equatable {
     /// recoverable, while a `.file` misdeclared produces data LOST (title,
     /// dates and warnings with nowhere to live). Given a source that forgets
     /// to say, err toward the recoverable failure.
-    public init(sourceID: String, title: String, body: ImportBody,
-                attachments: [ImportAttachment], folderPath: [String],
-                created: Date, modified: Date, fidelity: [FidelityWarning],
-                kind: ImportItemKind = .note) {
+    public init(
+        sourceID: String, title: String, body: ImportBody,
+        attachments: [ImportAttachment], folderPath: [String],
+        created: Date, modified: Date, fidelity: [FidelityWarning],
+        kind: ImportItemKind = .note
+    ) {
         self.sourceID = sourceID
         self.title = title
         self.body = body

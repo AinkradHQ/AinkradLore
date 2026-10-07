@@ -6,12 +6,12 @@ import Foundation
 /// than an empty `.content("")`, matching `MarkdownExtensions`' "return a
 /// neutral value rather than guess" discipline.
 public enum TransclusionContent: Equatable, Sendable {
-    case content(String)                 // the slice to render
-    case truncated(String)               // slice + "content truncated" notice
-    case missingFragment(String, String) // (opening content, fragment name)
+    case content(String)  // the slice to render
+    case truncated(String)  // slice + "content truncated" notice
+    case missingFragment(String, String)  // (opening content, fragment name)
     case circular
     case tooDeep
-    case unreadable(String)              // message
+    case unreadable(String)  // message
 }
 
 /// Turns an embed's raw target (`note`, `note#Heading`, `note#^block-id`)
@@ -25,10 +25,12 @@ public enum TransclusionResolver {
     public static let depthCap = 3
     public static let byteCap = 256 * 1024
 
-    public static func resolve(rawTarget: String,
-                               resolver: LinkResolver,
-                               path: [URL],
-                               readFile: (URL) throws -> String) -> TransclusionContent {
+    public static func resolve(
+        rawTarget: String,
+        resolver: LinkResolver,
+        path: [URL],
+        readFile: (URL) throws -> String
+    ) -> TransclusionContent {
         // 3. Resolve first — the URL is needed for the cycle check.
         guard let url = resolver.resolve(rawTarget) else {
             return .unreadable("Could not resolve \"\(rawTarget)\".")
@@ -76,8 +78,11 @@ public enum TransclusionResolver {
         switch fragment {
         case .block(let id):
             guard let anchor = model.blockAnchors.first(where: { $0.id == id }) else {
-                let opening = slice(text, NSRange(location: bodyRange.location,
-                                                   length: min(bodyRange.length, 200)))
+                let opening = slice(
+                    text,
+                    NSRange(
+                        location: bodyRange.location,
+                        length: min(bodyRange.length, 200)))
                 return .missingFragment(opening, id)
             }
             let range = blockRange(in: text, containing: anchor.offset)
@@ -85,8 +90,11 @@ public enum TransclusionResolver {
 
         case .heading(let heading):
             guard let entry = model.outline.first(where: { $0.text == heading }) else {
-                let opening = slice(text, NSRange(location: bodyRange.location,
-                                                   length: min(bodyRange.length, 200)))
+                let opening = slice(
+                    text,
+                    NSRange(
+                        location: bodyRange.location,
+                        length: min(bodyRange.length, 200)))
                 return .missingFragment(opening, heading)
             }
             let range = headingRange(in: text, outline: model.outline, entry: entry)
@@ -179,7 +187,9 @@ public enum TransclusionResolver {
         // Trim a single trailing newline so the slice doesn't carry the
         // start-of-next-block blank line into its own content.
         var length = end - start
-        while length > 0, text.character(at: start + length - 1) == 0x0A || text.character(at: start + length - 1) == 0x0D {
+        while length > 0,
+            text.character(at: start + length - 1) == 0x0A || text.character(at: start + length - 1) == 0x0D
+        {
             length -= 1
         }
         return NSRange(location: start, length: length)

@@ -1,7 +1,8 @@
-import XCTest
-import SwiftUI
-@testable import LoreFeature
 import AinkradAppKit
+import SwiftUI
+import XCTest
+
+@testable import LoreFeature
 
 /// The wrapping tag row, and the layout behind it.
 @MainActor
@@ -11,10 +12,12 @@ final class TagChipRowTests: XCTestCase {
 
     func test_theRowBuildsCollapsedAndExpanded() {
         let theme = HostTheme(TestTokens.make())
-        _ = TagChipRow(tags: tags(3), counts: ["tag0": 2],
-                       activeTag: .constant(nil), theme: theme)
-        _ = TagChipRow(tags: tags(40), counts: [:],
-                       activeTag: .constant("tag39"), theme: theme)
+        _ = TagChipRow(
+            tags: tags(3), counts: ["tag0": 2],
+            activeTag: .constant(nil), theme: theme)
+        _ = TagChipRow(
+            tags: tags(40), counts: [:],
+            activeTag: .constant("tag39"), theme: theme)
     }
 
     /// The cap exists so a large vocabulary cannot push the note list off the

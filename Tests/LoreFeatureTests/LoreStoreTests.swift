@@ -1,6 +1,7 @@
-import XCTest
-@testable import LoreFeature
 import AinkradAppKit
+import XCTest
+
+@testable import LoreFeature
 
 final class FakeDocs: PluginDocumentStore {
     private var store: [String: Data] = [:]
@@ -16,9 +17,10 @@ final class LoreStoreTests: XCTestCase {
         return u
     }
     private func makeStore(_ root: URL) throws -> LoreStore {
-        let s = LoreStore(documents: FakeDocs(),
-                          indexPath: root.appendingPathComponent(".index.sqlite"))
-        try s.setVaultRootForTesting(root)   // bypasses security-scoped bookmark in tests
+        let s = LoreStore(
+            documents: FakeDocs(),
+            indexPath: root.appendingPathComponent(".index.sqlite"))
+        try s.setVaultRootForTesting(root)  // bypasses security-scoped bookmark in tests
         return s
     }
 
@@ -39,14 +41,16 @@ final class LoreStoreTests: XCTestCase {
     }
 
     func test_create_writesFileAndIndexes() throws {
-        let root = tempDir(); let s = try makeStore(root)
+        let root = tempDir()
+        let s = try makeStore(root)
         let note = try s.create(title: "First")
         XCTAssertTrue(FileManager.default.fileExists(atPath: note.path.path))
         XCTAssertEqual(s.rows.map(\.title), ["First"])
     }
 
     func test_save_updatesBodyAndSearch() throws {
-        let root = tempDir(); let s = try makeStore(root)
+        let root = tempDir()
+        let s = try makeStore(root)
         var note = try s.create(title: "Note")
         note.body = "searchable haystack"
         try s.save(note)
@@ -57,7 +61,8 @@ final class LoreStoreTests: XCTestCase {
     /// autosave-resurrection defect — is gone; `trash(_:)` is the only deletion
     /// path. It must still satisfy what this test always asserted.
     func test_trash_removesFileAndRow() throws {
-        let root = tempDir(); let s = try makeStore(root)
+        let root = tempDir()
+        let s = try makeStore(root)
         let note = try s.create(title: "Trash")
         try s.trash(s.rows.first { $0.id == note.id }!)
         XCTAssertFalse(FileManager.default.fileExists(atPath: note.path.path))
@@ -65,7 +70,8 @@ final class LoreStoreTests: XCTestCase {
     }
 
     func test_rebuild_picksUpExternalFile() throws {
-        let root = tempDir(); let s = try makeStore(root)
+        let root = tempDir()
+        let s = try makeStore(root)
         let ext = root.appendingPathComponent("outside.md")
         try "---\nid: ext\ntitle: Outside\ntags: []\ncreated: 2026-07-19\nupdated: 2026-07-19\n---\nhi"
             .write(to: ext, atomically: true, encoding: .utf8)
@@ -74,9 +80,14 @@ final class LoreStoreTests: XCTestCase {
     }
 
     func test_allTags_areDedupedAndSorted() throws {
-        let root = tempDir(); let s = try makeStore(root)
-        var a = try s.create(title: "A"); a.tags = ["zeta", "alpha"]; try s.save(a)
-        var b = try s.create(title: "B"); b.tags = ["alpha", "mid"]; try s.save(b)
+        let root = tempDir()
+        let s = try makeStore(root)
+        var a = try s.create(title: "A")
+        a.tags = ["zeta", "alpha"]
+        try s.save(a)
+        var b = try s.create(title: "B")
+        b.tags = ["alpha", "mid"]
+        try s.save(b)
         XCTAssertEqual(s.allTags, ["alpha", "mid", "zeta"])
     }
 
@@ -112,7 +123,8 @@ final class LoreStoreTests: XCTestCase {
     }
 
     func test_rebuild_isRecursiveAndPrunesDeleted() throws {
-        let root = tempDir(); let s = try makeStore(root)
+        let root = tempDir()
+        let s = try makeStore(root)
         let sub = root.appendingPathComponent("nested")
         try FileManager.default.createDirectory(at: sub, withIntermediateDirectories: true)
         let deep = sub.appendingPathComponent("deep.md")
@@ -163,13 +175,15 @@ final class LoreStoreTests: XCTestCase {
         let root = parent.appendingPathComponent("vault", isDirectory: true)
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: parent) }
-        try "alpha".write(to: root.appendingPathComponent("a.txt"),
-                          atomically: true, encoding: .utf8)
+        try "alpha".write(
+            to: root.appendingPathComponent("a.txt"),
+            atomically: true, encoding: .utf8)
         // ...while a dot directory INSIDE the vault is still skipped.
         let git = root.appendingPathComponent(".git", isDirectory: true)
         try FileManager.default.createDirectory(at: git, withIntermediateDirectories: true)
-        try "beta".write(to: git.appendingPathComponent("b.txt"),
-                         atomically: true, encoding: .utf8)
+        try "beta".write(
+            to: git.appendingPathComponent("b.txt"),
+            atomically: true, encoding: .utf8)
 
         let entries = VaultIndexCoordinator.scanVault(at: root)
         XCTAssertEqual(entries.map(\.url.lastPathComponent), ["a.txt"])
@@ -180,8 +194,9 @@ final class LoreStoreTests: XCTestCase {
         let limit = VaultIndexCoordinator.maxIndexedPlaintextBytes
         // "needle" up front, then well past the cap.
         let big = "needle\n" + String(repeating: "x", count: limit + 5_000)
-        try big.write(to: root.appendingPathComponent("big.txt"),
-                      atomically: true, encoding: .utf8)
+        try big.write(
+            to: root.appendingPathComponent("big.txt"),
+            atomically: true, encoding: .utf8)
 
         let entries = VaultIndexCoordinator.scanVault(at: root)
         XCTAssertEqual(entries.count, 1)
@@ -200,8 +215,9 @@ final class LoreStoreTests: XCTestCase {
         let text = "a" + String(repeating: "é", count: limit)
         let capped = VaultIndexCoordinator.capped(text)
         XCTAssertEqual(capped.utf8.count, limit - 1, "half a scalar was kept or too much dropped")
-        XCTAssertFalse(capped.unicodeScalars.contains("\u{FFFD}"),
-                       "truncation cut through a scalar")
+        XCTAssertFalse(
+            capped.unicodeScalars.contains("\u{FFFD}"),
+            "truncation cut through a scalar")
         XCTAssertTrue(capped.dropFirst().allSatisfy { $0 == "é" })
     }
 
@@ -230,30 +246,36 @@ final class LoreStoreTests: XCTestCase {
     }
 
     func test_mixedVault_listsDocumentsAndMediaButNotCode() throws {
-        let root = try makeMixedVault(); let s = try makeStore(root)
+        let root = try makeMixedVault()
+        let s = try makeStore(root)
         try s.rebuild()
-        XCTAssertEqual(Set(s.rows.map(\.path.lastPathComponent)),
-                       ["note.md", "log.txt", "paper.pdf", "diagram.png"])
+        XCTAssertEqual(
+            Set(s.rows.map(\.path.lastPathComponent)),
+            ["note.md", "log.txt", "paper.pdf", "diagram.png"])
     }
 
     func test_attachmentRow_isMetadataOnlyAndTitledByFilename() throws {
-        let root = try makeMixedVault(); let s = try makeStore(root)
+        let root = try makeMixedVault()
+        let s = try makeStore(root)
         try s.rebuild()
         let row = try XCTUnwrap(s.rows.first { $0.path.lastPathComponent == "diagram.png" })
         XCTAssertEqual(row.type, AttachmentEngine.identifier)
         XCTAssertEqual(row.title, "diagram.png")
         XCTAssertTrue(row.tags.isEmpty)
         XCTAssertTrue(row.properties.isEmpty)
-        let entry = try XCTUnwrap(VaultIndexCoordinator.scanVault(at: root)
-            .first { $0.url.lastPathComponent == "diagram.png" })
+        let entry = try XCTUnwrap(
+            VaultIndexCoordinator.scanVault(at: root)
+                .first { $0.url.lastPathComponent == "diagram.png" })
         XCTAssertEqual(entry.payload.plaintext, "")
     }
 
     func test_attachmentRows_doNotMatchSearchesForBodyTextTheyDoNotHave() throws {
-        let root = try makeMixedVault(); let s = try makeStore(root)
+        let root = try makeMixedVault()
+        let s = try makeStore(root)
         try s.rebuild()
-        XCTAssertTrue(s.search("zorkmid").isEmpty,
-                      "an attachment row matched body text that was never indexed")
+        XCTAssertTrue(
+            s.search("zorkmid").isEmpty,
+            "an attachment row matched body text that was never indexed")
         // The filename IS indexed as the title, so the row is still findable.
         XCTAssertEqual(s.search("diagram").map(\.path.lastPathComponent), ["diagram.png"])
     }
@@ -265,7 +287,8 @@ final class LoreStoreTests: XCTestCase {
     /// (open always fails for `.xlsx`) is exactly the behavior this task
     /// removes.
     func test_openingAttachmentRow_opensAReadOnlyTab() throws {
-        let root = try makeMixedVault(); let s = try makeStore(root)
+        let root = try makeMixedVault()
+        let s = try makeStore(root)
         try s.rebuild()
         let row = try XCTUnwrap(s.rows.first { $0.path.lastPathComponent == "diagram.png" })
         s.open(row)
@@ -328,7 +351,8 @@ final class LoreStoreTests: XCTestCase {
     }
 
     func test_externalChange_flagsOpenNote() throws {
-        let root = tempDir(); let s = try makeStore(root)
+        let root = tempDir()
+        let s = try makeStore(root)
         let note = try s.create(title: "Open")
         usleep(20_000)  // ensure the external write lands on a later mtime tick
         // simulate external edit bumping mtime
@@ -379,8 +403,9 @@ final class LoreStoreTests: XCTestCase {
         let s = try makeStore(root)
         await s.settleForTesting()
         try s.rebuild()
-        XCTAssertEqual(s.unresolvedLinks(from: root.appendingPathComponent("alpha.md")),
-                       [UnresolvedLink(rawTarget: "Nowhere", syntax: .wikilink)])
+        XCTAssertEqual(
+            s.unresolvedLinks(from: root.appendingPathComponent("alpha.md")),
+            [UnresolvedLink(rawTarget: "Nowhere", syntax: .wikilink)])
     }
 
     func test_openLinkOpensResolvedTargetInATab() async throws {

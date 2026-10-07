@@ -1,5 +1,6 @@
-import XCTest
 import AinkradAppKit
+import XCTest
+
 @testable import LoreFeature
 
 @MainActor
@@ -16,9 +17,12 @@ final class LoreSettingsCatalogTests: XCTestCase {
     func test_pageIsDeclared() throws {
         let (page, _) = try page()
         XCTAssertEqual(page.groups.map(\.title), ["Vault", "Editor", "Display", "Index", "Shortcuts"])
-        XCTAssertEqual(page.groups[1].fields.map(\.label),
-                       ["Text size", "Line width", "Focus mode", "Typewriter scrolling",
-                        "Experimental CodeMirror editor"])
+        XCTAssertEqual(
+            page.groups[1].fields.map(\.label),
+            [
+                "Text size", "Line width", "Focus mode", "Typewriter scrolling",
+                "Experimental CodeMirror editor",
+            ])
         let customs = page.groups.flatMap(\.fields).filter { if case .custom = $0.kind { true } else { false } }
         XCTAssertTrue(customs.isEmpty)
         // One shortcut row per command, plus the three written by hand.

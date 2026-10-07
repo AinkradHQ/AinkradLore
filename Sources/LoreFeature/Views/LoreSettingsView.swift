@@ -1,6 +1,6 @@
-import SwiftUI
-import AppKit
 import AinkradAppKit
+import AppKit
+import SwiftUI
 
 struct LoreSettingsView: View {
     @Bindable var store: LoreStore
@@ -27,14 +27,17 @@ struct LoreSettingsView: View {
             // question than which folder it reads.
             AinkradSectionHeader(title: "Surface")
 
-            AinkradSurfaceSettings(appName: "Lore",
-                                   presentation: presentation,
-                                   mode: modeControl)
+            AinkradSurfaceSettings(
+                appName: "Lore",
+                presentation: presentation,
+                mode: modeControl)
 
             AinkradSectionHeader(title: "Vault")
 
-            AinkradFormRow(title: "Vault folder",
-                           help: "The folder of markdown files Lore reads and writes.") {
+            AinkradFormRow(
+                title: "Vault folder",
+                help: "The folder of markdown files Lore reads and writes."
+            ) {
                 HStack(spacing: AinkradSpacing.sm) {
                     Text(store.configuredVaultRoot?.path ?? "None selected")
                         .font(AinkradFontResolver.font(.mono, typography: typo))
@@ -52,37 +55,46 @@ struct LoreSettingsView: View {
             }
 
             if !store.subfolders.isEmpty {
-                AinkradFormRow(title: "Default new-note folder",
-                               help: "Where ⌘N quick-capture saves new notes.") {
-                    AinkradSelect(items: [""] + store.subfolders,
-                                  selection: defaultFolderBinding,
-                                  label: { $0.isEmpty ? "Vault root" : $0 })
+                AinkradFormRow(
+                    title: "Default new-note folder",
+                    help: "Where ⌘N quick-capture saves new notes."
+                ) {
+                    AinkradSelect(
+                        items: [""] + store.subfolders,
+                        selection: defaultFolderBinding,
+                        label: { $0.isEmpty ? "Vault root" : $0 })
                 }
             }
 
-            AinkradFormRow(title: "Focus mode",
-                           help: "Dim everything except the paragraph you're "
-                               + "writing.") {
-                AinkradToggle(isOn: Binding(
-                    get: { store.editorSettings.focusMode },
-                    set: { on in
-                        var next = store.editorSettings
-                        next.focusMode = on
-                        store.setEditorSettings(next)
-                    }))
+            AinkradFormRow(
+                title: "Focus mode",
+                help: "Dim everything except the paragraph you're "
+                    + "writing."
+            ) {
+                AinkradToggle(
+                    isOn: Binding(
+                        get: { store.editorSettings.focusMode },
+                        set: { on in
+                            var next = store.editorSettings
+                            next.focusMode = on
+                            store.setEditorSettings(next)
+                        }))
             }
 
-            AinkradFormRow(title: "Typewriter scrolling",
-                           help: "Keep the line you're writing at a fixed "
-                               + "height instead of letting it walk to the "
-                               + "bottom of the window.") {
-                AinkradToggle(isOn: Binding(
-                    get: { store.editorSettings.typewriterMode },
-                    set: { on in
-                        var next = store.editorSettings
-                        next.typewriterMode = on
-                        store.setEditorSettings(next)
-                    }))
+            AinkradFormRow(
+                title: "Typewriter scrolling",
+                help: "Keep the line you're writing at a fixed "
+                    + "height instead of letting it walk to the "
+                    + "bottom of the window."
+            ) {
+                AinkradToggle(
+                    isOn: Binding(
+                        get: { store.editorSettings.typewriterMode },
+                        set: { on in
+                            var next = store.editorSettings
+                            next.typewriterMode = on
+                            store.setEditorSettings(next)
+                        }))
             }
 
             AinkradSectionHeader(title: "Display")
@@ -91,31 +103,40 @@ struct LoreSettingsView: View {
             // everything above it put together, and unreadable as a caption.
             // One line states the setting; the disclosure holds the caveat
             // that only matters once someone has hit it.
-            AinkradFormRow(title: "Show all files",
-                           help: "Show attachments and other non-document "
-                               + "files in the sidebar.") {
+            AinkradFormRow(
+                title: "Show all files",
+                help: "Show attachments and other non-document "
+                    + "files in the sidebar."
+            ) {
                 AinkradToggle(isOn: showAllFilesBinding)
             }
-            AinkradDisclosureGroup(title: "What this affects",
-                                   isExpanded: $showAllFilesHelpExpanded) {
-                Text("Off by default so the sidebar stays a list of documents. "
-                     + "Files stay fully indexed, linkable and openable either "
-                     + "way — this only changes what the browse list draws.")
-                    .font(AinkradFontResolver.font(.caption, typography: typo))
-                    .foregroundStyle(theme.tokens.foreground.opacity(LoreMetrics.secondaryText))
-                    .fixedSize(horizontal: false, vertical: true)
+            AinkradDisclosureGroup(
+                title: "What this affects",
+                isExpanded: $showAllFilesHelpExpanded
+            ) {
+                Text(
+                    "Off by default so the sidebar stays a list of documents. "
+                        + "Files stay fully indexed, linkable and openable either "
+                        + "way — this only changes what the browse list draws."
+                )
+                .font(AinkradFontResolver.font(.caption, typography: typo))
+                .foregroundStyle(theme.tokens.foreground.opacity(LoreMetrics.secondaryText))
+                .fixedSize(horizontal: false, vertical: true)
             }
 
-            AinkradFormRow(title: "Render tags as chips",
-                           help: "Draw inline #tags with a tinted background. "
-                               + "Off leaves them as tinted text.") {
-                AinkradToggle(isOn: Binding(
-                    get: { store.editorSettings.renderTagsAsChips },
-                    set: { on in
-                        var next = store.editorSettings
-                        next.renderTagsAsChips = on
-                        store.setEditorSettings(next)
-                    }))
+            AinkradFormRow(
+                title: "Render tags as chips",
+                help: "Draw inline #tags with a tinted background. "
+                    + "Off leaves them as tinted text."
+            ) {
+                AinkradToggle(
+                    isOn: Binding(
+                        get: { store.editorSettings.renderTagsAsChips },
+                        set: { on in
+                            var next = store.editorSettings
+                            next.renderTagsAsChips = on
+                            store.setEditorSettings(next)
+                        }))
             }
 
             // The help text is the only place a reader learns what this trades
@@ -124,22 +145,25 @@ struct LoreSettingsView: View {
             // endings would be normalised after E3 stopped normalising them —
             // both wrong in the direction that makes the feature sound worse,
             // which is still wrong.
-            AinkradFormRow(title: "Experimental CodeMirror editor",
-                           help: "Renders with CodeMirror instead of the native "
-                               + "editor. Tables can be edited in place, "
-                               + "embedded notes and images render inline, and "
-                               + "maths is typeset, and link completion and "
-                               + "hover previews work. A file with mixed line "
-                               + "endings opens in the native editor instead, so "
-                               + "its bytes are preserved. Reopen the note after "
-                               + "changing this.") {
-                AinkradToggle(isOn: Binding(
-                    get: { store.editorSettings.usesCM6 },
-                    set: { on in
-                        var next = store.editorSettings
-                        next.usesCM6 = on
-                        store.setEditorSettings(next)
-                    }))
+            AinkradFormRow(
+                title: "Experimental CodeMirror editor",
+                help: "Renders with CodeMirror instead of the native "
+                    + "editor. Tables can be edited in place, "
+                    + "embedded notes and images render inline, and "
+                    + "maths is typeset, and link completion and "
+                    + "hover previews work. A file with mixed line "
+                    + "endings opens in the native editor instead, so "
+                    + "its bytes are preserved. Reopen the note after "
+                    + "changing this."
+            ) {
+                AinkradToggle(
+                    isOn: Binding(
+                        get: { store.editorSettings.usesCM6 },
+                        set: { on in
+                            var next = store.editorSettings
+                            next.usesCM6 = on
+                            store.setEditorSettings(next)
+                        }))
             }
 
             // The editor's OWN settings — not inherited from the host theme.
@@ -148,10 +172,12 @@ struct LoreSettingsView: View {
             // See `EditorSettings`.
             AinkradSectionHeader(title: "Editor")
 
-            AinkradFormRow(title: "Text size",
-                           help: "Line height and paragraph spacing move with "
-                               + "it, so the page keeps its rhythm. ⌘+ and ⌘− "
-                               + "adjust it per session; ⌘0 resets.") {
+            AinkradFormRow(
+                title: "Text size",
+                help: "Line height and paragraph spacing move with "
+                    + "it, so the page keeps its rhythm. ⌘+ and ⌘− "
+                    + "adjust it per session; ⌘0 resets."
+            ) {
                 AinkradSegmentedPicker(
                     items: EditorSettings.Density.allCases,
                     selection: Binding(
@@ -164,26 +190,31 @@ struct LoreSettingsView: View {
                 ) { $0.title }
             }
 
-            AinkradFormRow(title: "Line width",
-                           help: "How wide the text column runs. A measure much "
-                               + "beyond ~70 characters is tiring to read, which "
-                               + "is what full width gives you on a wide display "
-                               + "— it is there for tables and wide code blocks.") {
-                AinkradSelect(items: EditorSettings.Measure.allCases,
-                              selection: Binding(
-                                get: { store.editorSettings.measure },
-                                set: { measure in
-                                    var next = store.editorSettings
-                                    next.measure = measure
-                                    store.setEditorSettings(next)
-                                }),
-                              label: { $0.title })
+            AinkradFormRow(
+                title: "Line width",
+                help: "How wide the text column runs. A measure much "
+                    + "beyond ~70 characters is tiring to read, which "
+                    + "is what full width gives you on a wide display "
+                    + "— it is there for tables and wide code blocks."
+            ) {
+                AinkradSelect(
+                    items: EditorSettings.Measure.allCases,
+                    selection: Binding(
+                        get: { store.editorSettings.measure },
+                        set: { measure in
+                            var next = store.editorSettings
+                            next.measure = measure
+                            store.setEditorSettings(next)
+                        }),
+                    label: { $0.title })
             }
 
             AinkradSectionHeader(title: "Index")
 
-            AinkradFormRow(title: "Index",
-                           help: "Rebuild the search index from the files on disk.") {
+            AinkradFormRow(
+                title: "Index",
+                help: "Rebuild the search index from the files on disk."
+            ) {
                 HStack(spacing: AinkradSpacing.sm) {
                     // `rebuildInBackground()`, never `try? store.rebuild()`:
                     // the synchronous path walks and parses the whole vault on
@@ -207,15 +238,18 @@ struct LoreSettingsView: View {
             // from `failure` above, which reports a refused VAULT CHOICE — two
             // different problems with two different fixes.
             if let indexError = store.indexError {
-                AinkradBanner(message: "The index couldn't be rebuilt: \(indexError)",
-                              status: .danger)
+                AinkradBanner(
+                    message: "The index couldn't be rebuilt: \(indexError)",
+                    status: .danger)
             }
 
             // Collapsed by default: it is reference material, consulted
             // occasionally, and expanded it is longer than everything above it
             // put together.
-            AinkradDisclosureGroup(title: "Keyboard shortcuts",
-                                   isExpanded: $shortcutsExpanded) {
+            AinkradDisclosureGroup(
+                title: "Keyboard shortcuts",
+                isExpanded: $shortcutsExpanded
+            ) {
                 LoreShortcutsReference(theme: theme)
             }
         }
@@ -225,13 +259,15 @@ struct LoreSettingsView: View {
     }
 
     private var defaultFolderBinding: Binding<String> {
-        Binding(get: { store.defaultNoteFolder },
-                set: { store.setDefaultNoteFolder($0) })
+        Binding(
+            get: { store.defaultNoteFolder },
+            set: { store.setDefaultNoteFolder($0) })
     }
 
     private var showAllFilesBinding: Binding<Bool> {
-        Binding(get: { store.showAllFiles },
-                set: { store.setShowAllFiles($0) })
+        Binding(
+            get: { store.showAllFiles },
+            set: { store.setShowAllFiles($0) })
     }
 
     /// Shares `SidebarOperations`' picker so settings and the first-run empty

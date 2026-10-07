@@ -1,12 +1,16 @@
 import AppKit
 import SwiftUI
 import XCTest
+
 @testable import LoreFeature
 
 /// Clicking into a table must not leave it half-drawn.
 final class TableCaretRevealTests: XCTestCase {
     private var windows: [NSWindow] = []
-    override func tearDown() { windows.removeAll(); super.tearDown() }
+    override func tearDown() {
+        windows.removeAll()
+        super.tearDown()
+    }
 
     @MainActor
     /// The caret in ONE row used to put that row back to `| a | b |` while
@@ -21,24 +25,25 @@ final class TableCaretRevealTests: XCTestCase {
     /// coherent fallback, not parity.
     func test_theWholeTableRevealsWhenTheCaretEntersAnyRow() throws {
         let body = """
-        before
+            before
 
-        | Choice | Effect during the period |
-        |---|---|
-        | **Leave as is** | Pickups run normally. |
-        | **Override** | The user edits the days. |
-        | **Turn off** | No pickups from this schedule. |
+            | Choice | Effect during the period |
+            |---|---|
+            | **Leave as is** | Pickups run normally. |
+            | **Override** | The user edits the days. |
+            | **Turn off** | No pickups from this schedule. |
 
-        after
-        """
+            after
+            """
         var stored = body
         let binding = Binding<String>(get: { stored }, set: { stored = $0 })
         let coordinator = MarkdownEditor.Coordinator(text: binding, tokens: TestTokens.make())
         let tv = LinkTextView(frame: NSRect(x: 0, y: 0, width: 900, height: 800))
         tv.isRichText = false
         tv.delegate = coordinator
-        let window = NSWindow(contentRect: tv.frame, styleMask: [.titled],
-                              backing: .buffered, defer: false)
+        let window = NSWindow(
+            contentRect: tv.frame, styleMask: [.titled],
+            backing: .buffered, defer: false)
         window.contentView = tv
         window.makeFirstResponder(tv)
         windows.append(window)
@@ -64,8 +69,9 @@ final class TableCaretRevealTests: XCTestCase {
         coordinator.revealForSelectionChange()
         tv.layoutSubtreeIfNeeded()
         let outside = rowsDrawnAsGrid()
-        XCTAssertEqual(outside.drawn, outside.total,
-                       "with the caret elsewhere every row is painted as a grid")
+        XCTAssertEqual(
+            outside.drawn, outside.total,
+            "with the caret elsewhere every row is painted as a grid")
         XCTAssertGreaterThan(outside.total, 1)
 
         // Click into the middle row.
@@ -75,15 +81,17 @@ final class TableCaretRevealTests: XCTestCase {
         tv.layoutSubtreeIfNeeded()
 
         let entered = rowsDrawnAsGrid()
-        XCTAssertEqual(entered.drawn, 0,
-                       "the WHOLE table goes to source together — a single row of raw "
-                       + "markdown inside a painted grid is the defect this fixes")
+        XCTAssertEqual(
+            entered.drawn, 0,
+            "the WHOLE table goes to source together — a single row of raw "
+                + "markdown inside a painted grid is the defect this fixes")
 
         // And the source really is on screen to be edited.
         let pipe = (body as NSString).range(of: "| **Override**").location
         XCTAssertGreaterThan(
             MarkdownBlockBackgrounds.boundingRect(
-                of: NSRange(location: pipe, length: 1), in: tv).width,
+                of: NSRange(location: pipe, length: 1), in: tv
+            ).width,
             MarkdownBlockBackgrounds.collapsedMarkerWidth,
             "the row the writer clicked into shows its own pipes")
 

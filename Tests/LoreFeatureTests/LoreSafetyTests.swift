@@ -1,6 +1,7 @@
-import XCTest
-@testable import LoreFeature
 import AinkradAppKit
+import XCTest
+
+@testable import LoreFeature
 
 /// Wave 2 Lore fixes: FTS5 expression injection (search silently returning
 /// nothing for ordinary input) and `save()` clobbering concurrent external
@@ -12,21 +13,22 @@ final class LoreSearchExpressionTests: XCTestCase {
     /// typing a colon made search look broken rather than erroring.
     func testOperatorCharactersAreTreatedAsText() throws {
         let cases = [
-            "size: 3",          // ':' is FTS5's column filter
-            "AND",              // bare boolean operator
+            "size: 3",  // ':' is FTS5's column filter
+            "AND",  // bare boolean operator
             "OR",
             "NOT",
             "NEAR",
             "C++",
             "a-b",
             "(unclosed",
-            "he said \"hi",     // unbalanced quote
+            "he said \"hi",  // unbalanced quote
             "^caret",
             "*star",
         ]
         for input in cases {
-            let expression = try XCTUnwrap(LoreIndex.ftsExpression(for: input),
-                                           "produced no expression for \(input)")
+            let expression = try XCTUnwrap(
+                LoreIndex.ftsExpression(for: input),
+                "produced no expression for \(input)")
             // Every term must be a quoted literal, where FTS5 treats all
             // characters as data rather than syntax.
             XCTAssertTrue(expression.hasPrefix("\""), "unquoted term in: \(expression)")
@@ -161,8 +163,9 @@ final class LoreRescanTests: XCTestCase {
     }
 
     private func store(at root: URL) throws -> LoreStore {
-        let s = LoreStore(documents: FakeDocs(),
-                          indexPath: root.appendingPathComponent(".index.sqlite"))
+        let s = LoreStore(
+            documents: FakeDocs(),
+            indexPath: root.appendingPathComponent(".index.sqlite"))
         try s.setVaultRootForTesting(root)
         return s
     }

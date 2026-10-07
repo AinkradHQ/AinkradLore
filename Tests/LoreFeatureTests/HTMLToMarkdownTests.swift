@@ -1,12 +1,14 @@
 import XCTest
+
 @testable import LoreFeature
 
 final class HTMLToMarkdownTests: XCTestCase {
     private func md(_ html: String) -> String { HTMLToMarkdown.convert(html).markdown }
 
     func testConvertsInlineEmphasis() {
-        XCTAssertEqual(md("<p>a <b>bold</b> and <i>italic</i> plan</p>"),
-                       "a **bold** and *italic* plan")
+        XCTAssertEqual(
+            md("<p>a <b>bold</b> and <i>italic</i> plan</p>"),
+            "a **bold** and *italic* plan")
     }
 
     func testConvertsHeadingsAndLists() {
@@ -17,8 +19,9 @@ final class HTMLToMarkdownTests: XCTestCase {
     }
 
     func testConvertsChecklists() {
-        let out = md("<ul><li><input type='checkbox' checked>done</li>"
-                     + "<li><input type='checkbox'>todo</li></ul>")
+        let out = md(
+            "<ul><li><input type='checkbox' checked>done</li>"
+                + "<li><input type='checkbox'>todo</li></ul>")
         XCTAssertTrue(out.contains("- [x] done"))
         XCTAssertTrue(out.contains("- [ ] todo"))
     }
@@ -34,13 +37,15 @@ final class HTMLToMarkdownTests: XCTestCase {
     }
 
     func testConvertsAnchorWithHref() {
-        XCTAssertEqual(md("<p>see <a href=\"https://example.com\">here</a></p>"),
-                       "see [here](https://example.com)")
+        XCTAssertEqual(
+            md("<p>see <a href=\"https://example.com\">here</a></p>"),
+            "see [here](https://example.com)")
     }
 
     func testDecodesNamedAndNumericEntities() {
-        XCTAssertEqual(md("<p>Tom &amp; Jerry&#39;s &lt;plan&gt; &#x2019;quoted&#x2019;</p>"),
-                       "Tom & Jerry's <plan> \u{2019}quoted\u{2019}")
+        XCTAssertEqual(
+            md("<p>Tom &amp; Jerry&#39;s &lt;plan&gt; &#x2019;quoted&#x2019;</p>"),
+            "Tom & Jerry's <plan> \u{2019}quoted\u{2019}")
     }
 
     func testHandlesSelfClosingTags() {

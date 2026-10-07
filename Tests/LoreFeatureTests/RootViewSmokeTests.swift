@@ -1,12 +1,14 @@
-import XCTest
-import SwiftUI
-@testable import LoreFeature
 import AinkradAppKit
+import SwiftUI
+import XCTest
+
+@testable import LoreFeature
 
 @MainActor
 final class RootViewSmokeTests: XCTestCase {
     private func makeStore() -> LoreStore {
-        LoreStore(documents: FakeDocs(),
+        LoreStore(
+            documents: FakeDocs(),
             indexPath: FileManager.default.temporaryDirectory.appendingPathComponent("\(UUID()).sqlite"))
     }
 
@@ -22,8 +24,9 @@ final class RootViewSmokeTests: XCTestCase {
     }
 
     func test_settingsView_builds() {
-        _ = LoreSettingsView(store: makeStore(), theme: HostTheme(TestTokens.make()),
-                             presentation: StubPresentation(), modeControl: StubMode())
+        _ = LoreSettingsView(
+            store: makeStore(), theme: HostTheme(TestTokens.make()),
+            presentation: StubPresentation(), modeControl: StubMode())
     }
 
     func test_documentPane_buildsForEachOpenTab() throws {
@@ -32,37 +35,42 @@ final class RootViewSmokeTests: XCTestCase {
             to: root.appendingPathComponent("a.md"), atomically: true, encoding: .utf8)
         try "plain".write(
             to: root.appendingPathComponent("b.txt"), atomically: true, encoding: .utf8)
-        let store = LoreStore(documents: FakeDocs(),
-                              indexPath: root.appendingPathComponent(".idx.sqlite"))
+        let store = LoreStore(
+            documents: FakeDocs(),
+            indexPath: root.appendingPathComponent(".idx.sqlite"))
         try store.setVaultRootForTesting(root)
         store.open(url: root.appendingPathComponent("a.md"))
         store.open(url: root.appendingPathComponent("b.txt"))
         XCTAssertEqual(store.tabs.count, 2)
         for session in store.tabs {
-            _ = DocumentPane(store: store, session: session,
-                             theme: HostTheme(TestTokens.make()),
-                             ops: SidebarOperations(store: store),
-                             onOutlineChange: { _ in }, onScrollHandler: { _ in },
-                             onTagClick: { _ in },
-                             mentionsRequest: .constant(false),
-                             showingActions: .constant(false), actionItems: [])
+            _ = DocumentPane(
+                store: store, session: session,
+                theme: HostTheme(TestTokens.make()),
+                ops: SidebarOperations(store: store),
+                onOutlineChange: { _ in }, onScrollHandler: { _ in },
+                onTagClick: { _ in },
+                mentionsRequest: .constant(false),
+                showingActions: .constant(false), actionItems: [])
         }
         // The tab strip is gone; the header is the chrome row that replaced
         // it. Built here for BOTH states — with a document and without —
         // because it now renders in the empty state too, where it carries the
         // sidebar toggle and the history chevrons.
-        _ = DocumentHeaderBar(session: store.selectedTab, store: store,
-                              theme: HostTheme(TestTokens.make()),
-                              row: nil, ops: SidebarOperations(store: store),
-                              showingActions: .constant(false))
-        _ = DocumentHeaderBar(session: nil, store: store,
-                              theme: HostTheme(TestTokens.make()),
-                              row: nil, ops: SidebarOperations(store: store),
-                              showingActions: .constant(false))
+        _ = DocumentHeaderBar(
+            session: store.selectedTab, store: store,
+            theme: HostTheme(TestTokens.make()),
+            row: nil, ops: SidebarOperations(store: store),
+            showingActions: .constant(false))
+        _ = DocumentHeaderBar(
+            session: nil, store: store,
+            theme: HostTheme(TestTokens.make()),
+            row: nil, ops: SidebarOperations(store: store),
+            showingActions: .constant(false))
         // The ⋯ menu's own contents, which no test could previously reach
         // because it lived inside a context-menu modifier.
-        _ = DocumentActionsMenu(items: [], theme: HostTheme(TestTokens.make()),
-                                onDismiss: {})
+        _ = DocumentActionsMenu(
+            items: [], theme: HostTheme(TestTokens.make()),
+            onDismiss: {})
     }
 
     /// Regression for the whole-branch review finding: linked mentions were
@@ -76,22 +84,25 @@ final class RootViewSmokeTests: XCTestCase {
     func test_documentPane_buildsForNonMarkdownTabWithMentions() throws {
         let root = try tempVault()
         try Data().write(to: root.appendingPathComponent("a.pdf"))
-        let store = LoreStore(documents: FakeDocs(),
-                              indexPath: root.appendingPathComponent(".idx.sqlite"))
+        let store = LoreStore(
+            documents: FakeDocs(),
+            indexPath: root.appendingPathComponent(".idx.sqlite"))
         try store.setVaultRootForTesting(root)
         store.open(url: root.appendingPathComponent("a.pdf"))
         guard let session = store.tabs.first else {
             return XCTFail("expected the PDF to open a tab")
         }
-        XCTAssertFalse(session.engine is MarkdownEngine,
-                       "this test must exercise a non-markdown engine")
-        _ = DocumentPane(store: store, session: session,
-                         theme: HostTheme(TestTokens.make()),
-                         ops: SidebarOperations(store: store),
-                         onOutlineChange: { _ in }, onScrollHandler: { _ in },
-                         onTagClick: { _ in },
-                         mentionsRequest: .constant(false),
-                         showingActions: .constant(false), actionItems: [])
+        XCTAssertFalse(
+            session.engine is MarkdownEngine,
+            "this test must exercise a non-markdown engine")
+        _ = DocumentPane(
+            store: store, session: session,
+            theme: HostTheme(TestTokens.make()),
+            ops: SidebarOperations(store: store),
+            onOutlineChange: { _ in }, onScrollHandler: { _ in },
+            onTagClick: { _ in },
+            mentionsRequest: .constant(false),
+            showingActions: .constant(false), actionItems: [])
     }
 
     /// The mentions list, now shown in a slideover on request rather than as a
@@ -100,11 +111,13 @@ final class RootViewSmokeTests: XCTestCase {
     /// is exactly the one a smoke test is most likely to stop covering.
     func test_mentionsListBuilds() throws {
         let theme = HostTheme(TestTokens.make())
-        _ = DocumentMentionsList(backlinks: [], unresolved: [], theme: theme,
-                                 onOpen: { _ in }, onCreate: { _ in })
-        let row = IndexRow(path: URL(fileURLWithPath: "/v/a.md"), id: "a", title: "A",
-                           tags: [], aliases: [], updated: Date(),
-                           type: MarkdownEngine.identifier, properties: [])
+        _ = DocumentMentionsList(
+            backlinks: [], unresolved: [], theme: theme,
+            onOpen: { _ in }, onCreate: { _ in })
+        let row = IndexRow(
+            path: URL(fileURLWithPath: "/v/a.md"), id: "a", title: "A",
+            tags: [], aliases: [], updated: Date(),
+            type: MarkdownEngine.identifier, properties: [])
         _ = DocumentMentionsList(
             backlinks: [LoreStore.Backlink(id: row.path, row: row, context: "see [[B]]")],
             unresolved: [UnresolvedLink(rawTarget: "Ghost", syntax: .wikilink)],
@@ -114,14 +127,16 @@ final class RootViewSmokeTests: XCTestCase {
     func test_folderTreeGroupsDocumentsByFolder() throws {
         let root = URL(fileURLWithPath: "/v")
         func row(_ path: String, _ title: String) -> IndexRow {
-            IndexRow(path: URL(fileURLWithPath: path), id: path, title: title, tags: [],
-                     aliases: [], updated: Date(), type: "markdown", properties: [])
+            IndexRow(
+                path: URL(fileURLWithPath: path), id: path, title: title, tags: [],
+                aliases: [], updated: Date(), type: "markdown", properties: [])
         }
-        let tree = FolderNode.tree(from: [
-            row("/v/a.md", "A"),
-            row("/v/Projects/b.md", "B"),
-            row("/v/Projects/Deep/c.md", "C"),
-        ], directories: [], root: root)
+        let tree = FolderNode.tree(
+            from: [
+                row("/v/a.md", "A"),
+                row("/v/Projects/b.md", "B"),
+                row("/v/Projects/Deep/c.md", "C"),
+            ], directories: [], root: root)
 
         XCTAssertEqual(tree.documents.map(\.title), ["A"])
         XCTAssertEqual(tree.children.map(\.name), ["Projects"])
@@ -144,8 +159,9 @@ final class RootViewSmokeTests: XCTestCase {
 
         let tree = FolderNode.tree(from: [], directories: ["Q1"], root: root)
 
-        XCTAssertEqual(tree.children.map(\.name), ["Q1"],
-                       "an empty directory must still appear as a folder node")
+        XCTAssertEqual(
+            tree.children.map(\.name), ["Q1"],
+            "an empty directory must still appear as a folder node")
         XCTAssertTrue(tree.children.first?.documents.isEmpty ?? false)
     }
 
@@ -160,19 +176,22 @@ final class RootViewSmokeTests: XCTestCase {
     /// `.newFolder` branch actually calls it.
     func test_createFolderMakesTheNewFolderVisibleWithNoManualRescan() throws {
         let root = try tempVault()
-        let store = LoreStore(documents: FakeDocs(),
-                              indexPath: root.appendingPathComponent(".idx.sqlite"))
+        let store = LoreStore(
+            documents: FakeDocs(),
+            indexPath: root.appendingPathComponent(".idx.sqlite"))
         try store.setVaultRootForTesting(root)
         XCTAssertFalse(store.directoryPaths.contains("Q1"))
 
         _ = try store.createFolder(named: "Q1", in: root)
 
-        XCTAssertTrue(store.directoryPaths.contains("Q1"),
-                      "createFolder must make the new folder visible immediately, "
-                      + "with no background rebuild or watcher event required")
+        XCTAssertTrue(
+            store.directoryPaths.contains("Q1"),
+            "createFolder must make the new folder visible immediately, "
+                + "with no background rebuild or watcher event required")
         let tree = FolderNode.tree(from: store.rows, directories: store.directoryPaths, root: root)
-        XCTAssertTrue(tree.children.contains { $0.name == "Q1" },
-                      "and the folder tree built from that state must show it")
+        XCTAssertTrue(
+            tree.children.contains { $0.name == "Q1" },
+            "and the folder tree built from that state must show it")
     }
 
     /// Same regression, for a folder created INSIDE a subfolder — the shape
@@ -188,15 +207,17 @@ final class RootViewSmokeTests: XCTestCase {
         let root = try tempVault()
         let parent = root.appendingPathComponent("Parent")
         try FileManager.default.createDirectory(at: parent, withIntermediateDirectories: true)
-        let store = LoreStore(documents: FakeDocs(),
-                              indexPath: root.appendingPathComponent(".idx.sqlite"))
+        let store = LoreStore(
+            documents: FakeDocs(),
+            indexPath: root.appendingPathComponent(".idx.sqlite"))
         try store.setVaultRootForTesting(root)
 
         _ = try store.createFolder(named: "Q1", in: parent)
 
-        XCTAssertTrue(store.directoryPaths.contains("Parent/Q1"),
-                      "a folder created inside a subfolder must be visible immediately, "
-                      + "without waiting on the watcher's coalescing latency")
+        XCTAssertTrue(
+            store.directoryPaths.contains("Parent/Q1"),
+            "a folder created inside a subfolder must be visible immediately, "
+                + "without waiting on the watcher's coalescing latency")
     }
 
     /// The background-rescan path (a watcher event, or a full app relaunch)
@@ -206,8 +227,9 @@ final class RootViewSmokeTests: XCTestCase {
     /// triggers.
     func test_directoryPathsPicksUpAFolderCreatedAfterActivation() async throws {
         let root = try tempVault()
-        let store = LoreStore(documents: FakeDocs(),
-                              indexPath: root.appendingPathComponent(".idx.sqlite"))
+        let store = LoreStore(
+            documents: FakeDocs(),
+            indexPath: root.appendingPathComponent(".idx.sqlite"))
         try store.setVaultRootForTesting(root)
         XCTAssertFalse(store.directoryPaths.contains("Q1"))
 
@@ -216,29 +238,34 @@ final class RootViewSmokeTests: XCTestCase {
         store.startBackgroundRebuild()
         await store.settleForTesting()
 
-        XCTAssertTrue(store.directoryPaths.contains("Q1"),
-                      "a folder created after activation must appear once the "
-                      + "background rescan that follows it lands")
+        XCTAssertTrue(
+            store.directoryPaths.contains("Q1"),
+            "a folder created after activation must appear once the "
+                + "background rescan that follows it lands")
     }
 
     func test_folderTreeViewBuilds() throws {
         let root = try tempVault()
-        let store = LoreStore(documents: FakeDocs(),
-                              indexPath: root.appendingPathComponent(".idx.sqlite"))
+        let store = LoreStore(
+            documents: FakeDocs(),
+            indexPath: root.appendingPathComponent(".idx.sqlite"))
         try store.setVaultRootForTesting(root)
-        _ = FolderTreeView(store: store, theme: HostTheme(TestTokens.make()),
-                           selected: .constant(nil), onSelect: { _ in },
-                           ops: SidebarOperations(store: store))
-        _ = NoteListView(store: store, query: .constant(""), selected: .constant(nil),
-                         theme: HostTheme(TestTokens.make()), onSelect: { _ in },
-                         onNew: {}, ops: SidebarOperations(store: store),
-                         activeTag: .constant(nil), focusRequest: .constant(nil))
+        _ = FolderTreeView(
+            store: store, theme: HostTheme(TestTokens.make()),
+            selected: .constant(nil), onSelect: { _ in },
+            ops: SidebarOperations(store: store))
+        _ = NoteListView(
+            store: store, query: .constant(""), selected: .constant(nil),
+            theme: HostTheme(TestTokens.make()), onSelect: { _ in },
+            onNew: {}, ops: SidebarOperations(store: store),
+            activeTag: .constant(nil), focusRequest: .constant(nil))
     }
 
     func test_documentErrorCard_builds() {
         let url = URL(fileURLWithPath: "/tmp/x.xlsx")
-        _ = DocumentErrorCard(url: url, message: "Lore couldn't open this document.",
-                              theme: HostTheme(TestTokens.make()))
+        _ = DocumentErrorCard(
+            url: url, message: "Lore couldn't open this document.",
+            theme: HostTheme(TestTokens.make()))
     }
 
     /// The delete affordance moved from `NoteEditorPane` to the list row's
@@ -249,15 +276,17 @@ final class RootViewSmokeTests: XCTestCase {
         let b = root.appendingPathComponent("b.md")
         try "---\nid: a\ntitle: A\n---\nx".write(to: a, atomically: true, encoding: .utf8)
         try "---\nid: b\ntitle: B\n---\ny".write(to: b, atomically: true, encoding: .utf8)
-        let store = LoreStore(documents: FakeDocs(),
-                              indexPath: root.appendingPathComponent(".idx.sqlite"))
+        let store = LoreStore(
+            documents: FakeDocs(),
+            indexPath: root.appendingPathComponent(".idx.sqlite"))
         try store.setVaultRootForTesting(root)
         store.open(url: a)
         store.open(url: b)
         XCTAssertEqual(store.tabs.count, 2)
 
-        let row = IndexRow(path: a, id: "a", title: "A", tags: [], aliases: [], updated: Date(),
-                           type: MarkdownEngine.identifier, properties: [])
+        let row = IndexRow(
+            path: a, id: "a", title: "A", tags: [], aliases: [], updated: Date(),
+            type: MarkdownEngine.identifier, properties: [])
         deleteDocument(row, in: store)
 
         XCTAssertEqual(store.tabs.map(\.url), [b])
@@ -272,8 +301,9 @@ final class RootViewSmokeTests: XCTestCase {
         let root = try tempVault()
         let url = root.appendingPathComponent("a.md")
         try "---\nid: a\ntitle: A\n---\nx".write(to: url, atomically: true, encoding: .utf8)
-        let store = LoreStore(documents: FakeDocs(),
-                              indexPath: root.appendingPathComponent(".idx.sqlite"))
+        let store = LoreStore(
+            documents: FakeDocs(),
+            indexPath: root.appendingPathComponent(".idx.sqlite"))
         try store.setVaultRootForTesting(root)
         store.open(url: url)
         let session = try XCTUnwrap(store.selectedTab)
@@ -286,7 +316,8 @@ final class RootViewSmokeTests: XCTestCase {
 
 enum TestTokens {
     static func make() -> HostThemeTokens {
-        HostThemeTokens(themeID: "t", background: .black, surface: .gray, surfaceElevated: .gray,
+        HostThemeTokens(
+            themeID: "t", background: .black, surface: .gray, surfaceElevated: .gray,
             accentPrimary: .blue, accentSecondary: .teal, accentTertiary: .green, foreground: .white)
     }
 }

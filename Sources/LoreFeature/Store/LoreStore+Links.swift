@@ -62,8 +62,10 @@ extension LoreStore {
     /// Throws rather than returning an optional: a create that fails must reach
     /// the user, and the caller's job is only to show it.
     @discardableResult
-    public func createAndOpenNote(forLinkTarget target: String,
-                                  syntax: LinkSyntax) throws -> Note {
+    public func createAndOpenNote(
+        forLinkTarget target: String,
+        syntax: LinkSyntax
+    ) throws -> Note {
         let note = try createNote(forLinkTarget: target, syntax: syntax)
         open(url: note.path)
         return note
@@ -81,8 +83,10 @@ extension LoreStore {
     /// and the folder split — so the two doors cannot disagree about what
     /// `[[Projects/Q1|the plan]]` should create.
     @discardableResult
-    public func createNote(forLinkTarget target: String,
-                           syntax: LinkSyntax) throws -> Note {
+    public func createNote(
+        forLinkTarget target: String,
+        syntax: LinkSyntax
+    ) throws -> Note {
         let decoded = DocumentLink(rawTarget: target, syntax: syntax).resolutionTarget
         var parts = LinkCompletionContext.documentName(of: decoded)
             .split(separator: "/").map(String.init)
@@ -115,7 +119,8 @@ extension LoreStore {
         var existing = url.standardizedFileURL
         var trailing: [String] = []
         while !FileManager.default.fileExists(atPath: existing.path),
-              existing.pathComponents.count > 1 {
+            existing.pathComponents.count > 1
+        {
             trailing.insert(existing.lastPathComponent, at: 0)
             existing = existing.deletingLastPathComponent()
         }
@@ -124,8 +129,11 @@ extension LoreStore {
         let rootPath = root.resolvingSymlinksInPath().standardizedFileURL.path
         let path = resolved.standardizedFileURL.path
         // The `/` matters: without it `/vault-backup` counts as inside `/vault`.
-        return path == rootPath || path.hasPrefix(rootPath.hasSuffix("/") ? rootPath
-                                                                         : rootPath + "/")
+        return path == rootPath
+            || path.hasPrefix(
+                rootPath.hasSuffix("/")
+                    ? rootPath
+                    : rootPath + "/")
     }
 
     /// `Projects/Design` for `<vault>/Projects/Design.md`. Empty when the

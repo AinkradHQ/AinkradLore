@@ -1,6 +1,6 @@
-import SwiftUI
-import AppKit
 import AinkradAppKit
+import AppKit
+import SwiftUI
 
 // The `NSViewRepresentable` lifecycle for `MarkdownEditor` — building the
 // `NSScrollView`/`LinkTextView` pair, wiring their callbacks to the
@@ -22,11 +22,13 @@ extension MarkdownEditor {
         tv.isVerticallyResizable = true
         tv.isHorizontallyResizable = false
         tv.minSize = NSSize(width: 0, height: 0)
-        tv.maxSize = NSSize(width: CGFloat.greatestFiniteMagnitude,
-                            height: CGFloat.greatestFiniteMagnitude)
+        tv.maxSize = NSSize(
+            width: CGFloat.greatestFiniteMagnitude,
+            height: CGFloat.greatestFiniteMagnitude)
         tv.textContainer?.widthTracksTextView = true
-        tv.textContainer?.containerSize = NSSize(width: 0,
-                                                 height: CGFloat.greatestFiniteMagnitude)
+        tv.textContainer?.containerSize = NSSize(
+            width: 0,
+            height: CGFloat.greatestFiniteMagnitude)
         tv.delegate = context.coordinator
         tv.isRichText = false
         tv.allowsUndo = true
@@ -70,8 +72,9 @@ extension MarkdownEditor {
             forViewWidth: tv.bounds.width, theme: initialTheme)
         tv.textContainer?.widthTracksTextView = false
         tv.textContainer?.size = NSSize(
-            width: MarkdownEditorLayout.containerWidth(forViewWidth: tv.bounds.width,
-                                                        theme: initialTheme),
+            width: MarkdownEditorLayout.containerWidth(
+                forViewWidth: tv.bounds.width,
+                theme: initialTheme),
             height: .greatestFiniteMagnitude)
         tv.onWidthChange = { [weak coordinator = context.coordinator] width in
             coordinator?.applyContainerGeometry(forWidth: width)
@@ -184,10 +187,13 @@ extension MarkdownEditor {
     /// A floating label, hidden unless the document is over the hard cap. Added
     /// to the SCROLL view rather than the text view so it stays put while the
     /// document scrolls under it, and so it never becomes part of the text.
-    private static func addStylingNotice(to scroll: NSScrollView,
-                                  tokens: HostThemeTokens) -> NSTextField {
-        let notice = NSTextField(labelWithString:
-            "Styling off — document over \(MarkdownDocumentModel.stylingHardCap / (1024 * 1024)) MB")
+    private static func addStylingNotice(
+        to scroll: NSScrollView,
+        tokens: HostThemeTokens
+    ) -> NSTextField {
+        let notice = NSTextField(
+            labelWithString:
+                "Styling off — document over \(MarkdownDocumentModel.stylingHardCap / (1024 * 1024)) MB")
         notice.font = .systemFont(ofSize: 11)
         notice.textColor = NSColor(tokens.accentSecondary)
         notice.isHidden = true
@@ -195,7 +201,7 @@ extension MarkdownEditor {
         scroll.addSubview(notice)
         NSLayoutConstraint.activate([
             notice.trailingAnchor.constraint(equalTo: scroll.trailingAnchor, constant: -20),
-            notice.topAnchor.constraint(equalTo: scroll.topAnchor, constant: 6)
+            notice.topAnchor.constraint(equalTo: scroll.topAnchor, constant: 6),
         ])
         return notice
     }
@@ -215,7 +221,10 @@ extension MarkdownEditor {
         context.coordinator.writePastedImage = writePastedImage
         context.coordinator.writeDroppedFile = writeDroppedFile
         context.coordinator.onSelectionChange = onSelectionChange
-        if tv.string != text { tv.string = text; context.coordinator.applyStyles() }
+        if tv.string != text {
+            tv.string = text
+            context.coordinator.applyStyles()
+        }
         tv.backgroundColor = NSColor(tokens.background)
         tv.insertionPointColor = NSColor(tokens.accentPrimary)
         context.coordinator.tokens = tokens

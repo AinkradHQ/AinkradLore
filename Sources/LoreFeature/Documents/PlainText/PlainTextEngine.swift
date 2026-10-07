@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// Plain text and source files: no frontmatter, no structure, the file's bytes
 /// are the document.
@@ -19,7 +19,9 @@ public final class PlainTextEngine: DocumentEngine {
     private let sourceURL: URL
 
     private init(text: String, isLossilyDecoded: Bool, sourceURL: URL) {
-        self.text = text; self.isLossilyDecoded = isLossilyDecoded; self.sourceURL = sourceURL
+        self.text = text
+        self.isLossilyDecoded = isLossilyDecoded
+        self.sourceURL = sourceURL
     }
 
     public static let extensions: Set<String> = [
@@ -62,8 +64,9 @@ public final class PlainTextEngine: DocumentEngine {
     }
 
     public var indexPayload: IndexPayload {
-        IndexPayload(title: sourceURL.deletingPathExtension().lastPathComponent,
-                     plaintext: text)
+        IndexPayload(
+            title: sourceURL.deletingPathExtension().lastPathComponent,
+            plaintext: text)
     }
 
     /// A lossily-decoded document cannot reproduce the file's original bytes,
@@ -88,12 +91,17 @@ private struct PlainTextDocumentEditor: View {
     @State private var text: String = ""
 
     var body: some View {
-        MarkdownEditor(text: $text, tokens: ctx.theme.tokens,
-                       settings: ctx.editorSettings,
-                       headingCompletions: ctx.headingCompletions,
-                       createLinkedNote: ctx.createLinkedNote)
-            .onChange(of: text) { engine.text = text; ctx.onChange() }
-            .onAppear { text = engine.text }
-            .background(ctx.theme.tokens.background)
+        MarkdownEditor(
+            text: $text, tokens: ctx.theme.tokens,
+            settings: ctx.editorSettings,
+            headingCompletions: ctx.headingCompletions,
+            createLinkedNote: ctx.createLinkedNote
+        )
+        .onChange(of: text) {
+            engine.text = text
+            ctx.onChange()
+        }
+        .onAppear { text = engine.text }
+        .background(ctx.theme.tokens.background)
     }
 }

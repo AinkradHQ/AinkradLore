@@ -1,17 +1,21 @@
 import AppKit
 import SwiftUI
 import XCTest
+
 @testable import LoreFeature
 
 final class MarkdownRevealTests: XCTestCase {
 
-    private func hidden(_ body: String, selection: NSRange,
-                        isFocused: Bool = true) -> [Range<Int>] {
+    private func hidden(
+        _ body: String, selection: NSRange,
+        isFocused: Bool = true
+    ) -> [Range<Int>] {
         let model = MarkdownDocumentModel(body: body)
-        return MarkdownReveal.hiddenMarkers(spans: model.styleSpans,
-                                            selection: selection,
-                                            text: body,
-                                            isFocused: isFocused)
+        return MarkdownReveal.hiddenMarkers(
+            spans: model.styleSpans,
+            selection: selection,
+            text: body,
+            isFocused: isFocused)
     }
 
     // MARK: - The reveal unit is the LINE
@@ -23,21 +27,24 @@ final class MarkdownRevealTests: XCTestCase {
     func test_aCaretInOneListItemRevealsOnlyThatItemsMarker() {
         let body = "- alpha\n- beta\n- gamma\n"
         // Precondition: this really is one block, or the test proves nothing.
-        XCTAssertEqual(MarkdownReveal.blocks(in: body).count, 1,
-                       "a list with no blank lines must be a single block, "
-                       + "or this test is not exercising the defect it exists for")
+        XCTAssertEqual(
+            MarkdownReveal.blocks(in: body).count, 1,
+            "a list with no blank lines must be a single block, "
+                + "or this test is not exercising the defect it exists for")
 
         let caretInBeta = NSRange(location: body.utf16.count / 2, length: 0)
         let hiddenRanges = hidden(body, selection: caretInBeta)
         let ns = body as NSString
         let betaLine = ns.lineRange(for: caretInBeta)
 
-        XCTAssertFalse(hiddenRanges.isEmpty,
-                       "the other two items' markers must still be hidden")
+        XCTAssertFalse(
+            hiddenRanges.isEmpty,
+            "the other two items' markers must still be hidden")
         for range in hiddenRanges {
-            XCTAssertFalse(range.lowerBound >= betaLine.location
-                           && range.upperBound <= NSMaxRange(betaLine),
-                           "no marker on the caret's own line may be hidden")
+            XCTAssertFalse(
+                range.lowerBound >= betaLine.location
+                    && range.upperBound <= NSMaxRange(betaLine),
+                "no marker on the caret's own line may be hidden")
         }
     }
 
@@ -51,11 +58,13 @@ final class MarkdownRevealTests: XCTestCase {
         let caretOnFirstLine = NSRange(location: 3, length: 0)
         let hiddenRanges = hidden(body, selection: caretOnFirstLine)
         // Two lines' worth of `**` pairs = four markers still collapsed.
-        XCTAssertEqual(hiddenRanges.count, 4,
-                       "lines two and three keep both of their markers hidden")
+        XCTAssertEqual(
+            hiddenRanges.count, 4,
+            "lines two and three keep both of their markers hidden")
         for range in hiddenRanges {
-            XCTAssertGreaterThanOrEqual(range.lowerBound, 13,
-                                        "nothing on the caret's line may be hidden")
+            XCTAssertGreaterThanOrEqual(
+                range.lowerBound, 13,
+                "nothing on the caret's line may be hidden")
         }
     }
 
@@ -64,14 +73,16 @@ final class MarkdownRevealTests: XCTestCase {
     /// block whose delimiters it could neither see nor edit.
     func test_aCaretInsideAFenceRevealsTheFenceLines() {
         let body = "intro\n\n```swift\nlet x = 1\nlet y = 2\n```\n\ntail\n"
-        let caretInsideTheCode = NSRange(location: (body as NSString).range(of: "let y").location,
-                                         length: 0)
+        let caretInsideTheCode = NSRange(
+            location: (body as NSString).range(of: "let y").location,
+            length: 0)
         let hiddenRanges = hidden(body, selection: caretInsideTheCode)
         let fenceStart = (body as NSString).range(of: "```swift").location
         for range in hiddenRanges {
-            XCTAssertFalse(range.lowerBound >= fenceStart,
-                           "the fence's own markers must be revealed when the caret "
-                           + "is anywhere inside the code block")
+            XCTAssertFalse(
+                range.lowerBound >= fenceStart,
+                "the fence's own markers must be revealed when the caret "
+                    + "is anywhere inside the code block")
         }
     }
 
@@ -80,10 +91,12 @@ final class MarkdownRevealTests: XCTestCase {
     func test_aCaretInAQuoteRevealsOnlyItsOwnLinesMarker() {
         let body = "> first line\n> second line\n> third line\n"
         XCTAssertEqual(MarkdownReveal.blocks(in: body).count, 1)
-        let caretOnSecond = NSRange(location: (body as NSString).range(of: "second").location,
-                                    length: 0)
-        XCTAssertFalse(hidden(body, selection: caretOnSecond).isEmpty,
-                       "the other quote lines' markers stay hidden")
+        let caretOnSecond = NSRange(
+            location: (body as NSString).range(of: "second").location,
+            length: 0)
+        XCTAssertFalse(
+            hidden(body, selection: caretOnSecond).isEmpty,
+            "the other quote lines' markers stay hidden")
     }
 
     /// An unfocused editor KEEPS its selection, so the block the caret was
@@ -93,10 +106,12 @@ final class MarkdownRevealTests: XCTestCase {
     func test_losingFocusHidesEveryMarker() {
         let body = "**bold**\n\nplain paragraph"
         let caretInsideTheSpan = NSRange(location: 3, length: 0)
-        XCTAssertTrue(hidden(body, selection: caretInsideTheSpan).isEmpty,
-                      "focused: the caret's own block reveals")
-        XCTAssertFalse(hidden(body, selection: caretInsideTheSpan, isFocused: false).isEmpty,
-                       "unfocused: nothing reveals")
+        XCTAssertTrue(
+            hidden(body, selection: caretInsideTheSpan).isEmpty,
+            "focused: the caret's own block reveals")
+        XCTAssertFalse(
+            hidden(body, selection: caretInsideTheSpan, isFocused: false).isEmpty,
+            "unfocused: nothing reveals")
     }
 
     /// The end-to-end regression for the resign-first-responder timing bug,
@@ -128,16 +143,19 @@ final class MarkdownRevealTests: XCTestCase {
     @MainActor
     func test_resigningFirstResponderActuallyHidesTheMarkers() throws {
         let body = "**bold**\n\nplain paragraph"
-        let hosting = NSHostingView(rootView: AnyView(
-            MarkdownEditor(text: .constant(body), tokens: TestTokens.make())))
+        let hosting = NSHostingView(
+            rootView: AnyView(
+                MarkdownEditor(text: .constant(body), tokens: TestTokens.make())))
         hosting.frame = NSRect(x: 0, y: 0, width: 800, height: 600)
-        let window = NSWindow(contentRect: hosting.frame, styleMask: [.borderless],
-                              backing: .buffered, defer: false)
+        let window = NSWindow(
+            contentRect: hosting.frame, styleMask: [.borderless],
+            backing: .buffered, defer: false)
         window.contentView = hosting
         hosting.layoutSubtreeIfNeeded()
 
-        let tv = try XCTUnwrap(Self.findLinkTextView(in: hosting),
-                               "MarkdownEditor.makeNSView must have produced a LinkTextView by now")
+        let tv = try XCTUnwrap(
+            Self.findLinkTextView(in: hosting),
+            "MarkdownEditor.makeNSView must have produced a LinkTextView by now")
         // A caret click, not a test-only shortcut: `setSelectedRange` is the
         // same call AppKit itself makes on a mouse click, and — because
         // `tv.delegate` is the real coordinator, wired by the real
@@ -178,9 +196,12 @@ final class MarkdownRevealTests: XCTestCase {
         let body = "**a**\n\n*b*\n\n`c`"
         let model = MarkdownDocumentModel(body: body)
         let markers = model.styleSpans.filter { if case .marker = $0.kind { return true } else { return false } }
-        XCTAssertEqual(hidden(body, selection: NSRange(location: 2, length: 0),
-                              isFocused: false).count,
-                       markers.count)
+        XCTAssertEqual(
+            hidden(
+                body, selection: NSRange(location: 2, length: 0),
+                isFocused: false
+            ).count,
+            markers.count)
     }
 
     /// With the caret elsewhere, every marker is hidden — this is the clean
@@ -281,8 +302,11 @@ final class MarkdownRevealTests: XCTestCase {
 
     func test_highlightMarkersHideWhenUnfocused() {
         let body = "before ==lit== after"
-        XCTAssertFalse(hidden(body, selection: NSRange(location: 9, length: 0),
-                              isFocused: false).isEmpty)
+        XCTAssertFalse(
+            hidden(
+                body, selection: NSRange(location: 9, length: 0),
+                isFocused: false
+            ).isEmpty)
     }
 
     /// `[^1]` inline reference.
@@ -293,8 +317,11 @@ final class MarkdownRevealTests: XCTestCase {
 
     func test_footnoteReferenceMarkersHideWhenUnfocused() {
         let body = "claim[^1] more"
-        XCTAssertFalse(hidden(body, selection: NSRange(location: 7, length: 0),
-                              isFocused: false).isEmpty)
+        XCTAssertFalse(
+            hidden(
+                body, selection: NSRange(location: 7, length: 0),
+                isFocused: false
+            ).isEmpty)
     }
 
     /// `[^1]:` definition at line start.
@@ -305,8 +332,11 @@ final class MarkdownRevealTests: XCTestCase {
 
     func test_footnoteDefinitionMarkersHideWhenUnfocused() {
         let body = "[^1]: the note"
-        XCTAssertFalse(hidden(body, selection: NSRange(location: 2, length: 0),
-                              isFocused: false).isEmpty)
+        XCTAssertFalse(
+            hidden(
+                body, selection: NSRange(location: 2, length: 0),
+                isFocused: false
+            ).isEmpty)
     }
 
     /// `#tag` carries no `.marker` span at all — see
@@ -356,8 +386,9 @@ extension MarkdownRevealTests {
     /// Uncollapsed text is untouched — collapse must be surgical.
     func test_collapseLeavesNeighbouringTextAlone() throws {
         let storage = NSTextStorage(string: "**bold**")
-        storage.addAttribute(.font, value: NSFont.systemFont(ofSize: 15),
-                             range: NSRange(location: 0, length: 8))
+        storage.addAttribute(
+            .font, value: NSFont.systemFont(ofSize: 15),
+            range: NSRange(location: 0, length: 8))
         MarkdownStyleRenderer.collapse([0..<2], in: storage)
         let font = storage.attribute(.font, at: 3, effectiveRange: nil) as? NSFont
         XCTAssertEqual(try XCTUnwrap(font).pointSize, 15, accuracy: 0.01)
@@ -385,14 +416,17 @@ extension MarkdownRevealTests {
         }
         XCTAssertFalse(markers.isEmpty)
         let storage = NSTextStorage(string: body)
-        storage.addAttribute(.font, value: NSFont.systemFont(ofSize: 15),
-                             range: NSRange(location: 0, length: (body as NSString).length))
+        storage.addAttribute(
+            .font, value: NSFont.systemFont(ofSize: 15),
+            range: NSRange(location: 0, length: (body as NSString).length))
         MarkdownStyleRenderer.collapse(markers, in: storage)
         XCTAssertEqual(storage.string, body)
         let head = storage.attribute(.font, at: 0, effectiveRange: nil) as? NSFont
         XCTAssertLessThan(try XCTUnwrap(head).pointSize, 0.1)
-        let tail = storage.attribute(.font, at: (body as NSString).length - 1,
-                                     effectiveRange: nil) as? NSFont
+        let tail =
+            storage.attribute(
+                .font, at: (body as NSString).length - 1,
+                effectiveRange: nil) as? NSFont
         XCTAssertEqual(try XCTUnwrap(tail).pointSize, 15, accuracy: 0.01)
     }
 
@@ -415,14 +449,16 @@ extension MarkdownRevealTests {
         let storage = NSTextStorage(string: body)
 
         func markerSize(caret: Int) -> CGFloat {
-            MarkdownStyleRenderer.apply(model.styleSpans, to: storage,
-                                        tokens: TestTokens.make(),
-                                        theme: MarkdownTheme(tokens: TestTokens.make()),
-                                        limitedTo: nil)
+            MarkdownStyleRenderer.apply(
+                model.styleSpans, to: storage,
+                tokens: TestTokens.make(),
+                theme: MarkdownTheme(tokens: TestTokens.make()),
+                limitedTo: nil)
             MarkdownStyleRenderer.collapse(
-                MarkdownReveal.hiddenMarkers(spans: model.styleSpans,
-                                             selection: NSRange(location: caret, length: 0),
-                                             text: body, isFocused: true),
+                MarkdownReveal.hiddenMarkers(
+                    spans: model.styleSpans,
+                    selection: NSRange(location: caret, length: 0),
+                    text: body, isFocused: true),
                 in: storage)
             return (storage.attribute(.font, at: 0, effectiveRange: nil) as? NSFont)?
                 .pointSize ?? -1
@@ -455,14 +491,16 @@ extension MarkdownRevealTests {
 
     /// A live editor over `body`, styled once, with the caret at `caret`.
     private func editor(_ body: String, caret: Int, width: CGFloat = 800)
-        -> (LinkTextView, MarkdownEditor.Coordinator) {
+        -> (LinkTextView, MarkdownEditor.Coordinator)
+    {
         let tokens = TestTokens.make()
         let tv = LinkTextView(frame: NSRect(x: 0, y: 0, width: width, height: 600))
         tv.isVerticallyResizable = true
         tv.isHorizontallyResizable = false
         tv.textContainer?.widthTracksTextView = true
-        tv.textContainer?.containerSize = NSSize(width: 0,
-                                                 height: CGFloat.greatestFiniteMagnitude)
+        tv.textContainer?.containerSize = NSSize(
+            width: 0,
+            height: CGFloat.greatestFiniteMagnitude)
         tv.isRichText = false
         tv.string = body
         let coordinator = MarkdownEditor.Coordinator(text: .constant(body), tokens: tokens)
@@ -489,14 +527,19 @@ extension MarkdownRevealTests {
         storage.addAttribute(.foregroundColor, value: sentinel, range: distant)
 
         // Caret from block 0 into block 1 — two blocks away from the sentinel.
-        tv.setSelectedRange(NSRange(location: (body as NSString).range(of: "two").location,
-                                    length: 0))
+        tv.setSelectedRange(
+            NSRange(
+                location: (body as NSString).range(of: "two").location,
+                length: 0))
         coordinator.revealForSelectionChange()
 
-        let survived = storage.attribute(.foregroundColor, at: distant.location,
-                                         effectiveRange: nil) as? NSColor
-        XCTAssertEqual(survived, sentinel,
-                       "an untouched block must not be re-attributed by a caret move")
+        let survived =
+            storage.attribute(
+                .foregroundColor, at: distant.location,
+                effectiveRange: nil) as? NSColor
+        XCTAssertEqual(
+            survived, sentinel,
+            "an untouched block must not be re-attributed by a caret move")
     }
 
     /// FINDING 1/2. `MarkdownReveal.blocks(in:)` is an O(document) scan and
@@ -510,13 +553,16 @@ extension MarkdownRevealTests {
 
         let ns = body as NSString
         // Within a block, and across three boundaries.
-        for caret in [2, 3, ns.range(of: "two").location, ns.range(of: "three").location,
-                      ns.range(of: "four").location, 1] {
+        for caret in [
+            2, 3, ns.range(of: "two").location, ns.range(of: "three").location,
+            ns.range(of: "four").location, 1,
+        ] {
             tv.setSelectedRange(NSRange(location: caret, length: 0))
             coordinator.revealForSelectionChange()
         }
-        XCTAssertEqual(coordinator.revealIndexBuilds, afterRender,
-                       "no caret move may rescan the document for blocks")
+        XCTAssertEqual(
+            coordinator.revealIndexBuilds, afterRender,
+            "no caret move may rescan the document for blocks")
     }
 
     /// And the reveal still has to be CORRECT after all that incremental work:
@@ -559,8 +605,9 @@ extension MarkdownRevealTests {
         XCTAssertEqual(callbacks, 1, "one width change must produce exactly one pass")
         let theme = MarkdownTheme(tokens: TestTokens.make())
         let expected = MarkdownEditorLayout.containerInset(forViewWidth: 2000, theme: theme)
-        XCTAssertEqual(tv.textContainerInset.width, expected.width, accuracy: 0.5,
-                       "the real resize path must re-centre the column")
+        XCTAssertEqual(
+            tv.textContainerInset.width, expected.width, accuracy: 0.5,
+            "the real resize path must re-centre the column")
 
         // Same width again, and a HEIGHT-only change — neither is a width
         // change, and neither may re-enter the handler.

@@ -12,7 +12,8 @@ extension LoreStore {
     public func suggestedTags(for url: URL, limit: Int = 5) -> [String] {
         let path = VaultIndexCoordinator.canonical(url)
         guard let me = rows.first(where: { $0.path == path }),
-              let text = try? String(contentsOf: path, encoding: .utf8) else { return [] }
+            let text = try? String(contentsOf: path, encoding: .utf8)
+        else { return [] }
         let have = Set(me.tags.map { $0.lowercased() })
         let lowered = text.lowercased()
         var scores: [String: Int] = [:]
@@ -20,8 +21,10 @@ extension LoreStore {
         for tag in allTags where !have.contains(tag.lowercased()) {
             let words = tag.lowercased().replacingOccurrences(of: "-", with: " ")
                 .replacingOccurrences(of: "_", with: " ")
-            if lowered.range(of: "\\b\(NSRegularExpression.escapedPattern(for: words))\\b",
-                             options: .regularExpression) != nil {
+            if lowered.range(
+                of: "\\b\(NSRegularExpression.escapedPattern(for: words))\\b",
+                options: .regularExpression) != nil
+            {
                 scores[tag, default: 0] += 3
             }
         }
@@ -33,7 +36,8 @@ extension LoreStore {
         where !have.contains(noun) && !known.contains(noun) {
             scores[noun, default: 0] += 1
         }
-        return scores
+        return
+            scores
             .sorted { $0.value != $1.value ? $0.value > $1.value : $0.key < $1.key }
             .prefix(limit).map(\.key)
     }
@@ -43,8 +47,10 @@ extension LoreStore {
         let tagger = NLTagger(tagSchemes: [.lexicalClass, .lemma])
         tagger.string = text
         var counts: [String: Int] = [:]
-        tagger.enumerateTags(in: text.startIndex..<text.endIndex, unit: .word, scheme: .lexicalClass,
-                             options: [.omitPunctuation, .omitWhitespace, .omitOther]) { tag, range in
+        tagger.enumerateTags(
+            in: text.startIndex..<text.endIndex, unit: .word, scheme: .lexicalClass,
+            options: [.omitPunctuation, .omitWhitespace, .omitOther]
+        ) { tag, range in
             guard tag == .noun else { return true }
             let lemma = tagger.tag(at: range.lowerBound, unit: .word, scheme: .lemma).0?.rawValue
             let word = (lemma ?? String(text[range])).lowercased()

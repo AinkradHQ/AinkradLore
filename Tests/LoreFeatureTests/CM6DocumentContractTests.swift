@@ -2,6 +2,7 @@ import AppKit
 import SwiftUI
 import WebKit
 import XCTest
+
 @testable import LoreFeature
 
 /// E1T2: Swift owns the document, and the editor never changes it behind our
@@ -15,7 +16,10 @@ final class CM6DocumentContractTests: XCTestCase {
     private var webView: WKWebView!
     private var coordinator: CM6EditorView.Coordinator!
     private var stored = ""
-    override func tearDown() { windows.removeAll(); super.tearDown() }
+    override func tearDown() {
+        windows.removeAll()
+        super.tearDown()
+    }
 
     // MARK: - harness
 
@@ -26,21 +30,25 @@ final class CM6DocumentContractTests: XCTestCase {
         coordinator = CM6EditorView.Coordinator(text: binding)
 
         let config = WKWebViewConfiguration()
-        config.userContentController.add(coordinator,
-                                         name: CM6EditorView.Coordinator.bridgeName)
-        webView = WKWebView(frame: NSRect(x: 0, y: 0, width: 900, height: 700),
-                            configuration: config)
+        config.userContentController.add(
+            coordinator,
+            name: CM6EditorView.Coordinator.bridgeName)
+        webView = WKWebView(
+            frame: NSRect(x: 0, y: 0, width: 900, height: 700),
+            configuration: config)
         webView.navigationDelegate = coordinator
         coordinator.webView = webView
         coordinator.pendingDocument = text
 
-        let window = NSWindow(contentRect: webView.frame, styleMask: [.titled],
-                              backing: .buffered, defer: false)
+        let window = NSWindow(
+            contentRect: webView.frame, styleMask: [.titled],
+            backing: .buffered, defer: false)
         window.contentView = webView
         windows.append(window)
 
-        let index = try XCTUnwrap(CM6EditorView.Coordinator.bundledIndexURL,
-                                  "Editor/dist must be a resource of this bundle")
+        let index = try XCTUnwrap(
+            CM6EditorView.Coordinator.bundledIndexURL,
+            "Editor/dist must be a resource of this bundle")
         webView.loadFileURL(index, allowingReadAccessTo: index.deletingLastPathComponent())
         try waitFor("the editor to hold the document") {
             (try? self.js("window.loreEditor?.text?.().length") as? Int) ?? -1 >= 0
@@ -49,8 +57,14 @@ final class CM6DocumentContractTests: XCTestCase {
 
     @MainActor @discardableResult
     private func js(_ source: String) throws -> Any? {
-        var result: Any?; var failure: Error?; var done = false
-        webView.evaluateJavaScript(source) { v, e in result = v; failure = e; done = true }
+        var result: Any?
+        var failure: Error?
+        var done = false
+        webView.evaluateJavaScript(source) { v, e in
+            result = v
+            failure = e
+            done = true
+        }
         let deadline = Date().addingTimeInterval(20)
         while !done, Date() < deadline {
             RunLoop.current.run(mode: .default, before: Date().addingTimeInterval(0.01))
@@ -100,9 +114,11 @@ final class CM6DocumentContractTests: XCTestCase {
     /// typed anything, and invisible because nothing LOOKS different.
     @MainActor
     func test_consistentLineEndingsRoundTripAndMixedAreNormalised() throws {
-        for (name, doc) in [("crlf", "one\r\ntwo\r\nthree\r\n"),
-                            ("cr", "one\rtwo\r"),
-                            ("lf", "one\ntwo\n")] {
+        for (name, doc) in [
+            ("crlf", "one\r\ntwo\r\nthree\r\n"),
+            ("cr", "one\rtwo\r"),
+            ("lf", "one\ntwo\n"),
+        ] {
             try boot(doc)
             XCTAssertEqual(try editorText(), doc, "\(name) must survive exactly")
         }
@@ -119,9 +135,10 @@ final class CM6DocumentContractTests: XCTestCase {
         XCTAssertFalse(CM6LineEndings.isConsistent(mixed))
         XCTAssertEqual(CM6LineEndings.dominant(in: mixed), .crlf)
         try boot(mixed)
-        XCTAssertEqual(try editorText(), "a\r\nb\r\nc\r\nd\r\n",
-                       "mixed endings become the dominant one — which is why such a "
-                       + "document is routed to the native editor instead")
+        XCTAssertEqual(
+            try editorText(), "a\r\nb\r\nc\r\nd\r\n",
+            "mixed endings become the dominant one — which is why such a "
+                + "document is routed to the native editor instead")
     }
 
     func test_lineEndingDetection() {
@@ -150,20 +167,24 @@ final class CM6DocumentContractTests: XCTestCase {
     /// misses.
     @MainActor
     func test_twoHundredKeystrokesKeepSwiftAndTheEditorIdentical()
-    throws {
+        throws
+    {
         try boot("start\n")
         for i in 0..<200 {
-            _ = try js("""
-            (() => { const v = window.loreEditor; v.insertAtEnd('\(i % 10)'); })()
-            """)
+            _ = try js(
+                """
+                (() => { const v = window.loreEditor; v.insertAtEnd('\(i % 10)'); })()
+                """)
             if i % 25 == 0 { try drain() }
         }
         try drain()
         let editor = try editorText()
-        XCTAssertEqual(stored, editor,
-                       "Swift's copy and the editor's must be the same string")
-        XCTAssertEqual(editor.filter(\.isNumber).count, 200,
-                       "every keystroke must be present exactly once")
+        XCTAssertEqual(
+            stored, editor,
+            "Swift's copy and the editor's must be the same string")
+        XCTAssertEqual(
+            editor.filter(\.isNumber).count, 200,
+            "every keystroke must be present exactly once")
     }
 
     /// The cases that break naive escaping and encoding, each verified byte for
@@ -196,8 +217,9 @@ final class CM6DocumentContractTests: XCTestCase {
         coordinator.push(document: stored)
         try drain()
         XCTAssertEqual(try editorText(), "replaced by swift\n")
-        XCTAssertEqual(stored, "replaced by swift\n",
-                       "the push must not be reported back and re-applied")
+        XCTAssertEqual(
+            stored, "replaced by swift\n",
+            "the push must not be reported back and re-applied")
     }
 
     /// Rule 2: Swift must not push text the editor just reported, or every

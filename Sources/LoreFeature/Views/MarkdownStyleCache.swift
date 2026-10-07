@@ -1,6 +1,6 @@
+import AinkradAppKit
 import AppKit
 import SwiftUI
-import AinkradAppKit
 
 /// The editor's style spans, and the text they describe.
 ///
@@ -74,11 +74,12 @@ struct MarkdownStyleCache {
     /// The pure, actor-free half of `reparse`. Safe to call from any thread.
     static func derive(_ newText: String) -> Derived {
         guard newText.utf16.count <= MarkdownDocumentModel.stylingHardCap else {
-            return Derived(spans: [], isOverHardCap: true, isOverViewportCap: true,
-                           // Nothing is styled above the hard cap, so the block
-                           // path is barred anyway; `true` states that without
-                           // paying for a scan of a document this large.
-                           hasReferenceDefinitions: true)
+            return Derived(
+                spans: [], isOverHardCap: true, isOverViewportCap: true,
+                // Nothing is styled above the hard cap, so the block
+                // path is barred anyway; `true` states that without
+                // paying for a scan of a document this large.
+                hasReferenceDefinitions: true)
         }
         // `init(body:)`: the editor styles exactly the string it was given,
         // whole. For markdown that string is `note.body` (bound in
@@ -90,10 +91,11 @@ struct MarkdownStyleCache {
         // `SourceOffsetMap` re-bases them; the defect is omission, not
         // misplacement.
         let model = MarkdownDocumentModel(body: newText)
-        return Derived(spans: model.styleSpans,
-                       isOverHardCap: model.isOverStylingHardCap,
-                       isOverViewportCap: model.isOverStylingViewportCap,
-                       hasReferenceDefinitions: containsReferenceDefinition(newText))
+        return Derived(
+            spans: model.styleSpans,
+            isOverHardCap: model.isOverStylingHardCap,
+            isOverViewportCap: model.isOverStylingViewportCap,
+            hasReferenceDefinitions: containsReferenceDefinition(newText))
     }
 
     /// Whether any line LOOKS like a link reference definition.
@@ -115,8 +117,11 @@ struct MarkdownStyleCache {
             // The `]` must be followed immediately by `:` to be a definition;
             // `[a] : b` is a paragraph.
             if let close = trimmed.dropFirst().firstIndex(of: "]"),
-               trimmed.index(after: close) < trimmed.endIndex,
-               trimmed[trimmed.index(after: close)] == ":" { return true }
+                trimmed.index(after: close) < trimmed.endIndex,
+                trimmed[trimmed.index(after: close)] == ":"
+            {
+                return true
+            }
         }
         return false
     }
@@ -146,9 +151,12 @@ struct MarkdownStyleCache {
     static func deriveBlock(of text: String, range: Range<Int>) -> [StyleSpan]? {
         let ns = text as NSString
         guard range.lowerBound >= 0, range.upperBound <= ns.length,
-              range.lowerBound < range.upperBound else { return nil }
-        let slice = ns.substring(with: NSRange(location: range.lowerBound,
-                                               length: range.count))
+            range.lowerBound < range.upperBound
+        else { return nil }
+        let slice = ns.substring(
+            with: NSRange(
+                location: range.lowerBound,
+                length: range.count))
         let model = MarkdownDocumentModel(body: slice)
         guard !model.isOverStylingHardCap else { return nil }
         var out: [StyleSpan] = []
@@ -157,7 +165,8 @@ struct MarkdownStyleCache {
             let lower = span.range.lowerBound + range.lowerBound
             let upper = span.range.upperBound + range.lowerBound
             guard lower >= range.lowerBound, upper <= range.upperBound,
-                  upper > lower else { return nil }
+                upper > lower
+            else { return nil }
             out.append(StyleSpan(range: lower..<upper, kind: span.kind))
         }
         return out
@@ -187,8 +196,11 @@ struct MarkdownStyleCache {
         var before: [StyleSpan] = []
         var after: [StyleSpan] = []
         for span in spans {
-            if span.range.lowerBound < range.lowerBound { before.append(span) }
-            else if span.range.lowerBound >= range.upperBound { after.append(span) }
+            if span.range.lowerBound < range.lowerBound {
+                before.append(span)
+            } else if span.range.lowerBound >= range.upperBound {
+                after.append(span)
+            }
             // Anything starting inside the block is dropped: `fresh` replaces it.
         }
         spans = before + fresh + after

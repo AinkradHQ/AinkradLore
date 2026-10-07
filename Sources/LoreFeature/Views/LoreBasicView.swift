@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// Lore's **basic** mode: one document, rendered and editable.
 ///
@@ -37,9 +37,11 @@ struct LoreBasicView: View {
     }
 
     var body: some View {
-        AinkradBasicShell(icon: "doc.text",
-                          title: title,
-                          subtitle: subtitle) {
+        AinkradBasicShell(
+            icon: "doc.text",
+            title: title,
+            subtitle: subtitle
+        ) {
             content
         }
         // Collect a document handed over by Hoard or Rune.
@@ -54,7 +56,8 @@ struct LoreBasicView: View {
 
     private func collectPendingDocument() {
         guard let intent = AinkradLaunchIntent.decode(launcher.takePendingLaunch()),
-              intent.isOpenDocument else { return }
+            intent.isOpenDocument
+        else { return }
         store.open(url: URL(fileURLWithPath: intent.path))
     }
 
@@ -71,17 +74,18 @@ struct LoreBasicView: View {
 
     @ViewBuilder private var content: some View {
         if let session = store.selectedTab {
-            DocumentPane(store: store, session: session, theme: theme, ops: ops,
-                         // Basic has no outline panel, no ⌘⇧O palette and no
-                         // tag row, so these three channels have nowhere to
-                         // publish to. They are dropped rather than wired to
-                         // hidden state that nothing would ever read.
-                         onOutlineChange: { _ in },
-                         onScrollHandler: { _ in },
-                         onTagClick: { _ in setPaneMode(.advanced) },
-                         mentionsRequest: .constant(false),
-                         showingActions: $showingActions,
-                         actionItems: [])
+            DocumentPane(
+                store: store, session: session, theme: theme, ops: ops,
+                // Basic has no outline panel, no ⌘⇧O palette and no
+                // tag row, so these three channels have nowhere to
+                // publish to. They are dropped rather than wired to
+                // hidden state that nothing would ever read.
+                onOutlineChange: { _ in },
+                onScrollHandler: { _ in },
+                onTagClick: { _ in setPaneMode(.advanced) },
+                mentionsRequest: .constant(false),
+                showingActions: $showingActions,
+                actionItems: [])
         } else {
             AinkradEmptyState(
                 icon: "doc.text",

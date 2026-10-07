@@ -1,7 +1,8 @@
-import XCTest
-import SwiftUI
-@testable import LoreFeature
 import AinkradAppKit
+import SwiftUI
+import XCTest
+
+@testable import LoreFeature
 
 /// Lore's basic mode: one document, rendered and editable.
 @MainActor
@@ -15,8 +16,9 @@ final class LoreBasicModeTests: XCTestCase {
     }
 
     private func makeStore(at root: URL) throws -> LoreStore {
-        let store = LoreStore(documents: FakeDocs(),
-                              indexPath: root.appendingPathComponent(".idx.sqlite"))
+        let store = LoreStore(
+            documents: FakeDocs(),
+            indexPath: root.appendingPathComponent(".idx.sqlite"))
         try store.setVaultRootForTesting(root)
         return store
     }
@@ -32,8 +34,11 @@ final class LoreBasicModeTests: XCTestCase {
         // The state a deep link has not arrived in yet. It must offer a way
         // out rather than render an inert blank pane.
         let root = try tempVault()
-        _ = LoreBasicView(store: try makeStore(at: root), theme: HostTheme(TestTokens.make()),
-                          launcher: StubLauncher()).body
+        _ =
+            LoreBasicView(
+                store: try makeStore(at: root), theme: HostTheme(TestTokens.make()),
+                launcher: StubLauncher()
+            ).body
     }
 
     func test_basicView_showsTheOpenDocument() throws {
@@ -44,8 +49,11 @@ final class LoreBasicModeTests: XCTestCase {
         store.open(url: root.appendingPathComponent("roadmap.md"))
 
         XCTAssertEqual(store.selectedTab?.url.lastPathComponent, "roadmap.md")
-        _ = LoreBasicView(store: store, theme: HostTheme(TestTokens.make()),
-                          launcher: StubLauncher()).body
+        _ =
+            LoreBasicView(
+                store: store, theme: HostTheme(TestTokens.make()),
+                launcher: StubLauncher()
+            ).body
     }
 
     func test_openingByURLNeedsNoIndexQuery() throws {
@@ -116,8 +124,9 @@ final class LoreLaunchIntentTests: XCTestCase {
         let file = root.appendingPathComponent("handed-over.md")
         try "# from Hoard".write(to: file, atomically: true, encoding: .utf8)
 
-        let store = LoreStore(documents: FakeDocs(),
-                              indexPath: root.appendingPathComponent(".idx.sqlite"))
+        let store = LoreStore(
+            documents: FakeDocs(),
+            indexPath: root.appendingPathComponent(".idx.sqlite"))
         try store.setVaultRootForTesting(root)
 
         let intent = AinkradLaunchIntent(path: file.path, mode: .basic)

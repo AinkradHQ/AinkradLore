@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// Where a sidebar drag lands. Pure, so the compounding bug that the first
 /// version of this shipped with — applying the translation to the live width
@@ -64,10 +64,13 @@ struct SidebarResizeHandle: View {
                         // on the first pixel of movement.
                         let start = dragStart ?? width
                         if dragStart == nil { dragStart = width }
-                        onChange(SidebarResize.width(start: start,
-                                                     translation: value.translation.width))
+                        onChange(
+                            SidebarResize.width(
+                                start: start,
+                                translation: value.translation.width))
                     }
-                    .onEnded { _ in dragStart = nil })
+                    .onEnded { _ in dragStart = nil }
+            )
             .accessibilityLabel("Resize sidebar")
             // Exposed as an adjustable so VoiceOver can drive it — a
             // drag-only control is unreachable without a pointer.

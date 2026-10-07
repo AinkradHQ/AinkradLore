@@ -1,7 +1,8 @@
-import XCTest
-import SwiftUI
-@testable import LoreFeature
 import AinkradAppKit
+import SwiftUI
+import XCTest
+
+@testable import LoreFeature
 
 /// The first-run path, which three milestones and 534 tests never touched.
 ///
@@ -22,9 +23,10 @@ import AinkradAppKit
 final class NoVaultTests: XCTestCase {
 
     private func vaultlessStore() -> LoreStore {
-        LoreStore(documents: FakeDocs(),
-                  indexPath: FileManager.default.temporaryDirectory
-                      .appendingPathComponent("\(UUID()).sqlite"))
+        LoreStore(
+            documents: FakeDocs(),
+            indexPath: FileManager.default.temporaryDirectory
+                .appendingPathComponent("\(UUID()).sqlite"))
     }
 
     private func tempVault() throws -> URL {
@@ -63,16 +65,18 @@ final class NoVaultTests: XCTestCase {
         XCTAssertNil(ops.createDocument())
         let message = ops.message
         XCTAssertNotNil(message, "a create that cannot succeed must say so")
-        XCTAssertTrue(message?.lowercased().contains("vault") == true,
-                      "the message must name the actual cause, got: \(message ?? "nil")")
+        XCTAssertTrue(
+            message?.lowercased().contains("vault") == true,
+            "the message must name the actual cause, got: \(message ?? "nil")")
     }
 
     /// The success path still returns the new document, so the caller can open
     /// it. Guards against "fixing" the silence by making create always fail.
     func test_createDocumentReturnsTheNewDocumentAndSetsNoMessage() throws {
         let root = try tempVault()
-        let store = LoreStore(documents: FakeDocs(),
-                              indexPath: root.appendingPathComponent(".idx.sqlite"))
+        let store = LoreStore(
+            documents: FakeDocs(),
+            indexPath: root.appendingPathComponent(".idx.sqlite"))
         try store.setVaultRootForTesting(root)
         let ops = SidebarOperations(store: store)
 
@@ -99,8 +103,9 @@ final class NoVaultTests: XCTestCase {
         ops.selectVault(root)
 
         XCTAssertNil(ops.message)
-        XCTAssertEqual(store.vaultRoot.map { VaultIndexCoordinator.canonical($0) },
-                       VaultIndexCoordinator.canonical(root))
+        XCTAssertEqual(
+            store.vaultRoot.map { VaultIndexCoordinator.canonical($0) },
+            VaultIndexCoordinator.canonical(root))
         // And the condition is genuinely cleared: create now works.
         XCTAssertNotNil(ops.createDocument())
     }
@@ -128,8 +133,9 @@ final class NoVaultTests: XCTestCase {
         XCTAssertEqual(LoreRootView.emptyState(for: store), .noVault)
 
         let root = try tempVault()
-        let withVault = LoreStore(documents: FakeDocs(),
-                                  indexPath: root.appendingPathComponent(".idx.sqlite"))
+        let withVault = LoreStore(
+            documents: FakeDocs(),
+            indexPath: root.appendingPathComponent(".idx.sqlite"))
         try withVault.setVaultRootForTesting(root)
         XCTAssertEqual(LoreRootView.emptyState(for: withVault), .noDocument)
     }
@@ -149,8 +155,9 @@ final class NoVaultTests: XCTestCase {
     /// the genuine "No notes yet" empty state permanently.
     func test_asettledVaultIsNotIndexing() async throws {
         let root = try tempVault()
-        let store = LoreStore(documents: FakeDocs(),
-                              indexPath: root.appendingPathComponent(".idx.sqlite"))
+        let store = LoreStore(
+            documents: FakeDocs(),
+            indexPath: root.appendingPathComponent(".idx.sqlite"))
         try store.setVaultRootForTesting(root)
         await store.settleForTesting()
         XCTAssertFalse(NoteListView.isStillIndexing(store))
@@ -164,8 +171,9 @@ final class NoVaultTests: XCTestCase {
         let root = try tempVault()
         try "---\nid: a\ntitle: A\n---\nx".write(
             to: root.appendingPathComponent("a.md"), atomically: true, encoding: .utf8)
-        let store = LoreStore(documents: FakeDocs(),
-                              indexPath: root.appendingPathComponent(".idx.sqlite"))
+        let store = LoreStore(
+            documents: FakeDocs(),
+            indexPath: root.appendingPathComponent(".idx.sqlite"))
         try store.setVaultRootForTesting(root)
         await store.settleForTesting()
 

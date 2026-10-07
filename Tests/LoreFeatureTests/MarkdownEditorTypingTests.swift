@@ -1,5 +1,6 @@
-import XCTest
 import AppKit
+import XCTest
+
 @testable import LoreFeature
 
 /// The AppKit half of the typing affordances: applying a pure `EditResult` to a
@@ -74,26 +75,30 @@ final class MarkdownEditorTypingTests: XCTestCase {
     /// must reconstruct the new text EXACTLY. Asserted as the round trip
     /// rather than as specific offsets, because the offsets are an
     /// implementation detail and the round trip is the contract.
-    private func assertRoundTrip(_ old: String, _ new: String,
-                                 file: StaticString = #filePath, line: UInt = #line) {
+    private func assertRoundTrip(
+        _ old: String, _ new: String,
+        file: StaticString = #filePath, line: UInt = #line
+    ) {
         let oldNS = old as NSString
-        let (range, replacement) = MarkdownEditorTyping.changedRange(from: oldNS,
-                                                                    to: new as NSString)
+        let (range, replacement) = MarkdownEditorTyping.changedRange(
+            from: oldNS,
+            to: new as NSString)
         let rebuilt = oldNS.replacingCharacters(in: range, with: replacement)
         XCTAssertEqual(rebuilt, new, "round trip must be exact", file: file, line: line)
-        XCTAssertLessThanOrEqual(NSMaxRange(range), oldNS.length,
-                                 "the range must be inside the old string",
-                                 file: file, line: line)
+        XCTAssertLessThanOrEqual(
+            NSMaxRange(range), oldNS.length,
+            "the range must be inside the old string",
+            file: file, line: line)
     }
 
     func test_changedRangeRoundTripsForEveryEditShape() {
-        assertRoundTrip("- first", "- first\n- ")            // insertion at the end
+        assertRoundTrip("- first", "- first\n- ")  // insertion at the end
         assertRoundTrip("- first\n- second", "- first\n- \n- second")  // in the middle
-        assertRoundTrip("    - a", "- a")                    // deletion at the start
-        assertRoundTrip("abc", "abc")                        // no change at all
-        assertRoundTrip("", "x")                             // from empty
-        assertRoundTrip("x", "")                             // to empty
-        assertRoundTrip("aaa", "aaaa")                       // ambiguous repetition
+        assertRoundTrip("    - a", "- a")  // deletion at the start
+        assertRoundTrip("abc", "abc")  // no change at all
+        assertRoundTrip("", "x")  // from empty
+        assertRoundTrip("x", "")  // to empty
+        assertRoundTrip("aaa", "aaaa")  // ambiguous repetition
         assertRoundTrip("- a\n- b\n- c", "  - a\n  - b\n  - c")  // multi-line indent
     }
 
@@ -105,13 +110,14 @@ final class MarkdownEditorTypingTests: XCTestCase {
         let new = "- 👍👍 tail\n- "
         assertRoundTrip(old, new)
         assertRoundTrip("a👍b", "a👍👍b")
-        assertRoundTrip("e\u{0301}x", "e\u{0301}yx")   // combining acute
+        assertRoundTrip("e\u{0301}x", "e\u{0301}yx")  // combining acute
 
         // And the range's own bounds sit on composed-sequence boundaries.
         let ns = "a👍b" as NSString
         let (range, _) = MarkdownEditorTyping.changedRange(from: ns, to: "a👍👍b" as NSString)
-        XCTAssertEqual(ns.rangeOfComposedCharacterSequence(at: range.location).location,
-                       range.location)
+        XCTAssertEqual(
+            ns.rangeOfComposedCharacterSequence(at: range.location).location,
+            range.location)
     }
 
     /// The point of the whole exercise: pressing Enter in a long list must not
@@ -119,9 +125,12 @@ final class MarkdownEditorTypingTests: XCTestCase {
     func test_theAnnouncedEditIsProportionalToTheChangeNotTheDocument() {
         let long = String(repeating: "- item\n", count: 1_000)
         let (range, replacement) =
-            MarkdownEditorTyping.changedRange(from: long as NSString,
-                                              to: ("- item\n- \n" + String(repeating: "- item\n",
-                                                                          count: 999)) as NSString)
+            MarkdownEditorTyping.changedRange(
+                from: long as NSString,
+                to: ("- item\n- \n"
+                    + String(
+                        repeating: "- item\n",
+                        count: 999)) as NSString)
         XCTAssertLessThan(range.length, 16)
         XCTAssertLessThan(replacement.count, 16)
     }
@@ -210,8 +219,9 @@ final class MarkdownEditorTypingTests: XCTestCase {
         tv.isRichText = false
         tv.string = ""
         tv.setSelectedRange(NSRange(location: 0, length: 0))
-        tv.setMarkedText("n", selectedRange: NSRange(location: 1, length: 0),
-                         replacementRange: NSRange(location: NSNotFound, length: 0))
+        tv.setMarkedText(
+            "n", selectedRange: NSRange(location: 1, length: 0),
+            replacementRange: NSRange(location: NSNotFound, length: 0))
         XCTAssertTrue(tv.hasMarkedText())
         tv.insertText("[", replacementRange: NSRange(location: NSNotFound, length: 0))
         XCTAssertFalse(tv.string.contains("[]"), "composition was auto-paired: \(tv.string)")
@@ -243,8 +253,9 @@ final class MarkdownEditorTypingTests: XCTestCase {
     /// Enter continues a list only when the `[[` completion panel is closed —
     /// while it is open, Enter belongs to the panel.
     func test_coordinatorRoutesEnterToListContinuationWhenNoPanelIsShowing() {
-        let coordinator = MarkdownEditor.Coordinator(text: .constant("- first"),
-                                                     tokens: TestTokens.make())
+        let coordinator = MarkdownEditor.Coordinator(
+            text: .constant("- first"),
+            tokens: TestTokens.make())
         let tv = textView("- first", caret: 7)
         XCTAssertFalse(coordinator.completionPanel.isVisible)
         XCTAssertTrue(coordinator.textView(tv, doCommandBy: #selector(NSResponder.insertNewline(_:))))

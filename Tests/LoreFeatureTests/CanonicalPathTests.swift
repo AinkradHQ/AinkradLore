@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 /// Task 8b: **every path that enters the index is canonical.**
@@ -26,8 +27,9 @@ final class CanonicalPathTests: XCTestCase {
     }
 
     private func store(_ root: URL) throws -> LoreStore {
-        let s = LoreStore(documents: FakeDocs(),
-                          indexPath: root.appendingPathComponent(".idx.sqlite"))
+        let s = LoreStore(
+            documents: FakeDocs(),
+            indexPath: root.appendingPathComponent(".idx.sqlite"))
         try s.setVaultRootForTesting(root)
         return s
     }
@@ -43,7 +45,7 @@ final class CanonicalPathTests: XCTestCase {
         try XCTSkipIf(
             VaultIndexCoordinator.canonical(url).path == url.path,
             "this machine's temporary directory is already canonical, so there are no two "
-            + "spellings to desynchronize — this test cannot exercise the bug here")
+                + "spellings to desynchronize — this test cannot exercise the bug here")
     }
 
     // MARK: - The invariant, at the index boundary
@@ -65,28 +67,38 @@ final class CanonicalPathTests: XCTestCase {
         try index.replaceAll(with: VaultIndexCoordinator.scanVault(at: root))
 
         let paths = try index.all().map(\.path.path).sorted()
-        XCTAssertEqual(paths, [canonicalRoot.appendingPathComponent("Design.md").path,
-                               canonicalRoot.appendingPathComponent("a.md").path],
-                       "documents.path is not canonical")
+        XCTAssertEqual(
+            paths,
+            [
+                canonicalRoot.appendingPathComponent("Design.md").path,
+                canonicalRoot.appendingPathComponent("a.md").path,
+            ],
+            "documents.path is not canonical")
         for path in paths {
-            XCTAssertFalse(path.hasPrefix("/var/"),
-                           "a non-canonical documents.path reached the index: \(path)")
+            XCTAssertFalse(
+                path.hasPrefix("/var/"),
+                "a non-canonical documents.path reached the index: \(path)")
         }
 
         // `links.target_path` — the column that drives backlinks,
         // `inboundLinkCount` and every rename's edit list.
         let outgoing = try index.outgoingLinks(from: a)
         XCTAssertEqual(outgoing.count, 1)
-        XCTAssertEqual(outgoing.first?.targetPath?.path,
-                       canonicalRoot.appendingPathComponent("Design.md").path,
-                       "links.target_path is not canonical")
+        XCTAssertEqual(
+            outgoing.first?.targetPath?.path,
+            canonicalRoot.appendingPathComponent("Design.md").path,
+            "links.target_path is not canonical")
 
         // And the read side finds it under the canonical spelling AND under the
         // raw one the caller still holds — because reads canonicalize too.
-        XCTAssertEqual(try index.backlinks(
-            to: canonicalRoot.appendingPathComponent("Design.md")).count, 1)
-        XCTAssertEqual(try index.backlinks(
-            to: root.appendingPathComponent("Design.md")).count, 1)
+        XCTAssertEqual(
+            try index.backlinks(
+                to: canonicalRoot.appendingPathComponent("Design.md")
+            ).count, 1)
+        XCTAssertEqual(
+            try index.backlinks(
+                to: root.appendingPathComponent("Design.md")
+            ).count, 1)
     }
 
     /// The assertions above are a REGRESSION GUARD rather than a reproducer:
@@ -109,27 +121,36 @@ final class CanonicalPathTests: XCTestCase {
         let source = try write(root, "source.md", "x")
         let target = try write(root, "target.md", "y")
         let index = try LoreIndex(path: root.appendingPathComponent(".probe.sqlite"))
-        try index.upsert(IndexEntry(
-            url: source, type: "md",
-            payload: IndexPayload(title: "Source", plaintext: "x"),
-            updated: Date(),
-            resolvedLinks: [ResolvedLink(rawTarget: "target", targetPath: target,
-                                         isEmbed: false)]))
+        try index.upsert(
+            IndexEntry(
+                url: source, type: "md",
+                payload: IndexPayload(title: "Source", plaintext: "x"),
+                updated: Date(),
+                resolvedLinks: [
+                    ResolvedLink(
+                        rawTarget: "target", targetPath: target,
+                        isEmbed: false)
+                ]))
 
-        XCTAssertEqual(try index.all().map(\.path.path),
-                       [canonicalRoot.appendingPathComponent("source.md").path],
-                       "documents.path kept the caller's raw spelling")
+        XCTAssertEqual(
+            try index.all().map(\.path.path),
+            [canonicalRoot.appendingPathComponent("source.md").path],
+            "documents.path kept the caller's raw spelling")
         // Read under the RAW source spelling — reads canonicalize too, so the
         // row is reachable either way.
-        XCTAssertEqual(try index.outgoingLinks(from: source).first?.targetPath?.path,
-                       canonicalRoot.appendingPathComponent("target.md").path,
-                       "links.target_path kept the caller's raw spelling")
+        XCTAssertEqual(
+            try index.outgoingLinks(from: source).first?.targetPath?.path,
+            canonicalRoot.appendingPathComponent("target.md").path,
+            "links.target_path kept the caller's raw spelling")
         XCTAssertEqual(try index.inboundLinks(to: target).count, 1)
-        XCTAssertEqual(try index.inboundLinks(
-            to: canonicalRoot.appendingPathComponent("target.md")).count, 1)
-        XCTAssertEqual(try index.inboundLinks(to: target).first?.sourceFile.path,
-                       canonicalRoot.appendingPathComponent("source.md").path,
-                       "links.source_path kept the caller's raw spelling")
+        XCTAssertEqual(
+            try index.inboundLinks(
+                to: canonicalRoot.appendingPathComponent("target.md")
+            ).count, 1)
+        XCTAssertEqual(
+            try index.inboundLinks(to: target).first?.sourceFile.path,
+            canonicalRoot.appendingPathComponent("source.md").path,
+            "links.source_path kept the caller's raw spelling")
     }
 
     /// `inboundLinkCount` is what `trash` warns the user with ("N notes link
@@ -152,12 +173,15 @@ final class CanonicalPathTests: XCTestCase {
         // poison the count.
         try s.coordinator.indexDocument(MarkdownEngine.load(a), at: a)
 
-        XCTAssertEqual(s.inboundLinkCount(to: design), 1,
-                       "the count trash warns with under-reported")
-        XCTAssertEqual(s.inboundLinkCount(to: VaultIndexCoordinator.canonical(design)), 1,
-                       "both spellings of the target must give the same count")
-        XCTAssertEqual(s.backlinks(to: design).count, 1,
-                       "the backlinks pane was empty for a linked document")
+        XCTAssertEqual(
+            s.inboundLinkCount(to: design), 1,
+            "the count trash warns with under-reported")
+        XCTAssertEqual(
+            s.inboundLinkCount(to: VaultIndexCoordinator.canonical(design)), 1,
+            "both spellings of the target must give the same count")
+        XCTAssertEqual(
+            s.backlinks(to: design).count, 1,
+            "the backlinks pane was empty for a linked document")
     }
 
     // MARK: - `transferOpenMTime`
@@ -200,15 +224,18 @@ final class CanonicalPathTests: XCTestCase {
         try FileManager.default.setAttributes(
             [.modificationDate: Date().addingTimeInterval(5)], ofItemAtPath: moved.path)
 
-        let renamed = Frontmatter.parse(try String(contentsOf: moved, encoding: .utf8),
-                                        path: moved)
-        XCTAssertTrue(s.externalChangeDetected(for: renamed),
-                      "the rename lost the mtime baseline, so the guard is disarmed")
+        let renamed = Frontmatter.parse(
+            try String(contentsOf: moved, encoding: .utf8),
+            path: moved)
+        XCTAssertTrue(
+            s.externalChangeDetected(for: renamed),
+            "the rename lost the mtime baseline, so the guard is disarmed")
         XCTAssertThrowsError(try s.save(renamed)) { error in
             XCTAssertEqual(error as? LoreError, .externalChange(moved))
         }
-        XCTAssertTrue(try String(contentsOf: moved, encoding: .utf8)
-            .contains("someone else's work"), "the refused save wrote anyway")
+        XCTAssertTrue(
+            try String(contentsOf: moved, encoding: .utf8)
+                .contains("someone else's work"), "the refused save wrote anyway")
     }
 
     // MARK: - `open(url:)`

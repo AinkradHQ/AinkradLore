@@ -1,7 +1,8 @@
-import XCTest
-import PDFKit
-@testable import LoreFeature
 import AinkradAppKit
+import PDFKit
+import XCTest
+
+@testable import LoreFeature
 
 /// The automated half of Task 11 (M3 acceptance). Covers criteria 1, 2, 3 and
 /// 7 — the ones testable without a GUI host. Criteria 4, 5, 6 and 8 need a
@@ -27,8 +28,9 @@ final class M3AcceptanceTests: XCTestCase {
     }
 
     private func makeStore(_ root: URL) throws -> LoreStore {
-        let s = LoreStore(documents: FakeDocs(),
-                          indexPath: root.appendingPathComponent(".index.sqlite"))
+        let s = LoreStore(
+            documents: FakeDocs(),
+            indexPath: root.appendingPathComponent(".index.sqlite"))
         try s.setVaultRootForTesting(root)
         return s
     }
@@ -86,10 +88,12 @@ final class M3AcceptanceTests: XCTestCase {
 
         try "---\nid: note\ntitle: Note\n---\nSee the [[Contract.pdf]] for terms."
             .write(to: root.appendingPathComponent("note.md"), atomically: true, encoding: .utf8)
-        try makePDF("This PDF mentions xylophone-quartz uniquely.",
-                    at: root.appendingPathComponent("Contract.pdf"))
-        try makeRTF("This RTF mentions marmoset-cobalt uniquely.",
-                    at: root.appendingPathComponent("report.rtf"))
+        try makePDF(
+            "This PDF mentions xylophone-quartz uniquely.",
+            at: root.appendingPathComponent("Contract.pdf"))
+        try makeRTF(
+            "This RTF mentions marmoset-cobalt uniquely.",
+            at: root.appendingPathComponent("report.rtf"))
         try onePixelPNG().write(to: root.appendingPathComponent("diagram.png"))
         // Not a document or media: must NOT get a row (`VaultWalk`).
         try "sheet data".write(
@@ -105,8 +109,9 @@ final class M3AcceptanceTests: XCTestCase {
         let (root, store) = try await makeAcceptanceVault()
         let expectedNames = ["note.md", "Contract.pdf", "report.rtf", "diagram.png"]
 
-        XCTAssertEqual(Set(store.rows.map(\.path.lastPathComponent)), Set(expectedNames),
-                       "every fixture must have an index row")
+        XCTAssertEqual(
+            Set(store.rows.map(\.path.lastPathComponent)), Set(expectedNames),
+            "every fixture must have an index row")
 
         for name in expectedNames {
             let url = root.appendingPathComponent(name)
@@ -139,8 +144,9 @@ final class M3AcceptanceTests: XCTestCase {
         XCTAssertEqual(store.selectedTab?.url.lastPathComponent, "Contract.pdf")
 
         let backlinks = store.backlinks(to: pdfURL)
-        XCTAssertEqual(backlinks.map(\.row.title), ["Note"],
-                       "the PDF's backlinks must list the referring note")
+        XCTAssertEqual(
+            backlinks.map(\.row.title), ["Note"],
+            "the PDF's backlinks must list the referring note")
     }
 
     // MARK: - Criterion 7: renaming an attachment rewrites the referring link
@@ -156,12 +162,15 @@ final class M3AcceptanceTests: XCTestCase {
 
         let noteText = try String(
             contentsOf: root.appendingPathComponent("note.md"), encoding: .utf8)
-        XCTAssertTrue(noteText.contains("[[Agreement.pdf]]"),
-                     "the referring note must be rewritten to point at the new name")
-        XCTAssertFalse(noteText.contains("[[Contract.pdf]]"),
-                       "the old link text must not remain")
-        XCTAssertTrue(FileManager.default.fileExists(
-            atPath: root.appendingPathComponent("Agreement.pdf").path))
+        XCTAssertTrue(
+            noteText.contains("[[Agreement.pdf]]"),
+            "the referring note must be rewritten to point at the new name")
+        XCTAssertFalse(
+            noteText.contains("[[Contract.pdf]]"),
+            "the old link text must not remain")
+        XCTAssertTrue(
+            FileManager.default.fileExists(
+                atPath: root.appendingPathComponent("Agreement.pdf").path))
         XCTAssertFalse(FileManager.default.fileExists(atPath: pdfURL.path))
     }
 }

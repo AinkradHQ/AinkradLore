@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 /// The SAVE path, measured the way `MarkdownStylingBenchmark` measures the
@@ -38,8 +39,9 @@ final class MarkdownSavePathBenchmark: XCTestCase {
     /// ~230 KB with links, code spans and headings — everything both halves of
     /// `indexPayload` have to walk.
     static var largeBody: String {
-        String(repeating: "# H\n\nSome **bold** text with a [[Link]] and `code`.\n\n",
-               count: 5_000)
+        String(
+            repeating: "# H\n\nSome **bold** text with a [[Link]] and `code`.\n\n",
+            count: 5_000)
     }
 
     private func engine(_ body: String) throws -> MarkdownEngine {

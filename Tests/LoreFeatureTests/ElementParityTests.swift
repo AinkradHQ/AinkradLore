@@ -1,6 +1,7 @@
 import AppKit
 import SwiftUI
 import XCTest
+
 @testable import LoreFeature
 
 /// M9.3: the four constructs Lore parsed and then showed as raw source.
@@ -11,12 +12,18 @@ import XCTest
 final class ElementParityTests: XCTestCase {
 
     private var windows: [NSWindow] = []
-    override func tearDown() { windows.removeAll(); super.tearDown() }
+    override func tearDown() {
+        windows.removeAll()
+        super.tearDown()
+    }
 
     @MainActor
-    private func editor(_ body: String,
-                        settings: EditorSettings = .default)
-        -> (MarkdownEditor.Coordinator, LinkTextView) {
+    private func editor(
+        _ body: String,
+        settings: EditorSettings = .default
+    )
+        -> (MarkdownEditor.Coordinator, LinkTextView)
+    {
         var stored = body
         let binding = Binding<String>(get: { stored }, set: { stored = $0 })
         let coordinator = MarkdownEditor.Coordinator(text: binding, tokens: TestTokens.make())
@@ -24,8 +31,9 @@ final class ElementParityTests: XCTestCase {
         let tv = LinkTextView(frame: NSRect(x: 0, y: 0, width: 800, height: 500))
         tv.isRichText = false
         tv.delegate = coordinator
-        let window = NSWindow(contentRect: tv.frame, styleMask: [.titled],
-                              backing: .buffered, defer: false)
+        let window = NSWindow(
+            contentRect: tv.frame, styleMask: [.titled],
+            backing: .buffered, defer: false)
         window.contentView = tv
         window.makeFirstResponder(tv)
         windows.append(window)
@@ -56,22 +64,26 @@ final class ElementParityTests: XCTestCase {
     func test_aTaskMarkerCollapsesAndDrawsACheckbox() {
         let body = "- [ ] open task\n- [x] done task\n\nfar away paragraph\n"
         let (coordinator, tv) = editor(body)
-        tv.setSelectedRange(NSRange(location: (body as NSString).range(of: "far").location,
-                                    length: 0))
+        tv.setSelectedRange(
+            NSRange(
+                location: (body as NSString).range(of: "far").location,
+                length: 0))
         coordinator.revealForSelectionChange()
         tv.layoutSubtreeIfNeeded()
 
         let openMarker = (body as NSString).range(of: "[ ]").location
-        XCTAssertLessThan(width(ofCharacterAt: openMarker, in: tv),
-                          MarkdownBlockBackgrounds.collapsedMarkerWidth,
-                          "the brackets must collapse, not stay spelled out")
+        XCTAssertLessThan(
+            width(ofCharacterAt: openMarker, in: tv),
+            MarkdownBlockBackgrounds.collapsedMarkerWidth,
+            "the brackets must collapse, not stay spelled out")
 
         let checkboxes = regionKinds(in: tv).compactMap { kind -> Bool? in
             if case .checkbox(let done) = kind { return done }
             return nil
         }
-        XCTAssertEqual(checkboxes, [false, true],
-                       "one region per task, in document order, carrying its state")
+        XCTAssertEqual(
+            checkboxes, [false, true],
+            "one region per task, in document order, carrying its state")
     }
 
     /// A task item draws a CHECKBOX and not also a bullet. Obsidian shows one
@@ -80,16 +92,19 @@ final class ElementParityTests: XCTestCase {
     func test_aTaskItemDrawsNoBulletBesideItsCheckbox() {
         let body = "- [ ] a task\n- an ordinary item\n\nfar away\n"
         let (coordinator, tv) = editor(body)
-        tv.setSelectedRange(NSRange(location: (body as NSString).range(of: "far").location,
-                                    length: 0))
+        tv.setSelectedRange(
+            NSRange(
+                location: (body as NSString).range(of: "far").location,
+                length: 0))
         coordinator.revealForSelectionChange()
 
         let bullets = regionKinds(in: tv).filter {
             if case .listMarker = $0 { return true }
             return false
         }
-        XCTAssertEqual(bullets.count, 1,
-                       "only the ORDINARY item gets a bullet; the task gets its box")
+        XCTAssertEqual(
+            bullets.count, 1,
+            "only the ORDINARY item gets a bullet; the task gets its box")
     }
 
     /// A finished task strikes and fades its own line — the part a drawn box
@@ -102,12 +117,16 @@ final class ElementParityTests: XCTestCase {
         let done = (body as NSString).range(of: "done task").location
         let open = (body as NSString).range(of: "open task").location
 
-        XCTAssertNotNil(storage.attribute(.strikethroughStyle, at: done,
-                                          effectiveRange: nil),
-                        "a finished task reads as finished")
-        XCTAssertNil(storage.attribute(.strikethroughStyle, at: open,
-                                       effectiveRange: nil),
-                     "an open one does not")
+        XCTAssertNotNil(
+            storage.attribute(
+                .strikethroughStyle, at: done,
+                effectiveRange: nil),
+            "a finished task reads as finished")
+        XCTAssertNil(
+            storage.attribute(
+                .strikethroughStyle, at: open,
+                effectiveRange: nil),
+            "an open one does not")
     }
 
     /// The caret on the task's own line puts the source back, so `[x]` can be
@@ -121,9 +140,10 @@ final class ElementParityTests: XCTestCase {
         coordinator.revealForSelectionChange()
         tv.layoutSubtreeIfNeeded()
 
-        XCTAssertGreaterThan(width(ofCharacterAt: marker, in: tv),
-                             MarkdownBlockBackgrounds.collapsedMarkerWidth,
-                             "the writer editing a task must be able to see [x]")
+        XCTAssertGreaterThan(
+            width(ofCharacterAt: marker, in: tv),
+            MarkdownBlockBackgrounds.collapsedMarkerWidth,
+            "the writer editing a task must be able to see [x]")
     }
 
     // MARK: - T11 thematic break
@@ -137,12 +157,16 @@ final class ElementParityTests: XCTestCase {
         tv.layoutSubtreeIfNeeded()
 
         let dashes = (body as NSString).range(of: "---").location
-        XCTAssertLessThan(width(ofCharacterAt: dashes, in: tv),
-                          MarkdownBlockBackgrounds.collapsedMarkerWidth,
-                          "the dashes must not stay on screen")
-        XCTAssertTrue(regionKinds(in: tv).contains { if case .rule = $0 { return true }
-                                                    return false },
-                      "a rule is drawn where they were")
+        XCTAssertLessThan(
+            width(ofCharacterAt: dashes, in: tv),
+            MarkdownBlockBackgrounds.collapsedMarkerWidth,
+            "the dashes must not stay on screen")
+        XCTAssertTrue(
+            regionKinds(in: tv).contains {
+                if case .rule = $0 { return true }
+                return false
+            },
+            "a rule is drawn where they were")
     }
 
     /// A `---` under text is a SETEXT HEADING, not a rule. Drawing a line
@@ -151,9 +175,12 @@ final class ElementParityTests: XCTestCase {
     func test_aSetextHeadingIsNotMistakenForARule() {
         let body = "Heading text\n---\n\nbody\n"
         let (_, tv) = editor(body)
-        XCTAssertFalse(regionKinds(in: tv).contains { if case .rule = $0 { return true }
-                                                      return false },
-                       "the AST calls this a heading, and so must the renderer")
+        XCTAssertFalse(
+            regionKinds(in: tv).contains {
+                if case .rule = $0 { return true }
+                return false
+            },
+            "the AST calls this a heading, and so must the renderer")
     }
 
     // MARK: - T12 standard markdown images
@@ -167,8 +194,9 @@ final class ElementParityTests: XCTestCase {
             if case .embed(let target, _) = span.kind { return target }
             return nil
         }
-        XCTAssertEqual(embeds, ["pictures/shot.png"],
-                       "the SOURCE identifies the image, not the alt text")
+        XCTAssertEqual(
+            embeds, ["pictures/shot.png"],
+            "the SOURCE identifies the image, not the alt text")
     }
 
     /// The alt text and the parentheses are notation and collapse with the
@@ -177,15 +205,18 @@ final class ElementParityTests: XCTestCase {
     func test_aStandardImagesNotationCollapses() {
         let body = "![alt text](pictures/shot.png)\n\nfar away\n"
         let (coordinator, tv) = editor(body)
-        tv.setSelectedRange(NSRange(location: (body as NSString).range(of: "far").location,
-                                    length: 0))
+        tv.setSelectedRange(
+            NSRange(
+                location: (body as NSString).range(of: "far").location,
+                length: 0))
         coordinator.revealForSelectionChange()
         tv.layoutSubtreeIfNeeded()
 
         for probe in [0, (body as NSString).range(of: "alt").location] {
-            XCTAssertLessThan(width(ofCharacterAt: probe, in: tv),
-                              MarkdownBlockBackgrounds.collapsedMarkerWidth,
-                              "character \(probe) of the image's notation is still visible")
+            XCTAssertLessThan(
+                width(ofCharacterAt: probe, in: tv),
+                MarkdownBlockBackgrounds.collapsedMarkerWidth,
+                "character \(probe) of the image's notation is still visible")
         }
     }
 
@@ -194,16 +225,22 @@ final class ElementParityTests: XCTestCase {
     func test_anImageInsideAFenceIsNotAnEmbed() {
         let body = "```\n![alt](shot.png)\n```\n"
         let model = MarkdownDocumentModel(body: body)
-        XCTAssertFalse(model.styleSpans.contains { if case .embed = $0.kind { return true }
-                                                   return false })
+        XCTAssertFalse(
+            model.styleSpans.contains {
+                if case .embed = $0.kind { return true }
+                return false
+            })
     }
 
     /// A malformed image emits nothing rather than a guessed marker range — a
     /// wrong marker HIDES the author's own text once collapsed.
     func test_aReferenceStyleImageEmitsNoEmbed() {
         let model = MarkdownDocumentModel(body: "![alt][ref]\n\n[ref]: shot.png\n")
-        XCTAssertFalse(model.styleSpans.contains { if case .embed = $0.kind { return true }
-                                                   return false })
+        XCTAssertFalse(
+            model.styleSpans.contains {
+                if case .embed = $0.kind { return true }
+                return false
+            })
     }
 
     // MARK: - T13 tag pills
@@ -214,20 +251,29 @@ final class ElementParityTests: XCTestCase {
         let (_, tv) = editor(body)
         let inside = (body as NSString).range(of: "project").location
 
-        XCTAssertNil(try XCTUnwrap(tv.textStorage).attribute(.backgroundColor, at: inside,
-                                                             effectiveRange: nil),
-                     "a per-glyph background cannot round or pad, so it is gone")
-        XCTAssertTrue(regionKinds(in: tv).contains { if case .tagPill = $0 { return true }
-                                                     return false })
+        XCTAssertNil(
+            try XCTUnwrap(tv.textStorage).attribute(
+                .backgroundColor, at: inside,
+                effectiveRange: nil),
+            "a per-glyph background cannot round or pad, so it is gone")
+        XCTAssertTrue(
+            regionKinds(in: tv).contains {
+                if case .tagPill = $0 { return true }
+                return false
+            })
     }
 
     /// With the setting off, no pill is drawn at all — the tag is tinted text.
     @MainActor
     func test_theChipSettingSuppressesThePill() {
-        let settings = EditorSettings(density: .standard, measure: .standard, zoomStep: 0,
-                                      renderTagsAsChips: false)
+        let settings = EditorSettings(
+            density: .standard, measure: .standard, zoomStep: 0,
+            renderTagsAsChips: false)
         let (_, tv) = editor("tagged #alpha here\n", settings: settings)
-        XCTAssertFalse(regionKinds(in: tv).contains { if case .tagPill = $0 { return true }
-                                                      return false })
+        XCTAssertFalse(
+            regionKinds(in: tv).contains {
+                if case .tagPill = $0 { return true }
+                return false
+            })
     }
 }

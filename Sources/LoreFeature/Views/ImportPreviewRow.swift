@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// One row of the import dry-run preview: a checkbox, the item's title, its
 /// planned target path, and any `FidelityWarning`s — the user's only signal
@@ -35,12 +35,17 @@ struct ImportPreviewRow: View {
     /// target; this only reports what that tap did.
     @ViewBuilder private var checkbox: some View {
         Image(systemName: isAlreadyImported || isSelected ? "checkmark.circle.fill" : "circle")
-            .foregroundStyle(isAlreadyImported
-                ? theme.foreground.opacity(LoreMetrics.indicatorGlyph)
-                : (isSelected ? theme.accentPrimary
-                              : theme.foreground.opacity(LoreMetrics.indicatorGlyph)))
-            .accessibilityLabel(isAlreadyImported ? "Already imported"
-                : (isSelected ? "Selected for import" : "Not selected"))
+            .foregroundStyle(
+                isAlreadyImported
+                    ? theme.foreground.opacity(LoreMetrics.indicatorGlyph)
+                    : (isSelected
+                        ? theme.accentPrimary
+                        : theme.foreground.opacity(LoreMetrics.indicatorGlyph))
+            )
+            .accessibilityLabel(
+                isAlreadyImported
+                    ? "Already imported"
+                    : (isSelected ? "Selected for import" : "Not selected"))
     }
 
     private var subtitle: String {

@@ -164,7 +164,7 @@ extension LoreStore {
         } catch {
             return .partial(
                 "“\(moved.lastPathComponent)” was renamed, but its title could not be saved: "
-                + error.localizedDescription)
+                    + error.localizedDescription)
         }
 
         if let partialReason { return .partial(partialReason) }
@@ -201,7 +201,7 @@ extension LoreStore {
         else {
             return "A title contains a character that is not allowed in a file name."
         }
-        let extensionBytes = ext.isEmpty ? 0 : ext.utf8.count + 1 // the "." plus the extension itself
+        let extensionBytes = ext.isEmpty ? 0 : ext.utf8.count + 1  // the "." plus the extension itself
         guard trimmed.utf8.count + extensionBytes <= 255 else {
             return "That title is too long for a file name."
         }
@@ -268,7 +268,9 @@ extension LoreStore {
         do {
             try newText.write(to: destination, atomically: true, encoding: .utf8)
         } catch {
-            Log.store.error("Failed to write synced title to \(destination.lastPathComponent, privacy: .public): \(error.localizedDescription, privacy: .public)")
+            Log.store.error(
+                "Failed to write synced title to \(destination.lastPathComponent, privacy: .public): \(error.localizedDescription, privacy: .public)"
+            )
             return
         }
 

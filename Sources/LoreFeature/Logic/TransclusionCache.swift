@@ -60,8 +60,10 @@ public struct TransclusionMeasurement: Equatable, Sendable {
     public let bodySize: CGFloat
     public let lineHeightMultiple: CGFloat
 
-    public init(height: CGFloat, width: CGFloat,
-                bodySize: CGFloat, lineHeightMultiple: CGFloat) {
+    public init(
+        height: CGFloat, width: CGFloat,
+        bodySize: CGFloat, lineHeightMultiple: CGFloat
+    ) {
         self.height = height
         self.width = width
         self.bodySize = bodySize
@@ -125,10 +127,13 @@ public final class TransclusionCache {
     /// A stored measurement taken at a DIFFERENT geometry is a miss, not a
     /// hit: reusing it would reserve a gap sized for a window the reader is no
     /// longer looking at. See `TransclusionMeasurement`.
-    public func measuredHeight(for key: TransclusionKey,
-                               matching geometry: TransclusionMeasurement) -> CGFloat? {
+    public func measuredHeight(
+        for key: TransclusionKey,
+        matching geometry: TransclusionMeasurement
+    ) -> CGFloat? {
         guard let stored = storage[key]?.measurement,
-              stored.matchesGeometry(of: geometry) else { return nil }
+            stored.matchesGeometry(of: geometry)
+        else { return nil }
         return stored.height
     }
 
@@ -136,8 +141,10 @@ public final class TransclusionCache {
     /// when there is no entry — a height with no content to belong to would be
     /// unreachable anyway, and inventing an entry for it would need a
     /// `TransclusionContent` this call does not have.
-    public func setMeasurement(_ measurement: TransclusionMeasurement,
-                               for key: TransclusionKey) {
+    public func setMeasurement(
+        _ measurement: TransclusionMeasurement,
+        for key: TransclusionKey
+    ) {
         guard storage[key] != nil else { return }
         storage[key]?.measurement = measurement
         touch(key)

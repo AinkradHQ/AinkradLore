@@ -1,5 +1,5 @@
-import Foundation
 import AinkradAppKit
+import Foundation
 
 // `load`, `create`, `save` and the mtime bookkeeping that guards `save`
 // against clobbering an externally-changed file. Moved out of
@@ -27,9 +27,13 @@ extension LoreStore {
     @discardableResult
     public func create(title: String, in subfolder: String = "") throws -> Note {
         guard let root = vaultRoot, coordinator.hasIndex else { throw LoreError.noVault }
-        let slug = title.isEmpty ? "untitled" : title.lowercased()
-            .replacingOccurrences(of: " ", with: "-")
-        var dir = defaultNoteFolder.isEmpty
+        let slug =
+            title.isEmpty
+            ? "untitled"
+            : title.lowercased()
+                .replacingOccurrences(of: " ", with: "-")
+        var dir =
+            defaultNoteFolder.isEmpty
             ? root : root.appendingPathComponent(defaultNoteFolder, isDirectory: true)
         // `..` and absolute segments are dropped, not rejected: this string
         // comes from document text, so it is untrusted input, and a link must
@@ -55,8 +59,9 @@ extension LoreStore {
             throw LoreError.outsideVault(url)
         }
         let now = Date()
-        let note = Note(path: url, id: UUID().uuidString, title: title, tags: [],
-                        created: now, updated: now, body: "")
+        let note = Note(
+            path: url, id: UUID().uuidString, title: title, tags: [],
+            created: now, updated: now, body: "")
         try Frontmatter.serialize(note).write(to: url, atomically: true, encoding: .utf8)
         try coordinator.indexDocument(MarkdownEngine.load(url), at: url)
         openMTimes[Self.pathKey(url)] = try mtime(of: url)
@@ -81,7 +86,8 @@ extension LoreStore {
         if !overwritingExternalChanges, externalChangeDetected(for: note) {
             throw LoreError.externalChange(note.path)
         }
-        var updated = note; updated.updated = Date()
+        var updated = note
+        updated.updated = Date()
 
         // Suppress the watcher across our own write. Saving fires
         // `FolderWatcher`, whose handler is a FULL `rebuild()` — re-reading and
@@ -116,7 +122,8 @@ extension LoreStore {
     /// True if the file changed on disk since we last loaded/saved it.
     public func externalChangeDetected(for note: Note) -> Bool {
         guard let known = openMTimes[Self.pathKey(note.path)],
-              let disk = try? mtime(of: note.path) else { return false }
+            let disk = try? mtime(of: note.path)
+        else { return false }
         return disk > known
     }
 
@@ -128,7 +135,8 @@ extension LoreStore {
         var candidate = root.appendingPathComponent("\(slug).md")
         var n = 2
         while FileManager.default.fileExists(atPath: candidate.path) {
-            candidate = root.appendingPathComponent("\(slug)-\(n).md"); n += 1
+            candidate = root.appendingPathComponent("\(slug)-\(n).md")
+            n += 1
         }
         return candidate
     }

@@ -76,12 +76,15 @@ enum EmbedGeometry {
     /// rect is trustworthy only for LTR, and even there only by coincidence.
     /// Deriving the origin from the writing direction and container width
     /// directly, instead, is correct for both and needs no special case.
-    static func drawRect(containerWidth: CGFloat, writingDirection: NSWritingDirection,
-                          indent: CGFloat, lineFragmentPadding: CGFloat = 0,
-                          imageSize: NSSize) -> NSRect {
+    static func drawRect(
+        containerWidth: CGFloat, writingDirection: NSWritingDirection,
+        indent: CGFloat, lineFragmentPadding: CGFloat = 0,
+        imageSize: NSSize
+    ) -> NSRect {
         let clampedIndent = max(0, indent)
         let clampedPadding = max(0, lineFragmentPadding)
-        let x: CGFloat = writingDirection == .rightToLeft
+        let x: CGFloat =
+            writingDirection == .rightToLeft
             // Grows LEFTWARD from the right margin, itself inset by the
             // line fragment's own trailing padding.
             ? containerWidth - clampedPadding - clampedIndent - imageSize.width
@@ -129,9 +132,11 @@ enum EmbedGeometry {
     /// can never turn one embed's styling pass into an unbounded scan; the
     /// realistic case (prose immediately above or below the image) resolves
     /// in one hop.
-    static func contextualWritingDirection(paragraph: NSRange, in text: NSString,
-                                           documentFallback: NSWritingDirection = .leftToRight,
-                                           maxHops: Int = 20) -> NSWritingDirection {
+    static func contextualWritingDirection(
+        paragraph: NSRange, in text: NSString,
+        documentFallback: NSWritingDirection = .leftToRight,
+        maxHops: Int = 20
+    ) -> NSWritingDirection {
         if let dir = nearestStrongDirection(before: paragraph, in: text, maxHops: maxHops) {
             return dir
         }
@@ -141,29 +146,33 @@ enum EmbedGeometry {
         return documentFallback
     }
 
-    private static func nearestStrongDirection(before paragraph: NSRange, in text: NSString,
-                                                maxHops: Int) -> NSWritingDirection? {
+    private static func nearestStrongDirection(
+        before paragraph: NSRange, in text: NSString,
+        maxHops: Int
+    ) -> NSWritingDirection? {
         var location = paragraph.location
         var hops = 0
         while location > 0, hops < maxHops {
             let priorRange = text.paragraphRange(for: NSRange(location: location - 1, length: 0))
             if let dir = strongWritingDirection(of: text.substring(with: priorRange)) { return dir }
-            guard priorRange.location < location else { break }   // safety: never loop in place
+            guard priorRange.location < location else { break }  // safety: never loop in place
             location = priorRange.location
             hops += 1
         }
         return nil
     }
 
-    private static func nearestStrongDirection(after paragraph: NSRange, in text: NSString,
-                                                maxHops: Int) -> NSWritingDirection? {
+    private static func nearestStrongDirection(
+        after paragraph: NSRange, in text: NSString,
+        maxHops: Int
+    ) -> NSWritingDirection? {
         var location = NSMaxRange(paragraph)
         var hops = 0
         while location < text.length, hops < maxHops {
             let nextRange = text.paragraphRange(for: NSRange(location: location, length: 0))
             if let dir = strongWritingDirection(of: text.substring(with: nextRange)) { return dir }
             let advanced = NSMaxRange(nextRange)
-            guard advanced > location else { break }   // safety: never loop in place
+            guard advanced > location else { break }  // safety: never loop in place
             location = advanced
             hops += 1
         }
@@ -210,16 +219,16 @@ enum EmbedGeometry {
     /// (plus its Supplement), Thaana, N'Ko, and the Hebrew/Arabic
     /// presentation-form compatibility blocks.
     private static let rtlScriptRanges: [ClosedRange<UInt32>] = [
-        0x0590...0x05FF,   // Hebrew
-        0x0600...0x06FF,   // Arabic
-        0x0700...0x074F,   // Syriac
-        0x0750...0x077F,   // Arabic Supplement
-        0x0780...0x07BF,   // Thaana
-        0x07C0...0x07FF,   // N'Ko
-        0x0860...0x086F,   // Syriac Supplement
-        0x08A0...0x08FF,   // Arabic Extended-A
-        0xFB1D...0xFB4F,   // Hebrew presentation forms
-        0xFB50...0xFDFF,   // Arabic presentation forms A
-        0xFE70...0xFEFF,   // Arabic presentation forms B
+        0x0590...0x05FF,  // Hebrew
+        0x0600...0x06FF,  // Arabic
+        0x0700...0x074F,  // Syriac
+        0x0750...0x077F,  // Arabic Supplement
+        0x0780...0x07BF,  // Thaana
+        0x07C0...0x07FF,  // N'Ko
+        0x0860...0x086F,  // Syriac Supplement
+        0x08A0...0x08FF,  // Arabic Extended-A
+        0xFB1D...0xFB4F,  // Hebrew presentation forms
+        0xFB50...0xFDFF,  // Arabic presentation forms A
+        0xFE70...0xFEFF,  // Arabic presentation forms B
     ]
 }

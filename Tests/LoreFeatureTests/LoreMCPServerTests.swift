@@ -1,6 +1,7 @@
-import Testing
-import Foundation
 import AinkradAppKit
+import Foundation
+import Testing
+
 @testable import LoreFeature
 
 // MARK: - harness
@@ -26,15 +27,18 @@ private final class RecordingSink {
 private func listedTools(_ server: MCPAppServer) async -> [[String: Any]] {
     let reply = await server.handle(#"{"jsonrpc":"2.0","id":1,"method":"tools/list"}"#)
     guard let data = reply.data(using: .utf8),
-          let root = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
-          let result = root["result"] as? [String: Any],
-          let tools = result["tools"] as? [[String: Any]] else { return [] }
+        let root = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
+        let result = root["result"] as? [String: Any],
+        let tools = result["tools"] as? [[String: Any]]
+    else { return [] }
     return tools
 }
 
 @MainActor
-private func call(_ server: MCPAppServer, _ name: String,
-                  _ arguments: [String: Any]) async -> (text: String, isError: Bool) {
+private func call(
+    _ server: MCPAppServer, _ name: String,
+    _ arguments: [String: Any]
+) async -> (text: String, isError: Bool) {
     let request: [String: Any] = [
         "jsonrpc": "2.0", "id": 7, "method": "tools/call",
         "params": ["name": name, "arguments": arguments],
@@ -42,9 +46,10 @@ private func call(_ server: MCPAppServer, _ name: String,
     let data = try! JSONSerialization.data(withJSONObject: request)
     let reply = await server.handle(String(decoding: data, as: UTF8.self))
     guard let replyData = reply.data(using: .utf8),
-          let root = (try? JSONSerialization.jsonObject(with: replyData)) as? [String: Any],
-          let result = root["result"] as? [String: Any],
-          let content = result["content"] as? [[String: Any]] else {
+        let root = (try? JSONSerialization.jsonObject(with: replyData)) as? [String: Any],
+        let result = root["result"] as? [String: Any],
+        let content = result["content"] as? [[String: Any]]
+    else {
         return ("<no result>", true)
     }
     return (content.first?["text"] as? String ?? "", result["isError"] as? Bool ?? false)
@@ -69,8 +74,9 @@ private func makeVault() async throws -> (URL, LoreStore) {
     let root = FileManager.default.temporaryDirectory
         .appendingPathComponent("lore-mcp-\(UUID())", isDirectory: true)
     try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
-    let store = LoreStore(documents: MemoryDocs(),
-                          indexPath: root.appendingPathComponent(".index.sqlite"))
+    let store = LoreStore(
+        documents: MemoryDocs(),
+        indexPath: root.appendingPathComponent(".index.sqlite"))
     try store.setVaultRootForTesting(root)
     await store.settleForTesting()
     return (root, store)
@@ -104,9 +110,10 @@ let overwriteEvasions: [OverwriteEvasion] = [
 @Suite(.timeLimit(.minutes(1)))
 struct LoreMCPServerTests {
     private func makeServer(_ sink: RecordingSink) -> (MCPAppServer, [String]) {
-        LoreMCPServer.make(appID: "lore",
-                           perform: { await sink.perform($0) },
-                           vaultSummary: { "summary" })
+        LoreMCPServer.make(
+            appID: "lore",
+            perform: { await sink.perform($0) },
+            vaultSummary: { "summary" })
     }
 
     // MARK: publication
@@ -127,11 +134,13 @@ struct LoreMCPServerTests {
         let listed = await listedTools(server)
         for tool in LoreMCPServer.tools {
             guard let entry = listed.first(where: { $0["name"] as? String == tool.name }) else {
-                Issue.record("tool \(tool.name) was not listed"); continue
+                Issue.record("tool \(tool.name) was not listed")
+                continue
             }
             #expect(destructiveHint(entry) == tool.destructive, "wrong destructiveHint for \(tool.name)")
-            #expect((entry["annotations"] as? [String: Any])?["readOnlyHint"] as? Bool == tool.readOnly,
-                    "wrong readOnlyHint for \(tool.name)")
+            #expect(
+                (entry["annotations"] as? [String: Any])?["readOnlyHint"] as? Bool == tool.readOnly,
+                "wrong readOnlyHint for \(tool.name)")
         }
     }
 
@@ -151,7 +160,8 @@ struct LoreMCPServerTests {
     @Test func everyInjectingToolIsDestructive() {
         for tool in LoreMCPServer.tools {
             for rule in tool.injects {
-                let reason = "\(tool.name) injects \(rule.key) = \(rule.value.described) "
+                let reason =
+                    "\(tool.name) injects \(rule.key) = \(rule.value.described) "
                     + "but is not destructive: true — it would be ungated"
                 #expect(tool.destructive, Comment(rawValue: reason))
             }
@@ -175,13 +185,18 @@ struct LoreMCPServerTests {
                     }
                 }
                 guard let twin else {
-                    Issue.record(Comment(rawValue:
-                        "\(tool.name) refuses \(rule.key) = \(rule.value.described) but no tool "
-                        + "injects it — the capability is gone, not gated"))
+                    Issue.record(
+                        Comment(
+                            rawValue:
+                                "\(tool.name) refuses \(rule.key) = \(rule.value.described) but no tool "
+                                + "injects it — the capability is gone, not gated"))
                     continue
                 }
-                #expect(listed.contains(twin.name), Comment(rawValue:
-                    "\(twin.name) is the twin for \(tool.name)'s \(rule.key) but was not published"))
+                #expect(
+                    listed.contains(twin.name),
+                    Comment(
+                        rawValue:
+                            "\(twin.name) is the twin for \(tool.name)'s \(rule.key) but was not published"))
             }
         }
     }
@@ -201,8 +216,9 @@ struct LoreMCPServerTests {
     @Test func saveNoteRejectsTheOverwriteFlag() async {
         let sink = RecordingSink()
         let (server, _) = makeServer(sink)
-        let outcome = await call(server, "save_note",
-                                 ["note": "abc", "body": "x", "overwritingExternalChanges": true])
+        let outcome = await call(
+            server, "save_note",
+            ["note": "abc", "body": "x", "overwritingExternalChanges": true])
         #expect(outcome.isError)
         #expect(outcome.text.contains("save_note refuses"))
         #expect(sink.payloads.isEmpty, "a rejected call must never reach the store")
@@ -211,8 +227,9 @@ struct LoreMCPServerTests {
     @Test func saveNoteAllowsTheFlagSetToFalse() async {
         let sink = RecordingSink()
         let (server, _) = makeServer(sink)
-        let outcome = await call(server, "save_note",
-                                 ["note": "abc", "overwritingExternalChanges": false])
+        let outcome = await call(
+            server, "save_note",
+            ["note": "abc", "overwritingExternalChanges": false])
         #expect(outcome.isError == false)
         #expect(sink.lastObject?["overwritingExternalChanges"] as? Bool == false)
     }
@@ -235,7 +252,7 @@ struct LoreMCPServerTests {
     /// The exact expression `LoreNoteOperations.saveNote` uses:
     /// `(object["overwritingExternalChanges"] as? Bool) ?? false`.
     private func resolvedOverwrite(_ payload: [String: Any]?) -> Bool {
-        guard let payload else { return false }   // nothing forwarded → nothing ran
+        guard let payload else { return false }  // nothing forwarded → nothing ran
         return (payload["overwritingExternalChanges"] as? Bool) ?? false
     }
 
@@ -243,10 +260,12 @@ struct LoreMCPServerTests {
     func saveNoteNeverOverwritesHoweverTheFlagIsSpelled(evasion: OverwriteEvasion) async {
         let sink = RecordingSink()
         let (server, _) = makeServer(sink)
-        _ = await call(server, "save_note",
-                       ["note": "abc", "overwritingExternalChanges": evasion.value()])
-        #expect(resolvedOverwrite(sink.lastObject) == false,
-                "save_note reached an overwrite via \(evasion.label)")
+        _ = await call(
+            server, "save_note",
+            ["note": "abc", "overwritingExternalChanges": evasion.value()])
+        #expect(
+            resolvedOverwrite(sink.lastObject) == false,
+            "save_note reached an overwrite via \(evasion.label)")
     }
 
     @Test func saveNoteRejectsNumericTrueAndIgnoresNearMissKeys() async {
@@ -255,15 +274,17 @@ struct LoreMCPServerTests {
 
         // `1` bridges to NSNumber, which `as? Bool` accepts — so BOTH the guard
         // and the sink read it as true. The guard must reject it outright.
-        let numeric = await call(server, "save_note",
-                                 ["note": "abc", "overwritingExternalChanges": 1])
+        let numeric = await call(
+            server, "save_note",
+            ["note": "abc", "overwritingExternalChanges": 1])
         #expect(numeric.isError)
         #expect(sink.payloads.isEmpty, "overwritingExternalChanges: 1 was forwarded, not rejected")
 
         // A differently-cased key: missed by the guard, and equally missed by
         // the sink, so no overwrite happens.
-        _ = await call(server, "save_note",
-                       ["note": "abc", "OverwritingExternalChanges": true])
+        _ = await call(
+            server, "save_note",
+            ["note": "abc", "OverwritingExternalChanges": true])
         #expect(resolvedOverwrite(sink.lastObject) == false, "a mis-cased key reached the sink")
     }
 
@@ -320,13 +341,15 @@ struct LoreMCPServerTests {
         try store.save(note)
         try externallyEdit(note.path, to: "theirs")
 
-        let outcome = await operations.run(payload([
-            "operation": "save", "note": note.id, "body": "mine again",
-            "overwritingExternalChanges": "true",
-        ]))
+        let outcome = await operations.run(
+            payload([
+                "operation": "save", "note": note.id, "body": "mine again",
+                "overwritingExternalChanges": "true",
+            ]))
         #expect(outcome.isError, "a string \"true\" was coerced into an overwrite")
-        #expect(outcome.text.contains("save_note_overwriting"),
-                "the conflict must name the tool that can resolve it")
+        #expect(
+            outcome.text.contains("save_note_overwriting"),
+            "the conflict must name the tool that can resolve it")
         #expect(try String(contentsOf: note.path, encoding: .utf8).contains("theirs"))
     }
 
@@ -339,26 +362,34 @@ struct LoreMCPServerTests {
     private static let fixtureSafe = LoreMCPServer.Tool(
         "fixture_multi_safe", "fixtureMulti", "test-only two-guard fixture",
         schemaJSON: #"{"type":"object"}"#,
-        rejects: [LoreMCPServer.GuardRule("overwritingExternalChanges", .bool(true)),
-                  LoreMCPServer.GuardRule("mode", .string("purge"))])
+        rejects: [
+            LoreMCPServer.GuardRule("overwritingExternalChanges", .bool(true)),
+            LoreMCPServer.GuardRule("mode", .string("purge")),
+        ])
 
     private static let fixtureDestructive = LoreMCPServer.Tool(
         "fixture_multi_destructive", "fixtureMulti", "test-only two-guard fixture twin",
         destructive: true, schemaJSON: #"{"type":"object"}"#,
-        injects: [LoreMCPServer.GuardRule("overwritingExternalChanges", .bool(true)),
-                  LoreMCPServer.GuardRule("mode", .string("purge"))])
+        injects: [
+            LoreMCPServer.GuardRule("overwritingExternalChanges", .bool(true)),
+            LoreMCPServer.GuardRule("mode", .string("purge")),
+        ])
 
-    private func invokeFixture(_ tool: LoreMCPServer.Tool, _ arguments: [String: Any],
-                               sink: RecordingSink) async -> (text: String, isError: Bool) {
-        let result = await LoreMCPServer.invoke(tool, arguments: payload(arguments),
-                                                perform: { await sink.perform($0) })
+    private func invokeFixture(
+        _ tool: LoreMCPServer.Tool, _ arguments: [String: Any],
+        sink: RecordingSink
+    ) async -> (text: String, isError: Bool) {
+        let result = await LoreMCPServer.invoke(
+            tool, arguments: payload(arguments),
+            perform: { await sink.perform($0) })
         return (result.text, result.isError)
     }
 
     @Test func fixtureSafeToolRefusesEitherGuardedArgumentAlone() async {
         let sink = RecordingSink()
-        let byFlag = await invokeFixture(Self.fixtureSafe,
-                                         ["overwritingExternalChanges": true], sink: sink)
+        let byFlag = await invokeFixture(
+            Self.fixtureSafe,
+            ["overwritingExternalChanges": true], sink: sink)
         #expect(byFlag.isError)
         #expect(sink.payloads.isEmpty)
 
@@ -391,8 +422,9 @@ struct LoreMCPServerTests {
 
     @Test func malformedArgumentsAreAnErrorNotAForwardedCall() async {
         let sink = RecordingSink()
-        let result = await LoreMCPServer.invoke(Self.fixtureSafe, arguments: "not json",
-                                                perform: { await sink.perform($0) })
+        let result = await LoreMCPServer.invoke(
+            Self.fixtureSafe, arguments: "not json",
+            perform: { await sink.perform($0) })
         #expect(result.isError)
         #expect(sink.payloads.isEmpty)
     }

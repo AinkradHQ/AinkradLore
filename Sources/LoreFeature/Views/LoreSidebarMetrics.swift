@@ -1,5 +1,5 @@
-import CoreGraphics
 import AinkradAppKit
+import CoreGraphics
 
 /// Sidebar geometry shared by `FolderTreeView` and `NoteListView`.
 ///

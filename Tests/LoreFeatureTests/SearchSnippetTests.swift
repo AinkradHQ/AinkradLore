@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 /// Search excerpts: the marker parsing, and the real thing through SQLite.
@@ -85,8 +86,9 @@ final class SearchSnippetTests: XCTestCase {
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent("lore-snippet-\(UUID())")
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
-        let store = LoreStore(documents: FakeDocs(),
-                              indexPath: root.appendingPathComponent(".idx.sqlite"))
+        let store = LoreStore(
+            documents: FakeDocs(),
+            indexPath: root.appendingPathComponent(".idx.sqlite"))
         try store.setVaultRootForTesting(root)
         return (root, store)
     }
@@ -102,7 +104,8 @@ final class SearchSnippetTests: XCTestCase {
         ---
         The quick brown fox jumps over the lazy dog and keeps going for a while.
         """.write(to: root.appendingPathComponent("a.md"), atomically: true, encoding: .utf8)
-        await store.settleForTesting(); try store.rebuild()
+        await store.settleForTesting()
+        try store.rebuild()
 
         let hits = store.searchHits("brown")
         let hit = try XCTUnwrap(hits.first { $0.row.path.lastPathComponent == "a.md" })
@@ -123,7 +126,8 @@ final class SearchSnippetTests: XCTestCase {
         ---
         Body text that does not contain the search term at all.
         """.write(to: root.appendingPathComponent("z.md"), atomically: true, encoding: .utf8)
-        await store.settleForTesting(); try store.rebuild()
+        await store.settleForTesting()
+        try store.rebuild()
 
         let hits = store.searchHits("Zebra")
         let hit = try XCTUnwrap(hits.first { $0.row.path.lastPathComponent == "z.md" })
@@ -141,10 +145,12 @@ final class SearchSnippetTests: XCTestCase {
         ---
         The setting size: 3 is documented here.
         """.write(to: root.appendingPathComponent("c.md"), atomically: true, encoding: .utf8)
-        await store.settleForTesting(); try store.rebuild()
+        await store.settleForTesting()
+        try store.rebuild()
 
-        XCTAssertFalse(store.searchHits("size: 3").isEmpty,
-                       "a colon made search look broken before ftsExpression existed")
+        XCTAssertFalse(
+            store.searchHits("size: 3").isEmpty,
+            "a colon made search look broken before ftsExpression existed")
     }
 
     /// Hits and plain search must agree on WHICH documents matched — they are
@@ -154,10 +160,12 @@ final class SearchSnippetTests: XCTestCase {
         let (root, store) = try vault()
         for name in ["one", "two", "three"] {
             try "---\nid: \(name)\ntitle: \(name)\n---\nshared term here"
-                .write(to: root.appendingPathComponent("\(name).md"),
-                       atomically: true, encoding: .utf8)
+                .write(
+                    to: root.appendingPathComponent("\(name).md"),
+                    atomically: true, encoding: .utf8)
         }
-        await store.settleForTesting(); try store.rebuild()
+        await store.settleForTesting()
+        try store.rebuild()
 
         let plain = Set(store.search("shared").map(\.path))
         let hits = Set(store.searchHits("shared").map(\.row.path))

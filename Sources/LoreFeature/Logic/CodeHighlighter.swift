@@ -33,10 +33,13 @@ enum CodeHighlighter {
     /// than with the viewport.
     static let maximumLength = 40_000
 
-    static func tokens(in text: NSString, range: NSRange,
-                       grammar: CodeGrammar) -> [CodeToken] {
+    static func tokens(
+        in text: NSString, range: NSRange,
+        grammar: CodeGrammar
+    ) -> [CodeToken] {
         guard range.location >= 0, NSMaxRange(range) <= text.length,
-              range.length > 0, range.length <= maximumLength else { return [] }
+            range.length > 0, range.length <= maximumLength
+        else { return [] }
         var out: [CodeToken] = []
         var index = range.location
         let end = NSMaxRange(range)
@@ -58,10 +61,12 @@ enum CodeHighlighter {
             // would do with it, and showing the rest as live code would be a
             // lie about what the snippet means.
             if !grammar.blockOpenUnits.isEmpty,
-               matches(grammar.blockOpenUnits, at: index, in: text, limit: end) {
+                matches(grammar.blockOpenUnits, at: index, in: text, limit: end)
+            {
                 var scan = index + grammar.blockOpenUnits.count
                 while scan < end,
-                      !matches(grammar.blockCloseUnits, at: scan, in: text, limit: end) {
+                    !matches(grammar.blockCloseUnits, at: scan, in: text, limit: end)
+                {
                     scan += 1
                 }
                 if scan < end { scan = min(end, scan + grammar.blockCloseUnits.count) }
@@ -74,8 +79,9 @@ enum CodeHighlighter {
             if let delimiter = grammar.stringDelimiterUnits.first(where: {
                 matches($0, at: index, in: text, limit: end)
             }) {
-                let closed = scanString(from: index, delimiter: delimiter,
-                                        in: text, limit: end, grammar: grammar)
+                let closed = scanString(
+                    from: index, delimiter: delimiter,
+                    in: text, limit: end, grammar: grammar)
                 out.append(CodeToken(range: index..<closed, kind: .string))
                 index = closed
                 continue
@@ -97,12 +103,16 @@ enum CodeHighlighter {
             if isIdentifierStart(unit) {
                 var scan = index
                 while scan < end,
-                      isIdentifierBody(text.character(at: scan),
-                                       hyphens: grammar.identifiersMayContainHyphen) {
+                    isIdentifierBody(
+                        text.character(at: scan),
+                        hyphens: grammar.identifiersMayContainHyphen)
+                {
                     scan += 1
                 }
-                let word = text.substring(with: NSRange(location: index,
-                                                        length: scan - index))
+                let word = text.substring(
+                    with: NSRange(
+                        location: index,
+                        length: scan - index))
                 if grammar.keywords.contains(word) {
                     out.append(CodeToken(range: index..<scan, kind: .keyword))
                 } else if grammar.types.contains(word) {
@@ -124,9 +134,11 @@ enum CodeHighlighter {
     /// unterminated `"` is a typo, and letting it swallow the rest of the fence
     /// would colour the whole snippet as a string. A multi-character one
     /// (`"""`, `'''`) is explicitly multi-line and does.
-    private static func scanString(from start: Int, delimiter: [UInt16],
-                                   in text: NSString, limit end: Int,
-                                   grammar: CodeGrammar) -> Int {
+    private static func scanString(
+        from start: Int, delimiter: [UInt16],
+        in text: NSString, limit end: Int,
+        grammar: CodeGrammar
+    ) -> Int {
         let width = delimiter.count
         var index = start + width
         while index < end {
@@ -145,8 +157,10 @@ enum CodeHighlighter {
 
     // MARK: - Character classes
 
-    private static func matches(_ units: [UInt16], at index: Int,
-                                in text: NSString, limit: Int) -> Bool {
+    private static func matches(
+        _ units: [UInt16], at index: Int,
+        in text: NSString, limit: Int
+    ) -> Bool {
         guard !units.isEmpty, index + units.count <= limit else { return false }
         for (offset, unit) in units.enumerated()
         where text.character(at: index + offset) != unit { return false }

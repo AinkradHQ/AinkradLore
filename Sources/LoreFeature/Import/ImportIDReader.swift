@@ -33,9 +33,11 @@ public enum ImportIDReader {
         var ids = ImportLedger.liveIDs(vaultRoot: vaultRoot)
         let root = URL(fileURLWithPath: vaultRoot.resolvingSymlinksInPath().path)
         let rootDepth = root.standardizedFileURL.pathComponents.count
-        guard let walker = FileManager.default.enumerator(
-            at: root, includingPropertiesForKeys: [.isDirectoryKey],
-            options: [.skipsPackageDescendants]) else { return ids }
+        guard
+            let walker = FileManager.default.enumerator(
+                at: root, includingPropertiesForKeys: [.isDirectoryKey],
+                options: [.skipsPackageDescendants])
+        else { return ids }
 
         for case let url as URL in walker {
             // Only components BELOW the root are ours to judge — a vault living
@@ -48,8 +50,9 @@ public enum ImportIDReader {
                 continue
             }
             guard url.pathExtension.lowercased() == "md",
-                  let text = try? String(contentsOf: url, encoding: .utf8),
-                  let id = importID(in: text) else { continue }
+                let text = try? String(contentsOf: url, encoding: .utf8),
+                let id = importID(in: text)
+            else { continue }
             ids.insert(id)
         }
         return ids

@@ -26,7 +26,8 @@ enum LinkPreview {
         // preview can never disagree with them about where frontmatter ends.
         var body = String(contents.dropFirst(Frontmatter.bodyOffset(in: contents)))
         body = strippingLeadingHeading(body)
-        let collapsed = body
+        let collapsed =
+            body
             .split(whereSeparator: { $0.isNewline })
             .map { $0.trimmingCharacters(in: .whitespaces) }
             .filter { !$0.isEmpty }

@@ -11,9 +11,11 @@ import Foundation
 /// deliberately NOT used here: it resolves against files already on disk,
 /// which is the applier's job (Task 11), not the planner's.
 public enum ImportPlanner {
-    public static func plan(items: [ImportItem],
-                            vaultRoot: URL,
-                            existingImportIDs: Set<String>) -> ImportPlan {
+    public static func plan(
+        items: [ImportItem],
+        vaultRoot: URL,
+        existingImportIDs: Set<String>
+    ) -> ImportPlan {
         var taken: Set<String> = []
         var planned: [PlannedItem] = []
 
@@ -24,8 +26,10 @@ public enum ImportPlanner {
             let firstChoice = directory.appendingPathComponent(preferredName)
 
             if existingImportIDs.contains(item.sourceID) {
-                planned.append(PlannedItem(item: item, targetURL: firstChoice,
-                                           disposition: .alreadyImported))
+                planned.append(
+                    PlannedItem(
+                        item: item, targetURL: firstChoice,
+                        disposition: .alreadyImported))
                 continue
             }
 
@@ -37,13 +41,17 @@ public enum ImportPlanner {
                     counter += 1
                 }
                 taken.insert(candidate.path)
-                planned.append(PlannedItem(item: item, targetURL: candidate,
-                                           disposition: .renamedToAvoidCollision(
-                                               original: preferredName)))
+                planned.append(
+                    PlannedItem(
+                        item: item, targetURL: candidate,
+                        disposition: .renamedToAvoidCollision(
+                            original: preferredName)))
             } else {
                 taken.insert(firstChoice.path)
-                planned.append(PlannedItem(item: item, targetURL: firstChoice,
-                                           disposition: .create))
+                planned.append(
+                    PlannedItem(
+                        item: item, targetURL: firstChoice,
+                        disposition: .create))
             }
         }
         return ImportPlan(items: planned)
@@ -70,8 +78,9 @@ public enum ImportPlanner {
         }
         let standardizedDirectory = directory.standardizedFileURL
         let standardizedRoot = vaultRoot.standardizedFileURL
-        guard standardizedDirectory.path == standardizedRoot.path
-            || standardizedDirectory.path.hasPrefix(standardizedRoot.path + "/")
+        guard
+            standardizedDirectory.path == standardizedRoot.path
+                || standardizedDirectory.path.hasPrefix(standardizedRoot.path + "/")
         else {
             return vaultRoot
         }

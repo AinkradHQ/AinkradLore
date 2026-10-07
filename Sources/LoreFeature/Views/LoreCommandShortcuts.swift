@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// Binds every shortcut in `LoreCommands` in one place.
 ///
@@ -38,8 +38,9 @@ struct LoreCommandShortcuts: ViewModifier {
                 ForEach(LoreCommands.available(in: runner.context)) { command in
                     if let shortcut = command.shortcut {
                         Button(command.title) { runner.run(command.id) }
-                            .keyboardShortcut(KeyEquivalent(shortcut.key),
-                                              modifiers: shortcut.eventModifiers)
+                            .keyboardShortcut(
+                                KeyEquivalent(shortcut.key),
+                                modifiers: shortcut.eventModifiers)
                     }
                 }
             }

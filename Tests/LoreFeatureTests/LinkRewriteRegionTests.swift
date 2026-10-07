@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LoreFeature
 
 /// Which REGIONS of a file a rewrite is allowed to touch, and how a
@@ -19,8 +20,9 @@ final class LinkRewriteRegionTests: XCTestCase {
     }
 
     private func makeStore(_ root: URL) throws -> LoreStore {
-        let s = LoreStore(documents: FakeDocs(),
-                          indexPath: root.appendingPathComponent(".index.sqlite"))
+        let s = LoreStore(
+            documents: FakeDocs(),
+            indexPath: root.appendingPathComponent(".index.sqlite"))
         try s.setVaultRootForTesting(root)
         return s
     }
@@ -39,23 +41,23 @@ final class LinkRewriteRegionTests: XCTestCase {
         let root = tempDir()
         let file = root.appendingPathComponent("a.md")
         let text = """
-        ---
-        id: a
-        title: A
-        note: see [[Design]] in the properties
-        ---
-        A real link to [[Design]].
+            ---
+            id: a
+            title: A
+            note: see [[Design]] in the properties
+            ---
+            A real link to [[Design]].
 
-        Inline code: `[[Design]]` is how you write one.
+            Inline code: `[[Design]]` is how you write one.
 
-        ```
-        [[Design]]
-        ```
+            ```
+            [[Design]]
+            ```
 
-        ~~~markdown
-        [[Design]]
-        ~~~
-        """
+            ~~~markdown
+            [[Design]]
+            ~~~
+            """
         try text.write(to: file, atomically: true, encoding: .utf8)
 
         let outcome = try LinkRewriter.applyEdits(
@@ -99,15 +101,19 @@ final class LinkRewriteRegionTests: XCTestCase {
             .write(to: file, atomically: true, encoding: .utf8)
 
         _ = try LinkRewriter.applyEdits(
-            [LinkEdit(file: file, oldTarget: "Design", newTarget: "Architecture"),
-             LinkEdit(file: file, oldTarget: "Design#Overview",
-                      newTarget: "Architecture#Overview"),
-             LinkEdit(file: file, oldTarget: "Design.md", newTarget: "Architecture.md")],
+            [
+                LinkEdit(file: file, oldTarget: "Design", newTarget: "Architecture"),
+                LinkEdit(
+                    file: file, oldTarget: "Design#Overview",
+                    newTarget: "Architecture#Overview"),
+                LinkEdit(file: file, oldTarget: "Design.md", newTarget: "Architecture.md"),
+            ],
             to: file, baseline: try mtime(of: file))
 
-        XCTAssertEqual(try String(contentsOf: file, encoding: .utf8),
-                       "[[Architecture|why it looks like that]] ![[Architecture]] "
-                       + "[[Architecture#Overview]] [t](Architecture.md)")
+        XCTAssertEqual(
+            try String(contentsOf: file, encoding: .utf8),
+            "[[Architecture|why it looks like that]] ![[Architecture]] "
+                + "[[Architecture#Overview]] [t](Architecture.md)")
     }
 
     /// Two edits in one file whose replacements differ in length: the spans are
@@ -119,20 +125,23 @@ final class LinkRewriteRegionTests: XCTestCase {
         try "[[A]] then [[B]] then [[A]]".write(to: file, atomically: true, encoding: .utf8)
 
         _ = try LinkRewriter.applyEdits(
-            [LinkEdit(file: file, oldTarget: "A", newTarget: "A Much Longer Name"),
-             LinkEdit(file: file, oldTarget: "B", newTarget: "C")],
+            [
+                LinkEdit(file: file, oldTarget: "A", newTarget: "A Much Longer Name"),
+                LinkEdit(file: file, oldTarget: "B", newTarget: "C"),
+            ],
             to: file, baseline: try mtime(of: file))
 
-        XCTAssertEqual(try String(contentsOf: file, encoding: .utf8),
-                       "[[A Much Longer Name]] then [[C]] then [[A Much Longer Name]]")
+        XCTAssertEqual(
+            try String(contentsOf: file, encoding: .utf8),
+            "[[A Much Longer Name]] then [[C]] then [[A Much Longer Name]]")
     }
 
     // MARK: - Percent-encoded markdown links
 
     func test_parserDecodesMarkdownTargetsForResolutionButStoresThemRaw() {
         let link = LinkParser.links(in: "see [text](Design%20Doc.md)").first
-        XCTAssertEqual(link?.rawTarget, "Design%20Doc.md")      // for rewriting
-        XCTAssertEqual(link?.resolutionTarget, "Design Doc.md") // for resolution
+        XCTAssertEqual(link?.rawTarget, "Design%20Doc.md")  // for rewriting
+        XCTAssertEqual(link?.resolutionTarget, "Design Doc.md")  // for resolution
     }
 
     /// Obsidian never percent-encodes a wikilink target, so a `%` inside one is
@@ -156,7 +165,8 @@ final class LinkRewriteRegionTests: XCTestCase {
         let source = root.appendingPathComponent("a.md")
         try "---\nid: a\ntitle: A\n---\nsee [the doc](Design%20Doc.md)"
             .write(to: source, atomically: true, encoding: .utf8)
-        await s.settleForTesting(); try s.rebuild()
+        await s.settleForTesting()
+        try s.rebuild()
 
         // Criterion 1/3: it resolves, so it is a backlink rather than a
         // `target_path NULL` orphan.
@@ -171,8 +181,9 @@ final class LinkRewriteRegionTests: XCTestCase {
         XCTAssertTrue(report.skipped.isEmpty)
 
         // Rewritten, and written back in the SAME encoded style the author used.
-        XCTAssertEqual(try String(contentsOf: source, encoding: .utf8),
-                       "---\nid: a\ntitle: A\n---\nsee [the doc](Spec%20Sheet.md)")
+        XCTAssertEqual(
+            try String(contentsOf: source, encoding: .utf8),
+            "---\nid: a\ntitle: A\n---\nsee [the doc](Spec%20Sheet.md)")
     }
 
     /// SUPERSEDES an earlier assertion that a raw space stayed raw. It did, and

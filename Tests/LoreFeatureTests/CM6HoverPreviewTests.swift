@@ -1,6 +1,7 @@
 import AppKit
 import WebKit
 import XCTest
+
 @testable import LoreFeature
 
 /// The link hover preview on the CodeMirror surface.
@@ -18,13 +19,17 @@ final class CM6HoverPreviewTests: XCTestCase {
 
     private var windows: [NSWindow] = []
     private var webView: WKWebView!
-    override func tearDown() { windows.removeAll(); super.tearDown() }
+    override func tearDown() {
+        windows.removeAll()
+        super.tearDown()
+    }
 
     @MainActor
     private func boot(_ text: String) throws {
         webView = WKWebView(frame: NSRect(x: 0, y: 0, width: 900, height: 700))
-        let window = NSWindow(contentRect: webView.frame, styleMask: [.titled],
-                              backing: .buffered, defer: false)
+        let window = NSWindow(
+            contentRect: webView.frame, styleMask: [.titled],
+            backing: .buffered, defer: false)
         window.contentView = webView
         windows.append(window)
         let index = try XCTUnwrap(CM6EditorView.Coordinator.bundledIndexURL)
@@ -34,13 +39,14 @@ final class CM6HoverPreviewTests: XCTestCase {
         }
         _ = try js("window.loreEditor.init(\(CM6EditorView.Coordinator.jsString(text)))")
         _ = try js("window.loreEditor.selectAt(window.loreEditor.text().length)")
-        _ = try js("""
-        (() => {
-          window.__posted = [];
-          window.webkit = { messageHandlers: { lore: {
-            postMessage: m => window.__posted.push(m) } } };
-        })()
-        """)
+        _ = try js(
+            """
+            (() => {
+              window.__posted = [];
+              window.webkit = { messageHandlers: { lore: {
+                postMessage: m => window.__posted.push(m) } } };
+            })()
+            """)
     }
 
     @MainActor
@@ -58,8 +64,9 @@ final class CM6HoverPreviewTests: XCTestCase {
         try boot("See [[Design Doc]] here.\n\n")
         XCTAssertEqual(try js("window.loreEditor.hoverAt(0)") as? Bool, true)
         XCTAssertEqual(try postedPreviews(), [], "nothing is asked for yet")
-        XCTAssertEqual(try js("window.loreEditor.hoverPendingTarget()") as? String,
-                       "Design Doc")
+        XCTAssertEqual(
+            try js("window.loreEditor.hoverPendingTarget()") as? String,
+            "Design Doc")
         // The stillness elapsing is what asks.
         XCTAssertEqual(try js("window.loreEditor.flushHover()") as? Bool, true)
         XCTAssertEqual(try postedPreviews(), ["Design Doc"])
@@ -85,8 +92,9 @@ final class CM6HoverPreviewTests: XCTestCase {
         try boot("See [[Design Doc]] here.\n\n")
         _ = try js("window.loreEditor.hoverAt(0)")
         _ = try js("window.loreEditor.hoverAway()")
-        XCTAssertEqual(try js("window.loreEditor.flushHover()") as? Bool, false,
-                       "there is nothing left to fire")
+        XCTAssertEqual(
+            try js("window.loreEditor.flushHover()") as? Bool, false,
+            "there is nothing left to fire")
         XCTAssertEqual(try postedPreviews(), [])
     }
 
@@ -97,14 +105,16 @@ final class CM6HoverPreviewTests: XCTestCase {
         try boot("See [[Design Doc]] here.\n\n")
         _ = try js("window.loreEditor.hoverAt(0)")
         _ = try js("window.loreEditor.flushHover()")
-        _ = try js("""
-        window.loreEditor.showPreview("Design Doc", "Design Doc",
-                                      "Route B: use Obsidian's engine.")
-        """)
+        _ = try js(
+            """
+            window.loreEditor.showPreview("Design Doc", "Design Doc",
+                                          "Route B: use Obsidian's engine.")
+            """)
         XCTAssertEqual(try js("window.loreEditor.previewIsOpen()") as? Bool, true)
         XCTAssertEqual(try js("window.loreEditor.previewTitle()") as? String, "Design Doc")
-        XCTAssertEqual(try js("window.loreEditor.previewBody()") as? String,
-                       "Route B: use Obsidian's engine.")
+        XCTAssertEqual(
+            try js("window.loreEditor.previewBody()") as? String,
+            "Route B: use Obsidian's engine.")
     }
 
     /// The read happens off the main actor and can land after the reader has
@@ -116,9 +126,11 @@ final class CM6HoverPreviewTests: XCTestCase {
         _ = try js("window.loreEditor.hoverAt(0)")
         _ = try js("window.loreEditor.flushHover()")
         _ = try js("window.loreEditor.hoverAway()")
-        XCTAssertEqual(try js("""
-        window.loreEditor.showPreview("Design Doc", "Design Doc", "body")
-        """) as? Bool, false)
+        XCTAssertEqual(
+            try js(
+                """
+                window.loreEditor.showPreview("Design Doc", "Design Doc", "body")
+                """) as? Bool, false)
         XCTAssertEqual(try js("window.loreEditor.previewIsOpen()") as? Bool, false)
     }
 
@@ -127,9 +139,11 @@ final class CM6HoverPreviewTests: XCTestCase {
     func test_anAnswerForAnotherLinkIsDropped() throws {
         try boot("See [[One]] and [[Two]].\n\n")
         _ = try js("window.loreEditor.hoverAt(1)")
-        XCTAssertEqual(try js("""
-        window.loreEditor.showPreview("One", "One", "the wrong note")
-        """) as? Bool, false)
+        XCTAssertEqual(
+            try js(
+                """
+                window.loreEditor.showPreview("One", "One", "the wrong note")
+                """) as? Bool, false)
         XCTAssertEqual(try js("window.loreEditor.previewIsOpen()") as? Bool, false)
     }
 
@@ -139,9 +153,10 @@ final class CM6HoverPreviewTests: XCTestCase {
         try boot("See [[Design Doc]] here.\n\n")
         _ = try js("window.loreEditor.hoverAt(0)")
         _ = try js("window.loreEditor.flushHover()")
-        _ = try js("""
-        window.loreEditor.showPreview("Design Doc", "Design Doc", "body")
-        """)
+        _ = try js(
+            """
+            window.loreEditor.showPreview("Design Doc", "Design Doc", "body")
+            """)
         XCTAssertEqual(try js("window.loreEditor.previewIsOpen()") as? Bool, true)
         _ = try js("window.loreEditor.insertAtEnd('x')")
         XCTAssertEqual(try js("window.loreEditor.previewIsOpen()") as? Bool, false)
@@ -153,8 +168,9 @@ final class CM6HoverPreviewTests: XCTestCase {
     func test_anEmbedChipCanBePreviewedToo() throws {
         try boot("![[Contract.pdf]]\n\n")
         XCTAssertEqual(try js("window.loreEditor.hoverAt(0)") as? Bool, true)
-        XCTAssertEqual(try js("window.loreEditor.hoverPendingTarget()") as? String,
-                       "Contract.pdf")
+        XCTAssertEqual(
+            try js("window.loreEditor.hoverPendingTarget()") as? String,
+            "Contract.pdf")
     }
 
     // MARK: - the excerpt, which is the native one
@@ -163,13 +179,13 @@ final class CM6HoverPreviewTests: XCTestCase {
     /// function would disagree with the first about where frontmatter ends.
     func test_theExcerptIsTheNativeOne() {
         let contents = """
-        ---
-        title: Design Doc
-        ---
-        # Design Doc
+            ---
+            title: Design Doc
+            ---
+            # Design Doc
 
-        Route B: use Obsidian's engine.
-        """
+            Route B: use Obsidian's engine.
+            """
         let excerpt = LinkPreview.excerpt(from: contents)
         XCTAssertFalse(excerpt.contains("title:"), "frontmatter is not the body")
         XCTAssertFalse(excerpt.hasPrefix("# "), "the leading heading is dropped")
@@ -180,8 +196,14 @@ final class CM6HoverPreviewTests: XCTestCase {
 
     @MainActor @discardableResult
     private func js(_ source: String) throws -> Any? {
-        var result: Any?; var failure: Error?; var done = false
-        webView.evaluateJavaScript(source) { v, e in result = v; failure = e; done = true }
+        var result: Any?
+        var failure: Error?
+        var done = false
+        webView.evaluateJavaScript(source) { v, e in
+            result = v
+            failure = e
+            done = true
+        }
         let deadline = Date().addingTimeInterval(20)
         while !done, Date() < deadline {
             RunLoop.current.run(mode: .default, before: Date().addingTimeInterval(0.01))

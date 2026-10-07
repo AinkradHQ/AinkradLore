@@ -1,5 +1,5 @@
-import SwiftUI
 import AinkradAppKit
+import SwiftUI
 
 /// A heading in a document, for outline navigation (M2 consumes this; M0 only
 /// has to carry it so engines do not need a schema change later).
@@ -24,7 +24,9 @@ public struct OutlineEntry: Sendable, Equatable {
     /// compiling.
     public let utf16Offset: Int
     public init(level: Int, text: String, utf16Offset: Int = 0) {
-        self.level = level; self.text = text; self.utf16Offset = utf16Offset
+        self.level = level
+        self.text = text
+        self.utf16Offset = utf16Offset
     }
 }
 
@@ -40,7 +42,10 @@ public struct OutlineEntry: Sendable, Equatable {
 public struct BlockAnchor: Sendable, Equatable {
     public let id: String
     public let offset: Int
-    public init(id: String, offset: Int) { self.id = id; self.offset = offset }
+    public init(id: String, offset: Int) {
+        self.id = id
+        self.offset = offset
+    }
 }
 
 public struct IndexPayload: Sendable {
@@ -61,13 +66,19 @@ public struct IndexPayload: Sendable {
     /// `^block-id` anchors this document defines. Populated by M6.
     public var blocks: [BlockAnchor]
 
-    public init(title: String, plaintext: String, tags: [String] = [],
-                properties: [FrontmatterPair] = [], outline: [OutlineEntry] = [],
-                links: [DocumentLink] = [], aliases: [String] = [],
-                blocks: [BlockAnchor] = [], id: String? = nil) {
+    public init(
+        title: String, plaintext: String, tags: [String] = [],
+        properties: [FrontmatterPair] = [], outline: [OutlineEntry] = [],
+        links: [DocumentLink] = [], aliases: [String] = [],
+        blocks: [BlockAnchor] = [], id: String? = nil
+    ) {
         self.id = id
-        self.title = title; self.plaintext = plaintext; self.tags = tags
-        self.properties = properties; self.outline = outline; self.links = links
+        self.title = title
+        self.plaintext = plaintext
+        self.tags = tags
+        self.properties = properties
+        self.outline = outline
+        self.links = links
         self.aliases = aliases
         self.blocks = blocks
     }
@@ -185,44 +196,43 @@ public struct EditorContext {
     /// when the editor tears down, or the closure — and everything it
     /// captures — outlives it. Defaulted to "never fires, token unused", so
     /// an engine or test with no vault behind it needs no changes.
-    public let registerExternalChangeHandler:
-        @MainActor (@escaping @MainActor (URL) -> Void) -> UUID
+    public let registerExternalChangeHandler: @MainActor (@escaping @MainActor (URL) -> Void) -> UUID
     /// Pairs with `registerExternalChangeHandler` — see its doc comment.
     public let unregisterExternalChangeHandler: @MainActor (UUID) -> Void
 
-    public init(theme: HostTheme,
-                editorSettings: EditorSettings = .default,
-                headingCompletions: @escaping @MainActor (String, String) -> HeadingCompletions?
-                    = { _, _ in nil },
-                createLinkedNote: @escaping @MainActor (String) -> Bool = { _ in false },
-                reportCaretOffset: @escaping @MainActor (Int) -> Void = { _ in },
-                onChange: @escaping @MainActor () -> Void,
-                completions: @escaping @MainActor (String) -> [IndexRow] = { _ in [] },
-                tagCompletions: @escaping @MainActor (String) -> [String] = { _ in [] },
-                openLink: @escaping @MainActor (String) -> Void = { _ in },
-                openLinkBeside: @escaping @MainActor (String) -> Void = { _ in },
-                onTagClick: @escaping @MainActor (String) -> Void = { _ in },
-                resolveEmbedTarget: @escaping @MainActor (String) -> URL? = { _ in nil },
-                linkTarget: @escaping @MainActor (IndexRow) -> String
-                    = { LinkCompletionContext.insertableTarget(for: $0) },
-                registerScrollHandler: @escaping @MainActor (@escaping @MainActor (Int) -> Void) -> Void
-                    = { _ in },
-                isReadOnly: Bool = false,
-                writePastedImage: @escaping @MainActor (Data, String) -> String? = { _, _ in nil },
-                writeDroppedFile: @escaping @MainActor (URL) -> String? = { _ in nil },
-                commitTitle: @escaping @MainActor (String) -> LoreStore.TitleCommitOutcome
-                    = { _ in .refused("Renaming is unavailable here.") },
-                registerExternalChangeHandler:
-                    @escaping @MainActor (@escaping @MainActor (URL) -> Void) -> UUID
-                    = { _ in UUID() },
-                unregisterExternalChangeHandler: @escaping @MainActor (UUID) -> Void
-                    = { _ in }) {
-        self.theme = theme; self.editorSettings = editorSettings
+    public init(
+        theme: HostTheme,
+        editorSettings: EditorSettings = .default,
+        headingCompletions: @escaping @MainActor (String, String) -> HeadingCompletions? = { _, _ in nil },
+        createLinkedNote: @escaping @MainActor (String) -> Bool = { _ in false },
+        reportCaretOffset: @escaping @MainActor (Int) -> Void = { _ in },
+        onChange: @escaping @MainActor () -> Void,
+        completions: @escaping @MainActor (String) -> [IndexRow] = { _ in [] },
+        tagCompletions: @escaping @MainActor (String) -> [String] = { _ in [] },
+        openLink: @escaping @MainActor (String) -> Void = { _ in },
+        openLinkBeside: @escaping @MainActor (String) -> Void = { _ in },
+        onTagClick: @escaping @MainActor (String) -> Void = { _ in },
+        resolveEmbedTarget: @escaping @MainActor (String) -> URL? = { _ in nil },
+        linkTarget: @escaping @MainActor (IndexRow) -> String = { LinkCompletionContext.insertableTarget(for: $0) },
+        registerScrollHandler: @escaping @MainActor (@escaping @MainActor (Int) -> Void) -> Void = { _ in },
+        isReadOnly: Bool = false,
+        writePastedImage: @escaping @MainActor (Data, String) -> String? = { _, _ in nil },
+        writeDroppedFile: @escaping @MainActor (URL) -> String? = { _ in nil },
+        commitTitle: @escaping @MainActor (String) -> LoreStore.TitleCommitOutcome = { _ in
+            .refused("Renaming is unavailable here.")
+        },
+        registerExternalChangeHandler:
+            @escaping @MainActor (@escaping @MainActor (URL) -> Void) -> UUID = { _ in UUID() },
+        unregisterExternalChangeHandler: @escaping @MainActor (UUID) -> Void = { _ in }
+    ) {
+        self.theme = theme
+        self.editorSettings = editorSettings
         self.headingCompletions = headingCompletions
         self.createLinkedNote = createLinkedNote
         self.reportCaretOffset = reportCaretOffset
         self.onChange = onChange
-        self.completions = completions; self.tagCompletions = tagCompletions
+        self.completions = completions
+        self.tagCompletions = tagCompletions
         self.openLink = openLink
         self.openLinkBeside = openLinkBeside
         self.onTagClick = onTagClick

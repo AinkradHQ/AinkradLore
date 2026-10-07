@@ -63,8 +63,8 @@ public protocol DocumentEngine: AnyObject {
     @MainActor func makeEditor(_ ctx: EditorContext) -> AnyView
 }
 
-public extension DocumentEngine {
-    var indexTitle: String { indexPayload.title }
-    var isEditable: Bool { true }
-    var isContentTruncated: Bool { false }
+extension DocumentEngine {
+    public var indexTitle: String { indexPayload.title }
+    public var isEditable: Bool { true }
+    public var isContentTruncated: Bool { false }
 }

@@ -55,8 +55,10 @@ enum CM6Completion {
     /// here silently shifts every range that follows.
     static func characterOffset(ofUTF16 offset: Int, in text: String) -> Int? {
         guard offset >= 0, offset <= text.utf16.count else { return nil }
-        guard let index = String.Index(utf16Offset: offset, in: text)
-            .samePosition(in: text) else { return nil }
+        guard
+            let index = String.Index(utf16Offset: offset, in: text)
+                .samePosition(in: text)
+        else { return nil }
         return text.distance(from: text.startIndex, to: index)
     }
 
@@ -66,14 +68,16 @@ enum CM6Completion {
     /// - Parameters kept as closures rather than a context object so this stays
     ///   testable without building an `EditorContext`.
     @MainActor
-    static func query(text: String, utf16Caret: Int,
-                      documents: (String) -> [IndexRow],
-                      headings: (String, String) -> HeadingCompletions?,
-                      tags: (String) -> [String],
-                      linkTarget: (IndexRow) -> String,
-                      canCreate: Bool) -> Query? {
+    static func query(
+        text: String, utf16Caret: Int,
+        documents: (String) -> [IndexRow],
+        headings: (String, String) -> HeadingCompletions?,
+        tags: (String) -> [String],
+        linkTarget: (IndexRow) -> String,
+        canCreate: Bool
+    ) -> Query? {
         guard let caret = characterOffset(ofUTF16: utf16Caret, in: text),
-              let trigger = LinkCompletionContext.trigger(in: text, at: caret)
+            let trigger = LinkCompletionContext.trigger(in: text, at: caret)
         else { return nil }
 
         switch trigger.kind {
@@ -93,7 +97,8 @@ enum CM6Completion {
             var items: [Item] = []
 
             if let heading = LinkCompletionContext.headingQuery(inPrefix: trigger.query),
-               let found = headings(heading.document, heading.heading) {
+                let found = headings(heading.document, heading.heading)
+            {
                 // The document name is re-emitted with the fragment: the caret
                 // sits after the `#`, and inserting only the heading would
                 // leave `[[Design#Design#Overview]]`.
@@ -101,21 +106,26 @@ enum CM6Completion {
                 // resolver-checked so the finished link cannot land on a
                 // namesake in another folder. The native path takes the same
                 // care (`found?.insertTarget ?? query.document`).
-                let target = found.insertTarget.isEmpty ? heading.document
-                                                        : found.insertTarget
+                let target =
+                    found.insertTarget.isEmpty
+                    ? heading.document
+                    : found.insertTarget
                 items = found.headings.map {
-                    Item(label: $0, detail: target,
-                         insert: "\(target)#\($0)]]", createsNote: nil)
+                    Item(
+                        label: $0, detail: target,
+                        insert: "\(target)#\($0)]]", createsNote: nil)
                 }
-                return items.isEmpty ? nil
+                return items.isEmpty
+                    ? nil
                     : Query(from: range.location, to: range.location + range.length, items: items)
             }
 
             let rows = documents(trigger.query)
             items = rows.map {
-                Item(label: $0.title.isEmpty ? $0.path.lastPathComponent : $0.title,
-                     detail: $0.path.deletingLastPathComponent().lastPathComponent,
-                     insert: linkTarget($0) + "]]", createsNote: nil)
+                Item(
+                    label: $0.title.isEmpty ? $0.path.lastPathComponent : $0.title,
+                    detail: $0.path.deletingLastPathComponent().lastPathComponent,
+                    insert: linkTarget($0) + "]]", createsNote: nil)
             }
             let trimmed = trigger.query.trimmingCharacters(in: .whitespaces)
             if canCreate, !trimmed.isEmpty {
@@ -127,12 +137,15 @@ enum CM6Completion {
                 // exists, and a create row at the top is one stray Return away
                 // from a duplicate. The native `items(for:)` says the same.
                 if !exists {
-                    items.append(Item(label: "Create \u{201C}\(trimmed)\u{201D}",
-                                      detail: "new note",
-                                      insert: trimmed + "]]", createsNote: trimmed))
+                    items.append(
+                        Item(
+                            label: "Create \u{201C}\(trimmed)\u{201D}",
+                            detail: "new note",
+                            insert: trimmed + "]]", createsNote: trimmed))
                 }
             }
-            return items.isEmpty ? nil
+            return items.isEmpty
+                ? nil
                 : Query(from: range.location, to: range.location + range.length, items: items)
         }
     }
@@ -141,14 +154,17 @@ enum CM6Completion {
     static func json(_ query: Query?) -> String {
         guard let query else { return "null" }
         let items: [[String: Any]] = query.items.map {
-            var item: [String: Any] = ["label": $0.label, "detail": $0.detail,
-                                       "insert": $0.insert]
+            var item: [String: Any] = [
+                "label": $0.label, "detail": $0.detail,
+                "insert": $0.insert,
+            ]
             if let create = $0.createsNote { item["create"] = create }
             return item
         }
         let payload: [String: Any] = ["from": query.from, "to": query.to, "items": items]
         guard let data = try? JSONSerialization.data(withJSONObject: payload),
-              let text = String(data: data, encoding: .utf8) else { return "null" }
+            let text = String(data: data, encoding: .utf8)
+        else { return "null" }
         return text
     }
 }

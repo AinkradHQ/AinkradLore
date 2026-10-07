@@ -12,7 +12,10 @@ extension VaultIndexCoordinator {
                 LoreEmbeddings.refresh(index)
             }.value
             guard let self else { return }
-            if self.index === index { self.embeddings = vectors; self.lastQueryNearest = nil }
+            if self.index === index {
+                self.embeddings = vectors
+                self.lastQueryNearest = nil
+            }
             self.isEmbedding = false
         }
     }
@@ -26,10 +29,12 @@ extension VaultIndexCoordinator {
     /// hits: keyword matches stay first, meaning fills in what words missed.
     func semanticRows(for query: String, excluding: Set<String>, limit: Int = 20) -> [IndexRow] {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard trimmed.count >= 3, !embeddings.isEmpty, let nearest = queryNearest(trimmed, limit: limit + excluding.count)
+        guard trimmed.count >= 3, !embeddings.isEmpty,
+            let nearest = queryNearest(trimmed, limit: limit + excluding.count)
         else { return [] }
         let byPath = Dictionary(rows.map { ($0.path.path, $0) }, uniquingKeysWith: { a, _ in a })
-        return nearest
+        return
+            nearest
             .filter { !excluding.contains($0.0) }
             .prefix(limit)
             .compactMap { byPath[$0.0] }
@@ -50,8 +55,9 @@ extension VaultIndexCoordinator {
             vocabulary = NLEmbedding.wordEmbedding(for: .english)
         }
         guard let model = embeddingModel, let vocabulary,
-              LoreEmbeddings.hasKnownWord(query, vocabulary: vocabulary),
-              let v = LoreEmbeddings.vector(query, model: model) else { return nil }
+            LoreEmbeddings.hasKnownWord(query, vocabulary: vocabulary),
+            let v = LoreEmbeddings.vector(query, model: model)
+        else { return nil }
         let nearest = LoreEmbeddings.nearest(to: v, in: embeddings, limit: limit)
         lastQueryNearest = (query, limit, nearest)
         return nearest
