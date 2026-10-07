@@ -1528,7 +1528,7 @@
   /* THE CARET, and the selection.
      `drawSelection()` replaces the browser's caret with one CodeMirror draws
      itself, taking its colour from CodeMirror's BASE theme — and the base theme
-     is the light one, which draws `border-left: 1.2px solid black`. A black
+     is the light one, which draws a 1.2 px solid black left border. A black
      caret on this background is an invisible caret, which is exactly how it was
      reported. Every colour added to this file was one of ours; the ones
      CodeMirror draws were never given any. */
@@ -1538,19 +1538,19 @@
      written as `.cm-cursor` here — the first attempt at this styled the caret
      and measured it still `rgb(0, 0, 0)` against a `rgb(22, 22, 28)` page.
      Overriding a vendored library's hard-coded colour is what `!important` is
-     for, and there is no cleaner hook: CodeMirror picks black or `#ddd` from a
+     for, and there is no cleaner hook: CodeMirror picks black or a fixed light grey from a
      light/dark flag, while `--ak-palette-foreground` is the HOST's actual
      foreground and is right in both. */
   .cm-cursor, .cm-dropCursor,
   .cm-editor .cm-cursor, .cm-editor.cm-focused .cm-cursor {
     border-left-color: var(--ak-palette-foreground) !important;
-    border-left-width: 2px !important;
+    border-left-width: var(--ak-size-s2) !important;
   }
   .cm-selectionBackground,
   .cm-editor .cm-selectionBackground,
   .cm-editor.cm-focused .cm-selectionBackground,
   ::selection {
-    background: color-mix(in srgb, var(--ak-palette-accent-primary) 38%, transparent) !important;
+    background: color-mix(in srgb, var(--ak-palette-accent-primary) calc(var(--lore-opacity-o38) * 100%), transparent) !important;
   }
 
   /* THE FONT FAMILY GOES ON `.cm-content`, NOT `.cm-editor`.
@@ -1564,8 +1564,8 @@
      the same numbers, so switching surfaces does not reflow the reader's
      document. */
   /* The inset and the measure, with `!important` for the same measured reason
-     the caret needed it: CodeMirror's base theme sets `padding: 4px 0` on
-     `.cm-content` and won — the computed padding-left was 0px, not 28px, so
+     the caret needed it: CodeMirror's base theme sets a 4 px vertical padding on
+     `.cm-content` and won — the computed padding-left was 0, not the inset, so
      every line sat flush against the left edge of the pane.
      `font-family` on the same selector DID win, which is why this went
      unnoticed: one property of the rule applied and another did not.
@@ -1587,7 +1587,8 @@
   .cm-line { padding: 0; }
 
   /* Mono at 0.92 of body: a monospaced face reads larger at equal points. */
-  .cm-content .tok-monospace { font-family: var(--lore-font-mono); font-size: 0.92em; }
+  .cm-content .tok-monospace { font-family: var(--lore-font-mono);
+                              font-size: calc(var(--lore-mono-scale) * 1em); }
 
   /* A fenced block reads as a panel, not as loose monospaced text on the page.
      Line decorations rather than one span: a mark over a multi-line range
@@ -1608,11 +1609,9 @@
      widget returns, so its own box carries the spacing. Margin on a block
      widget is measured no better than margin on a line — `padding` with a
      transparent border keeps the rule one pixel and the box predictable. */
-  .cm-lore-rule { border: none; border-top: 1px solid
-                  color-mix(in srgb, var(--ak-palette-foreground) 45%, transparent);
-                  margin: 0; padding: 12px 0 0; }
-  .cm-lore-bullet { color: color-mix(in srgb, var(--ak-palette-foreground) 55%, transparent);
-                    margin-right: 6px; }
+  .cm-lore-rule { border: none; border-top: var(--ak-size-s1) solid var(--ak-text-faint);
+                  margin: 0; padding: var(--ak-size-s12) 0 0; }
+  .cm-lore-bullet { color: var(--ak-text-muted); margin-right: var(--ak-size-s6); }
 
   /* E2T1b. Obsidian's internal link: accent-coloured, underlined only on
      hover, and the cursor is a pointer so it reads as clickable before it is
@@ -1783,8 +1782,8 @@
     color: var(--ak-palette-accent-primary); font-size: 0.75em; vertical-align: super;
   }
   .cm-lore-footnote-def {
-    color: color-mix(in srgb, var(--ak-palette-foreground) 55%, transparent);
-    margin-right: 4px;
+    color: var(--ak-text-muted);
+    margin-right: var(--ak-size-s4);
   }
 
   /* E2T6. Maths. KaTeX brings its own typography; these rules only place it.
@@ -1794,12 +1793,12 @@
      and its line decoration crashed the range builder. Unparseable maths reads
      as source, which is `MarkdownMath`'s rule for the same case. */
   .cm-lore-math { display: inline-block; vertical-align: baseline; }
-  .cm-lore-math-block { display: block; padding: 8px 0; text-align: center; }
+  .cm-lore-math-block { display: block; padding: var(--ak-size-s8) 0; text-align: center; }
   /* KaTeX's error rendering is a red copy of the source. It must never appear:
      an unparseable expression is skipped and left as plain source instead. This
      rule exists so that if one ever does slip through it is obvious in a
      screenshot rather than subtly mis-coloured. */
-  .katex-error { outline: 2px dashed red; }
+  .katex-error { outline: var(--ak-size-s2) dashed red; }
 
   /* E2T1c. A transcluded note: somebody else's text, bounded so it reads that
      way. A left rule in the accent tint and a hairline frame — the same two
