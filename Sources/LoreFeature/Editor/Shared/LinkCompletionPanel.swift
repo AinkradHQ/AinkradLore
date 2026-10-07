@@ -151,7 +151,7 @@ final class LinkCompletionPanel {
 /// Local rather than the kit's: `AinkradFloatingPanel` hosts a KEYABLE panel,
 /// and this list must never take key from the text view. The kit has no
 /// non-key mode yet (reported to the Epic 4 inventory, R3).
-// design-lint: allow raw-control token-gap non-key-floating-panel
+// design-lint: allow raw-control kit-gap non-key-floating-panel
 private final class NonKeyPanel: NSPanel {
     override var canBecomeKey: Bool { false }
     override var canBecomeMain: Bool { false }

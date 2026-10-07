@@ -197,7 +197,7 @@ extension MarkdownEditor {
             labelWithString:
                 "Styling off — document over \(MarkdownDocumentModel.stylingHardCap / (1024 * 1024)) MB")
         let captionSize = CGFloat(skin.type.roles.caption)
-        notice.font = .systemFont(ofSize: captionSize)  // design-lint: allow font-size token-gap nsfont
+        notice.font = .systemFont(ofSize: captionSize)  // design-lint: allow font-size kit-gap nsfont
         notice.textColor = NSColor(tokens.accentSecondary)
         notice.isHidden = true
         notice.translatesAutoresizingMaskIntoConstraints = false

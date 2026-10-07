@@ -32,7 +32,7 @@ struct SidebarPinnedSection: View {
     var body: some View {
         let pinned = store.pinnedRows
         if !pinned.isEmpty {
-            VStack(alignment: .leading, spacing: 2) {  // design-lint: allow spacing-literal token-gap spacing.xxs
+            VStack(alignment: .leading, spacing: CGFloat(skin.size.s2)) {
                 header("Pinned")
                 ForEach(pinned, id: \.path) { row in shortcutRow(row) }
                 // The gap a separator line used to fill, kept so the browse

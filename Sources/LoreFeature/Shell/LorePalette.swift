@@ -73,7 +73,7 @@ struct LorePalette: View {
             // A click-off scrim. Dims the work behind without hiding it, and
             // gives the palette an unambiguous way out for anyone who reached
             // it by accident and does not know Esc closes it.
-            Color.black.opacity(skin.opacity.o25)  // design-lint: allow raw-color token-gap material.scrim
+            skin.color(.palette("black", skin.opacity.o25))
                 .ignoresSafeArea()
                 .contentShape(Rectangle())
                 .onTapGesture(perform: onDismiss)

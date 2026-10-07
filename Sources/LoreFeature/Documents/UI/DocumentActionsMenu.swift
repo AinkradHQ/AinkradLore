@@ -46,7 +46,7 @@ struct DocumentActionsMenu: View {
     }
 
     private func row(_ item: AinkradMenuItem) -> some View {
-        Button {  // design-lint: allow raw-control token-gap AinkradMenuRow
+        Button {  // design-lint: allow raw-control kit-gap AinkradMenuRow
             // Dismissed BEFORE the action runs: several of these open a sheet,
             // and a menu left standing over one swallows its first click.
             onDismiss()

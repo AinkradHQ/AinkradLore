@@ -95,7 +95,7 @@ struct DocumentHeaderBar: View {
     /// appears and disappears as you navigate makes the row jitter and moves
     /// everything after it sideways, which is worse than a dimmed chevron.
     @ViewBuilder private var history: some View {
-        HStack(spacing: 2) {  // design-lint: allow spacing-literal token-gap spacing.xxs
+        HStack(spacing: CGFloat(skin.size.s2)) {
             AinkradIconButton(systemName: "chevron.left", tooltip: "Back") {
                 store.goBack()
             }

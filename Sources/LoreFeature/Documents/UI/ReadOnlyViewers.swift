@@ -171,7 +171,7 @@ struct TruncationNotice: View {
             .foregroundStyle(theme.tokens.foreground.opacity(skin.opacity.o80))
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, AinkradSpacing.md)
-            .padding(.vertical, 6)  // design-lint: allow padding-literal token-gap spacing.s6
+            .padding(.vertical, CGFloat(skin.size.s6))
             .background(theme.tokens.background.opacity(skin.opacity.o90))
     }
 }

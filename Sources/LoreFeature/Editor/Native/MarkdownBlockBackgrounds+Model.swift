@@ -145,16 +145,9 @@ extension MarkdownBlockBackgrounds {
             guard !kind.isNeutral else {
                 return NSColor(tokens.foreground).withAlphaComponent(theme.skin.opacity.o70)
             }
-            return theme.syntaxColor(forHue: kind.hue, onDark: calloutOnDark, onLight: calloutOnLight)
+            let callout = theme.skin.syntax.callout
+            return theme.syntaxColor(
+                forHue: CGFloat(kind.hue(callout)), onDark: callout.onDark, onLight: callout.onLight)
         }
-
-        /// A callout's saturation and brightness per surface. Its own pair, a
-        /// touch more saturated than the code tones: a callout tints a panel,
-        /// a code token tints a few glyphs. The kit's `syntax` group carries
-        /// the code tones only.
-        // design-lint: allow raw-color token-gap syntax.callout.onDark
-        static let calloutOnDark = AinkradSyntaxTone(saturation: 0.55, brightness: 0.95)
-        // design-lint: allow raw-color token-gap syntax.callout.onLight
-        static let calloutOnLight = AinkradSyntaxTone(saturation: 0.75, brightness: 0.70)
     }
 }

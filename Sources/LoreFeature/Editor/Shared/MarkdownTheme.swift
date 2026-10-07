@@ -128,17 +128,18 @@ struct MarkdownTheme: Equatable {
             settings.density == .standard
             ? CGFloat(skin.type.sizes.t15) : settings.density.bodySize
         bodySize = baseSize * settings.zoomFactor
-        // The skin has no editor line height yet; Standard's 1.5 stays in
-        // `EditorSettings.Density`.
-        // design-lint: allow font-size token-gap type.editor.lineHeight
-        lineHeightMultiple = settings.density.lineHeightMultiple
+        // Standard's line height is the skin's (`type.editor.lineHeight`); a
+        // density the user picked keeps its own, like the body size above.
+        lineHeightMultiple =
+            settings.density == .standard
+            ? CGFloat(skin.type.editor.lineHeight) : settings.density.lineHeightMultiple
         paragraphSpacing = settings.density.paragraphSpacing * settings.zoomFactor
         listIndentStep = 22 * settings.zoomFactor
         contentInset = 28 * settings.zoomFactor
         maxMeasure = settings.maxMeasure
         renderTagsAsChips = settings.renderTagsAsChips
         isDarkSurface = tokens.foreground.relativeLuminance > Self.darkSurfaceLuminance
-        bodyFont = .systemFont(ofSize: bodySize)  // design-lint: allow font-size token-gap nsfont
+        bodyFont = .systemFont(ofSize: bodySize)  // design-lint: allow font-size kit-gap nsfont
         monoFont = .monospacedSystemFont(
             ofSize: bodySize * Self.monoRatio,
             weight: .regular)
@@ -224,12 +225,13 @@ struct MarkdownTheme: Equatable {
     /// so they stay here — the one source both editors read (the CM6 page
     /// through `CM6ThemeBridge`).
     func headingSize(_ level: Int) -> CGFloat {
-        bodySize * Self.headingRatios[min(max(level, 1), 6) - 1]
+        bodySize * CGFloat(headingRatio(level))
     }
 
-    /// h1…h6 as multiples of the body size. See `headingSize(_:)`.
-    // design-lint: allow font-size token-gap type.editor.headingRatios
-    static let headingRatios: [CGFloat] = [1.80, 1.60, 1.40, 1.25, 1.125, 1.05]
+    /// A heading level's multiple of the body size (`type.editor.headingRatios`).
+    func headingRatio(_ level: Int) -> Double {
+        skin.type.editor.headingRatios[min(max(level, 1), 6) - 1]
+    }
 
     /// The weight a heading is set at.
     ///

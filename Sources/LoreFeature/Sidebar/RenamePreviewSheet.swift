@@ -205,7 +205,7 @@ struct RenamePreviewSheet: View {
 
     private func fileList(_ names: [String]) -> some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 2) {  // design-lint: allow spacing-literal token-gap spacing.xxs
+            VStack(alignment: .leading, spacing: CGFloat(skin.size.s2)) {
                 ForEach(Array(names.enumerated()), id: \.offset) { name in
                     Text(name.element).lineLimit(1)
                         .foregroundStyle(theme.tokens.foreground.opacity(skin.opacity.o70))

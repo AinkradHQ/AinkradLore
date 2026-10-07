@@ -36,6 +36,6 @@ struct DocumentSlideover<Content: View>: View {
         .background(theme.tokens.surfaceElevated)
         .shadow(
             color: .black.opacity(skin.opacity.o35),
-            radius: 12, x: -4, y: 0)  // design-lint: allow radius-literal token-gap material.drawer
+            radius: CGFloat(skin.size.s12), x: -4, y: 0)
     }
 }

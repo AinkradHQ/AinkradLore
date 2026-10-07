@@ -1,3 +1,4 @@
+import AinkradAppKitUI
 import Foundation
 
 /// Obsidian callouts: `> [!note] An optional title`.
@@ -93,20 +94,18 @@ enum MarkdownCallout {
         /// correctly on a light or a dark surface; see
         /// `MarkdownTheme.syntaxColor(forHue:onDark:onLight:)`.
         ///
-        /// Belongs in the skin's `syntax` group beside the code hues, which has
-        /// no callout hues yet, so the table stays here as a token gap. The CM6
-        /// stylesheet's `--callout-hue` values must match it (5B.9).
-        // design-lint: allow raw-color token-gap syntax.callout.hue
-        var hue: CGFloat {
+        /// Read from the skin's `syntax.callout` group; the CM6 stylesheet
+        /// reads the same values through `CM6ThemeBridge`.
+        func hue(_ callout: AinkradSyntaxCalloutTokens) -> Double {
             switch self {
-            case .note, .info: return 210  // blue
-            case .abstract, .tip: return 175  // teal
-            case .todo, .question: return 45  // amber
-            case .success: return 140  // green
-            case .warning: return 30  // orange
-            case .failure, .danger: return 0  // red
-            case .bug: return 350  // crimson
-            case .example: return 275  // violet
+            case .note, .info: return callout.note
+            case .abstract, .tip: return callout.abstract
+            case .todo, .question: return callout.todo
+            case .success: return callout.success
+            case .warning: return callout.warning
+            case .failure, .danger: return callout.failure
+            case .bug: return callout.bug
+            case .example: return callout.example
             case .quote: return 0  // neutral, see isNeutral
             }
         }

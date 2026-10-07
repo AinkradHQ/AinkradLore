@@ -102,7 +102,7 @@ struct NoteListView: View {
                     tags: store.allTags, counts: store.tagCounts,
                     activeTag: $activeTag, theme: theme
                 )
-                .padding(.vertical, 2)  // design-lint: allow padding-literal token-gap spacing.xxs
+                .padding(.vertical, CGFloat(skin.size.s2))
             }
 
             if visible.isEmpty && NoteListView.isStillIndexing(store) {
@@ -141,7 +141,7 @@ struct NoteListView: View {
             } else {
                 ScrollViewReader { proxy in
                     ScrollView {
-                        LazyVStack(spacing: 2) {  // design-lint: allow spacing-literal token-gap spacing.xxs
+                        LazyVStack(spacing: CGFloat(skin.size.s2)) {
                             // The result COUNT. Without it, "did my search
                             // find three things or thirty" needs scrolling to
                             // answer — and a count is also the only signal
@@ -155,7 +155,7 @@ struct NoteListView: View {
                                 .font(AinkradFontResolver.font(.caption, typography: typo))
                                 .foregroundStyle(theme.tokens.foreground.opacity(skin.opacity.o75))
                                 .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.bottom, 2)  // design-lint: allow padding-literal token-gap spacing.xxs
+                                .padding(.bottom, CGFloat(skin.size.s2))
                                 .accessibilityLabel(
                                     "\(visible.count) results for \(query)")
                             }

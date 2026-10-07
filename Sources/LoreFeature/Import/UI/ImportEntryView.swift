@@ -64,7 +64,7 @@ struct ImportEntryView: View {
                 "Lore shows you everything it would write, and writes nothing until you "
                     + "approve it. Anything you have already imported is skipped."
             )
-            .font(.callout)  // design-lint: allow font-size token-gap type.callout
+            .font(.callout)  // design-lint: allow font-size kit-gap type.callout
             .foregroundStyle(theme.tokens.foreground.opacity(skin.opacity.o70))
             .fixedSize(horizontal: false, vertical: true)
             AinkradListRow(
