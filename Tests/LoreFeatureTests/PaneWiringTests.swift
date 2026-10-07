@@ -34,7 +34,7 @@ final class PaneWiringTests: XCTestCase {
         let root = here.deletingLastPathComponent()  // LoreFeatureTests
             .deletingLastPathComponent()  // Tests
             .deletingLastPathComponent()  // package root
-        let url = root.appendingPathComponent("Sources/LoreFeature/Views/\(name)")
+        let url = root.appendingPathComponent("Sources/LoreFeature/Documents/UI/\(name)")
         return try String(contentsOf: url, encoding: .utf8)
     }
 
