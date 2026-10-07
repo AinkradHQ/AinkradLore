@@ -5,12 +5,12 @@ import Foundation
 /// out of it, if any. Two different fragments of the same file are distinct
 /// entries; a bumped mtime makes an old entry unreachable by key, so the
 /// cache never has to actively scan for staleness.
-public struct TransclusionKey: Hashable, Sendable {
-    public let path: URL
-    public let mtime: Date
-    public let fragment: String?
+struct TransclusionKey: Hashable, Sendable {
+    let path: URL
+    let mtime: Date
+    let fragment: String?
 
-    public init(path: URL, mtime: Date, fragment: String?) {
+    init(path: URL, mtime: Date, fragment: String?) {
         self.path = path
         self.mtime = mtime
         self.fragment = fragment
@@ -21,14 +21,14 @@ public struct TransclusionKey: Hashable, Sendable {
 /// measurement site (Task 5) share one counter type; `record()` is called
 /// from exactly one place, added in Task 5 — not from this file.
 @MainActor
-public enum TransclusionMeasureCounter {
-    public static private(set) var count = 0
+enum TransclusionMeasureCounter {
+    static private(set) var count = 0
 
-    public static func reset() {
+    static func reset() {
         count = 0
     }
 
-    public static func record() {
+    static func record() {
         count += 1
     }
 }
@@ -53,14 +53,14 @@ public enum TransclusionMeasureCounter {
 /// `invalidateMeasurements()`. That call remains, and Task 7 still wires it,
 /// but it is now an optimisation (drop work known to be stale early) rather
 /// than the mechanism that makes the cache correct.
-public struct TransclusionMeasurement: Equatable, Sendable {
-    public let height: CGFloat
+struct TransclusionMeasurement: Equatable, Sendable {
+    let height: CGFloat
     /// The OUTER width passed to `TransclusionLayout`, before frame padding.
-    public let width: CGFloat
-    public let bodySize: CGFloat
-    public let lineHeightMultiple: CGFloat
+    let width: CGFloat
+    let bodySize: CGFloat
+    let lineHeightMultiple: CGFloat
 
-    public init(
+    init(
         height: CGFloat, width: CGFloat,
         bodySize: CGFloat, lineHeightMultiple: CGFloat
     ) {
@@ -72,7 +72,7 @@ public struct TransclusionMeasurement: Equatable, Sendable {
 
     /// Whether this measurement describes `other`'s geometry — i.e. whether
     /// its height may be reused for it.
-    public func matchesGeometry(of other: TransclusionMeasurement) -> Bool {
+    func matchesGeometry(of other: TransclusionMeasurement) -> Bool {
         width == other.width && bodySize == other.bodySize
             && lineHeightMultiple == other.lineHeightMultiple
     }
@@ -92,7 +92,7 @@ public struct TransclusionMeasurement: Equatable, Sendable {
 /// tall it renders — and, since `TransclusionMeasurement` carries its own
 /// geometry, a missed invalidation costs a re-measure rather than a wrong gap.
 @MainActor
-public final class TransclusionCache {
+final class TransclusionCache {
     private struct Entry {
         var content: TransclusionContent
         var measurement: TransclusionMeasurement?
@@ -103,13 +103,13 @@ public final class TransclusionCache {
     /// Most-recently-used keys, back to front (front = least recently used).
     private var order: [TransclusionKey] = []
 
-    public init(capacity: Int = 32) {
+    init(capacity: Int = 32) {
         self.capacity = capacity
     }
 
     /// Returns the cached content for `key`, computing and storing it via
     /// `make()` on a miss. A hit never calls `make`.
-    public func content(for key: TransclusionKey, make: () -> TransclusionContent) -> TransclusionContent {
+    func content(for key: TransclusionKey, make: () -> TransclusionContent) -> TransclusionContent {
         if let entry = storage[key] {
             touch(key)
             return entry.content
@@ -127,7 +127,7 @@ public final class TransclusionCache {
     /// A stored measurement taken at a DIFFERENT geometry is a miss, not a
     /// hit: reusing it would reserve a gap sized for a window the reader is no
     /// longer looking at. See `TransclusionMeasurement`.
-    public func measuredHeight(
+    func measuredHeight(
         for key: TransclusionKey,
         matching geometry: TransclusionMeasurement
     ) -> CGFloat? {
@@ -141,7 +141,7 @@ public final class TransclusionCache {
     /// when there is no entry — a height with no content to belong to would be
     /// unreachable anyway, and inventing an entry for it would need a
     /// `TransclusionContent` this call does not have.
-    public func setMeasurement(
+    func setMeasurement(
         _ measurement: TransclusionMeasurement,
         for key: TransclusionKey
     ) {
@@ -153,7 +153,7 @@ public final class TransclusionCache {
     /// Drops every entry whose key's `path` matches `path`, regardless of
     /// mtime or fragment — used when a file watcher reports a change but the
     /// exact new mtime isn't known to the caller yet.
-    public func invalidate(path: URL) {
+    func invalidate(path: URL) {
         let staleKeys = storage.keys.filter { $0.path == path }
         for key in staleKeys {
             storage.removeValue(forKey: key)
@@ -170,7 +170,7 @@ public final class TransclusionCache {
     /// the geometry it was taken at, so one that survives a width change is
     /// already ignored by `measuredHeight(for:matching:)`. This call just
     /// stops the stale bytes being carried around.
-    public func invalidateMeasurements() {
+    func invalidateMeasurements() {
         for key in storage.keys {
             storage[key]?.measurement = nil
         }

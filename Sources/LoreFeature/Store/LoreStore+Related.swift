@@ -5,7 +5,7 @@ extension LoreStore {
     /// neighbours (see `LoreIndex.linkNeighbours`), 1 per shared tag, and 1–5
     /// for how close the two notes are in meaning (above `LoreEmbeddings.threshold`).
     /// Backlinks are left out: the list right above this one already shows them.
-    public func relatedNotes(to url: URL, limit: Int = 8) -> [IndexRow] {
+    func relatedNotes(to url: URL, limit: Int = 8) -> [IndexRow] {
         let path = VaultIndexCoordinator.canonical(url)
         guard let me = rows.first(where: { $0.path == path }) else { return [] }
         var scores = coordinator.linkNeighbours(of: path)

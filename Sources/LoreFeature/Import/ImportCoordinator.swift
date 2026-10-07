@@ -8,7 +8,7 @@ import Observation
 /// produce it. `.needsFullDiskAccess` is still deliberately absent: the SQLite
 /// fast path is not wired to any call site, so nothing can reach that state and
 /// a state no code path reaches is a state no test can prove works.
-public enum ImportEntryState {
+enum ImportEntryState {
     case choosingSource
     case scanning
     case previewing(ImportSelection)
@@ -29,8 +29,8 @@ public enum ImportEntryState {
 /// vault cannot be imported into itself — is not layout.
 @MainActor
 @Observable
-public final class ImportCoordinator: Identifiable {
-    public private(set) var state: ImportEntryState = .choosingSource
+final class ImportCoordinator: Identifiable {
+    private(set) var state: ImportEntryState = .choosingSource
     private let vaultRoot: URL
 
     /// Files a notification when the import reaches a terminal state.
@@ -41,7 +41,7 @@ public final class ImportCoordinator: Identifiable {
     /// site and test is unaffected.
     var reporter: LoreSignalReporter?
 
-    public init(vaultRoot: URL, reporter: LoreSignalReporter? = nil) {
+    init(vaultRoot: URL, reporter: LoreSignalReporter? = nil) {
         self.vaultRoot = vaultRoot
         self.reporter = reporter
     }
@@ -74,7 +74,7 @@ public final class ImportCoordinator: Identifiable {
     /// The panel is here and the work is in `scan(_:)` so tests exercise the
     /// whole pipeline without a modal — the M3 lesson about logic that is only
     /// reachable through a view being logic nothing tests.
-    public func chooseObsidianVault() {
+    func chooseObsidianVault() {
         let panel = NSOpenPanel()
         panel.canChooseDirectories = true
         panel.canChooseFiles = false
@@ -93,13 +93,13 @@ public final class ImportCoordinator: Identifiable {
     /// that store is an undocumented gzipped protobuf whose layout is still
     /// unverified. This route asks Notes.app itself: slower on a large library,
     /// blind to locked notes, and supported.
-    public func importAppleNotes() {
+    func importAppleNotes() {
         Task { await scan(AppleNotesScriptSource(), sourceRoot: nil) }
     }
 
     /// Opens the Automation pane directly. Telling the user where the switch is
     /// and making them find it are different products.
-    public func openAutomationSettings() {
+    func openAutomationSettings() {
         guard
             let url = URL(
                 string:
@@ -113,7 +113,7 @@ public final class ImportCoordinator: Identifiable {
     /// `sourceRoot` is separate from the source object because the nesting
     /// check below is about DIRECTORIES, and not every `ImportSource` has one
     /// (Apple Notes does not). Pass nil when the source is not a folder.
-    public func scan(_ source: some ImportSource, sourceRoot: URL?) async {
+    func scan(_ source: some ImportSource, sourceRoot: URL?) async {
         if let sourceRoot,
             let reason = Self.nestingRefusal(
                 source: sourceRoot,
@@ -163,11 +163,11 @@ public final class ImportCoordinator: Identifiable {
     /// a freshly recomputed one. Recomputing here would break the dry-run
     /// promise in the least visible way possible: the preview would be a
     /// description of a different run.
-    public func apply(_ plan: ImportPlan) async {
+    func apply(_ plan: ImportPlan) async {
         transition(to: .finished(await ImportApplier(vaultRoot: vaultRoot).apply(plan)))
     }
 
-    public func reset() { state = .choosingSource }
+    func reset() { state = .choosingSource }
 
     /// Importing a vault into itself, or into its own parent, would have the
     /// scan walk into what the apply step is writing — at best duplicating

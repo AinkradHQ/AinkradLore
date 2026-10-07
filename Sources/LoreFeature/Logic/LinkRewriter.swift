@@ -1,11 +1,11 @@
 import Foundation
 
 /// One link edit inside one file.
-public struct LinkEdit: Sendable, Equatable {
-    public let file: URL
-    public let oldTarget: String
-    public let newTarget: String
-    public init(file: URL, oldTarget: String, newTarget: String) {
+struct LinkEdit: Sendable, Equatable {
+    let file: URL
+    let oldTarget: String
+    let newTarget: String
+    init(file: URL, oldTarget: String, newTarget: String) {
         self.file = file
         self.oldTarget = oldTarget
         self.newTarget = newTarget
@@ -16,10 +16,10 @@ public struct LinkEdit: Sendable, Equatable {
 /// dropped: "the index says this file links here, and the rename cannot fix
 /// it" is exactly the condition that, swallowed, produces a rename that looks
 /// clean while a link quietly breaks.
-public struct UnrewritableLink: Sendable, Equatable {
-    public let sourceFile: URL
-    public let rawTarget: String
-    public init(sourceFile: URL, rawTarget: String) {
+struct UnrewritableLink: Sendable, Equatable {
+    let sourceFile: URL
+    let rawTarget: String
+    init(sourceFile: URL, rawTarget: String) {
         self.sourceFile = sourceFile
         self.rawTarget = rawTarget
     }
@@ -27,12 +27,12 @@ public struct UnrewritableLink: Sendable, Equatable {
 
 /// The complete change set for a rename or move, computed before anything is
 /// written. Nothing in M1 mutates more than one file without one of these.
-public struct RenamePlan: Sendable {
-    public let source: URL
-    public let destination: URL
-    public let edits: [LinkEdit]
+struct RenamePlan: Sendable {
+    let source: URL
+    let destination: URL
+    let edits: [LinkEdit]
     /// Links the planner had to give up on — reported by `apply` as failures.
-    public let unrewritable: [UnrewritableLink]
+    let unrewritable: [UnrewritableLink]
 
     /// Each affected file's modification date AS OF PLANNING TIME, keyed by
     /// path. `apply` refuses to write a file whose mtime has moved past its
@@ -45,7 +45,7 @@ public struct RenamePlan: Sendable {
     /// Reading the mtime inside `apply` instead would make the check
     /// tautological (the value is read microseconds before it is compared) and
     /// the guard would never fire.
-    public let baselines: [String: Date]
+    let baselines: [String: Date]
 
     /// Non-nil when the operation was refused at PLAN time, before anything was
     /// computed — today only an invalid new name (empty, a path separator, `.`,
@@ -54,9 +54,9 @@ public struct RenamePlan: Sendable {
     /// other outcome, and so `apply` has exactly one place to report it.
     ///
     /// `apply` writes NOTHING and creates NOTHING for a refused plan.
-    public let refusal: String?
+    let refusal: String?
 
-    public init(
+    init(
         source: URL, destination: URL, edits: [LinkEdit],
         unrewritable: [UnrewritableLink] = [],
         baselines: [String: Date] = [:],
@@ -73,7 +73,7 @@ public struct RenamePlan: Sendable {
     /// A copy carrying freshly-read mtimes. Keeps the mtime read (I/O) out of
     /// `LinkRewriter` while keeping the value on the plan, where `apply` needs
     /// it and where the preview UI (Task 10) can see it too.
-    public func withBaselines(_ baselines: [String: Date]) -> RenamePlan {
+    func withBaselines(_ baselines: [String: Date]) -> RenamePlan {
         RenamePlan(
             source: source, destination: destination, edits: edits,
             unrewritable: unrewritable, baselines: baselines,
@@ -82,17 +82,17 @@ public struct RenamePlan: Sendable {
 
     /// First-seen order, deduplicated, so the confirmation UI shows a stable
     /// file list rather than one entry per edit.
-    public var affectedFiles: [URL] {
+    var affectedFiles: [URL] {
         var seen = Set<String>()
         return edits.compactMap { seen.insert($0.file.path).inserted ? $0.file : nil }
     }
-    public var isEmpty: Bool { edits.isEmpty }
+    var isEmpty: Bool { edits.isEmpty }
 }
 
 /// Computes — but never applies — every inbound-link edit a rename or move
 /// requires. Pure computation: no disk access, no store, nothing mutated.
 /// Task 7 owns applying the resulting `RenamePlan`.
-public enum LinkRewriter {
+enum LinkRewriter {
     /// Computes every inbound-link edit a rename or move requires.
     ///
     /// The rewritten target preserves the AUTHOR'S style: a bare `[[Design]]`
@@ -110,7 +110,7 @@ public enum LinkRewriter {
     /// count shown in the confirmation UI. This is also why a plain move
     /// (same basename, new folder) produces no edit for a bare link: a bare
     /// link resolves by basename, so it still resolves after the move.
-    public static func plan(
+    static func plan(
         renaming source: URL,
         to destination: URL,
         inboundLinks: [(
@@ -326,6 +326,7 @@ extension LinkRewriter {
         // the report: an unreadable mtime is "cannot verify", a newer one is
         // "somebody edited it". Same behaviour, honest wording.
         guard
+            // `try?`: a probe — an unreadable mtime is reported as "cannot verify".
             let disk = try? FileManager.default
                 .attributesOfItem(atPath: file.path)[.modificationDate] as? Date
         else { return .skipped(.unverifiable) }

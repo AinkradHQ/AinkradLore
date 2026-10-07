@@ -7,16 +7,16 @@ import Observation
 /// below records a real bug the code around it fixes.
 @MainActor
 @Observable
-public final class VaultIndexCoordinator {
+final class VaultIndexCoordinator {
     /// `didSet` drops the cached resolver below — see `currentResolver()`.
     /// Every reassignment site (background rebuild, `activate`, `shutdown`,
     /// `indexDocument`, the rename/trash paths) already goes through THIS
     /// property, so one `didSet` covers every invalidation point without
     /// hunting down each call site by hand.
-    public internal(set) var rows: [IndexRow] = [] {
+    var rows: [IndexRow] = [] {
         didSet { cachedResolver = nil }
     }
-    public private(set) var vaultRoot: URL?
+    private(set) var vaultRoot: URL?
     /// Vault-relative paths of every directory — what `FolderTreeView` needs
     /// to show an EMPTY folder, which produces zero index rows and so has no
     /// other representation.
@@ -81,7 +81,7 @@ public final class VaultIndexCoordinator {
     /// full rescan for Lore's OWN mutations (synchronous, exact, no need to
     /// wait on FSEvents' coalescing latency) — not because the watcher can't
     /// see those changes anymore.
-    public internal(set) var directoryPaths: [String] = []
+    var directoryPaths: [String] = []
 
     private let indexPath: URL
     private(set) var index: LoreIndex?
@@ -100,18 +100,18 @@ public final class VaultIndexCoordinator {
     private var suppressWatcherUntil: Date = .distantPast
     /// A background rescan is in flight.
     ///
-    /// `public private(set)` rather than `private`: this is the ONLY signal the
+    /// Module-readable rather than `private`: this is the ONLY signal the
     /// UI has that a vault is still being read. Kept private, a first-run user
     /// opening a large vault saw an empty sidebar — indistinguishable from an
     /// empty vault — for as long as the scan took.
-    public internal(set) var isRebuilding = false
+    var isRebuilding = false
     /// Why the last background rescan failed, or nil if it succeeded.
     ///
     /// `performBackgroundRebuild` used to `return nil` on a throw and tell
     /// nobody: a vault that could not be indexed looked exactly like a vault
     /// with nothing in it. Cleared at the START of each attempt, so it only
     /// ever describes the most recent one.
-    public internal(set) var lastRebuildError: String?
+    var lastRebuildError: String?
     /// A vault change arrived while a rescan was running — run once more after.
     var rebuildRequestedAgain = false
 
@@ -181,11 +181,11 @@ public final class VaultIndexCoordinator {
     /// is still picked up on the next event.
     static let selfWriteSuppressionWindow: TimeInterval = 1.0
 
-    public init(indexPath: URL) {
+    init(indexPath: URL) {
         self.indexPath = indexPath
     }
 
-    public func activate(root: URL) throws {
+    func activate(root: URL) throws {
         // CANONICAL ON WRITE. `vaultRoot` is stored canonically and is never the
         // caller's spelling: it seeds `scanVault`'s enumerator (so every indexed
         // path derives from it) and it is the prefix `LinkRewriter` strips to
@@ -216,7 +216,7 @@ public final class VaultIndexCoordinator {
     /// Called from `LoreApp.teardown` when the host closes this instance. Until
     /// generation 8 there was no way for the host to say that, so all of this
     /// leaked for the lifetime of the process every time Lore was removed.
-    public func shutdown() {
+    func shutdown() {
         watcher = nil
         rebuildRequestedAgain = false
         index = nil

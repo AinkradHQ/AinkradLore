@@ -34,12 +34,12 @@ import Foundation
 /// path content alone.
 /// What a `[[Note#…]]` fragment names: a heading, or a `^block-id` anchor.
 /// The discriminator is a single `^` immediately after the `#`.
-public enum LinkFragment: Sendable, Equatable {
+enum LinkFragment: Sendable, Equatable {
     case heading(String)
     case block(String)
 }
 
-public struct LinkResolver: Sendable {
+struct LinkResolver: Sendable {
     private let byKey: [String: [URL]]
     /// All document URLs, sorted deterministically (markdown-first, then
     /// length, then lexicographic path) — the candidate source for the
@@ -48,7 +48,7 @@ public struct LinkResolver: Sendable {
     /// never needed.
     private let sortedDocuments: [URL]
 
-    public init(documents: [(url: URL, title: String, aliases: [String])]) {
+    init(documents: [(url: URL, title: String, aliases: [String])]) {
         var map: [String: [URL]] = [:]
         var seen = Set<String>()
         var allURLs: [URL] = []
@@ -110,7 +110,7 @@ public struct LinkResolver: Sendable {
     /// untouched and still resolves via its own extension-bearing key from
     /// `init`. Any OTHER extension-bearing target (`Contract.pdf`,
     /// `diagram.png`) is looked up verbatim, via the keys `init` registers.
-    public static func basename(of rawTarget: String) -> String {
+    static func basename(of rawTarget: String) -> String {
         var target = rawTarget
         if let hash = target.firstIndex(of: "#") { target = String(target[..<hash]) }
         target = target.trimmingCharacters(in: .whitespaces)
@@ -120,7 +120,7 @@ public struct LinkResolver: Sendable {
 
     /// The `#…` fragment a raw target carries, if any — distinguishing
     /// `#^block-id` from `#Heading`. `nil` when there is no `#` at all.
-    public static func fragment(of rawTarget: String) -> LinkFragment? {
+    static func fragment(of rawTarget: String) -> LinkFragment? {
         guard let hash = rawTarget.firstIndex(of: "#") else { return nil }
         let raw = String(rawTarget[rawTarget.index(after: hash)...])
         if raw.hasPrefix("^") {
@@ -129,7 +129,7 @@ public struct LinkResolver: Sendable {
         return .heading(raw)
     }
 
-    public func resolve(_ rawTarget: String) -> URL? {
+    func resolve(_ rawTarget: String) -> URL? {
         let target = Self.basename(of: rawTarget)
         guard !target.isEmpty else { return nil }
 

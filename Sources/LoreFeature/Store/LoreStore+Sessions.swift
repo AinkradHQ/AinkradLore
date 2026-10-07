@@ -28,9 +28,9 @@ extension LoreStore {
         tabs.append(session)
     }
 
-    public func open(_ row: IndexRow) { open(url: row.path) }
+    func open(_ row: IndexRow) { open(url: row.path) }
 
-    public func open(url: URL) {
+    func open(url: URL) {
         open(url: url, recordingHistory: true)
     }
 
@@ -63,7 +63,7 @@ extension LoreStore {
         }
     }
 
-    public func selectTab(_ session: DocumentSession) {
+    func selectTab(_ session: DocumentSession) {
         touch(session)
         selectedTab = session
         recordVisit(session.url)
@@ -77,9 +77,9 @@ extension LoreStore {
     /// looking at". In a vault, that is almost always a LINEAR trail (follow a
     /// link, read, come back), which a stack models exactly and a strip models
     /// only by accident of ordering.
-    public var history: [URL] { pane.history }
+    var history: [URL] { pane.history }
     /// Where in `history` the open document sits. Nil before anything opens.
-    public var historyIndex: Int? { pane.historyIndex }
+    var historyIndex: Int? { pane.historyIndex }
 
     /// Closing does NOT discard unsaved edits: `DocumentSession` autosaves on a
     /// 500ms debounce, so a tab closed immediately after a keystroke could
@@ -95,7 +95,7 @@ extension LoreStore {
     /// Pass `force: true` to remove the tab regardless — the user explicitly
     /// choosing to discard.
     @discardableResult
-    public func closeTab(_ session: DocumentSession, force: Bool = false) -> Bool {
+    func closeTab(_ session: DocumentSession, force: Bool = false) -> Bool {
         guard let idx = tabs.firstIndex(where: { $0 === session }) else { return false }
         if session.isDirty && !session.isReadOnly {
             do {

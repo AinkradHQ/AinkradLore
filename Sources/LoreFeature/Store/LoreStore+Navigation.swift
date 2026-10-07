@@ -74,8 +74,8 @@ extension LoreStore {
     /// Whether the pane has somewhere to go. Forwarded from `PaneState`,
     /// which owns the arithmetic — see that type for why the history moved off
     /// the store ahead of split view.
-    public var canGoBack: Bool { focusedPane.canGoBack }
-    public var canGoForward: Bool { focusedPane.canGoForward }
+    var canGoBack: Bool { focusedPane.canGoBack }
+    var canGoForward: Bool { focusedPane.canGoForward }
 
     /// Records a visit in the pane. The key function is passed in rather than
     /// reached for, so `PaneState` stays free of the store's canonicalisation
@@ -86,7 +86,7 @@ extension LoreStore {
 
     /// Opens the previously visited document.
     @discardableResult
-    public func goBack() -> Bool {
+    func goBack() -> Bool {
         guard focusedPane.canGoBack, let index = focusedPane.historyIndex
         else { return false }
         focusedPane.historyIndex = index - 1
@@ -95,7 +95,7 @@ extension LoreStore {
     }
 
     @discardableResult
-    public func goForward() -> Bool {
+    func goForward() -> Bool {
         guard focusedPane.canGoForward, let index = focusedPane.historyIndex
         else { return false }
         focusedPane.historyIndex = index + 1

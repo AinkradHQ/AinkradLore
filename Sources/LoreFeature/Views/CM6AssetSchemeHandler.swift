@@ -63,6 +63,7 @@ final class CM6AssetSchemeHandler: NSObject, WKURLSchemeHandler {
             let target = Self.target(from: url),
             !target.isEmpty,
             let file = resolve?(target),
+            // `try?`: an unreadable target is the same 404 as a missing one.
             let data = try? Data(contentsOf: file)
         else {
             // A 404, not an error: an embed whose target does not resolve is an

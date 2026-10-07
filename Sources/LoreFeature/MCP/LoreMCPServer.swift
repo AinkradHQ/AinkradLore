@@ -339,6 +339,7 @@ enum LoreMCPServer {
         async -> AgentActionResult
     {
         guard let data = arguments.data(using: .utf8),
+            // `try?`: unparseable arguments are the caller's error, answered below.
             var object = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
         else {
             return AgentActionResult(text: "\(tool.name): malformed arguments", isError: true)
@@ -359,6 +360,7 @@ enum LoreMCPServer {
         for rule in tool.injects { object[rule.key] = rule.value.foundation }
 
         object["operation"] = tool.operation
+        // `try?`: Foundation values and literals always encode; the else still answers.
         guard let payload = try? JSONSerialization.data(withJSONObject: object) else {
             return AgentActionResult(text: "\(tool.name): could not encode the request", isError: true)
         }
@@ -384,6 +386,7 @@ enum LoreMCPServer {
         }
         var schema: [String: Any] = ["type": "object", "properties": props, "required": required]
         if let trailer { schema["description"] = trailer }
+        // `try?`: a literal schema always encodes; the fallback is still a valid schema.
         guard let data = try? JSONSerialization.data(withJSONObject: schema) else {
             return #"{"type":"object"}"#
         }

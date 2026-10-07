@@ -47,7 +47,7 @@ extension LoreStore {
     /// so any refusal, at either stage, leaves the store exactly as it found
     /// it: file present, tab open.
     @discardableResult
-    public func trash(_ row: IndexRow) throws -> Int {
+    func trash(_ row: IndexRow) throws -> Int {
         guard coordinator.hasIndex else { throw LoreError.noVault }
         // `DocumentSession` never canonicalizes the URL it was opened with, so
         // a tab opened via `open(url:)` with a caller-supplied path must be
@@ -170,7 +170,7 @@ extension LoreStore {
     /// Consumes the record whether or not it succeeds — a failed restore has
     /// already told the user why, and leaving a stale record armed invites a
     /// second press that fails the same way.
-    public func undoTrash() throws {
+    func undoTrash() throws {
         guard let undo = lastTrash else { return }
         lastTrash = nil
         // Refuse before moving anything: the original name may be taken again.

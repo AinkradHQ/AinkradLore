@@ -1,8 +1,8 @@
 import Foundation
 
 /// One styled region of the editor's text.
-public struct StyleSpan: Equatable, Sendable {
-    public enum Kind: Equatable, Sendable {
+struct StyleSpan: Equatable, Sendable {
+    enum Kind: Equatable, Sendable {
         case heading(Int)
         case strong
         case emphasis
@@ -125,10 +125,10 @@ public struct StyleSpan: Equatable, Sendable {
     /// UTF-16 offsets into the EDITOR's full string, frontmatter included.
     /// Not Character offsets — `LinkSpan.targetRange` uses those, and mixing
     /// the two misplaces every span in a document containing an emoji.
-    public let range: Range<Int>
-    public let kind: Kind
+    let range: Range<Int>
+    let kind: Kind
 
-    public init(range: Range<Int>, kind: Kind) {
+    init(range: Range<Int>, kind: Kind) {
         self.range = range
         self.kind = kind
     }
@@ -142,7 +142,7 @@ public struct StyleSpan: Equatable, Sendable {
     /// true` can ever fall inside a fence's range. This property exists so
     /// that guarantee has a name to test, rather than tests reaching past
     /// `StyleSpan` into `Kind` directly.
-    public var isTransclusionEmbed: Bool {
+    var isTransclusionEmbed: Bool {
         if case .embed = kind { return true }
         return false
     }

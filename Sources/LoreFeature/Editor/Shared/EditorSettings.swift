@@ -27,12 +27,12 @@ import Foundation
 /// a free-form body-size field lets someone produce a document whose h4 is
 /// smaller than its body text. Presets move the whole system together, which is
 /// what keeps `MarkdownThemeTests`' scale assertions meaningful.
-public struct EditorSettings: Equatable, Sendable, Codable {
+struct EditorSettings: Equatable, Sendable, Codable {
 
-    public enum Density: String, CaseIterable, Codable, Sendable {
+    enum Density: String, CaseIterable, Codable, Sendable {
         case compact, standard, comfortable
 
-        public var title: String {
+        var title: String {
             switch self {
             case .compact: return "Compact"
             case .standard: return "Standard"
@@ -72,10 +72,10 @@ public struct EditorSettings: Equatable, Sendable, Codable {
     /// measure much beyond ~70 characters is tiring to read, which is what an
     /// unbounded editor gives you on a wide display. It exists for tables and
     /// wide code blocks, where the constraint hurts more than it helps.
-    public enum Measure: String, CaseIterable, Codable, Sendable {
+    enum Measure: String, CaseIterable, Codable, Sendable {
         case narrow, standard, wide, full
 
-        public var title: String {
+        var title: String {
             switch self {
             case .narrow: return "Narrow"
             case .standard: return "Standard"
@@ -95,28 +95,27 @@ public struct EditorSettings: Equatable, Sendable, Codable {
         }
     }
 
-    public var density: Density
-    public var measure: Measure
+    var density: Density
+    var measure: Measure
     /// ⌘+ / ⌘− steps on top of `density`. A TRANSIENT override in spirit —
     /// "this document is hard to read right now" — but persisted anyway,
     /// because a zoom that silently resets on relaunch reads as a bug to
     /// anyone who used it to make the app usable at all.
-    public var zoomStep: Int
+    var zoomStep: Int
     /// Dim everything but the paragraph being written.
-    public var focusMode: Bool
+    var focusMode: Bool
     /// Keep the caret at a fixed height rather than letting it walk to the
     /// bottom edge.
-    public var typewriterMode: Bool
+    var typewriterMode: Bool
     /// Whether inline `#tags` draw as tinted chips or as plain tinted text.
     ///
     /// On by default — chips are what makes a tag scannable. Off exists
     /// because some people want the `#` typographically quiet in long prose.
-    public var renderTagsAsChips: Bool = true
+    var renderTagsAsChips: Bool = true
 
     /// Render with CodeMirror instead of the native `NSTextView`.
     ///
-    /// OFF by default, and it stays off until the parity checklist in the M10
-    /// plan is signed off. Both surfaces read and write the same document
+    /// ON by default (see below). Both surfaces read and write the same document
     /// string, so switching is reversible and costs nothing but a reload of the
     /// pane.
     ///
@@ -139,7 +138,7 @@ public struct EditorSettings: Equatable, Sendable, Codable {
     /// Kept labelled experimental because it is new, not because a listed
     /// feature is missing: link completion and hover previews are wired, and
     /// the E4T2 parity checklist is what says nothing else is.
-    public var usesCM6: Bool = true
+    var usesCM6: Bool = true
 
     /// Defaults reproduce the pre-settings numbers EXACTLY (body 15,
     /// line-height 1.5, paragraph spacing 12, measure 760). That is not
@@ -149,14 +148,14 @@ public struct EditorSettings: Equatable, Sendable, Codable {
     /// `measure: .full` since the owner asked for the full width directly. One
     /// source of truth: the decoder falls back to `EditorSettings.default
     /// .measure`, so settings written before the key existed follow this too.
-    public static let `default` = EditorSettings(
+    static let `default` = EditorSettings(
         density: .standard, measure: .full,
         zoomStep: 0)
 
     /// Both writing modes default OFF. They are strong opinions about how a
     /// page should behave, and an editor that dims most of the document the
     /// first time it is opened reads as broken rather than as focused.
-    public init(
+    init(
         density: Density, measure: Measure, zoomStep: Int,
         focusMode: Bool = false, typewriterMode: Bool = false,
         renderTagsAsChips: Bool = true,
@@ -189,7 +188,7 @@ public struct EditorSettings: Equatable, Sendable, Codable {
         case usesCM6
     }
 
-    public init(from decoder: Decoder) throws {
+    init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         density =
             try container.decodeIfPresent(Density.self, forKey: .density)
@@ -225,8 +224,8 @@ public struct EditorSettings: Equatable, Sendable, Codable {
     /// Asymmetric on purpose. Zooming IN has an obvious ceiling of usefulness
     /// but no failure mode; zooming OUT hits illegibility fast, and a text view
     /// at 60% of 13pt is not a feature. The floor is the tighter of the two.
-    public static let minZoom = -3
-    public static let maxZoom = 8
+    static let minZoom = -3
+    static let maxZoom = 8
 
     static func clampZoom(_ step: Int) -> Int { min(max(step, minZoom), maxZoom) }
 
@@ -236,15 +235,15 @@ public struct EditorSettings: Equatable, Sendable, Codable {
     var zoomFactor: CGFloat { 1 + CGFloat(zoomStep) * 0.1 }
 
     /// The effective body size.
-    public var bodySize: CGFloat { density.bodySize * zoomFactor }
+    var bodySize: CGFloat { density.bodySize * zoomFactor }
 
     /// The effective column width. Scales WITH zoom: a reader who doubled the
     /// text size and kept a 760pt column would be reading a 35-character
     /// measure, which is worse than either setting alone.
-    public var maxMeasure: CGFloat? { density.measure(measure, zoomFactor: zoomFactor) }
+    var maxMeasure: CGFloat? { density.measure(measure, zoomFactor: zoomFactor) }
 
     /// Zoom applied to `step`, clamped.
-    public func zoomed(by step: Int) -> EditorSettings {
+    func zoomed(by step: Int) -> EditorSettings {
         EditorSettings(
             density: density, measure: measure,
             zoomStep: Self.clampZoom(zoomStep + step),
@@ -253,7 +252,7 @@ public struct EditorSettings: Equatable, Sendable, Codable {
     }
 
     /// Zoom reset to the density's own size (⌘0).
-    public func zoomReset() -> EditorSettings {
+    func zoomReset() -> EditorSettings {
         EditorSettings(
             density: density, measure: measure, zoomStep: 0,
             focusMode: focusMode, typewriterMode: typewriterMode,

@@ -257,6 +257,7 @@ struct CM6EditorView: NSViewRepresentable {
             let title = url.deletingPathExtension().lastPathComponent
             Task { [weak self] in
                 let excerpt = await Task.detached(priority: .userInitiated) {
+                    // `try?`: an unreadable target shows no preview.
                     guard let contents = try? String(contentsOf: url, encoding: .utf8)
                     else { return String?.none }
                     return LinkPreview.excerpt(from: contents)
@@ -447,7 +448,10 @@ struct CM6EditorView: NSViewRepresentable {
             finishLoading()
         }
 
-        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        func webView(
+            _ webView: WKWebView,
+            didFinish navigation: WKNavigation!  // design-lint: allow force-unwrap WebKit's delegate signature
+        ) {
             finishLoading()
         }
 
@@ -481,6 +485,7 @@ struct CM6EditorView: NSViewRepresentable {
         /// tests that pin the escaping have no business spinning up a main
         /// actor to check that a backslash comes out escaped.
         nonisolated static func jsString(_ value: String) -> String {
+            // `try?`: one string always encodes; the fallback is an empty JS string.
             guard let data = try? JSONSerialization.data(withJSONObject: [value]),
                 let array = String(data: data, encoding: .utf8)
             else { return "\"\"" }

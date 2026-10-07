@@ -23,11 +23,11 @@ extension LoreStore {
 
     // MARK: - Pinned
 
-    public func isPinned(_ url: URL) -> Bool {
+    func isPinned(_ url: URL) -> Bool {
         pinnedPaths.contains(Self.pathKey(url))
     }
 
-    public func togglePinned(_ url: URL) {
+    func togglePinned(_ url: URL) {
         let key = Self.pathKey(url)
         if pinnedPaths.contains(key) {
             pinnedPaths.remove(key)
@@ -42,7 +42,7 @@ extension LoreStore {
     /// Sorted by TITLE rather than by pin order: pinning is a set, not a
     /// sequence, and remembering the order someone pinned things in implies a
     /// meaning the UI never offered a way to change.
-    public var pinnedRows: [IndexRow] {
+    var pinnedRows: [IndexRow] {
         rows.filter { pinnedPaths.contains(Self.pathKey($0.path)) }
             .sorted { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
     }

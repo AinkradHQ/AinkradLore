@@ -2,14 +2,14 @@ import Foundation
 
 /// Converts the HTML bodies produced by Apple Notes readers into markdown, flagging
 /// anything it cannot represent as a `FidelityWarning` rather than silently dropping it.
-public enum HTMLToMarkdown {
+enum HTMLToMarkdown {
     static let known: Set<String> = [
         "p", "br", "div", "span", "b", "strong", "i", "em", "u", "s", "strike", "del",
         "h1", "h2", "h3", "h4", "h5", "h6", "ul", "ol", "li", "a", "blockquote",
         "table", "tr", "td", "th", "img", "input", "code", "pre", "body", "html", "font",
     ]
 
-    public static func convert(_ html: String) -> (
+    static func convert(_ html: String) -> (
         markdown: String,
         warnings: [FidelityWarning]
     ) {
@@ -40,7 +40,7 @@ public enum HTMLToMarkdown {
                         "\n"
                         + String(
                             repeating: "#",
-                            count: Int(name.dropFirst())!) + " "
+                            count: Int(name.dropFirst()) ?? 1) + " "
                 case "ul": listDepth += 1
                 case "ol":
                     listDepth += 1

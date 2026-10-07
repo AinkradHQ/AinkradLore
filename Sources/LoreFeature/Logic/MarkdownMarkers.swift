@@ -4,7 +4,7 @@ import Foundation
 ///
 /// `Sendable` because `StyleSpan` and its `Kind` are, and a marker owner rides
 /// inside a `Kind`.
-public enum MarkerOwner: Equatable, Sendable {
+enum MarkerOwner: Equatable, Sendable {
     case heading, strong, emphasis, inlineCode, codeFence, link, wikilink, blockQuote, listBullet
     /// A `~~` pair.
     case strikethrough

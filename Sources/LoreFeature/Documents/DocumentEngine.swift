@@ -4,7 +4,7 @@ import SwiftUI
 ///
 /// Class-bound so a loaded document is a reference the session mutates in place
 /// and the editor view binds to.
-public protocol DocumentEngine: AnyObject {
+protocol DocumentEngine: AnyObject {
     /// Stable identifier, stored in the index's `type` column.
     static var identifier: String { get }
 
@@ -64,7 +64,7 @@ public protocol DocumentEngine: AnyObject {
 }
 
 extension DocumentEngine {
-    public var indexTitle: String { indexPayload.title }
-    public var isEditable: Bool { true }
-    public var isContentTruncated: Bool { false }
+    var indexTitle: String { indexPayload.title }
+    var isEditable: Bool { true }
+    var isContentTruncated: Bool { false }
 }

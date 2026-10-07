@@ -8,6 +8,7 @@ import AppKit
 /// - `--ak-*` is the skin's own `Codable` encoding, key path by key path
 ///   (`text.muted` → `--ak-text-muted`, `size.s1_5` → `--ak-size-s1-5`). There
 ///   is no mapping table: a token added to the skin reaches CSS by existing.
+///   The one exception is the `components` group, which the page never reads.
 ///   Colours are emitted RESOLVED — `palette.*` against the host's tokens, as
 ///   `MarkdownTheme.color` resolves them for the native editor — and the
 ///   length ladders (`spacing`, `radius`, `size`, `type.sizes`) carry `px`.
@@ -43,6 +44,7 @@ enum CM6ThemeBridge {
     /// interpolated: a font family holding a `'` must not end the string.
     static func pushScript(_ variables: [String: String]) -> String {
         let json =
+            // `try?`: a `[String: String]` always encodes; `{}` pushes nothing.
             (try? JSONSerialization.data(withJSONObject: variables, options: [.sortedKeys]))
             .flatMap { String(data: $0, encoding: .utf8) } ?? "{}"
         return "(() => { const s = document.documentElement.style; "
@@ -88,7 +90,8 @@ enum CM6ThemeBridge {
     ) {
         switch value {
         case let dictionary as [String: Any]:
-            for (key, child) in dictionary {
+            // `components` is the kit's per-component styling; no CM6 rule reads it.
+            for (key, child) in dictionary where !(path.isEmpty && key == "components") {
                 flatten(child, path: path + [key], paletteKeys: paletteKeys, theme: theme, into: &out)
             }
         case let array as [Any]:
@@ -123,6 +126,7 @@ enum CM6ThemeBridge {
             string == "clear" || string.hasPrefix("#") || string.hasPrefix("tint")
             || paletteKeys.contains(base)
         guard isColour,
+            // `try?`: probes — a value that is not a colour token passes through as CSS.
             let data = try? JSONEncoder().encode(string),
             let token = try? JSONDecoder().decode(AinkradColorToken.self, from: data)
         else { return string }

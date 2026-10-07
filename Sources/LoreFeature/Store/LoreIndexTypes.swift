@@ -6,18 +6,18 @@ import Foundation
 /// `rawTarget` is what rename rewriting must find and replace, so that a link
 /// written `[[design]]` is rewritten `[[new-name]]` rather than being silently
 /// normalized to a full path.
-public struct ResolvedLink: Sendable, Equatable {
-    public let rawTarget: String
-    public let targetPath: URL?
-    public let isEmbed: Bool
+struct ResolvedLink: Sendable, Equatable {
+    let rawTarget: String
+    let targetPath: URL?
+    let isEmbed: Bool
     /// Which syntax the link was written in. Stored, not inferred: every
     /// percent-encoding decision downstream (resolution, rename rewriting, and
     /// "create the note this dead link names") is conditional on it, and the
     /// raw target alone cannot tell you — `100%20off` is an encoded space in a
     /// markdown link and a literal `%20` in a wikilink. Inferring it separately
     /// at each consumer is exactly the drift that produced these bugs.
-    public let syntax: LinkSyntax
-    public init(
+    let syntax: LinkSyntax
+    init(
         rawTarget: String, targetPath: URL?, isEmbed: Bool,
         syntax: LinkSyntax = .wikilink
     ) {
@@ -32,11 +32,11 @@ public struct ResolvedLink: Sendable, Equatable {
 /// in. A bare `String` was not enough for the "Create note" affordance: the
 /// name to create is the percent-DECODED target for a markdown link and the
 /// verbatim one for a wikilink.
-public struct UnresolvedLink: Sendable, Equatable, Hashable, Identifiable {
-    public let rawTarget: String
-    public let syntax: LinkSyntax
-    public var id: String { "\(syntax == .markdown ? "m" : "w"):\(rawTarget)" }
-    public init(rawTarget: String, syntax: LinkSyntax) {
+struct UnresolvedLink: Sendable, Equatable, Hashable, Identifiable {
+    let rawTarget: String
+    let syntax: LinkSyntax
+    var id: String { "\(syntax == .markdown ? "m" : "w"):\(rawTarget)" }
+    init(rawTarget: String, syntax: LinkSyntax) {
         self.rawTarget = rawTarget
         self.syntax = syntax
     }
@@ -44,20 +44,20 @@ public struct UnresolvedLink: Sendable, Equatable, Hashable, Identifiable {
 
 /// One document's contribution to the index: where it lives, which engine
 /// claims it, and the payload that engine produced.
-public struct IndexEntry: Sendable {
-    public let url: URL
-    public let type: String
-    public let payload: IndexPayload
-    public let updated: Date
-    public let resolvedLinks: [ResolvedLink]
-    public let isEditable: Bool
-    public let byteSize: Int
+struct IndexEntry: Sendable {
+    let url: URL
+    let type: String
+    let payload: IndexPayload
+    let updated: Date
+    let resolvedLinks: [ResolvedLink]
+    let isEditable: Bool
+    let byteSize: Int
     /// True when `payload.plaintext` was cut short by
     /// `VaultIndexCoordinator.capped` (or an engine's own equivalent cap).
     /// Without it a partially-indexed document is indistinguishable from one
     /// indexed whole — see `LoreIndex.schemaVersion`'s `7:` note.
-    public let isTruncated: Bool
-    public init(
+    let isTruncated: Bool
+    init(
         url: URL, type: String, payload: IndexPayload, updated: Date,
         resolvedLinks: [ResolvedLink] = [],
         isEditable: Bool = true, byteSize: Int = 0, isTruncated: Bool = false
@@ -73,23 +73,23 @@ public struct IndexEntry: Sendable {
     }
 }
 
-public struct IndexRow: Equatable, Sendable {
-    public let path: URL
-    public let id: String
-    public let title: String
-    public let tags: [String]
-    public let aliases: [String]
-    public let updated: Date
-    public let type: String
-    public let properties: [FrontmatterPair]
-    public let isEditable: Bool
-    public let byteSize: Int
-    public let isTruncated: Bool
+struct IndexRow: Equatable, Sendable {
+    let path: URL
+    let id: String
+    let title: String
+    let tags: [String]
+    let aliases: [String]
+    let updated: Date
+    let type: String
+    let properties: [FrontmatterPair]
+    let isEditable: Bool
+    let byteSize: Int
+    let isTruncated: Bool
 
     // Explicit init (rather than the implicit memberwise one) so existing
     // fixtures across the test suite that predate `isEditable`/`byteSize`/
     // `isTruncated` keep compiling — defaults match `IndexEntry`'s.
-    public init(
+    init(
         path: URL, id: String, title: String, tags: [String], aliases: [String],
         updated: Date, type: String, properties: [FrontmatterPair],
         isEditable: Bool = true, byteSize: Int = 0, isTruncated: Bool = false
@@ -120,10 +120,10 @@ public struct IndexRow: Equatable, Sendable {
 /// bits. Two fingerprints that print identically then compared unequal,
 /// silently disabling the fast path on every launch. Comparing the stored
 /// double directly, unconverted, is exact.
-public struct DocumentFingerprint: Equatable, Sendable {
-    public let updatedEpoch: Double
-    public let byteSize: Int
-    public init(updatedEpoch: Double, byteSize: Int) {
+struct DocumentFingerprint: Equatable, Sendable {
+    let updatedEpoch: Double
+    let byteSize: Int
+    init(updatedEpoch: Double, byteSize: Int) {
         self.updatedEpoch = updatedEpoch
         self.byteSize = byteSize
     }

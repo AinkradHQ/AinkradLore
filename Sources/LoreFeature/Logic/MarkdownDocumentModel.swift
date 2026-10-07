@@ -8,7 +8,7 @@ import Markdown
 /// were blind to code fences, so a `#` comment in a code block became a heading
 /// in the index and `**bold**` inside a fence was styled. Every feature that
 /// reads document structure now derives from this single parse.
-public struct MarkdownDocumentModel: Sendable {
+struct MarkdownDocumentModel: Sendable {
     /// Above this much text, styling covers only the visible range plus a
     /// margin, re-derived on scroll. The outline and task lists still come from
     /// a full parse, which happens once per debounce rather than per keystroke.
@@ -17,16 +17,16 @@ public struct MarkdownDocumentModel: Sendable {
     /// the parse — starts to be felt on a keystroke, and it is far above any
     /// hand-written note in the owner's vault, so ordinary editing never takes
     /// this path.
-    public static let stylingViewportCap = 256 * 1024
+    static let stylingViewportCap = 256 * 1024
 
     /// Above this, styling is disabled entirely and the editor says so. A note
     /// that is slow to type in is worse than one that is plainly styled.
-    public static let stylingHardCap = 2 * 1024 * 1024
+    static let stylingHardCap = 2 * 1024 * 1024
 
-    public let offsetMap: SourceOffsetMap
+    let offsetMap: SourceOffsetMap
 
     /// Every raw-text region, tagged. Ordered as the walk found them.
-    public let codeRegions: [CodeRegion]
+    let codeRegions: [CodeRegion]
 
     /// `codeRegions` as a searchable union — every kind.
     private let allKindsIndex: CodeRegionIndex
@@ -37,11 +37,11 @@ public struct MarkdownDocumentModel: Sendable {
 
     /// Every code region's range, kind discarded. Unchanged in meaning from
     /// before kinds existed: fenced, indented, HTML block, and inline code.
-    public var codeRangesUTF16: [NSRange] { codeRegions.map(\.range) }
+    var codeRangesUTF16: [NSRange] { codeRegions.map(\.range) }
 
     /// The kinds the LINK GRAPH suppresses on. Deliberately NOT every kind —
     /// see `CodeRegionKind`.
-    public static let linkSuppressingKinds: Set<CodeRegionKind> = [
+    static let linkSuppressingKinds: Set<CodeRegionKind> = [
         .fencedCodeBlock, .inlineCode,
     ]
 
@@ -49,7 +49,7 @@ public struct MarkdownDocumentModel: Sendable {
     /// indexes. Retained so wikilink spans can be derived ON DEMAND — see
     /// `styleSpans`. The parsed `Document` is NOT retained: `RawMarkup` is not
     /// `Sendable`.
-    public let fullText: String
+    let fullText: String
 
     /// Style spans for the nodes the AST knows about, in walk order, in UTF-16
     /// offsets into `fullText`. Collected in `init` by the same walk as
@@ -58,7 +58,7 @@ public struct MarkdownDocumentModel: Sendable {
     /// Deliberately NOT the whole story: wikilinks are not CommonMark, so this
     /// omits them. Callers wanting what the EDITOR should style want
     /// `styleSpans`.
-    public let astStyleSpans: [StyleSpan]
+    let astStyleSpans: [StyleSpan]
 
     /// Headings, in document order, with UTF-16 offsets into `fullText`.
     /// Collected in `init` by the SAME walk as `astStyleSpans` and
@@ -66,12 +66,12 @@ public struct MarkdownDocumentModel: Sendable {
     /// inside a fenced code block is never visited at all (the parser never
     /// produced one there), so an offset heading comment cannot appear here —
     /// unlike the line scanner this replaces.
-    public let outline: [OutlineEntry]
+    let outline: [OutlineEntry]
 
     /// The non-AST syntaxes, from the SAME pass that produced the code
     /// regions. A second scan here would be a second parse, which is exactly
     /// the disagreement this type exists to remove.
-    public let extensionSpans: [MarkdownExtensions.Span]
+    let extensionSpans: [MarkdownExtensions.Span]
 
     /// Wikilink spans, derived on demand rather than in `init`.
     ///
@@ -84,7 +84,7 @@ public struct MarkdownDocumentModel: Sendable {
     ///
     /// The parser is handed THIS model's already-computed regions, so the
     /// public path parses markdown exactly once.
-    public var wikilinkSpans: [StyleSpan] {
+    var wikilinkSpans: [StyleSpan] {
         WikilinkSpanBuilder.spans(in: fullText, suppression: injectableSuppressionIndex)
     }
 
@@ -93,7 +93,7 @@ public struct MarkdownDocumentModel: Sendable {
     /// Derived from `extensionSpans`, which the initializer already computed —
     /// a second scan here would be a second parse, which is the disagreement
     /// this type exists to remove.
-    public var inlineTags: [String] {
+    var inlineTags: [String] {
         var seen = Set<String>()
         return extensionSpans.compactMap { span in
             guard case .tag(let name) = span.kind, seen.insert(name).inserted
@@ -103,7 +103,7 @@ public struct MarkdownDocumentModel: Sendable {
     }
 
     /// `^block-id` anchors, derived from `extensionSpans` — not a rescan.
-    public var blockAnchors: [BlockAnchor] {
+    var blockAnchors: [BlockAnchor] {
         extensionSpans.compactMap { span in
             guard case .blockID(let id) = span.kind else { return nil }
             return BlockAnchor(id: id, offset: span.range.lowerBound)
@@ -122,7 +122,7 @@ public struct MarkdownDocumentModel: Sendable {
     /// NOT gated on `isOverStylingHardCap`. The caps govern STYLING — what the
     /// editor draws — and dropping links above one would silently amputate the
     /// link graph of a large note and let a rename stop rewriting it.
-    public var links: [DocumentLink] {
+    var links: [DocumentLink] {
         LinkParser.spans(in: fullText, suppression: injectableSuppressionIndex).map(\.link)
     }
 
@@ -134,7 +134,7 @@ public struct MarkdownDocumentModel: Sendable {
     /// path should hold the result, not the model.
     /// Empty above `stylingHardCap`: past that size the honest answer is "this
     /// document is not styled", not a slow one.
-    public var styleSpans: [StyleSpan] {
+    var styleSpans: [StyleSpan] {
         guard !isOverStylingHardCap else { return [] }
         return astStyleSpans + wikilinkSpans + mathSpans + Self.styleSpans(from: extensionSpans)
     }
@@ -210,12 +210,12 @@ public struct MarkdownDocumentModel: Sendable {
     }
 
     /// UTF-16 length, which is what every style offset is measured in.
-    public var isOverStylingHardCap: Bool {
+    var isOverStylingHardCap: Bool {
         fullText.utf16.count > Self.stylingHardCap
     }
 
     /// True when styling should be limited to the visible range plus a margin.
-    public var isOverStylingViewportCap: Bool {
+    var isOverStylingViewportCap: Bool {
         fullText.utf16.count > Self.stylingViewportCap
     }
 
@@ -252,7 +252,7 @@ public struct MarkdownDocumentModel: Sendable {
     /// heading in that region vanishes from the outline; a `[[link]]` inside a
     /// fence there vanishes from the SUPPRESSION index and becomes a phantom
     /// link that a rename will rewrite.
-    public init(fullText: String) {
+    init(fullText: String) {
         self.init(text: fullText, bodyStart: Frontmatter.bodyOffset(in: fullText))
     }
 
@@ -271,7 +271,7 @@ public struct MarkdownDocumentModel: Sendable {
     /// three chances to pass the wrong value, and a default that was silently
     /// wrong for two of them. An argument LABEL states the provenance at the
     /// call site and cannot be defaulted away.
-    public init(body: String) {
+    init(body: String) {
         self.init(text: body, bodyStart: 0)
     }
 
@@ -365,7 +365,7 @@ public struct MarkdownDocumentModel: Sendable {
 
     /// True if `offset` is inside ANY code region. Semantics unchanged: callers
     /// that genuinely want every raw-text region keep using this.
-    public func isInsideCode(utf16Offset offset: Int) -> Bool {
+    func isInsideCode(utf16Offset offset: Int) -> Bool {
         allKindsIndex.contains(offset)
     }
 
@@ -374,7 +374,7 @@ public struct MarkdownDocumentModel: Sendable {
     /// The prebuilt index serves the one set that is on a hot path; any other
     /// set is a test or a one-off, and pays for its own index. Both branches
     /// answer the same question — see `CodeRegionIndex`.
-    public func isInsideCode(utf16Offset offset: Int, kinds: Set<CodeRegionKind>) -> Bool {
+    func isInsideCode(utf16Offset offset: Int, kinds: Set<CodeRegionKind>) -> Bool {
         if kinds == Self.linkSuppressingKinds { return linkSuppressionIndex.contains(offset) }
         return CodeRegionIndex(regions: codeRegions, kinds: kinds).contains(offset)
     }

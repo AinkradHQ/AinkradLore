@@ -10,18 +10,18 @@ import SwiftUI
 /// one is a no-op. They can never be created regardless of the user's choice,
 /// so offering a checkbox that appears to control them would be dishonest.
 @MainActor
-public final class ImportSelection: ObservableObject {
-    @Published public private(set) var deselected: Set<String> = []
+final class ImportSelection: ObservableObject {
+    @Published private(set) var deselected: Set<String> = []
     /// Recomputed from the surviving selection on every change, never patched.
     /// Patching would let the previewed plan drift from the plan that
     /// executes — the entire dry-run promise rests on those being identical.
-    @Published public private(set) var plan: ImportPlan
+    @Published private(set) var plan: ImportPlan
 
-    public let items: [ImportItem]
+    let items: [ImportItem]
     let vaultRoot: URL
     let existingImportIDs: Set<String>
 
-    public init(items: [ImportItem], vaultRoot: URL, existingImportIDs: Set<String>) {
+    init(items: [ImportItem], vaultRoot: URL, existingImportIDs: Set<String>) {
         self.items = items
         self.vaultRoot = vaultRoot
         self.existingImportIDs = existingImportIDs
@@ -32,11 +32,11 @@ public final class ImportSelection: ObservableObject {
 
     /// Whether `sourceID` will be handed to the planner. False for items
     /// already imported (see type doc) or explicitly deselected.
-    public func isSelected(_ sourceID: String) -> Bool {
+    func isSelected(_ sourceID: String) -> Bool {
         !existingImportIDs.contains(sourceID) && !deselected.contains(sourceID)
     }
 
-    public func toggle(_ sourceID: String) {
+    func toggle(_ sourceID: String) {
         guard !existingImportIDs.contains(sourceID) else { return }
         if deselected.contains(sourceID) { deselected.remove(sourceID) } else { deselected.insert(sourceID) }
         plan = ImportPlanner.plan(
@@ -49,7 +49,7 @@ public final class ImportSelection: ObservableObject {
 /// deselectable except already-imported ones; the header count and the
 /// Import button both track `plan.creating`, never `plan.items`, so the
 /// preview never claims credit for rows that are informational only.
-public struct ImportPreviewSheet: View {
+struct ImportPreviewSheet: View {
     @ObservedObject var selection: ImportSelection
     let onImport: (ImportPlan) -> Void
     let onCancel: () -> Void
@@ -58,7 +58,7 @@ public struct ImportPreviewSheet: View {
     @Environment(\.ainkradTypography) private var typo
     @Environment(\.ainkradSkin) private var skin
 
-    public init(
+    init(
         selection: ImportSelection, onImport: @escaping (ImportPlan) -> Void,
         onCancel: @escaping () -> Void
     ) {
@@ -69,7 +69,7 @@ public struct ImportPreviewSheet: View {
 
     private var creatingCount: Int { selection.plan.creating.count }
 
-    public var body: some View {
+    var body: some View {
         VStack(alignment: .leading, spacing: AinkradSpacing.md) {
             Text(headline)
                 .font(AinkradFontResolver.font(.headline, typography: typo))

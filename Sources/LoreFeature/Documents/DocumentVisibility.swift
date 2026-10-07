@@ -32,7 +32,7 @@ import Foundation
 /// small, NAMED, documented, owner-approved curations — not a scattered set
 /// of ad hoc extension checks, and each is anchored to a specific engine's
 /// own extension set rather than invented independently.
-public enum DocumentVisibility {
+enum DocumentVisibility {
     /// Owner ruling (fix round 1): "documents stay, code/config/junk goes."
     /// This is a DELIBERATE, curated list of `PlainTextEngine` extensions
     /// that are developer-ish text rather than prose — a `.json` credentials
@@ -72,7 +72,7 @@ public enum DocumentVisibility {
     ///     against `EmbedRendering.imageExtensions` the same way `EmbedRendering
     ///     .kind(for:)` already does — a `.PNG` screenshot must not be treated
     ///     as junk just because it was saved with an upper-case extension.
-    public static func isHiddenByDefault(type: String, pathExtension: String) -> Bool {
+    static func isHiddenByDefault(type: String, pathExtension: String) -> Bool {
         let ext = pathExtension.lowercased()
         switch type {
         case PlainTextEngine.identifier:
@@ -94,7 +94,7 @@ public enum DocumentVisibility {
         }
     }
 
-    public static func isHiddenByDefault(_ row: IndexRow) -> Bool {
+    static func isHiddenByDefault(_ row: IndexRow) -> Bool {
         isHiddenByDefault(type: row.type, pathExtension: row.path.pathExtension)
     }
 
@@ -103,7 +103,7 @@ public enum DocumentVisibility {
     /// files" setting) to get `rows` back unfiltered, without a second index
     /// rebuild: this is a filter over already-loaded rows, so flipping the
     /// setting takes effect on the very next redraw.
-    public static func visibleRows(_ rows: [IndexRow], showAllFiles: Bool) -> [IndexRow] {
+    static func visibleRows(_ rows: [IndexRow], showAllFiles: Bool) -> [IndexRow] {
         showAllFiles ? rows : rows.filter { !isHiddenByDefault($0) }
     }
 }

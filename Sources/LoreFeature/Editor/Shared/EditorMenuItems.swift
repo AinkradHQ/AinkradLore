@@ -3,7 +3,7 @@ import AppKit
 
 /// Everything the editor's context menu can do, injected so the builder stays
 /// pure and the tests need no text view.
-public struct EditorMenuActions {
+struct EditorMenuActions {
     var cut: () -> Void = {}
     var copy: () -> Void = {}
     var paste: () -> Void = {}

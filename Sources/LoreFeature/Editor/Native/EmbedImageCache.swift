@@ -8,7 +8,7 @@ import AppKit
 /// every caret move — the exact per-render regression `MarkdownStylingBenchmark`
 /// exists to catch.
 ///
-/// `@unchecked Sendable` with a lock for the same reason `ExtractionCache` is:
+/// `@unchecked Sendable` with an `NSLock`, for the same reason `ExtractionCache` is:
 /// nothing here touches AppKit's main-actor state, only a private dictionary.
 final class EmbedImageCache: @unchecked Sendable {
     static let shared = EmbedImageCache()
@@ -57,6 +57,7 @@ final class EmbedImageCache: @unchecked Sendable {
     }
 
     private static func key(for url: URL) -> Key? {
+        // `try?`: a probe — no stat means no key, and the caller decodes uncached.
         guard let attrs = try? FileManager.default.attributesOfItem(atPath: url.path),
             let mtime = attrs[.modificationDate] as? Date,
             let size = attrs[.size] as? Int

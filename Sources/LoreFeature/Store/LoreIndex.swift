@@ -1,10 +1,10 @@
 import Foundation
 import GRDB
 
-/// `@unchecked Sendable`: the only stored property is a GRDB `DatabaseQueue`,
+/// `@unchecked Sendable` with a GRDB `DatabaseQueue`: the only stored property,
 /// which serializes every access internally and is safe to use from any thread.
 /// This is what lets `LoreStore` run a whole-vault rebuild off the main actor.
-public final class LoreIndex: @unchecked Sendable {
+final class LoreIndex: @unchecked Sendable {
     /// Internal, not private: the search reads live in `LoreIndex+Search.swift`
     /// and Swift's `private` is file-scoped. Still closed outside the module,
     /// and `LoreIndex` remains the only type that touches it.
@@ -56,7 +56,7 @@ public final class LoreIndex: @unchecked Sendable {
         return config
     }
 
-    public init(path: URL) throws {
+    init(path: URL) throws {
         // Probe the existing file's version in its own scope and CLOSE it
         // before deleting: unlinking a database file while a connection is
         // still open on it is an SQLite API violation ("vnode unlinked while
@@ -154,8 +154,11 @@ public final class LoreIndex: @unchecked Sendable {
     /// caller could act on.
     private static func recreate(at path: URL) {
         for suffix in ["", "-wal", "-shm"] {
-            try? FileManager.default.removeItem(
-                atPath: path.path + suffix)
+            let file = path.path + suffix
+            guard FileManager.default.fileExists(atPath: file) else { continue }
+            Log.store.orNil("delete the index file \(suffix)") {
+                try FileManager.default.removeItem(atPath: file)
+            }
         }
     }
 
@@ -227,7 +230,7 @@ public final class LoreIndex: @unchecked Sendable {
 
     // MARK: - Writes
 
-    public func upsert(_ entry: IndexEntry) throws {
+    func upsert(_ entry: IndexEntry) throws {
         try dbQueue.write { db in
             try Self.write(entry, into: db)
         }
@@ -318,7 +321,7 @@ public final class LoreIndex: @unchecked Sendable {
     /// meant a few thousand transactions, every one of them an fsync, all on
     /// the main actor. Batching them into one transaction is most of why a
     /// rescan is now fast enough to be unnoticeable.
-    public func replaceAll(with entries: [IndexEntry]) throws {
+    func replaceAll(with entries: [IndexEntry]) throws {
         try dbQueue.write { db in
             // Canonical, because that is the spelling `Self.write` stores: a raw
             // keep-set would fail to match the row it just wrote and prune it
@@ -342,7 +345,7 @@ public final class LoreIndex: @unchecked Sendable {
         }
     }
 
-    public func remove(path url: URL) throws {
+    func remove(path url: URL) throws {
         let path = Self.canonical(url)
         try dbQueue.write { db in
             let rowid = try Int64.fetchOne(
@@ -357,14 +360,14 @@ public final class LoreIndex: @unchecked Sendable {
 
     // MARK: - Reads
 
-    public func all() throws -> [IndexRow] {
+    func all() throws -> [IndexRow] {
         try dbQueue.read { db in
             try Row.fetchAll(db, sql: "SELECT * FROM documents ORDER BY updated DESC").map(Self.row)
         }
     }
 
     /// One document's row, or `nil` when it is not indexed.
-    public func row(at url: URL) throws -> IndexRow? {
+    func row(at url: URL) throws -> IndexRow? {
         try dbQueue.read { db in
             try Row.fetchOne(
                 db, sql: "SELECT * FROM documents WHERE path = ?",
@@ -381,7 +384,7 @@ public final class LoreIndex: @unchecked Sendable {
     /// into a `Date` — see `DocumentFingerprint.updatedEpoch`'s doc comment
     /// for why that round-trip is lossy and would silently disable the fast
     /// path.
-    public func fingerprints() throws -> [String: DocumentFingerprint] {
+    func fingerprints() throws -> [String: DocumentFingerprint] {
         try dbQueue.read { db in
             var out: [String: DocumentFingerprint] = [:]
             let rows = try Row.fetchAll(db, sql: "SELECT path, updated, byte_size FROM documents")
@@ -419,7 +422,7 @@ public final class LoreIndex: @unchecked Sendable {
     /// A row this process cannot JSON-decode (e.g. one written by the earlier
     /// comma-joined format) is treated as "never recorded" rather than thrown:
     /// one full rebuild self-heals it into the new format.
-    public func indexedDirectories() throws -> Set<String>? {
+    func indexedDirectories() throws -> Set<String>? {
         try dbQueue.read { db in
             guard
                 let raw = try String.fetchOne(
@@ -427,6 +430,7 @@ public final class LoreIndex: @unchecked Sendable {
                 )
             else { return nil }
             guard let data = raw.data(using: .utf8),
+                // `try?`: an undecodable row is "never recorded" (see above).
                 let decoded = try? JSONDecoder().decode([String].self, from: data)
             else { return nil }
             return Set(decoded)
@@ -436,7 +440,7 @@ public final class LoreIndex: @unchecked Sendable {
     /// Persists `directories` as the set to compare against on the next
     /// process's first rebuild. See `indexedDirectories()`'s doc comment for
     /// why this is JSON, not comma-joined.
-    public func setIndexedDirectories(_ directories: Set<String>) throws {
+    func setIndexedDirectories(_ directories: Set<String>) throws {
         let encoded = try JSONEncoder().encode(Array(directories))
         let json = String(decoding: encoded, as: UTF8.self)
         try dbQueue.write { db in

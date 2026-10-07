@@ -5,7 +5,7 @@ extension LoreIndex {
     // MARK: - Links
 
     /// Documents containing a link that resolves to `target`.
-    public func backlinks(to target: URL) throws -> [IndexRow] {
+    func backlinks(to target: URL) throws -> [IndexRow] {
         try dbQueue.read { db in
             try Row.fetchAll(
                 db,
@@ -25,7 +25,7 @@ extension LoreIndex {
     /// DOCUMENT: a rename must rewrite every individual link, so a document
     /// linking twice with two different spellings (`[[Design]]` and
     /// `[[Projects/Design.md]]`) has to yield two rows here, not one.
-    public func inboundLinks(to target: URL) throws
+    func inboundLinks(to target: URL) throws
         -> [(sourceFile: URL, rawTarget: String, syntax: LinkSyntax)]
     {
         try dbQueue.read { db in
@@ -55,7 +55,7 @@ extension LoreIndex {
 
     /// This document's outbound links that resolve to nothing. A normal state:
     /// it is how a link to a not-yet-written note behaves.
-    public func unresolvedLinks(from source: URL) throws -> [UnresolvedLink] {
+    func unresolvedLinks(from source: URL) throws -> [UnresolvedLink] {
         try dbQueue.read { db in
             try Row.fetchAll(
                 db,
@@ -69,7 +69,7 @@ extension LoreIndex {
         }
     }
 
-    public func outgoingLinks(from source: URL) throws -> [ResolvedLink] {
+    func outgoingLinks(from source: URL) throws -> [ResolvedLink] {
         try dbQueue.read { db in
             try Row.fetchAll(
                 db,
@@ -93,7 +93,7 @@ extension LoreIndex {
 
     /// Where a block anchor sits, or `nil` if that document has no such
     /// anchor. Used to resolve `[[Note#^id]]`.
-    public func blockOffset(inDocumentAt path: String, id: String) throws -> Int? {
+    func blockOffset(inDocumentAt path: String, id: String) throws -> Int? {
         try dbQueue.read { db in
             try Int.fetchOne(
                 db,

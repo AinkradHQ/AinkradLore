@@ -20,7 +20,7 @@ extension LoreStore {
     /// DIRECTORY (symlink-aware, same guard `create(title:in:)` uses), not
     /// merely on the string. A name like `../../etc/passwd` or a name that is
     /// only dots must never be able to escape `noteURL`'s directory.
-    public func writeAttachment(
+    func writeAttachment(
         data: Data, preferredName: String,
         besideNote noteURL: URL
     ) throws -> URL {
@@ -72,7 +72,7 @@ extension LoreStore {
     /// (directories are never indexed, so the link can never resolve). Only
     /// a regular file — or a symlink that ultimately resolves to one — is
     /// accepted; anything else is rejected before any bytes move.
-    public func writeAttachment(copying sourceURL: URL, besideNote noteURL: URL) throws -> URL {
+    func writeAttachment(copying sourceURL: URL, besideNote noteURL: URL) throws -> URL {
         var isDirectory: ObjCBool = false
         guard FileManager.default.fileExists(atPath: sourceURL.path, isDirectory: &isDirectory),
             !isDirectory.boolValue
@@ -120,7 +120,7 @@ extension LoreStore {
     /// see `sanitized`'s doc comment. The file on disk and the link that
     /// names it must always agree, which is only true if both come from the
     /// SAME sanitized string.
-    public func embedSyntax(for attachmentURL: URL) -> String {
+    func embedSyntax(for attachmentURL: URL) -> String {
         "![[\(attachmentURL.lastPathComponent)]]"
     }
 
@@ -161,7 +161,7 @@ extension LoreStore {
     /// that by budgeting BYTES and walking back to a scalar boundary —
     /// the exact technique `VaultIndexCoordinator.capped` already uses for
     /// the same reason, copied rather than reinvented.
-    public nonisolated static func sanitized(_ name: String) -> String {
+    nonisolated static func sanitized(_ name: String) -> String {
         let forbidden = CharacterSet(charactersIn: "/:]|#\u{0}").union(.newlines)
         var cleaned = String(
             String.UnicodeScalarView(
@@ -206,7 +206,7 @@ extension LoreStore {
     /// starting at `preferredName` and then trying ` 2`, ` 3`, … before the
     /// extension — Finder's own collision shape, so it reads as familiar
     /// rather than invented.
-    public static func nonCollidingURL(in directory: URL, preferredName: String) -> URL {
+    static func nonCollidingURL(in directory: URL, preferredName: String) -> URL {
         let base = (preferredName as NSString).deletingPathExtension
         let ext = (preferredName as NSString).pathExtension
         var candidate = directory.appendingPathComponent(preferredName)

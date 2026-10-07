@@ -3,7 +3,7 @@ import Foundation
 extension VaultIndexCoordinator {
     /// Synchronous rescan. Kept for tests and for callers that must observe the
     /// result immediately; production paths use `startBackgroundRebuild`.
-    public func rebuild() throws {
+    func rebuild() throws {
         guard let root = vaultRoot, let index else { return }
         let oldRows = rows
         try index.replaceAll(with: Self.scanVault(at: root))
@@ -18,13 +18,13 @@ extension VaultIndexCoordinator {
         notifyChangedPaths(from: oldRows, to: rows)
     }
 
-    public func search(_ query: String) -> [IndexRow] {
+    func search(_ query: String) -> [IndexRow] {
         let keyword = Log.search.orNil("search") { try index?.search(query) } ?? []
         return keyword + semanticRows(for: query, excluding: Set(keyword.map(\.path.path)))
     }
 
     /// Search with an excerpt per hit — see `LoreIndex.searchHits`.
-    public func searchHits(_ query: String) -> [SearchHit] {
+    func searchHits(_ query: String) -> [SearchHit] {
         let keyword = Log.search.orNil("search hits") { try index?.searchHits(query) } ?? []
         return keyword
             + semanticRows(for: query, excluding: Set(keyword.map(\.row.path.path)))

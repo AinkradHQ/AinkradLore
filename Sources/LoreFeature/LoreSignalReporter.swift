@@ -14,13 +14,12 @@ import Foundation
 /// while the user is looking at it, and the editor already says so in its own
 /// chrome. A feed row for a save the user just watched succeed is noise.
 @MainActor
-public struct LoreSignalReporter {
+struct LoreSignalReporter {
     let signals: PluginSignalEmitter
 
-    /// `public` only because `ImportCoordinator`'s initialiser is public and
-    /// takes one. The methods stay internal — nothing outside this module
-    /// should be filing Lore's notifications.
-    public init(signals: PluginSignalEmitter) { self.signals = signals }
+    /// Internal like the rest of the module: nothing outside it should be
+    /// filing Lore's notifications.
+    init(signals: PluginSignalEmitter) { self.signals = signals }
 
     /// An import finished.
     ///

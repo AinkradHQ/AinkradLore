@@ -17,7 +17,7 @@ extension Frontmatter {
     /// frontmatter" has one definition: a rewriter with its own `---` detector
     /// would drift, and the drift would show up as a `[[link]]` written in a
     /// property being rewritten (or a real one not being).
-    public static func bodyOffset(in text: String) -> Int {
+    static func bodyOffset(in text: String) -> Int {
         let layout = splitLines(text)
         guard let close = closingFenceIndex(layout) else { return 0 }
         var offset = layout.bom ? 1 : 0

@@ -26,21 +26,21 @@ import Foundation
 /// plan-time baselines, the skip-if-changed-on-disk guard, the
 /// exclude-files-with-unsaved-edits rule, the identity-tracked sessions, or the
 /// three-state `EditOutcome`.
-public struct FolderRenamePlan: Sendable {
-    public let source: URL
-    public let destination: URL
+struct FolderRenamePlan: Sendable {
+    let source: URL
+    let destination: URL
     /// Every INDEXED document beneath `source`, paired with the path it will
     /// have once the folder has moved. Unindexed files are not listed because
     /// nothing needs to be planned for them — they move with the directory —
     /// but they do move.
-    public let documentMoves: [(from: URL, to: URL)]
-    public let edits: [LinkEdit]
-    public let unrewritable: [UnrewritableLink]
-    public let baselines: [String: Date]
+    let documentMoves: [(from: URL, to: URL)]
+    let edits: [LinkEdit]
+    let unrewritable: [UnrewritableLink]
+    let baselines: [String: Date]
     /// See `RenamePlan.refusal`. `apply` writes and creates nothing.
-    public let refusal: String?
+    let refusal: String?
 
-    public init(
+    init(
         source: URL, destination: URL,
         documentMoves: [(from: URL, to: URL)] = [],
         edits: [LinkEdit] = [], unrewritable: [UnrewritableLink] = [],
@@ -56,7 +56,7 @@ public struct FolderRenamePlan: Sendable {
     }
 
     /// First-seen order, deduplicated — the file list the confirmation UI shows.
-    public var affectedFiles: [URL] {
+    var affectedFiles: [URL] {
         var seen = Set<String>()
         return edits.compactMap { seen.insert($0.file.path).inserted ? $0.file : nil }
     }
@@ -64,14 +64,14 @@ public struct FolderRenamePlan: Sendable {
     /// True when the folder holds no indexed documents. NOT the same as "no
     /// work to do": the folder still gets renamed, and `apply` still reports
     /// `movedTo`.
-    public var hasNoIndexedDocuments: Bool { documentMoves.isEmpty }
+    var hasNoIndexedDocuments: Bool { documentMoves.isEmpty }
 }
 
 extension LoreStore {
 
     /// Computes the change set for renaming `folder` to `newName`. Nothing is
     /// written.
-    public func plan(renameFolder folder: URL, to newName: String) -> FolderRenamePlan {
+    func plan(renameFolder folder: URL, to newName: String) -> FolderRenamePlan {
         let source = VaultIndexCoordinator.canonical(folder)
         let parent = source.deletingLastPathComponent()
         if let refusal = nameRejection(newName, in: parent) {
@@ -146,7 +146,7 @@ extension LoreStore {
     /// exists (still resolvable, and re-running fixes it) rather than at one
     /// that is gone.
     @discardableResult
-    public func apply(_ plan: FolderRenamePlan) -> RenameReport {
+    func apply(_ plan: FolderRenamePlan) -> RenameReport {
         if let refusal = plan.refusal {
             return RenameReport(
                 rewritten: [], skipped: [],
@@ -272,7 +272,7 @@ extension LoreStore {
         reloadRewritten(pass)
 
         coordinator.suppressWatcher(for: VaultIndexCoordinator.selfWriteSuppressionWindow)
-        try? rebuild()
+        Log.store.orNil("rebuild the index after a folder rename") { try rebuild() }
 
         // A rewritten file that lived inside the folder must be reported at its
         // new path: the old one no longer exists by the time the UI renders.
@@ -317,6 +317,7 @@ extension LoreStore {
             probe.deleteLastPathComponent()
         }
         guard
+            // `try?`: a probe — unreadable answers "sensitive" (see above).
             let values = try? probe.resourceValues(
                 forKeys: [.volumeSupportsCaseSensitiveNamesKey]),
             let sensitive = values.volumeSupportsCaseSensitiveNames

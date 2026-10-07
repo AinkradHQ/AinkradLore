@@ -25,10 +25,10 @@ import Foundation
 /// the defect this pass split exists to close — an imported `![[pic.png]]`
 /// silently orphaned because the image landed as `pic 2.png`.
 @MainActor
-public struct ImportApplier {
+struct ImportApplier {
     let vaultRoot: URL
 
-    public init(vaultRoot: URL) {
+    init(vaultRoot: URL) {
         self.vaultRoot = vaultRoot
     }
 
@@ -68,7 +68,7 @@ public struct ImportApplier {
     /// real content, plus the directory itself if this call created it and
     /// nothing at all ended up inside. Those are pure applier bookkeeping,
     /// not user data, so there is no honesty trade-off in removing them.
-    public func apply(_ plan: ImportPlan) async -> ImportReport {
+    func apply(_ plan: ImportPlan) async -> ImportReport {
         var report = ImportReport()
         var reservations: [Reservation] = []
 

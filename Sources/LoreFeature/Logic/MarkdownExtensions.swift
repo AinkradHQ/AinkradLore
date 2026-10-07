@@ -24,17 +24,17 @@ import Foundation
 /// Every range is an absolute UTF-16 offset into the editor's full string,
 /// frontmatter included — matching `StyleSpan.range`. Never `Character`
 /// offsets, which misplace every span after an emoji.
-public enum MarkdownExtensions {
+enum MarkdownExtensions {
 
-    public struct Span: Equatable, Sendable {
+    struct Span: Equatable, Sendable {
         /// The whole source form, delimiters included.
-        public let range: Range<Int>
+        let range: Range<Int>
         /// Between the delimiters. Equal to `range` for kinds that have none.
-        public let content: Range<Int>
-        public let kind: Kind
+        let content: Range<Int>
+        let kind: Kind
     }
 
-    public enum Kind: Equatable, Sendable {
+    enum Kind: Equatable, Sendable {
         case highlight
         case footnoteReference(label: String)
         case footnoteDefinition(label: String)

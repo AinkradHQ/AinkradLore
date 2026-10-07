@@ -165,6 +165,7 @@ extension MarkdownEditor.Coordinator {
             seen.insert(url)
             guard stattedThisPass[url] == nil else { continue }
             externalChangeStatCalls += 1
+            // `try?`: a probe — an unstat-able target reads as `.distantPast`, a stable value.
             let attributes = try? FileManager.default.attributesOfItem(atPath: url.path)
             let mtime = (attributes?[.modificationDate] as? Date) ?? .distantPast
             stattedThisPass[url] = mtime

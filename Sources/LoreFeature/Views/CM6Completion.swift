@@ -162,6 +162,7 @@ enum CM6Completion {
             return item
         }
         let payload: [String: Any] = ["from": query.from, "to": query.to, "items": items]
+        // `try?`: strings and ints always encode; `null` shows no list.
         guard let data = try? JSONSerialization.data(withJSONObject: payload),
             let text = String(data: data, encoding: .utf8)
         else { return "null" }

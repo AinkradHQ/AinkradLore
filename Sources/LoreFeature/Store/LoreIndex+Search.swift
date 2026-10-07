@@ -15,7 +15,7 @@ extension LoreIndex {
     /// Hits per query. FTS ranks best-first, so nobody reads past this — and
     /// without it a one-letter query over a large vault materialised every row.
     /// `ponytail:` a cap, not paging; add an offset when a list needs "more".
-    public static let searchLimit = 100
+    static let searchLimit = 100
 
     /// Best-first order for a MATCH. `bm25` is negative (more negative =
     /// better); scaling it by a factor above 1 promotes a hit.
@@ -30,7 +30,7 @@ extension LoreIndex {
             * (1.0 + 1.0 / (1.0 + max(0, strftime('%s','now') - n.updated) / 2592000.0))
         """
 
-    public func search(_ query: String) throws -> [IndexRow] {
+    func search(_ query: String) throws -> [IndexRow] {
         guard let expression = Self.ftsExpression(for: query) else { return try all() }
         return try dbQueue.read { db in
             try Row.fetchAll(
@@ -46,7 +46,7 @@ extension LoreIndex {
 
     /// `search` throwing is never actionable at a call site; this is the shape
     /// every caller already used via `try?`.
-    public func searchOrEmpty(_ query: String) -> [IndexRow] {
+    func searchOrEmpty(_ query: String) -> [IndexRow] {
         Log.search.orNil("search") { try search(query) } ?? []
     }
 
@@ -64,7 +64,7 @@ extension LoreIndex {
     /// `-1` as the column argument would let FTS pick the best-matching
     /// column, which sounds better and is not: a title-only match would then
     /// return the title as its own excerpt.
-    public func searchHits(_ query: String) throws -> [SearchHit] {
+    func searchHits(_ query: String) throws -> [SearchHit] {
         guard let expression = Self.ftsExpression(for: query) else {
             return try all().map { SearchHit(row: $0, snippet: nil) }
         }
