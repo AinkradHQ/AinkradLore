@@ -23,15 +23,6 @@ public final class LoreStore {
     /// the user left open, rather than collapsing everything.
     public internal(set) var expandedFolders: Set<String> = []
 
-    /// Whether `BacklinksPanel` is expanded or collapsed, persisted the same
-    /// way as `sidebarMode`: a per-vault-host UI choice, not per-document, so
-    /// one toggle sticks across every note the user opens.
-    public internal(set) var backlinksPanelExpanded: Bool = true
-
-    /// Whether `OutlineSection` is expanded or collapsed. Same shape and same
-    /// reasoning as `backlinksPanelExpanded`.
-    public internal(set) var outlinePanelExpanded: Bool = true
-
     /// "Show all files" — OFF by default, so a non-document attachment (a
     /// `.zip`, a stray binary, an OAuth credentials file) is hidden from the
     /// sidebar browse lists (`FolderTreeView`, `NoteListView`) unless the
@@ -142,16 +133,6 @@ public final class LoreStore {
             let text = String(data: data, encoding: .utf8)
         {
             expandedFolders = Set(text.split(separator: "\n").map(String.init))
-        }
-        if let data = documents.data(forKey: Self.backlinksPanelExpandedKey),
-            let raw = String(data: data, encoding: .utf8)
-        {
-            backlinksPanelExpanded = raw == "true"
-        }
-        if let data = documents.data(forKey: Self.outlinePanelExpandedKey),
-            let raw = String(data: data, encoding: .utf8)
-        {
-            outlinePanelExpanded = raw == "true"
         }
         if let data = documents.data(forKey: Self.showAllFilesKey),
             let raw = String(data: data, encoding: .utf8)

@@ -81,15 +81,4 @@ extension LoreStore {
         headingCache = headings
         return headings
     }
-
-    /// Drops the cached outline.
-    ///
-    /// Called when the vault changes underneath it. The cache is otherwise
-    /// only ever wrong for as long as one completion session lasts — a
-    /// heading added to another document while this one is being typed into
-    /// is not worth a file watcher.
-    func invalidateHeadingCache() {
-        headingCacheKey = nil
-        headingCache = []
-    }
 }

@@ -44,7 +44,7 @@ final class LinkPreviewPanel {
     func hide() {
         shownTarget = nil
         panel?.orderOut(nil)
-        panel?.parent?.removeChildWindow(panel!)
+        if let panel { panel.parent?.removeChildWindow(panel) }
         panel = nil
         host = nil
     }

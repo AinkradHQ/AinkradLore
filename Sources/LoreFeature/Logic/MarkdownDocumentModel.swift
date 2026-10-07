@@ -424,7 +424,7 @@ public struct MarkdownDocumentModel: Sendable {
         // a second scan here would be a second parse. Computed via
         // `MarkdownMath.spans` directly, not `self.mathSpans`: `self` is not
         // fully initialized until `extensionSpans` itself is assigned.
-        let codeRanges = collector.regions.map { Range($0.range)! }
+        let codeRanges = collector.regions.compactMap { Range($0.range) }
         let text = fullText as NSString
         let mathRanges = MarkdownMath.spans(in: text, isSuppressed: { allKindsIndex.contains($0) })
             .map(\.range)

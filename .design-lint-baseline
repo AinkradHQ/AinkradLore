@@ -12,8 +12,8 @@ raw-control 15
 file-length 24
 try-bang 0
 force-cast 0
-force-unwrap 6
-print 3
+force-unwrap 2
+print 0
 opacity-literal 45
 frame-literal 18
 chamfer-literal 0

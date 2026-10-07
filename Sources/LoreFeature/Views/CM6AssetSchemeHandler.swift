@@ -68,11 +68,16 @@ final class CM6AssetSchemeHandler: NSObject, WKURLSchemeHandler {
             // A 404, not an error: an embed whose target does not resolve is an
             // ordinary state of a vault being edited, and failing the task
             // instead logs a WebKit error for every broken link in the note.
-            task.didReceive(
-                HTTPURLResponse(
+            guard
+                let notFound = HTTPURLResponse(
                     url: task.request.url ?? URL(fileURLWithPath: "/"),
                     statusCode: 404, httpVersion: nil,
-                    headerFields: nil)!)
+                    headerFields: nil)
+            else {
+                task.didFailWithError(URLError(.badServerResponse))
+                return
+            }
+            task.didReceive(notFound)
             task.didFinish()
             return
         }
