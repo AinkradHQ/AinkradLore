@@ -112,16 +112,17 @@ extension MarkdownBlockBackgrounds {
         /// Kept so a callout's tint can be derived per KIND at draw time.
         /// Thirteen callout types would otherwise mean thirteen stored colours
         /// resolved for every document, almost all of them never used.
-        let tokens: HostThemeTokens
+        let theme: MarkdownTheme
 
-        init(tokens: HostThemeTokens) {
-            self.tokens = tokens
-            codePanel = NSColor(tokens.surfaceElevated).withAlphaComponent(0.55)
+        init(theme: MarkdownTheme) {
+            self.theme = theme
+            let tokens = theme.tokens
+            codePanel = NSColor(tokens.surfaceElevated).withAlphaComponent(theme.skin.opacity.o55)
             // 0.45, not 0.30. At 0.30 on a dark surface the bar was close to
             // invisible, which left an indent doing the whole job of saying
             // "quote" — and an indent alone is what a list looks like.
-            quoteBar = NSColor(tokens.foreground).withAlphaComponent(0.45)
-            listMarker = NSColor(tokens.foreground).withAlphaComponent(0.55)
+            quoteBar = NSColor(tokens.foreground).withAlphaComponent(theme.skin.opacity.o45)
+            listMarker = NSColor(tokens.foreground).withAlphaComponent(theme.skin.opacity.o55)
             mathTint = NSColor(tokens.accentSecondary)
         }
 
@@ -138,31 +139,22 @@ extension MarkdownBlockBackgrounds {
         /// foreground, exactly as an ordinary block quote does.
         static func calloutTint(
             _ kind: MarkdownCallout.Kind,
-            tokens: HostThemeTokens
+            theme: MarkdownTheme
         ) -> NSColor {
+            let tokens = theme.tokens
             guard !kind.isNeutral else {
-                return NSColor(tokens.foreground).withAlphaComponent(0.70)
+                return NSColor(tokens.foreground).withAlphaComponent(theme.skin.opacity.o70)
             }
-            let onDark = isDarkSurface(tokens: tokens)
-            return NSColor(
-                hue: kind.hue / 360,
-                saturation: onDark ? 0.55 : 0.75,
-                brightness: onDark ? 0.95 : 0.70,
-                alpha: 1)
+            return theme.syntaxColor(forHue: kind.hue, onDark: calloutOnDark, onLight: calloutOnLight)
         }
 
-        /// Whether the editor is painting on a dark surface, judged from the
-        /// FOREGROUND rather than from a theme name: a light foreground implies
-        /// a dark background, and this works for any host theme without the
-        /// tokens having to declare an appearance.
-        static func isDarkSurface(tokens: HostThemeTokens) -> Bool {
-            let foreground = NSColor(tokens.foreground).usingColorSpace(.sRGB)
-            guard let foreground else { return true }
-            let luminance =
-                0.299 * foreground.redComponent
-                + 0.587 * foreground.greenComponent
-                + 0.114 * foreground.blueComponent
-            return luminance > 0.5
-        }
+        /// A callout's saturation and brightness per surface. Its own pair, a
+        /// touch more saturated than the code tones: a callout tints a panel,
+        /// a code token tints a few glyphs. The kit's `syntax` group carries
+        /// the code tones only.
+        // design-lint: allow raw-color token-gap syntax.callout.onDark
+        static let calloutOnDark = AinkradSyntaxTone(saturation: 0.55, brightness: 0.95)
+        // design-lint: allow raw-color token-gap syntax.callout.onLight
+        static let calloutOnLight = AinkradSyntaxTone(saturation: 0.75, brightness: 0.70)
     }
 }

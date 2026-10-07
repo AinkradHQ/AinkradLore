@@ -23,7 +23,7 @@ extension MarkdownBlockBackgrounds {
         drawsIcon: Bool,
         at range: NSRange, columnX x: CGFloat,
         columnWidth width: CGFloat,
-        tokens: HostThemeTokens,
+        theme: MarkdownTheme,
         font: NSFont,
         in textView: NSTextView, origin: NSPoint,
         dirtyRect: NSRect
@@ -31,13 +31,13 @@ extension MarkdownBlockBackgrounds {
         var rect = boundingRect(of: range, in: textView)
         guard !rect.isNull, !rect.isEmpty else { return }
         rect = rect.offsetBy(dx: origin.x, dy: origin.y)
-        let tint = Palette.calloutTint(kind, tokens: tokens)
+        let tint = Palette.calloutTint(kind, theme: theme)
 
         let panel = NSRect(x: x, y: rect.minY - 2, width: width, height: rect.height + 4)
         guard panel.intersects(dirtyRect) else { return }
         // A wash, not a fill: the body text sits on this, and a callout that
         // out-shouts its own contents is decoration rather than emphasis.
-        tint.withAlphaComponent(0.10).setFill()
+        tint.withAlphaComponent(theme.skin.opacity.o10).setFill()
         let outline = NSBezierPath(
             roundedRect: panel, xRadius: cornerRadius,
             yRadius: cornerRadius)
@@ -46,10 +46,10 @@ extension MarkdownBlockBackgrounds {
         // alone at 0.10 leaves the panel's edge undefined against a surface
         // that is nearly the same value — the callout reads as a smudge behind
         // the text rather than as a box around it.
-        tint.withAlphaComponent(0.25).setStroke()
+        tint.withAlphaComponent(theme.skin.opacity.o25).setStroke()
         outline.lineWidth = 1
         outline.stroke()
-        tint.withAlphaComponent(0.85).setFill()
+        tint.withAlphaComponent(theme.skin.opacity.o85).setFill()
         NSBezierPath(
             roundedRect: NSRect(
                 x: x, y: panel.minY, width: barWidth,

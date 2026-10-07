@@ -37,8 +37,12 @@ extension MarkdownEditor {
         /// document the user is already looking at rather than only the next
         /// one they open.
         var settings: EditorSettings
+        /// The environment's skin, kept in sync by `updateNSView` exactly as
+        /// `settings` is. `.standard` until the first update reads it.
+        var skin: AinkradSkin = .standard
 
-        /// The scale and the faces the current `tokens` and `settings` imply.
+        /// The scale and the faces the current `tokens`, `settings` and `skin`
+        /// imply.
         ///
         /// CACHED against both, rather than constructed per access. It was
         /// constructed per access — `MarkdownTheme(tokens:settings:)` inline at
@@ -56,17 +60,18 @@ extension MarkdownEditor {
             (
                 tokens: HostThemeTokens,
                 settings: EditorSettings,
+                skin: AinkradSkin,
                 theme: MarkdownTheme
             )?
 
         var theme: MarkdownTheme {
             if let cached = themeCache,
-                cached.tokens == tokens, cached.settings == settings
+                cached.tokens == tokens, cached.settings == settings, cached.skin == skin
             {
                 return cached.theme
             }
-            let built = MarkdownTheme(tokens: tokens, settings: settings)
-            themeCache = (tokens, settings, built)
+            let built = MarkdownTheme(tokens: tokens, settings: settings, skin: skin)
+            themeCache = (tokens, settings, skin, built)
             return built
         }
         var completions: (@MainActor (String) -> [IndexRow])?

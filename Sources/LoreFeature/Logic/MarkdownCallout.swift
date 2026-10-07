@@ -91,7 +91,12 @@ public enum MarkdownCallout {
         /// saying "danger" — in the same way syntax colouring is. Saturation
         /// and brightness are derived from the theme so the result still sits
         /// correctly on a light or a dark surface; see
-        /// `MarkdownBlockBackgrounds.Palette`.
+        /// `MarkdownTheme.syntaxColor(forHue:onDark:onLight:)`.
+        ///
+        /// Belongs in the skin's `syntax` group beside the code hues, which has
+        /// no callout hues yet, so the table stays here as a token gap. The CM6
+        /// stylesheet's `--callout-hue` values must match it (5B.9).
+        // design-lint: allow raw-color token-gap syntax.callout.hue
         public var hue: CGFloat {
             switch self {
             case .note, .info: return 210  // blue

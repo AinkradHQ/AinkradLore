@@ -22,6 +22,7 @@ final class LinkCompletionPanel {
     private var host: NSHostingController<LinkCompletionView>?
     private var selection = LinkCompletionSelection()
     private var tokens: HostThemeTokens?
+    private var skin: AinkradSkin = .standard
 
     /// Called when the user picks a row, by click or by return.
     var onPick: ((LinkCompletionItem) -> Void)?
@@ -32,6 +33,7 @@ final class LinkCompletionPanel {
     ///   by `NSTextView.firstRect(forCharacterRange:actualRange:)`.
     func show(
         matches: [LinkCompletionItem], tokens: HostThemeTokens,
+        skin: AinkradSkin = .standard,
         caretRect: NSRect, over view: NSView
     ) {
         guard !matches.isEmpty, let window = view.window else {
@@ -40,6 +42,7 @@ final class LinkCompletionPanel {
         }
         selection.update(to: matches)
         self.tokens = tokens
+        self.skin = skin
 
         let panel = self.panel ?? makePanel(attachedTo: window)
         self.panel = panel
@@ -85,7 +88,8 @@ final class LinkCompletionPanel {
         let root = LinkCompletionView(
             matches: selection.matches,
             selected: selection.index,
-            tokens: tokens
+            tokens: tokens,
+            skin: skin
         ) { [weak self] row in self?.onPick?(row) }
         if let host {
             host.rootView = root
@@ -143,6 +147,11 @@ final class LinkCompletionPanel {
 /// Mouse events do not require key status: they are routed to the window under
 /// the cursor. That is what makes a non-key panel clickable but unfocusable,
 /// which is exactly what a completion list wants.
+///
+/// Local rather than the kit's: `AinkradFloatingPanel` hosts a KEYABLE panel,
+/// and this list must never take key from the text view. The kit has no
+/// non-key mode yet (reported to the Epic 4 inventory, R3).
+// design-lint: allow raw-control token-gap non-key-floating-panel
 private final class NonKeyPanel: NSPanel {
     override var canBecomeKey: Bool { false }
     override var canBecomeMain: Bool { false }

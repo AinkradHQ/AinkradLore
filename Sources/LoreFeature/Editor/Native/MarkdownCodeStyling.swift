@@ -28,10 +28,10 @@ extension MarkdownStyleRenderer {
     /// difference.
     static func highlightCode(
         in r: NSRange, grammar: CodeGrammar,
-        storage: NSTextStorage, tokens: HostThemeTokens
+        storage: NSTextStorage, theme: MarkdownTheme
     ) {
         let text = storage.string as NSString
-        let palette = CodePalette(tokens: tokens)
+        let palette = CodePalette(theme: theme)
         for token in CodeHighlighter.tokens(in: text, range: r, grammar: grammar) {
             let range = NSRange(
                 location: token.range.lowerBound,
@@ -53,7 +53,7 @@ extension MarkdownStyleRenderer {
         }
     }
 
-    /// Syntax colours: fixed hues, theme-derived brightness.
+    /// Syntax colours: the skin's `syntax` hues, theme-derived brightness.
     ///
     /// The same trade `MarkdownCallout` makes, for the same reason. These are
     /// SEMANTIC — a reader who knows one editor expects strings and comments to
@@ -70,22 +70,15 @@ extension MarkdownStyleRenderer {
         let keyword: NSColor
         let type: NSColor
 
-        init(tokens: HostThemeTokens) {
-            let onDark = MarkdownBlockBackgrounds.Palette.isDarkSurface(tokens: tokens)
-            func hued(_ hue: CGFloat) -> NSColor {
-                NSColor(
-                    hue: hue / 360,
-                    saturation: onDark ? 0.50 : 0.72,
-                    brightness: onDark ? 0.95 : 0.66,
-                    alpha: 1)
-            }
+        init(theme: MarkdownTheme) {
+            let syntax = theme.skin.syntax
             // Comments are quiet foreground rather than a hue: they are the one
             // token kind meant to recede.
-            comment = NSColor(tokens.foreground).withAlphaComponent(0.45)
-            string = hued(140)  // green
-            number = hued(30)  // orange
-            keyword = hued(285)  // violet
-            type = hued(200)  // blue
+            comment = theme.color(syntax.comment)
+            string = theme.syntaxColor(forHue: CGFloat(syntax.stringHue))  // green
+            number = theme.syntaxColor(forHue: CGFloat(syntax.numberHue))  // orange
+            keyword = theme.syntaxColor(forHue: CGFloat(syntax.keywordHue))  // violet
+            type = theme.syntaxColor(forHue: CGFloat(syntax.typeHue))  // blue
         }
 
         func colour(for kind: CodeToken.Kind) -> NSColor {
@@ -111,7 +104,7 @@ extension MarkdownStyleRenderer {
     /// identifier, no spaces) immediately after the fence run.
     static func styleLanguageLabel(
         _ language: String, in r: NSRange,
-        storage: NSTextStorage, tokens: HostThemeTokens,
+        storage: NSTextStorage,
         theme: MarkdownTheme
     ) {
         let full = storage.string as NSString
@@ -131,13 +124,14 @@ extension MarkdownStyleRenderer {
         // in Lore means "you can click this" — so every fence wore what looked
         // like a button in its corner. Obsidian's language label is small,
         // quiet and unmistakably inert; this is the same idea.
+        let labelSize = theme.bodySize * 0.85
         storage.addAttribute(
             .font,
-            value: NSFont.systemFont(ofSize: theme.bodySize * 0.85),
+            value: NSFont.systemFont(ofSize: labelSize),  // design-lint: allow font-size token-gap type.editor.label
             range: labelRange)
         storage.addAttribute(
             .foregroundColor,
-            value: NSColor(tokens.foreground).withAlphaComponent(0.45),
+            value: theme.color(theme.skin.text.faint),
             range: labelRange)
     }
 }

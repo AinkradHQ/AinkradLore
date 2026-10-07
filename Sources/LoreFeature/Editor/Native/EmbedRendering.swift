@@ -70,11 +70,12 @@ public enum EmbedRendering {
     /// preceding character; flagged as a follow-up in the task report.
     static func applyChipStyling(
         over range: NSRange, to storage: NSTextStorage,
-        tokens: HostThemeTokens
+        theme: MarkdownTheme
     ) {
+        let tokens = theme.tokens
         storage.addAttribute(
             .backgroundColor,
-            value: NSColor(tokens.surfaceElevated).withAlphaComponent(0.6),
+            value: NSColor(tokens.surfaceElevated).withAlphaComponent(theme.skin.opacity.o60),
             range: range)
         storage.addAttribute(.foregroundColor, value: NSColor(tokens.accentPrimary), range: range)
         storage.addAttribute(
@@ -214,7 +215,7 @@ extension MarkdownEditor.Coordinator {
                 continue  // Fallback colour already applied by `add(.embed:)`.
 
             case .chip:
-                EmbedRendering.applyChipStyling(over: r, to: storage, tokens: tokens)
+                EmbedRendering.applyChipStyling(over: r, to: storage, theme: theme)
 
             case .transclusion:
                 // A transclusion that is NOT alone on its paragraph cannot be
@@ -225,7 +226,7 @@ extension MarkdownEditor.Coordinator {
                 // `TransclusionStyling.prepare` asks this same question and
                 // skips those embeds, so the two answers cannot disagree.
                 guard EmbedRendering.isAloneOnItsParagraph(fullRange: full_, in: text) else {
-                    EmbedRendering.applyChipStyling(over: r, to: storage, tokens: tokens)
+                    EmbedRendering.applyChipStyling(over: r, to: storage, theme: theme)
                     continue
                 }
                 // Otherwise: rendered by `TransclusionStyling`, not here. The collapse,
@@ -243,7 +244,7 @@ extension MarkdownEditor.Coordinator {
                     // Decode failed: never a blank gap, so it falls back to
                     // the same chip the document case gets — over the
                     // target text only, same as a chip.
-                    EmbedRendering.applyChipStyling(over: r, to: storage, tokens: tokens)
+                    EmbedRendering.applyChipStyling(over: r, to: storage, theme: theme)
                     continue
                 }
                 // Restricted to an embed that is ALONE on its paragraph. A
@@ -269,7 +270,7 @@ extension MarkdownEditor.Coordinator {
                 // .test_midParagraphEmbed_rendersAsAChipNotAnImage` for the
                 // regression guard.
                 guard EmbedRendering.isAloneOnItsParagraph(fullRange: full_, in: text) else {
-                    EmbedRendering.applyChipStyling(over: r, to: storage, tokens: tokens)
+                    EmbedRendering.applyChipStyling(over: r, to: storage, theme: theme)
                     continue
                 }
                 let maxWidth = max(1, containerWidth - 32)

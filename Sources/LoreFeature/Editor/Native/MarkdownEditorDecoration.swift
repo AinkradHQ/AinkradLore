@@ -125,7 +125,7 @@ extension MarkdownEditor.Coordinator {
     func refreshBlockBackgrounds(in storage: NSTextStorage, window: NSRange?) {
         blockBackgroundRefreshes += 1
         guard let linkView = textView as? LinkTextView else { return }
-        linkView.blockBackgroundPalette = MarkdownBlockBackgrounds.Palette(tokens: tokens)
+        linkView.blockBackgroundPalette = MarkdownBlockBackgrounds.Palette(theme: theme)
         linkView.blockBackgroundFont = theme.bodyFont
         linkView.blockBackgrounds =
             MarkdownBlockBackgrounds.regions(

@@ -417,7 +417,7 @@ final class MarkdownCalloutTests: XCTestCase {
     func test_everyKindResolvesATintOnBothSurfaces() {
         for kind in MarkdownCallout.Kind.allCases {
             let tint = MarkdownBlockBackgrounds.Palette
-                .calloutTint(kind, tokens: TestTokens.make())
+                .calloutTint(kind, theme: MarkdownTheme(tokens: TestTokens.make()))
             let srgb = tint.usingColorSpace(.sRGB)
             XCTAssertNotNil(srgb, "\(kind) must resolve in sRGB")
             if kind.isNeutral {
@@ -440,7 +440,7 @@ final class MarkdownCalloutTests: XCTestCase {
     func test_distinctMeaningsGetDistinctColours() {
         func tint(_ kind: MarkdownCallout.Kind) -> NSColor {
             MarkdownBlockBackgrounds.Palette
-                .calloutTint(kind, tokens: TestTokens.make()).usingColorSpace(.sRGB)!
+                .calloutTint(kind, theme: MarkdownTheme(tokens: TestTokens.make())).usingColorSpace(.sRGB)!
         }
         let pairs: [(MarkdownCallout.Kind, MarkdownCallout.Kind)] = [
             (.danger, .success), (.warning, .info), (.note, .bug), (.example, .tip),

@@ -7,9 +7,10 @@ extension MarkdownStyleRenderer {
     /// kinds are listed as a no-op so this switch stays exhaustive.
     static func addBlock(
         _ kind: StyleSpan.Kind, in r: NSRange,
-        to storage: NSTextStorage, tokens: HostThemeTokens,
+        to storage: NSTextStorage,
         theme: MarkdownTheme, listDepth: Int
     ) {
+        let tokens = theme.tokens
         switch kind {
         case .heading(let level):
             // Foreground, not accentPrimary. Size and weight carry hierarchy;
@@ -35,7 +36,7 @@ extension MarkdownStyleRenderer {
                 .foregroundColor,
                 value: level <= 3
                     ? NSColor(tokens.foreground)
-                    : NSColor(tokens.foreground).withAlphaComponent(0.85),
+                    : NSColor(tokens.foreground).withAlphaComponent(theme.skin.opacity.o85),
                 range: r)
             let full = storage.string as NSString
             let paragraph = full.paragraphRange(for: r)
@@ -52,7 +53,7 @@ extension MarkdownStyleRenderer {
             storage.addAttribute(
                 .foregroundColor,
                 value: NSColor(tokens.foreground)
-                    .withAlphaComponent(LoreMetrics.secondaryText),
+                    .withAlphaComponent(theme.skin.opacity.o75),
                 range: r)
 
         case .codeBlock(let language):
@@ -91,24 +92,24 @@ extension MarkdownStyleRenderer {
             if let language, !language.isEmpty,
                 let grammar = CodeGrammar.named(language)
             {
-                highlightCode(in: r, grammar: grammar, storage: storage, tokens: tokens)
+                highlightCode(in: r, grammar: grammar, storage: storage, theme: theme)
             }
             if let language, !language.isEmpty {
                 styleLanguageLabel(
-                    language, in: r, storage: storage, tokens: tokens,
+                    language, in: r, storage: storage,
                     theme: theme)
             }
 
         case .blockQuote:
-            // 0.85, not the 0.65 this used to be. `LoreMetrics.secondaryText`
-            // names 0.75 as the floor at which supporting text still meets
+            // 0.85, not the 0.65 this used to be. The skin's `o75` step is the
+            // secondary-text floor, 0.75, at which supporting text still meets
             // 4.5:1, and quote BODY is not supporting text — it is prose the
             // reader is meant to read. The bar and the indent already say
             // "quote"; dimming below the floor as well was saying it twice, the
             // second time by making it harder to read.
             storage.addAttribute(
                 .foregroundColor,
-                value: NSColor(tokens.foreground).withAlphaComponent(0.85),
+                value: NSColor(tokens.foreground).withAlphaComponent(theme.skin.opacity.o85),
                 range: r)
             // The indent leaves room for the bar `MarkdownBlockBackgrounds`
             // draws in the margin; the bar is what says "quote". Paragraph
@@ -139,7 +140,7 @@ extension MarkdownStyleRenderer {
                 .foregroundColor,
                 value: MarkdownBlockBackgrounds.Palette.calloutTint(
                     kind,
-                    tokens: tokens),
+                    theme: theme),
                 range: r)
 
         case .thematicBreak:
@@ -176,7 +177,7 @@ extension MarkdownStyleRenderer {
             storage.addAttribute(
                 .foregroundColor,
                 value: NSColor(tokens.accentSecondary)
-                    .withAlphaComponent(isRendered ? 1.0 : 0.85),
+                    .withAlphaComponent(isRendered ? 1.0 : theme.skin.opacity.o85),
                 range: r)
 
         case .checkbox(let done):
@@ -198,7 +199,7 @@ extension MarkdownStyleRenderer {
                 value: NSUnderlineStyle.single.rawValue, range: paragraph)
             storage.addAttribute(
                 .foregroundColor,
-                value: NSColor(tokens.foreground).withAlphaComponent(0.55),
+                value: theme.color(theme.skin.text.muted),
                 range: paragraph)
 
         case .listItem:
@@ -247,14 +248,14 @@ extension MarkdownStyleRenderer {
             // 0.01 pt font on it, at which a foreground colour is unobservable.
             // So this only ever describes the revealed state.
             //
-            // 0.40 is below `LoreMetrics.secondaryText` (0.75) on purpose.
+            // 0.40 is below the `o75` secondary-text floor on purpose.
             // That floor is about TEXT — captions, hints, prose the reader
             // reads. These are syntax characters standing next to their own
             // content, and the same exemption `.blockID` (0.25) already takes
             // applies: they must be findable, not readable.
             storage.addAttribute(
                 .foregroundColor,
-                value: NSColor(tokens.foreground).withAlphaComponent(0.40),
+                value: NSColor(tokens.foreground).withAlphaComponent(theme.skin.opacity.o40),
                 range: r)
 
         case .strong, .emphasis, .strikethrough, .highlight, .footnoteReference, .tag, .blockID,
