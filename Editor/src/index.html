@@ -1785,12 +1785,12 @@
      adjacent margins COLLAPSE — so the drawn position and the computed one
      diverge, cumulatively, further down the document. The symptom is selecting
      one line and getting another, which is what these caused. */
-  .cm-lore-h1 { padding: 32px 0 12px; }
-  .cm-lore-h2 { padding: 28px 0 10px; }
-  .cm-lore-h3 { padding: 24px 0 9px; }
-  .cm-lore-h4 { padding: 20px 0 9px; }
-  .cm-lore-h5 { padding: 18px 0 7px; }
-  .cm-lore-h6 { padding: 16px 0 6px; }
+  .cm-lore-h1 { padding: var(--ak-size-s32) 0 var(--ak-size-s12); }
+  .cm-lore-h2 { padding: var(--ak-size-s28) 0 var(--ak-size-s10); }
+  .cm-lore-h3 { padding: var(--ak-size-s24) 0 var(--ak-size-s9); }
+  .cm-lore-h4 { padding: var(--ak-size-s20) 0 var(--ak-size-s9); }
+  .cm-lore-h5 { padding: var(--ak-size-s18) 0 var(--ak-size-s7); }
+  .cm-lore-h6 { padding: var(--ak-size-s16) 0 var(--ak-size-s6); }
   .cm-content > .cm-line:first-child { padding-top: 0; }
 
   /* A footnote reference is a small superscript; a definition's label opens its

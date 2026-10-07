@@ -10,15 +10,22 @@ import { tags as t } from "@lezer/highlight"
 
 // S3: every colour is a CSS variable, so HostThemeTokens maps in without JS.
 const highlight = HighlightStyle.define([
-  { tag: t.heading1, fontSize: "1.8em", fontWeight: "600" },
-  { tag: t.heading2, fontSize: "1.6em", fontWeight: "600" },
-  { tag: t.heading3, fontSize: "1.4em", fontWeight: "600" },
+  { tag: t.heading1, fontSize: "calc(var(--lore-heading-1-scale) * 1em)",
+    fontWeight: "var(--lore-heading-1-weight)" },
+  { tag: t.heading2, fontSize: "calc(var(--lore-heading-2-scale) * 1em)",
+    fontWeight: "var(--lore-heading-2-weight)" },
+  { tag: t.heading3, fontSize: "calc(var(--lore-heading-3-scale) * 1em)",
+    fontWeight: "var(--lore-heading-3-weight)" },
   // 5B.F1: h4–h6 were never sized — the stylesheet's `.tok-heading<N>` rules
-  // matched nothing. Ratios and weights are `MarkdownTheme.headingSize` /
-  // `headingWeight`: semibold at the top, bold at the bottom.
-  { tag: t.heading4, fontSize: "1.25em", fontWeight: "700" },
-  { tag: t.heading5, fontSize: "1.125em", fontWeight: "700" },
-  { tag: t.heading6, fontSize: "1.05em", fontWeight: "700" },
+  // matched nothing. Ratios and weights are `MarkdownTheme.headingRatios` /
+  // `headingWeight` through CM6ThemeBridge: semibold at the top, bold at the
+  // bottom.
+  { tag: t.heading4, fontSize: "calc(var(--lore-heading-4-scale) * 1em)",
+    fontWeight: "var(--lore-heading-4-weight)" },
+  { tag: t.heading5, fontSize: "calc(var(--lore-heading-5-scale) * 1em)",
+    fontWeight: "var(--lore-heading-5-weight)" },
+  { tag: t.heading6, fontSize: "calc(var(--lore-heading-6-scale) * 1em)",
+    fontWeight: "var(--lore-heading-6-weight)" },
   { tag: t.strong, fontWeight: "700" },
   { tag: t.emphasis, fontStyle: "italic" },
   { tag: t.strikethrough, textDecoration: "line-through" },
