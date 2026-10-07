@@ -224,6 +224,8 @@ extension LoreStore {
             guard isEdited || isMoving else { continue }
             pass.affected.append((session, path))
             if session.isDirty && !session.isReadOnly {
+                // `try?`: a refused flush leaves the session dirty, and the guard
+                // below takes its file out of the rewrite set.
                 if (try? session.saveNow()) != nil, baselines[path] != nil {
                     baselines[path] = Self.mtimeOnDisk(session.url)
                 }
@@ -277,7 +279,7 @@ extension LoreStore {
     func reloadRewritten(_ pass: LinkRewritePass) {
         for entry in pass.affected where pass.writtenPaths.contains(entry.path) {
             guard !entry.session.isDirty else { continue }
-            try? entry.session.resolveByReloading()
+            Log.store.orNil("reload a rewritten tab") { try entry.session.resolveByReloading() }
         }
     }
 
@@ -401,7 +403,7 @@ extension LoreStore {
         // is about to make redundant.
         coordinator.suppressWatcher(for: VaultIndexCoordinator.selfWriteSuppressionWindow)
         // The index still holds the old path and the old link targets.
-        try? rebuild()
+        Log.store.orNil("rebuild the index after a rename") { try rebuild() }
 
         // The moved file's own entry must be reported at its NEW path: it was
         // rewritten under the old name, which no longer exists by the time the

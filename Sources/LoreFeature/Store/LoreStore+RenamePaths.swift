@@ -64,6 +64,7 @@ extension LoreStore {
     }
 
     static func mtimeOnDisk(_ url: URL) -> Date? {
+        // `try?`: a probe — nil is the callers' "mtime unknown".
         try? FileManager.default
             .attributesOfItem(atPath: url.path)[.modificationDate] as? Date
     }
@@ -78,6 +79,7 @@ extension LoreStore {
     /// means an unreadable attribute is treated as "not proven the same
     /// file", never as "assume it's fine, skip the collision guard".
     static func sameFileOnDisk(_ a: URL, _ b: URL) -> Bool {
+        // `try?`: probes that fail closed, as above.
         guard let attrsA = try? FileManager.default.attributesOfItem(atPath: a.path),
             let attrsB = try? FileManager.default.attributesOfItem(atPath: b.path),
             let inodeA = attrsA[.systemFileNumber] as? Int,
