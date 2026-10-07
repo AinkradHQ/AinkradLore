@@ -249,6 +249,8 @@ extension LoreStore {
         // later in this function is safe specifically because every session
         // still open at that point is clean.
         for session in sessions where session.isDirty {
+            // `try?`: a refused flush leaves the session dirty, and the guard
+            // below turns that into `unsavedEdits` — the refusal is surfaced.
             if !session.isReadOnly { try? session.saveNow() }
             guard !session.isDirty else {
                 throw LoreError.unsavedEdits(
@@ -273,7 +275,9 @@ extension LoreStore {
 
         // Index rows first, directory second. See the doc comment above.
         for row in documents {
-            try? coordinator.removeFromIndex(row.path)
+            Log.store.orNil("remove a trashed folder's file from the index") {
+                try coordinator.removeFromIndex(row.path)
+            }
             forgetOpenMTime(row.path)
         }
         // Also for any open session outside `documents` (unindexed type,

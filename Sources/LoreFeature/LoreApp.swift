@@ -38,7 +38,9 @@ public struct LoreApp: AinkradApp {
         stores.value(for: instance(of: host)) {
             let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
                 .appendingPathComponent("com.ainkrad.plugin.lore", isDirectory: true)
-            try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+            Log.store.orNil("create Lore's support folder") {
+                try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+            }
             let store = LoreStore(
                 documents: host.documents,
                 indexPath: dir.appendingPathComponent("index.sqlite"))

@@ -142,6 +142,8 @@ struct LoreCommandRunner {
     /// three resolutions and a toast cannot offer a choice.
     private func saveNow() {
         guard let session = store.selectedTab, !session.isReadOnly else { return }
+        // `try?`: `saveNow` records a conflict in `conflict` and a write
+        // failure in `lastSaveError`, which the pane's banners show.
         try? session.saveNow()
     }
 

@@ -146,9 +146,11 @@ public final class LoreStore {
         }
         // Decoded leniently: a settings blob written by a NEWER Lore (or a
         // corrupt one) falls back to the defaults rather than refusing to
-        // start. Preferences are not worth failing a launch over.
+        // start. Preferences are not worth failing a launch over — but the
+        // dropped blob is logged, so "my settings reset" has an answer.
         if let data = documents.data(forKey: Self.editorSettingsKey),
-            let decoded = try? JSONDecoder().decode(EditorSettings.self, from: data)
+            let decoded = Log.store.orNil(
+                "decode the editor settings", { try JSONDecoder().decode(EditorSettings.self, from: data) })
         {
             editorSettings = decoded
         }
@@ -180,7 +182,7 @@ public final class LoreStore {
     public func activateVaultIfNeeded() {
         guard let root = pendingVaultRoot else { return }
         pendingVaultRoot = nil
-        try? coordinator.activate(root: root)
+        Log.store.orNil("activate the bookmarked vault") { try coordinator.activate(root: root) }
     }
 
     // MARK: - Index facade
@@ -248,6 +250,7 @@ public final class LoreStore {
     }
 
     private static func context(in source: URL, for target: URL) -> String {
+        // `try?`: an unreadable referrer just shows no context line (see above).
         guard let text = try? String(contentsOf: source, encoding: .utf8) else { return "" }
         let needle = target.deletingPathExtension().lastPathComponent.lowercased()
         for line in text.split(separator: "\n") where line.lowercased().contains(needle) {
@@ -330,18 +333,16 @@ public final class LoreStore {
     /// 3. clear the tab state.
     ///
     /// A save that REFUSES (external-change conflict, read-only volume) cannot
-    /// be surfaced from here: this is a non-interactive teardown, and the store
-    /// holds only a `PluginDocumentStore` — the host exposes no logger to it —
-    /// so there is nowhere to report to. The session's own `conflict` /
+    /// be surfaced from here: this is a non-interactive teardown, so the most
+    /// it can do is leave a line in `Log.store`. The session's own `conflict` /
     /// `lastSaveError` flags still hold the reason, but the session is about to
     /// be released. This is a known, accepted residual: a conflicted tab open
     /// at teardown keeps the ON-DISK file (the other writer's version) and
-    /// loses the in-memory edit. Wiring a host logger through would let us at
-    /// least record it, and is the right M1 follow-up.
+    /// loses the in-memory edit — now at least recorded.
     private func closeAllTabs() {
         for tab in tabs {
             if tab.isDirty && !tab.isReadOnly {
-                try? tab.saveNow()
+                Log.store.orNil("save a dirty tab at teardown") { try tab.saveNow() }
             }
             tab.cancelPendingSave()
         }
