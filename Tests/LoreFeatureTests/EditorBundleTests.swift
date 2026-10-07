@@ -42,7 +42,7 @@ final class EditorBundleTests: XCTestCase {
             contentsOf: Self.distURL.appendingPathComponent("index.html"),
             encoding: .utf8)
         XCTAssertTrue(html.contains("editor.js"), "the shell must load the bundle")
-        XCTAssertTrue(html.contains("--font-text"), "theming tokens must be present")
+        XCTAssertTrue(html.contains("--lore-font-text"), "theming tokens must be present")
     }
 
     /// The half of "is committed" the size check above cannot see.

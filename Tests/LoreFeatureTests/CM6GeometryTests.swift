@@ -163,7 +163,7 @@ final class CM6GeometryTests: XCTestCase {
                 + "theme draws it black on whatever the page is")
         let joined = rules.joined()
         XCTAssertTrue(
-            joined.contains("var(--fg)"),
+            joined.contains("var(--ak-palette-foreground)"),
             "the caret must take the HOST's foreground, not a constant: \(joined)")
         // CodeMirror's rule is `&light .cm-cursor`, a two-class descendant
         // selector, so an unqualified override loses to it — measured.
@@ -180,7 +180,7 @@ final class CM6GeometryTests: XCTestCase {
                 Bundle(for: Self.self)
                     .url(forResource: "index", withExtension: "html")), encoding: .utf8)
         let joined = Self.rules(for: "cm-selectionBackground", in: css).joined()
-        XCTAssertTrue(joined.contains("--accent-primary"), "got \(joined)")
+        XCTAssertTrue(joined.contains("var(--ak-palette-accent-primary)"), "got \(joined)")
         XCTAssertTrue(joined.contains("!important"), "got \(joined)")
     }
 
