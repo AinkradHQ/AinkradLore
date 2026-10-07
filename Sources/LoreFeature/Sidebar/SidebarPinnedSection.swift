@@ -27,6 +27,7 @@ struct SidebarPinnedSection: View {
     let ops: SidebarOperations
 
     @Environment(\.ainkradTypography) private var typo
+    @Environment(\.ainkradSkin) private var skin
 
     var body: some View {
         let pinned = store.pinnedRows
@@ -43,7 +44,7 @@ struct SidebarPinnedSection: View {
     private func header(_ title: String) -> some View {
         Text(title.uppercased())
             .font(AinkradFontResolver.font(.caption, typography: typo))
-            .foregroundStyle(theme.tokens.foreground.opacity(LoreMetrics.tertiaryText))
+            .foregroundStyle(theme.tokens.foreground.opacity(skin.opacity.o60))
             .padding(.top, AinkradSpacing.xs)
             .accessibilityAddTraits(.isHeader)
     }

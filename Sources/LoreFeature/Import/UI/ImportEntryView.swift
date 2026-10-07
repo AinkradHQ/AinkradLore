@@ -74,7 +74,7 @@ struct ImportEntryView: View {
                 subtitle: "Copies the vault in and keeps your [[wikilinks]] working.",
                 trailing: {
                     Image(systemName: "chevron.right")
-                        .foregroundStyle(theme.tokens.foreground.opacity(LoreMetrics.indicatorGlyph))
+                        .foregroundStyle(theme.tokens.foreground.opacity(skin.opacity.o55))
                 })
             AinkradListRow(
                 onTap: coordinator.importAppleNotes,
@@ -84,7 +84,7 @@ struct ImportEntryView: View {
                     + "the Recently Deleted folder are left alone.",
                 trailing: {
                     Image(systemName: "chevron.right")
-                        .foregroundStyle(theme.tokens.foreground.opacity(LoreMetrics.indicatorGlyph))
+                        .foregroundStyle(theme.tokens.foreground.opacity(skin.opacity.o55))
                 })
             Spacer()
         }

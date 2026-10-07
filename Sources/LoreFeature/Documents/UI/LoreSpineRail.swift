@@ -86,7 +86,7 @@ struct LoreSpineRail: View {
                     of: entry.utf16Offset,
                     in: documentLength)
                 Capsule()
-                    // EXEMPT from `LoreMetrics.indicatorGlyph`, deliberately.
+                    // EXEMPT from the 0.55 indicator-glyph floor, deliberately.
                     //
                     // The floors exist for elements that carry meaning no other
                     // channel carries. These ticks do not: the ACTIVE one is
@@ -137,7 +137,7 @@ struct LoreSpineRail: View {
         .padding(AinkradSpacing.sm)
         .frame(width: CGFloat(skin.size.s240), alignment: .leading)
         .background(theme.tokens.surfaceElevated)
-        .clipShape(ChamferShape(cut: LoreMetrics.chamfer))
+        .clipShape(ChamferShape(cut: CGFloat(skin.cut.c6)))
         .shadow(
             color: .black.opacity(skin.opacity.o30),
             radius: 12, x: 2  // design-lint: allow radius-literal token-gap material.drawer

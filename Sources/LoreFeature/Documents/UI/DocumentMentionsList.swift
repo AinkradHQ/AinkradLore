@@ -30,6 +30,7 @@ struct DocumentMentionsList: View {
     let onCreate: (UnresolvedLink) -> Void
 
     @Environment(\.ainkradTypography) private var typo
+    @Environment(\.ainkradSkin) private var skin
 
     /// Collapsed by default, and summarised in one line.
     ///
@@ -59,7 +60,7 @@ struct DocumentMentionsList: View {
                 VStack(alignment: .leading, spacing: AinkradSpacing.sm) {
                     Text(summary)
                         .font(AinkradFontResolver.font(.caption, typography: typo))
-                        .foregroundStyle(theme.tokens.foreground.opacity(LoreMetrics.tertiaryText))
+                        .foregroundStyle(theme.tokens.foreground.opacity(skin.opacity.o60))
                     details
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)

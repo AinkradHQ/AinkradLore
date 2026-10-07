@@ -44,6 +44,7 @@ struct LoreRootView: View {
     @State private var splitFraction: CGFloat = 0.5
     @Environment(\.ainkradReduceMotion) private var reduceMotion
     @Environment(\.ainkradTypography) private var typo
+    @Environment(\.ainkradSkin) private var skin
 
     init(store: LoreStore, theme: HostTheme) {
         self.store = store
@@ -252,7 +253,7 @@ struct LoreRootView: View {
             if store.sidebarMode == .tree && effectiveSidebarMode == .all {
                 Text("Showing matches across all folders.")
                     .font(AinkradFontResolver.font(.caption, typography: typo))
-                    .foregroundStyle(theme.tokens.foreground.opacity(LoreMetrics.secondaryText))
+                    .foregroundStyle(theme.tokens.foreground.opacity(skin.opacity.o75))
                     .padding(.horizontal, AinkradSpacing.md)
             }
 

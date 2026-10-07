@@ -14,13 +14,16 @@ import CoreGraphics
 /// rows line up, and folding it in here would bury it.
 enum LoreMetrics {
 
+    // The skin has no sidebar-width token yet (`chrome.settings.sidebarWidth`
+    // is the host Settings window's), and these are read by the STORE, which
+    // has no environment to read a skin from.
     /// The sidebar's width when nothing has been chosen.
-    static let defaultSidebarWidth: CGFloat = 280
+    static let defaultSidebarWidth: CGFloat = 280  // design-lint: allow frame-literal token-gap chrome.sidebarWidth
     /// Narrow enough to be a list of names, wide enough to still show one.
-    static let minSidebarWidth: CGFloat = 180
+    static let minSidebarWidth: CGFloat = 180  // design-lint: allow frame-literal token-gap chrome.sidebarMinWidth
     /// Wide enough for deep trees, bounded so the editor cannot be squeezed
     /// out of existence on a small display.
-    static let maxSidebarWidth: CGFloat = 520
+    static let maxSidebarWidth: CGFloat = 520  // design-lint: allow frame-literal token-gap chrome.sidebarMaxWidth
 
     static func clampSidebarWidth(_ width: CGFloat) -> CGFloat {
         min(max(width, minSidebarWidth), maxSidebarWidth)
@@ -30,7 +33,8 @@ enum LoreMetrics {
     /// bar), so the editor's chrome lines up column-to-column.
     static let gutter: CGFloat = AinkradSpacing.md
 
-    /// The one chamfer cut Lore draws.
+    /// The one chamfer cut Lore draws — `skin.cut.c6` in a view. Kept only for
+    /// `LinkPreviewPanel`, which moves to the kit panel in 5B.8.
     ///
     /// There were two — `ChamferShape(cut: 6)` on tabs and `cut: 4` on the
     /// panel-bar buttons — with no rule distinguishing them; they were simply
@@ -50,16 +54,13 @@ enum LoreMetrics {
     // Deliberately NOT a single value: text and non-text have different
     // minimums in the guidance, and collapsing them would either wash out the
     // glyphs or over-darken the captions.
+    //
+    // Views read these as `skin.opacity.o75` / `.o60` / `.o55`. The two left
+    // here are read only by the native editor (`MarkdownStyleRendering`,
+    // `LinkPreviewPanel`), which is tokenised in 5B.8.
 
     /// Supporting text — captions, hints, the save-state label.
     static let secondaryText: Double = 0.75
     /// The faintest text should ever go: shortcut hints, placeholder detail.
     static let tertiaryText: Double = 0.6
-    /// Icons and indicators that are not text but do carry meaning.
-    static let indicatorGlyph: Double = 0.55
-
-    /// Height of the tab strip. Tall enough that a `.sm`-padded tab plus its
-    /// chamfer sits fully INSIDE the bar — at the old 32 the chamfer was
-    /// clipped by the bar's own edge.
-    static let tabBarHeight: CGFloat = 40
 }

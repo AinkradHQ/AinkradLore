@@ -21,6 +21,7 @@ struct NoteListView: View {
     /// reach into this view's focus state directly.
     @Binding var focusRequest: Bool?
     @Environment(\.ainkradTypography) private var typo
+    @Environment(\.ainkradSkin) private var skin
 
     /// Which row the KEYBOARD is on. Deliberately separate from `selected`,
     /// which is the open document: arrowing through a list must not open every
@@ -152,7 +153,7 @@ struct NoteListView: View {
                                         : "\(visible.count) results"
                                 )
                                 .font(AinkradFontResolver.font(.caption, typography: typo))
-                                .foregroundStyle(theme.tokens.foreground.opacity(LoreMetrics.secondaryText))
+                                .foregroundStyle(theme.tokens.foreground.opacity(skin.opacity.o75))
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .padding(.bottom, 2)
                                 .accessibilityLabel(
@@ -179,7 +180,7 @@ struct NoteListView: View {
                                 // documents it has not opened.
                                 .overlay {
                                     if focusedIndex == index {
-                                        ChamferShape(cut: LoreMetrics.chamfer)
+                                        ChamferShape(cut: CGFloat(skin.cut.c6))
                                             .strokeBorder(
                                                 theme.tokens.accentPrimary,
                                                 lineWidth: 1.5)

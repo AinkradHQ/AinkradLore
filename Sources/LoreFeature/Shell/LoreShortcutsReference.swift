@@ -17,6 +17,7 @@ import SwiftUI
 struct LoreShortcutsReference: View {
     let theme: HostTheme
     @Environment(\.ainkradTypography) private var typo
+    @Environment(\.ainkradSkin) private var skin
 
     var body: some View {
         VStack(alignment: .leading, spacing: AinkradSpacing.md) {
@@ -77,7 +78,7 @@ struct LoreShortcutsReference: View {
                 // has to interpret.
                 Text("⌘K")
                     .font(AinkradFontResolver.font(.caption, typography: typo))
-                    .foregroundStyle(theme.tokens.foreground.opacity(LoreMetrics.tertiaryText))
+                    .foregroundStyle(theme.tokens.foreground.opacity(skin.opacity.o60))
             }
         }
         .accessibilityElement(children: .combine)
