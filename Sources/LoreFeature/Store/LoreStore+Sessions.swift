@@ -19,6 +19,9 @@ extension LoreStore {
     /// exercised without one. Filling the cache by opening documents navigates
     /// the focused pane away from the document under test, at which point
     /// evicting it is correct and the test proves nothing.
+    ///
+    /// `try?`: a file that does not open is simply not warmed, and the test
+    /// that called this sees so in the cache it asserts on.
     func warmForTesting(_ url: URL) {
         guard let session = try? DocumentSession.open(url: url, coordinator: coordinator)
         else { return }
