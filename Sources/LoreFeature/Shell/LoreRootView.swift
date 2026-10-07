@@ -110,7 +110,9 @@ struct LoreRootView: View {
                 // modifiers on the same view are unreliable on macOS — with the
                 // failure mode being a dialog that silently never appears (see
                 // `SidebarOperationsPresentation`).
-                .sheet(item: $importing) { coordinator in
+                .sheet(  // design-lint: allow raw-control kit-gap AinkradTextField-focus
+                    item: $importing
+                ) { coordinator in
                     ImportEntryView(
                         coordinator: coordinator, theme: theme,
                         onClose: { importing = nil })
