@@ -12,8 +12,6 @@ extension LoreStore {
     static let defaultFolderKey = "defaultNoteFolder"
     static let sidebarModeKey = "sidebarMode"
     static let expandedFoldersKey = "expandedFolders"
-    static let backlinksPanelExpandedKey = "backlinksPanelExpanded"
-    static let outlinePanelExpandedKey = "outlinePanelExpanded"
     static let showAllFilesKey = "showAllFiles"
     static let sidebarCollapsedKey = "sidebarCollapsed"
     static let editorSettingsKey = "editorSettings"
@@ -59,22 +57,6 @@ extension LoreStore {
         documents.setData(
             folders.sorted().joined(separator: "\n").data(using: .utf8),
             forKey: Self.expandedFoldersKey)
-    }
-
-    /// Persist the backlinks panel's collapsed/expanded state.
-    public func setBacklinksPanelExpanded(_ expanded: Bool) {
-        backlinksPanelExpanded = expanded
-        documents.setData(
-            (expanded ? "true" : "false").data(using: .utf8),
-            forKey: Self.backlinksPanelExpandedKey)
-    }
-
-    /// Persist the outline panel's collapsed/expanded state.
-    public func setOutlinePanelExpanded(_ expanded: Bool) {
-        outlinePanelExpanded = expanded
-        documents.setData(
-            (expanded ? "true" : "false").data(using: .utf8),
-            forKey: Self.outlinePanelExpandedKey)
     }
 
     /// Persist the "Show all files" setting. Takes effect immediately: both

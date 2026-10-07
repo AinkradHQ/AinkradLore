@@ -92,10 +92,6 @@ extension LoreIndex {
         }
     }
 
-    public func searchHitsOrEmpty(_ query: String) -> [SearchHit] {
-        (try? searchHits(query)) ?? []
-    }
-
     /// Turns raw user input into a safe FTS5 MATCH expression, or `nil` when
     /// there is nothing to search for.
     ///
