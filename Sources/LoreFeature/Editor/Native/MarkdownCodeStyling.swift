@@ -138,7 +138,7 @@ extension MarkdownStyleRenderer {
             range: labelRange)
         storage.addAttribute(
             .foregroundColor,
-            value: NSColor(theme.tokens.foreground).withAlphaComponent(0.45),
+            value: theme.color(theme.skin.text.faint),
             range: labelRange)
     }
 }

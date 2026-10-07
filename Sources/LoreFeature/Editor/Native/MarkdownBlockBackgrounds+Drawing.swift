@@ -127,7 +127,8 @@ extension MarkdownBlockBackgrounds {
                     pill = pill.insetBy(dx: 0, dy: slack / 2)
                         .insetBy(dx: -inlineCodePaddingH, dy: -inlineCodePaddingV)
                     guard pill.intersects(dirtyRect) else { continue }
-                    NSColor(palette.theme.tokens.surfaceElevated).withAlphaComponent(0.9).setFill()
+                    NSColor(palette.theme.tokens.surfaceElevated)
+                        .withAlphaComponent(palette.theme.skin.opacity.o90).setFill()
                     NSBezierPath(
                         roundedRect: pill, xRadius: inlineCodeRadius,
                         yRadius: inlineCodeRadius
@@ -136,7 +137,8 @@ extension MarkdownBlockBackgrounds {
             case .tagPill:
                 let pill = rect.insetBy(dx: -tagPillPaddingH, dy: -tagPillPaddingV)
                 guard pill.intersects(dirtyRect) else { continue }
-                NSColor(palette.theme.tokens.accentPrimary).withAlphaComponent(0.14).setFill()
+                NSColor(palette.theme.tokens.accentPrimary)
+                    .withAlphaComponent(palette.theme.skin.opacity.o14).setFill()
                 NSBezierPath(
                     roundedRect: pill, xRadius: pill.height / 2,
                     yRadius: pill.height / 2

@@ -43,7 +43,7 @@ extension MarkdownStyleRenderer {
             // the opposite.
             storage.addAttribute(
                 .foregroundColor,
-                value: NSColor(tokens.foreground).withAlphaComponent(0.55),
+                value: theme.color(theme.skin.text.muted),
                 range: r)
 
         case .highlight:
@@ -52,7 +52,7 @@ extension MarkdownStyleRenderer {
             // swap does not guarantee against every theme.
             storage.addAttribute(
                 .backgroundColor,
-                value: NSColor(tokens.accentSecondary).withAlphaComponent(0.28),
+                value: NSColor(tokens.accentSecondary).withAlphaComponent(theme.skin.opacity.o28),
                 range: r)
 
         case .footnoteReference:
@@ -93,7 +93,7 @@ extension MarkdownStyleRenderer {
             // author needs to be able to find, not something to read past.
             storage.addAttribute(
                 .foregroundColor,
-                value: NSColor(tokens.foreground).withAlphaComponent(0.25),
+                value: NSColor(tokens.foreground).withAlphaComponent(theme.skin.opacity.o25),
                 range: r)
 
         case .inlineCode:

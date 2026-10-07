@@ -122,6 +122,34 @@ struct MarkdownTheme: Equatable {
             .size(withAttributes: [.font: bodyFont]).width
     }
 
+    /// A skin colour token resolved against the HOST palette, as AppKit draws
+    /// it — `text.muted`, `text.faint`, `syntax.comment`.
+    ///
+    /// `.palette(key, alpha)` becomes `NSColor(tokens.<key>)` at that alpha:
+    /// the exact construction the editor used before the skin existed, so the
+    /// default skin renders byte for byte as it did (`MarkdownStyleGoldenTests`).
+    /// A key the host tokens do not carry falls back to the skin's own
+    /// resolution.
+    func color(_ token: AinkradColorToken) -> NSColor {
+        guard case .palette(let key, let alpha) = token, let base = hostColor(key) else {
+            return NSColor(skin.color(token))
+        }
+        return alpha == 1 ? NSColor(base) : NSColor(base).withAlphaComponent(alpha)
+    }
+
+    private func hostColor(_ key: String) -> Color? {
+        switch key {
+        case "background": return tokens.background
+        case "surface": return tokens.surface
+        case "surfaceElevated": return tokens.surfaceElevated
+        case "accentPrimary": return tokens.accentPrimary
+        case "accentSecondary": return tokens.accentSecondary
+        case "accentTertiary": return tokens.accentTertiary
+        case "foreground": return tokens.foreground
+        default: return nil
+        }
+    }
+
     /// h1…h6. Clamped so an out-of-range level from a malformed document
     /// cannot produce a negative or absurd size.
     ///

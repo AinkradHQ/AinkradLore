@@ -75,7 +75,7 @@ public enum EmbedRendering {
         let tokens = theme.tokens
         storage.addAttribute(
             .backgroundColor,
-            value: NSColor(tokens.surfaceElevated).withAlphaComponent(0.6),
+            value: NSColor(tokens.surfaceElevated).withAlphaComponent(theme.skin.opacity.o60),
             range: range)
         storage.addAttribute(.foregroundColor, value: NSColor(tokens.accentPrimary), range: range)
         storage.addAttribute(

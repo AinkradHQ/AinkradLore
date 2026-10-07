@@ -117,12 +117,12 @@ extension MarkdownBlockBackgrounds {
         init(theme: MarkdownTheme) {
             self.theme = theme
             let tokens = theme.tokens
-            codePanel = NSColor(tokens.surfaceElevated).withAlphaComponent(0.55)
+            codePanel = NSColor(tokens.surfaceElevated).withAlphaComponent(theme.skin.opacity.o55)
             // 0.45, not 0.30. At 0.30 on a dark surface the bar was close to
             // invisible, which left an indent doing the whole job of saying
             // "quote" — and an indent alone is what a list looks like.
-            quoteBar = NSColor(tokens.foreground).withAlphaComponent(0.45)
-            listMarker = NSColor(tokens.foreground).withAlphaComponent(0.55)
+            quoteBar = NSColor(tokens.foreground).withAlphaComponent(theme.skin.opacity.o45)
+            listMarker = NSColor(tokens.foreground).withAlphaComponent(theme.skin.opacity.o55)
             mathTint = NSColor(tokens.accentSecondary)
         }
 
@@ -143,7 +143,7 @@ extension MarkdownBlockBackgrounds {
         ) -> NSColor {
             let tokens = theme.tokens
             guard !kind.isNeutral else {
-                return NSColor(tokens.foreground).withAlphaComponent(0.70)
+                return NSColor(tokens.foreground).withAlphaComponent(theme.skin.opacity.o70)
             }
             let onDark = isDarkSurface(tokens: tokens)
             return NSColor(

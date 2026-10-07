@@ -36,7 +36,7 @@ extension MarkdownStyleRenderer {
                 .foregroundColor,
                 value: level <= 3
                     ? NSColor(tokens.foreground)
-                    : NSColor(tokens.foreground).withAlphaComponent(0.85),
+                    : NSColor(tokens.foreground).withAlphaComponent(theme.skin.opacity.o85),
                 range: r)
             let full = storage.string as NSString
             let paragraph = full.paragraphRange(for: r)
@@ -53,7 +53,7 @@ extension MarkdownStyleRenderer {
             storage.addAttribute(
                 .foregroundColor,
                 value: NSColor(tokens.foreground)
-                    .withAlphaComponent(LoreMetrics.secondaryText),
+                    .withAlphaComponent(theme.skin.opacity.o75),
                 range: r)
 
         case .codeBlock(let language):
@@ -109,7 +109,7 @@ extension MarkdownStyleRenderer {
             // second time by making it harder to read.
             storage.addAttribute(
                 .foregroundColor,
-                value: NSColor(tokens.foreground).withAlphaComponent(0.85),
+                value: NSColor(tokens.foreground).withAlphaComponent(theme.skin.opacity.o85),
                 range: r)
             // The indent leaves room for the bar `MarkdownBlockBackgrounds`
             // draws in the margin; the bar is what says "quote". Paragraph
@@ -177,7 +177,7 @@ extension MarkdownStyleRenderer {
             storage.addAttribute(
                 .foregroundColor,
                 value: NSColor(tokens.accentSecondary)
-                    .withAlphaComponent(isRendered ? 1.0 : 0.85),
+                    .withAlphaComponent(isRendered ? 1.0 : theme.skin.opacity.o85),
                 range: r)
 
         case .checkbox(let done):
@@ -199,7 +199,7 @@ extension MarkdownStyleRenderer {
                 value: NSUnderlineStyle.single.rawValue, range: paragraph)
             storage.addAttribute(
                 .foregroundColor,
-                value: NSColor(tokens.foreground).withAlphaComponent(0.55),
+                value: theme.color(theme.skin.text.muted),
                 range: paragraph)
 
         case .listItem:
@@ -255,7 +255,7 @@ extension MarkdownStyleRenderer {
             // applies: they must be findable, not readable.
             storage.addAttribute(
                 .foregroundColor,
-                value: NSColor(tokens.foreground).withAlphaComponent(0.40),
+                value: NSColor(tokens.foreground).withAlphaComponent(theme.skin.opacity.o40),
                 range: r)
 
         case .strong, .emphasis, .strikethrough, .highlight, .footnoteReference, .tag, .blockID,

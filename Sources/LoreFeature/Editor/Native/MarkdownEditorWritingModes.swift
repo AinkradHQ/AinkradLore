@@ -3,14 +3,6 @@ import AppKit
 /// Focus mode and typewriter scrolling, applied to the text view.
 extension MarkdownEditor.Coordinator {
 
-    /// How far unfocused text fades.
-    ///
-    /// Faded, not hidden. The point of focus mode is to quieten the rest of
-    /// the document, not to make it unreadable — a writer glances up at the
-    /// previous paragraph constantly, and a mode that made that impossible
-    /// would be turned off within a minute.
-    static let unfocusedAlpha: CGFloat = 0.35
-
     /// Applies both writing modes for the current caret position.
     ///
     /// Called from the same selection-change path the reveal logic uses, so a
@@ -41,7 +33,11 @@ extension MarkdownEditor.Coordinator {
         let focused = WritingModes.paragraphRange(
             in: tv.string,
             caret: tv.selectedRange().location)
-        let dimmed = NSColor(tokens.foreground).withAlphaComponent(Self.unfocusedAlpha)
+        // Faded, not hidden. The point of focus mode is to quieten the rest of
+        // the document, not to make it unreadable — a writer glances up at the
+        // previous paragraph constantly, and a mode that made that impossible
+        // would be turned off within a minute.
+        let dimmed = NSColor(theme.tokens.foreground).withAlphaComponent(theme.skin.opacity.o35)
         for range in [
             NSRange(location: 0, length: focused.location),
             NSRange(
