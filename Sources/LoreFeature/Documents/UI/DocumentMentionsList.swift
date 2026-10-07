@@ -71,43 +71,26 @@ struct DocumentMentionsList: View {
     @ViewBuilder private var details: some View {
         VStack(alignment: .leading, spacing: AinkradSpacing.sm) {
             ForEach(backlinks) { link in
-                Button {
-                    onOpen(link.row.path)
-                } label: {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(link.row.title)
-                            .font(AinkradFontResolver.font(.headline, typography: typo))
-                            .lineLimit(1)
-                        if !link.context.isEmpty {
-                            // The LINE the link sits on. A bare list of
-                            // filenames is meaningfully less useful than seeing
-                            // WHY something links here — the rule the old panel
-                            // established and this keeps.
-                            Text(link.context)
-                                .font(AinkradFontResolver.font(.caption, typography: typo))
-                                .foregroundStyle(theme.tokens.foreground.opacity(0.7))
-                                .lineLimit(2)
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
+                // The LINE the link sits on, as the subtitle. A bare list of
+                // filenames is meaningfully less useful than seeing WHY
+                // something links here — the rule the old panel established
+                // and this keeps.
+                AinkradListRow(
+                    onTap: { onOpen(link.row.path) },
+                    leading: { EmptyView() },
+                    title: link.row.title,
+                    subtitle: link.context.isEmpty ? nil : link.context,
+                    trailing: { EmptyView() })
             }
 
             if !related.isEmpty {
                 AinkradSectionHeader(title: "Related notes")
                 ForEach(related, id: \.path) { row in
-                    Button {
-                        onOpen(row.path)
-                    } label: {
-                        Text(row.title)
-                            .font(AinkradFontResolver.font(.headline, typography: typo))
-                            .lineLimit(1)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
+                    AinkradListRow(
+                        onTap: { onOpen(row.path) },
+                        leading: { EmptyView() },
+                        title: row.title,
+                        trailing: { EmptyView() })
                 }
             }
 

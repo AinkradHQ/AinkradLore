@@ -16,6 +16,7 @@ struct DocumentSlideover<Content: View>: View {
     static var width: CGFloat { 300 }
 
     @Environment(\.ainkradTypography) private var typo
+    @Environment(\.ainkradSkin) private var skin
 
     var body: some View {
         VStack(alignment: .leading, spacing: AinkradSpacing.sm) {
@@ -33,6 +34,8 @@ struct DocumentSlideover<Content: View>: View {
         .padding(AinkradSpacing.md)
         .frame(width: Self.width)
         .background(theme.tokens.surfaceElevated)
-        .shadow(color: .black.opacity(0.35), radius: 12, x: -4, y: 0)
+        .shadow(
+            color: .black.opacity(skin.opacity.o35),
+            radius: 12, x: -4, y: 0)  // design-lint: allow radius-literal token-gap material.drawer
     }
 }

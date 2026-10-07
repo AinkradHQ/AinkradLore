@@ -41,6 +41,7 @@ struct DocumentHeaderBar: View {
 
     @Environment(\.ainkradTypography) private var typo
     @Environment(\.ainkradReduceMotion) private var reduceMotion
+    @Environment(\.ainkradSkin) private var skin
     /// Ticks only while a "Saved" label is young enough for its wording to
     /// still change. See `RelativeClock`.
     @State private var now = Date()
@@ -94,19 +95,19 @@ struct DocumentHeaderBar: View {
     /// appears and disappears as you navigate makes the row jitter and moves
     /// everything after it sideways, which is worse than a dimmed chevron.
     @ViewBuilder private var history: some View {
-        HStack(spacing: 2) {
+        HStack(spacing: 2) {  // design-lint: allow spacing-literal token-gap spacing.xxs
             AinkradIconButton(systemName: "chevron.left", tooltip: "Back") {
                 store.goBack()
             }
             .disabled(!store.canGoBack)
-            .opacity(store.canGoBack ? 1 : 0.35)
+            .opacity(store.canGoBack ? 1 : skin.opacity.o35)
             .accessibilityLabel("Back")
 
             AinkradIconButton(systemName: "chevron.right", tooltip: "Forward") {
                 store.goForward()
             }
             .disabled(!store.canGoForward)
-            .opacity(store.canGoForward ? 1 : 0.35)
+            .opacity(store.canGoForward ? 1 : skin.opacity.o35)
             .accessibilityLabel("Forward")
         }
     }
@@ -119,7 +120,7 @@ struct DocumentHeaderBar: View {
         if let session {
             Text(Self.breadcrumb(for: session.url, root: store.vaultRoot))
                 .font(AinkradFontResolver.font(.body, typography: typo))
-                .foregroundStyle(theme.tokens.foreground.opacity(0.85))
+                .foregroundStyle(theme.tokens.foreground.opacity(skin.opacity.o85))
                 .lineLimit(1)
                 .truncationMode(.head)
                 .accessibilityLabel("Document \(session.url.lastPathComponent)")

@@ -28,6 +28,7 @@ struct DocumentActionsMenu: View {
     let onDismiss: () -> Void
 
     @Environment(\.ainkradTypography) private var typo
+    @Environment(\.ainkradSkin) private var skin
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -39,19 +40,22 @@ struct DocumentActionsMenu: View {
         // target — so inside the full-width scrim `ZStack` the menu happily
         // stretched to the width of the window. The rows still fill, they just
         // fill this.
-        .frame(width: 240, alignment: .leading)
+        .frame(width: CGFloat(skin.size.s240), alignment: .leading)
         .background(theme.tokens.surfaceElevated)
         .clipShape(ChamferShape(cut: LoreMetrics.chamfer))
         .overlay(
             ChamferShape(cut: LoreMetrics.chamfer)
-                .strokeBorder(theme.tokens.foreground.opacity(0.15), lineWidth: 1)
+                .strokeBorder(theme.tokens.foreground.opacity(skin.opacity.o15), lineWidth: 1)
         )
-        .shadow(color: .black.opacity(0.35), radius: 12, y: 4)
+        .shadow(
+            color: .black.opacity(skin.opacity.o35),
+            radius: 12, y: 4  // design-lint: allow radius-literal token-gap material.popover
+        )
         .environment(\.ainkradTheme, theme.tokens)
     }
 
     private func row(_ item: AinkradMenuItem) -> some View {
-        Button {
+        Button {  // design-lint: allow raw-control token-gap AinkradMenuRow
             // Dismissed BEFORE the action runs: several of these open a sheet,
             // and a menu left standing over one swallows its first click.
             onDismiss()
