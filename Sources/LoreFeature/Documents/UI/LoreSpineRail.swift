@@ -49,6 +49,7 @@ struct LoreSpineRail: View {
     @State private var expanded = false
     @Environment(\.ainkradReduceMotion) private var reduceMotion
     @Environment(\.ainkradTypography) private var typo
+    @Environment(\.ainkradSkin) private var skin
 
     /// Width of the rail at rest. Sized to be unmissable as an affordance
     /// while fitting inside `MarkdownTheme.contentInset`, so it costs the text
@@ -99,11 +100,11 @@ struct LoreSpineRail: View {
                     .fill(
                         index == activeIndex
                             ? theme.tokens.accentPrimary
-                            : theme.tokens.foreground.opacity(0.28)
+                            : theme.tokens.foreground.opacity(skin.opacity.o28)
                     )
                     // Deeper headings draw shorter ticks, so nesting is
                     // legible without a single character of text.
-                    .frame(width: Self.tickWidth(forLevel: entry.level), height: 2)
+                    .frame(width: Self.tickWidth(forLevel: entry.level), height: CGFloat(skin.size.s2))
                     .position(
                         x: Self.tickWidth(forLevel: entry.level) / 2 + 2,
                         y: geometry.size.height * fraction)
@@ -116,7 +117,7 @@ struct LoreSpineRail: View {
     private var labels: some View {
         VStack(alignment: .leading, spacing: AinkradSpacing.xs) {
             ForEach(Array(outline.enumerated()), id: \.offset) { index, entry in
-                Button {
+                Button {  // design-lint: allow raw-control spine tick, not a row
                     onSelect(entry.utf16Offset)
                 } label: {
                     Text(entry.text)
@@ -124,7 +125,7 @@ struct LoreSpineRail: View {
                         .foregroundStyle(
                             index == activeIndex
                                 ? theme.tokens.accentPrimary
-                                : theme.tokens.foreground.opacity(0.85)
+                                : theme.tokens.foreground.opacity(skin.opacity.o85)
                         )
                         .lineLimit(1)
                         .padding(.leading, CGFloat(max(0, entry.level - 1)) * 10)
@@ -134,10 +135,13 @@ struct LoreSpineRail: View {
             }
         }
         .padding(AinkradSpacing.sm)
-        .frame(width: 240, alignment: .leading)
+        .frame(width: CGFloat(skin.size.s240), alignment: .leading)
         .background(theme.tokens.surfaceElevated)
         .clipShape(ChamferShape(cut: LoreMetrics.chamfer))
-        .shadow(color: .black.opacity(0.3), radius: 12, x: 2)
+        .shadow(
+            color: .black.opacity(skin.opacity.o30),
+            radius: 12, x: 2  // design-lint: allow radius-literal token-gap material.drawer
+        )
         .transition(.opacity)
     }
 

@@ -142,10 +142,15 @@ public final class DocumentSession: Identifiable {
         isDirty = true
         saveTask?.cancel()
         saveTask = Task { [weak self] in
+            // `try?`: the sleep throws only on cancellation, which the guard
+            // below handles — a newer keystroke re-armed the save.
             try? await Task.sleep(for: Self.autosaveDelay)
             guard !Task.isCancelled, let self else { return }
             // A conflict is surfaced, never swallowed: the editor's text stays
             // intact until the user chooses a resolution.
+            // `try?`: nothing is lost — `saveNow` records a conflict in
+            // `conflict` and a write failure in `lastSaveError`, which the
+            // pane's banners show, before it throws.
             try? self.saveNow()
         }
     }
@@ -242,7 +247,7 @@ public final class DocumentSession: Identifiable {
         conflict = false
         isDirty = false
         lastSaveError = nil
-        try? coordinator.indexDocument(engine, at: candidate)
+        Log.store.orNil("index the saved copy") { try coordinator.indexDocument(engine, at: candidate) }
         return candidate
     }
 
@@ -297,7 +302,7 @@ public final class DocumentSession: Identifiable {
         lastSavedAt = Date()
         // The file is truth; the index is derived. A failed index write must
         // never make a successful save look like a failure.
-        try? coordinator.indexDocument(engine, at: url)
+        Log.store.orNil("index the saved document") { try coordinator.indexDocument(engine, at: url) }
     }
 
     /// Replaces this session's engine contents with `fresh`'s, via the engine's
@@ -317,6 +322,8 @@ public final class DocumentSession: Identifiable {
         try adopt(engine)
     }
 
+    /// `try?`: a file that cannot be stat'ed has no mtime, and every caller
+    /// already treats `nil` as `.distantPast` — the conflict-safe answer.
     private static func mtime(of url: URL) -> Date? {
         try? FileManager.default.attributesOfItem(atPath: url.path)[.modificationDate] as? Date
     }

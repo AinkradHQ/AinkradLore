@@ -34,6 +34,8 @@ struct DocumentPaneColumn: View {
     @Binding var mentionsRequest: Bool
     @State private var showingActions = false
 
+    @Environment(\.ainkradSkin) private var skin
+
     var body: some View {
         VStack(spacing: 0) {
             DocumentHeaderBar(
@@ -76,7 +78,7 @@ struct DocumentPaneColumn: View {
         if isSplit {
             Rectangle()
                 .fill(isFocused ? theme.tokens.accentPrimary : .clear)
-                .frame(height: 2)
+                .frame(height: CGFloat(skin.size.s2))
                 .accessibilityHidden(true)
         }
     }

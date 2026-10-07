@@ -51,7 +51,9 @@ extension LoreStore {
         guard Self.isContained(dir, in: root) else {
             throw LoreError.outsideVault(dir)
         }
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        Log.store.orNil("create the note's folder") {
+            try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        }
         let url = uniqueURL(in: dir, slug: slug)
         // Re-checked after creation: now the whole chain exists, so this
         // resolves every component rather than only the pre-existing ones.
@@ -120,6 +122,10 @@ extension LoreStore {
     }
 
     /// True if the file changed on disk since we last loaded/saved it.
+    ///
+    /// `try?`: a file that cannot be stat'ed (deleted, unmounted) is not
+    /// proof of a newer write, and the save that asks this will hit the real
+    /// error itself.
     public func externalChangeDetected(for note: Note) -> Bool {
         guard let known = openMTimes[Self.pathKey(note.path)],
             let disk = try? mtime(of: note.path)
