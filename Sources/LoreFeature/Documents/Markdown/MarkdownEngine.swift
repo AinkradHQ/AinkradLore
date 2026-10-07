@@ -329,9 +329,8 @@ private struct MarkdownDocumentEditor: View {
         guard mayUseCM6 == nil else { return }
         mayUseCM6 = CM6LineEndings.isConsistent(body)
         if mayUseCM6 == false {
-            NSLog(
-                "Lore: mixed line endings; opening in the native editor to "
-                    + "preserve them exactly")
+            Log.editor.notice(
+                "Lore: mixed line endings; opening in the native editor to preserve them exactly")
         }
     }
 

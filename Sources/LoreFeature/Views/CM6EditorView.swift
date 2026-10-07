@@ -189,7 +189,9 @@ struct CM6EditorView: NSViewRepresentable {
             ending = CM6LineEndings.dominant(in: document)
             if !CM6LineEndings.isConsistent(document) {
                 // Declared, not hidden: this note's bytes are about to change.
-                NSLog("Lore: mixed line endings normalised to \(ending) on open")
+                let normalised = String(describing: ending)
+                Log.editor.notice(
+                    "Lore: mixed line endings normalised to \(normalised, privacy: .public) on open")
             }
             evaluate(
                 "window.loreEditor.setDocument("
@@ -375,7 +377,9 @@ struct CM6EditorView: NSViewRepresentable {
 
         private func evaluate(_ source: String) {
             webView?.evaluateJavaScript(source) { _, error in
-                if let error { NSLog("CM6 bridge: \(error)") }
+                if let error {
+                    Log.editor.error("CM6 bridge: \(String(describing: error), privacy: .public)")
+                }
             }
         }
 
