@@ -1,7 +1,7 @@
 # design-lint baseline. Counts only go down: `make lint` lowers them.
 # Raising one needs `make lint-rebaseline`, DESIGN_LINT_ALLOW_RAISE=1 on push, and a PR note.
 version 1
-format off
+format on
 font-size 0
 padding-literal 0
 spacing-literal 0
