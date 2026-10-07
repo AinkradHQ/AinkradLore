@@ -112,10 +112,11 @@ extension MarkdownBlockBackgrounds {
         /// Kept so a callout's tint can be derived per KIND at draw time.
         /// Thirteen callout types would otherwise mean thirteen stored colours
         /// resolved for every document, almost all of them never used.
-        let tokens: HostThemeTokens
+        let theme: MarkdownTheme
 
-        init(tokens: HostThemeTokens) {
-            self.tokens = tokens
+        init(theme: MarkdownTheme) {
+            self.theme = theme
+            let tokens = theme.tokens
             codePanel = NSColor(tokens.surfaceElevated).withAlphaComponent(0.55)
             // 0.45, not 0.30. At 0.30 on a dark surface the bar was close to
             // invisible, which left an indent doing the whole job of saying
@@ -138,8 +139,9 @@ extension MarkdownBlockBackgrounds {
         /// foreground, exactly as an ordinary block quote does.
         static func calloutTint(
             _ kind: MarkdownCallout.Kind,
-            tokens: HostThemeTokens
+            theme: MarkdownTheme
         ) -> NSColor {
+            let tokens = theme.tokens
             guard !kind.isNeutral else {
                 return NSColor(tokens.foreground).withAlphaComponent(0.70)
             }

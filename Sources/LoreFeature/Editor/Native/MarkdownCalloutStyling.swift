@@ -23,7 +23,7 @@ extension MarkdownBlockBackgrounds {
         drawsIcon: Bool,
         at range: NSRange, columnX x: CGFloat,
         columnWidth width: CGFloat,
-        tokens: HostThemeTokens,
+        theme: MarkdownTheme,
         font: NSFont,
         in textView: NSTextView, origin: NSPoint,
         dirtyRect: NSRect
@@ -31,7 +31,7 @@ extension MarkdownBlockBackgrounds {
         var rect = boundingRect(of: range, in: textView)
         guard !rect.isNull, !rect.isEmpty else { return }
         rect = rect.offsetBy(dx: origin.x, dy: origin.y)
-        let tint = Palette.calloutTint(kind, tokens: tokens)
+        let tint = Palette.calloutTint(kind, theme: theme)
 
         let panel = NSRect(x: x, y: rect.minY - 2, width: width, height: rect.height + 4)
         guard panel.intersects(dirtyRect) else { return }

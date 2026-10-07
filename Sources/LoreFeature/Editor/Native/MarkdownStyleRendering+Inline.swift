@@ -6,9 +6,10 @@ extension MarkdownStyleRenderer {
     /// The inline kinds of `add(_:)` — character-level styling inside a block.
     static func addInline(
         _ kind: StyleSpan.Kind, in r: NSRange,
-        to storage: NSTextStorage, tokens: HostThemeTokens,
+        to storage: NSTextStorage,
         theme: MarkdownTheme
     ) {
+        let tokens = theme.tokens
         switch kind {
         // Both compose onto `current` ITSELF, not onto a fresh
         // `.systemFont(ofSize: current.pointSize)`. Re-basing kept the size and

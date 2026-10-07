@@ -7,9 +7,10 @@ extension MarkdownStyleRenderer {
     /// kinds are listed as a no-op so this switch stays exhaustive.
     static func addBlock(
         _ kind: StyleSpan.Kind, in r: NSRange,
-        to storage: NSTextStorage, tokens: HostThemeTokens,
+        to storage: NSTextStorage,
         theme: MarkdownTheme, listDepth: Int
     ) {
+        let tokens = theme.tokens
         switch kind {
         case .heading(let level):
             // Foreground, not accentPrimary. Size and weight carry hierarchy;
@@ -91,11 +92,11 @@ extension MarkdownStyleRenderer {
             if let language, !language.isEmpty,
                 let grammar = CodeGrammar.named(language)
             {
-                highlightCode(in: r, grammar: grammar, storage: storage, tokens: tokens)
+                highlightCode(in: r, grammar: grammar, storage: storage, theme: theme)
             }
             if let language, !language.isEmpty {
                 styleLanguageLabel(
-                    language, in: r, storage: storage, tokens: tokens,
+                    language, in: r, storage: storage,
                     theme: theme)
             }
 
@@ -139,7 +140,7 @@ extension MarkdownStyleRenderer {
                 .foregroundColor,
                 value: MarkdownBlockBackgrounds.Palette.calloutTint(
                     kind,
-                    tokens: tokens),
+                    theme: theme),
                 range: r)
 
         case .thematicBreak:

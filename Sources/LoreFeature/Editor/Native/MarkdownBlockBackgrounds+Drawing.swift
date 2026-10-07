@@ -88,7 +88,7 @@ extension MarkdownBlockBackgrounds {
                     kind, title: drawsHeader ? title : nil,
                     drawsIcon: drawsHeader,
                     at: region.range, columnX: x,
-                    columnWidth: width, tokens: palette.tokens,
+                    columnWidth: width, theme: palette.theme,
                     font: font,
                     in: textView, origin: origin, dirtyRect: dirtyRect)
                 continue
@@ -127,7 +127,7 @@ extension MarkdownBlockBackgrounds {
                     pill = pill.insetBy(dx: 0, dy: slack / 2)
                         .insetBy(dx: -inlineCodePaddingH, dy: -inlineCodePaddingV)
                     guard pill.intersects(dirtyRect) else { continue }
-                    NSColor(palette.tokens.surfaceElevated).withAlphaComponent(0.9).setFill()
+                    NSColor(palette.theme.tokens.surfaceElevated).withAlphaComponent(0.9).setFill()
                     NSBezierPath(
                         roundedRect: pill, xRadius: inlineCodeRadius,
                         yRadius: inlineCodeRadius
@@ -136,7 +136,7 @@ extension MarkdownBlockBackgrounds {
             case .tagPill:
                 let pill = rect.insetBy(dx: -tagPillPaddingH, dy: -tagPillPaddingV)
                 guard pill.intersects(dirtyRect) else { continue }
-                NSColor(palette.tokens.accentPrimary).withAlphaComponent(0.14).setFill()
+                NSColor(palette.theme.tokens.accentPrimary).withAlphaComponent(0.14).setFill()
                 NSBezierPath(
                     roundedRect: pill, xRadius: pill.height / 2,
                     yRadius: pill.height / 2
@@ -266,7 +266,7 @@ extension MarkdownBlockBackgrounds {
         // A done box is tinted; an empty one is quiet foreground, like the
         // bullet it replaced. Colour marks the state, so an unchecked list does
         // not read as a column of controls demanding attention.
-        (done ? NSColor(palette.tokens.accentTertiary) : palette.listMarker).set()
+        (done ? NSColor(palette.theme.tokens.accentTertiary) : palette.listMarker).set()
         configured.draw(
             in: box, from: .zero, operation: .sourceOver,
             fraction: 1, respectFlipped: true, hints: nil)

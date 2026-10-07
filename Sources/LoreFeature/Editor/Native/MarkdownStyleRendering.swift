@@ -39,6 +39,10 @@ enum MarkdownStyleRenderer {
     /// bold on screen — which is the exact failure this guards. `setAttributes`
     /// over the full range collapses the storage to one run, so the clear is
     /// cheap regardless of how much was styled before.
+    ///
+    /// `tokens` is not read: every colour comes from `theme.tokens`, which
+    /// every caller builds from the same value. The parameter stays so the
+    /// reveal path's call sites (out of 5B.8's scope) are unchanged.
     static func apply(
         _ spans: [StyleSpan], to storage: NSTextStorage,
         tokens: HostThemeTokens, theme: MarkdownTheme,
@@ -49,7 +53,7 @@ enum MarkdownStyleRenderer {
         storage.setAttributes(
             [
                 .font: theme.bodyFont,
-                .foregroundColor: NSColor(tokens.foreground),
+                .foregroundColor: NSColor(theme.tokens.foreground),
                 // Body rhythm as the FLOOR, so line height and paragraph spacing
                 // exist for ordinary prose — which is most of a note — and each
                 // block kind then overrides only what it needs.
@@ -66,7 +70,7 @@ enum MarkdownStyleRenderer {
             guard r.length > 0, NSMaxRange(r) <= full.length else { continue }
             if let window, NSIntersectionRange(r, window).length == 0 { continue }
             add(
-                span.kind, in: r, to: storage, tokens: tokens, theme: theme,
+                span.kind, in: r, to: storage, theme: theme,
                 listDepth: depths[index])
         }
         storage.endEditing()
@@ -90,6 +94,7 @@ enum MarkdownStyleRenderer {
     ///
     /// - Parameter spanIndices: positions into `spans`, so the caller's cached
     ///   per-block index and its globally-derived `depths` stay aligned.
+    /// - Parameter tokens: not read; see `apply`.
     static func restyle(
         _ spans: [StyleSpan], at spanIndices: [Int],
         depths: [Int], in range: NSRange, to storage: NSTextStorage,
@@ -103,7 +108,7 @@ enum MarkdownStyleRenderer {
         storage.setAttributes(
             [
                 .font: theme.bodyFont,
-                .foregroundColor: NSColor(tokens.foreground),
+                .foregroundColor: NSColor(theme.tokens.foreground),
                 .paragraphStyle: MarkdownParagraphStyles.style(for: .body, theme: theme),
             ], range: clamped)
         for index in spanIndices {
@@ -112,7 +117,7 @@ enum MarkdownStyleRenderer {
             let r = NSRange(location: span.range.lowerBound, length: span.range.count)
             guard r.length > 0, NSMaxRange(r) <= storage.length else { continue }
             add(
-                span.kind, in: r, to: storage, tokens: tokens, theme: theme,
+                span.kind, in: r, to: storage, theme: theme,
                 listDepth: index < depths.count ? depths[index] : 0)
         }
         storage.endEditing()
@@ -197,15 +202,15 @@ enum MarkdownStyleRenderer {
     /// every case styles the span's whole source range, markers included.
     private static func add(
         _ kind: StyleSpan.Kind, in r: NSRange,
-        to storage: NSTextStorage, tokens: HostThemeTokens,
+        to storage: NSTextStorage,
         theme: MarkdownTheme, listDepth: Int
     ) {
         switch kind {
         case .strong, .emphasis, .strikethrough, .highlight, .footnoteReference, .tag, .blockID,
             .inlineCode, .link, .wikilink, .embed:
-            addInline(kind, in: r, to: storage, tokens: tokens, theme: theme)
+            addInline(kind, in: r, to: storage, theme: theme)
         default:
-            addBlock(kind, in: r, to: storage, tokens: tokens, theme: theme, listDepth: listDepth)
+            addBlock(kind, in: r, to: storage, theme: theme, listDepth: listDepth)
         }
     }
 }

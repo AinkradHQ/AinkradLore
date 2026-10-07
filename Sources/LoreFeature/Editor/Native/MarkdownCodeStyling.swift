@@ -28,10 +28,10 @@ extension MarkdownStyleRenderer {
     /// difference.
     static func highlightCode(
         in r: NSRange, grammar: CodeGrammar,
-        storage: NSTextStorage, tokens: HostThemeTokens
+        storage: NSTextStorage, theme: MarkdownTheme
     ) {
         let text = storage.string as NSString
-        let palette = CodePalette(tokens: tokens)
+        let palette = CodePalette(theme: theme)
         for token in CodeHighlighter.tokens(in: text, range: r, grammar: grammar) {
             let range = NSRange(
                 location: token.range.lowerBound,
@@ -70,7 +70,8 @@ extension MarkdownStyleRenderer {
         let keyword: NSColor
         let type: NSColor
 
-        init(tokens: HostThemeTokens) {
+        init(theme: MarkdownTheme) {
+            let tokens = theme.tokens
             let onDark = MarkdownBlockBackgrounds.Palette.isDarkSurface(tokens: tokens)
             func hued(_ hue: CGFloat) -> NSColor {
                 NSColor(
@@ -111,7 +112,7 @@ extension MarkdownStyleRenderer {
     /// identifier, no spaces) immediately after the fence run.
     static func styleLanguageLabel(
         _ language: String, in r: NSRange,
-        storage: NSTextStorage, tokens: HostThemeTokens,
+        storage: NSTextStorage,
         theme: MarkdownTheme
     ) {
         let full = storage.string as NSString
@@ -137,7 +138,7 @@ extension MarkdownStyleRenderer {
             range: labelRange)
         storage.addAttribute(
             .foregroundColor,
-            value: NSColor(tokens.foreground).withAlphaComponent(0.45),
+            value: NSColor(theme.tokens.foreground).withAlphaComponent(0.45),
             range: labelRange)
     }
 }

@@ -60,7 +60,8 @@ extension MarkdownEditor {
         // initial size, then kept in sync by `onWidthChange` via
         // `applyContainerGeometry`, which owns both together so they cannot
         // drift apart on resize.
-        let initialTheme = MarkdownTheme(tokens: tokens, settings: settings)
+        context.coordinator.skin = context.environment.ainkradSkin
+        let initialTheme = context.coordinator.theme
         // The view's OWN font, which is what typing attributes fall back to
         // and what an empty document is set in before any styling pass runs.
         // It was a monospaced 14 pt literal — the same constant the renderer
@@ -235,8 +236,12 @@ extension MarkdownEditor {
         // function of the theme AND the view width, and `applyStyles` alone
         // does not touch them (see `applyContainerGeometry`, which owns both
         // together so they cannot drift apart).
-        if context.coordinator.settings != settings {
+        // The skin is a display input exactly like `settings` (it sets the
+        // body size and every alpha level), so a change takes the same path.
+        let skin = context.environment.ainkradSkin
+        if context.coordinator.settings != settings || context.coordinator.skin != skin {
             context.coordinator.settings = settings
+            context.coordinator.skin = skin
             // The view's own font, alongside the geometry. `applyStyles` sets
             // a font on the STORAGE, which covers every existing character —
             // but not the typing attributes an empty document types into, so

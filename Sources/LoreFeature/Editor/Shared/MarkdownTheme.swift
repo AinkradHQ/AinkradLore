@@ -10,9 +10,16 @@ import SwiftUI
 /// M3 (PDF) and M4 (rich text) render the same documents, so this value is the
 /// seam that stops the three from drifting apart.
 ///
-/// Colour still comes from `HostThemeTokens` — the theme owns hue, this owns
-/// scale.
+/// It also carries what the styling files colour WITH: the host's
+/// `HostThemeTokens` (the palette) and the `AinkradSkin` (alpha levels, syntax
+/// hues, type sizes). Every styling file reads both through this value and
+/// never takes `HostThemeTokens` on its own, so "where does this colour come
+/// from" has one answer.
 struct MarkdownTheme: Equatable {
+    /// The host palette every editor colour is drawn from.
+    let tokens: HostThemeTokens
+    /// The skin: opacity levels, syntax hues and type sizes.
+    let skin: AinkradSkin
     let bodySize: CGFloat
     let lineHeightMultiple: CGFloat
     let paragraphSpacing: CGFloat
@@ -90,12 +97,15 @@ struct MarkdownTheme: Equatable {
     /// settings to offer (a preview, a test, an engine with no editor chrome)
     /// renders precisely what it rendered before.
     ///
-    /// `tokens` is still accepted and still unused. It stays because colour
-    /// genuinely belongs to the host theme and a future scale that depends on
-    /// it (a host-wide type ramp) would arrive through this parameter — but it
-    /// is worth being explicit that TODAY it decides nothing here, which the
-    /// old signature actively obscured.
-    init(tokens: HostThemeTokens, settings: EditorSettings = .default) {
+    /// `skin` defaults to `.standard` for the same reason: a caller with no
+    /// environment to read one from (a test, the CM6 bridge until 5B.9) gets
+    /// the default skin, whose values are today's literals.
+    init(
+        tokens: HostThemeTokens, settings: EditorSettings = .default,
+        skin: AinkradSkin = .standard
+    ) {
+        self.tokens = tokens
+        self.skin = skin
         bodySize = settings.bodySize
         lineHeightMultiple = settings.density.lineHeightMultiple
         paragraphSpacing = settings.density.paragraphSpacing * settings.zoomFactor
