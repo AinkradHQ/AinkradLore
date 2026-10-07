@@ -40,7 +40,7 @@ enum HTMLToMarkdown {
                         "\n"
                         + String(
                             repeating: "#",
-                            count: Int(name.dropFirst())!) + " "
+                            count: Int(name.dropFirst()) ?? 1) + " "
                 case "ul": listDepth += 1
                 case "ol":
                     listDepth += 1

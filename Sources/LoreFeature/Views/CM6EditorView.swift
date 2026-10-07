@@ -448,7 +448,10 @@ struct CM6EditorView: NSViewRepresentable {
             finishLoading()
         }
 
-        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        func webView(
+            _ webView: WKWebView,
+            didFinish navigation: WKNavigation!  // design-lint: allow force-unwrap WebKit's delegate signature
+        ) {
             finishLoading()
         }
 
