@@ -14,3 +14,6 @@ Editor/node_modules/
 # rebuild; the sources are the deliverable, the binaries are a cache.
 scripts/.preview
 scripts/.window-bounds
+# Local junk that was once committed: SwiftPM scratch and agent worktrees.
+.build/
+.claude/worktrees/
