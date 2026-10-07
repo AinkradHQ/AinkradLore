@@ -47,7 +47,7 @@ extension LoreIndex {
     /// `search` throwing is never actionable at a call site; this is the shape
     /// every caller already used via `try?`.
     public func searchOrEmpty(_ query: String) -> [IndexRow] {
-        (try? search(query)) ?? []
+        Log.search.orNil("search") { try search(query) } ?? []
     }
 
     /// Search, with a matched excerpt per hit.

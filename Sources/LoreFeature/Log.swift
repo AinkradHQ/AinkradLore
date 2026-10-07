@@ -11,3 +11,18 @@ enum Log {
     static let search = AinkradLog.logger(app: "lore", area: "search")
     static let watcher = AinkradLog.logger(app: "lore", area: "watcher")
 }
+
+extension Logger {
+    /// `try?` that leaves a trace: the same `nil` on a throw, plus one `.error`
+    /// line naming `what` and the error. A `nil` the body returns WITHOUT
+    /// throwing (no index open, "never recorded") passes through unlogged.
+    @discardableResult
+    func orNil<T>(_ what: String, _ body: () throws -> T?) -> T? {
+        do {
+            return try body()
+        } catch {
+            self.error("\(what, privacy: .public) failed: \(String(describing: error), privacy: .public)")
+            return nil
+        }
+    }
+}
