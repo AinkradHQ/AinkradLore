@@ -57,6 +57,7 @@ final class EmbedImageCache: @unchecked Sendable {
     }
 
     private static func key(for url: URL) -> Key? {
+        // `try?`: a probe — no stat means no key, and the caller decodes uncached.
         guard let attrs = try? FileManager.default.attributesOfItem(atPath: url.path),
             let mtime = attrs[.modificationDate] as? Date,
             let size = attrs[.size] as? Int

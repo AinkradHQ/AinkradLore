@@ -48,21 +48,23 @@ enum LoreEmbeddings {
     /// Embeds every note that is missing a vector or changed since, drops
     /// vectors for notes that are gone, and returns them all. Off the main actor.
     static func refresh(_ index: LoreIndex) -> [String: [Float]] {
-        try? index.ensureEmbeddingsTable()
-        if let model = model(), let stale = try? index.staleEmbeddingSources() {
+        Log.search.orNil("create the embeddings table") { try index.ensureEmbeddingsTable() }
+        if let model = model(),
+            let stale = Log.search.orNil("read stale embedding sources", { try index.staleEmbeddingSources() })
+        {
             var batch: [(String, Double, [Float])] = []
             for source in stale {
                 if Task.isCancelled { break }
                 if let v = vector(source.text, model: model) { batch.append((source.path, source.updated, v)) }
                 if batch.count == 64 {
-                    try? index.saveEmbeddings(batch)
+                    Log.search.orNil("save embeddings") { try index.saveEmbeddings(batch) }
                     batch = []
                 }
             }
-            try? index.saveEmbeddings(batch)
+            Log.search.orNil("save embeddings") { try index.saveEmbeddings(batch) }
         }
-        try? index.pruneEmbeddings()
-        return (try? index.embeddings()) ?? [:]
+        Log.search.orNil("prune embeddings") { try index.pruneEmbeddings() }
+        return Log.search.orNil("read embeddings") { try index.embeddings() } ?? [:]
     }
 
     static func cosine(_ a: [Float], _ b: [Float]) -> Float {

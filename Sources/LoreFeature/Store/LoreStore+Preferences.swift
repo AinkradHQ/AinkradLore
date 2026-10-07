@@ -31,7 +31,7 @@ extension LoreStore {
     /// Persist the editor's own display preferences.
     func setEditorSettings(_ settings: EditorSettings) {
         editorSettings = settings
-        if let data = try? JSONEncoder().encode(settings) {
+        if let data = Log.store.orNil("encode the editor settings", { try JSONEncoder().encode(settings) }) {
             documents.setData(data, forKey: Self.editorSettingsKey)
         }
     }

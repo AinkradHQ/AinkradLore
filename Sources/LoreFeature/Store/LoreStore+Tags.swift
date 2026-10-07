@@ -12,6 +12,7 @@ extension LoreStore {
     func suggestedTags(for url: URL, limit: Int = 5) -> [String] {
         let path = VaultIndexCoordinator.canonical(url)
         guard let me = rows.first(where: { $0.path == path }),
+            // `try?`: an unreadable note has no text to suggest tags from.
             let text = try? String(contentsOf: path, encoding: .utf8)
         else { return [] }
         let have = Set(me.tags.map { $0.lowercased() })
@@ -71,6 +72,7 @@ extension LoreStore {
     func addTag(_ tag: String, to url: URL) throws {
         let path = VaultIndexCoordinator.canonical(url)
         for session in tabs where VaultIndexCoordinator.canonical(session.url) == path && session.isDirty {
+            // `try?`: a refused flush leaves the session dirty, and the guard below surfaces it.
             if !session.isReadOnly { try? session.saveNow() }
             guard !session.isDirty else {
                 throw LoreError.unsavedEdits(path, "it has unsaved edits. Save the open tab, then add the tag again.")

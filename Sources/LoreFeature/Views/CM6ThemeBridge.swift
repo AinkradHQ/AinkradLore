@@ -43,6 +43,7 @@ enum CM6ThemeBridge {
     /// interpolated: a font family holding a `'` must not end the string.
     static func pushScript(_ variables: [String: String]) -> String {
         let json =
+            // `try?`: a `[String: String]` always encodes; `{}` pushes nothing.
             (try? JSONSerialization.data(withJSONObject: variables, options: [.sortedKeys]))
             .flatMap { String(data: $0, encoding: .utf8) } ?? "{}"
         return "(() => { const s = document.documentElement.style; "
@@ -123,6 +124,7 @@ enum CM6ThemeBridge {
             string == "clear" || string.hasPrefix("#") || string.hasPrefix("tint")
             || paletteKeys.contains(base)
         guard isColour,
+            // `try?`: probes — a value that is not a colour token passes through as CSS.
             let data = try? JSONEncoder().encode(string),
             let token = try? JSONDecoder().decode(AinkradColorToken.self, from: data)
         else { return string }

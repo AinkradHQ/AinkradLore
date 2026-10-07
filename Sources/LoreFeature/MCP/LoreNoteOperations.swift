@@ -68,6 +68,7 @@ struct LoreNoteOperations {
 
     func run(_ json: String) async -> AgentActionResult {
         guard let data = json.data(using: .utf8),
+            // `try?`: an unparseable request is answered below as malformed.
             let object = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
             let operation = object["operation"] as? String
         else {

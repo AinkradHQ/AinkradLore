@@ -205,6 +205,7 @@ enum TransclusionStyling {
     /// stat'd gets `.distantPast`, which is stable — so an unreadable target
     /// is cached as unreadable rather than re-read on every render.
     private static func modificationDate(of url: URL) -> Date {
+        // `try?`: a probe — see above: unreadable is cached as `.distantPast`.
         let attrs = try? FileManager.default.attributesOfItem(atPath: url.path)
         return (attrs?[.modificationDate] as? Date) ?? .distantPast
     }

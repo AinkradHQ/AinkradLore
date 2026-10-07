@@ -28,6 +28,7 @@ extension LoreStore {
     var subfolders: [String] {
         guard let root = configuredVaultRoot else { return [] }
         let urls =
+            // `try?`: probes — an unlistable root has no subfolders to offer.
             (try? FileManager.default.contentsOfDirectory(
                 at: root, includingPropertiesForKeys: [.isDirectoryKey])) ?? []
         return

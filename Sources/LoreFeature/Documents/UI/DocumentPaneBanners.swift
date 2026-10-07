@@ -42,14 +42,14 @@ extension DocumentPane {
             status: .warning
         ) {
             AinkradButton(title: "Reload from disk", style: .secondary) {
-                try? session.resolveByReloading()
+                Log.store.orNil("reload the document from disk") { try session.resolveByReloading() }
             }
             // Labelled to say where editing continues: this tab adopts the copy.
             AinkradButton(title: "Save my copy & edit it", style: .secondary) {
-                try? session.resolveBySavingCopy()
+                Log.store.orNil("save a copy of the document") { try session.resolveBySavingCopy() }
             }
             AinkradButton(title: "Overwrite disk", style: .ghost) {
-                try? session.resolveByOverwriting()
+                Log.store.orNil("overwrite the document on disk") { try session.resolveByOverwriting() }
             }
         }
     }

@@ -44,6 +44,7 @@ extension MarkdownEditor.Coordinator {
         previewPanel.hide()
 
         hoverTask = Task { [weak self] in
+            // `try?`: the sleep throws only on cancellation, which the guard below handles.
             try? await Task.sleep(for: MarkdownEditor.Coordinator.hoverDelay)
             guard !Task.isCancelled else { return }
             await self?.presentPreview(for: target, at: index)
@@ -60,6 +61,7 @@ extension MarkdownEditor.Coordinator {
         guard let url = resolveHoverTarget?(name) else { return }
 
         let excerpt: String? = await Task.detached(priority: .userInitiated) {
+            // `try?`: an unreadable target shows no preview.
             guard let contents = try? String(contentsOf: url, encoding: .utf8) else { return nil }
             return LinkPreview.excerpt(from: contents)
         }.value

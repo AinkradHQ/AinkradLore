@@ -326,6 +326,7 @@ extension LinkRewriter {
         // the report: an unreadable mtime is "cannot verify", a newer one is
         // "somebody edited it". Same behaviour, honest wording.
         guard
+            // `try?`: a probe — an unreadable mtime is reported as "cannot verify".
             let disk = try? FileManager.default
                 .attributesOfItem(atPath: file.path)[.modificationDate] as? Date
         else { return .skipped(.unverifiable) }

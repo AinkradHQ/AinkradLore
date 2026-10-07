@@ -61,12 +61,14 @@ enum VaultWalk {
         if let own = GitignoreRules(directory: dir, relative: relative) { rules.append(own) }
         // Names, then appended to `dir`: every URL keeps the root's canonical
         // spelling (`contentsOfDirectory(at:)` re-spells `/var` as `/private/var`).
+        // `try?`: a probe — an unlistable folder contributes no files.
         guard let names = try? FileManager.default.contentsOfDirectory(atPath: dir.path)
         else { return }
         for name in names {
             if name.hasPrefix(".") { continue }
             let url = dir.appendingPathComponent(name)
             let path = relative + [name]
+            // `try?`: a probe — an entry that cannot be stat'ed is walked as a plain file.
             let values = try? url.resourceValues(forKeys: keys)
             let isPackage = values?.isPackage == true
             let isDirectory = values?.isDirectory == true && !isPackage
@@ -106,6 +108,7 @@ struct GitignoreRules {
 
     init?(directory: URL, relative: [String]) {
         let file = directory.appendingPathComponent(".gitignore")
+        // `try?`: a probe — no readable `.gitignore` means no rules here.
         guard let text = try? String(contentsOf: file, encoding: .utf8) else { return nil }
         self.init(text: text, base: relative)
     }

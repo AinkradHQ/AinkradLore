@@ -30,6 +30,7 @@ final class AttachmentEngine: DocumentEngine {
     static func canOpen(_ url: URL) -> Bool { true }
 
     static func load(_ url: URL) throws -> AttachmentEngine {
+        // `try?`: a probe — a file that cannot be stat'ed shows as 0 bytes.
         let attributes = try? FileManager.default.attributesOfItem(atPath: url.path)
         let size = (attributes?[.size] as? Int) ?? 0
         return AttachmentEngine(sourceURL: url, byteSize: size)

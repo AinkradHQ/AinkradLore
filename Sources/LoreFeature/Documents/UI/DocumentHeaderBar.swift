@@ -182,6 +182,7 @@ struct DocumentHeaderBar: View {
 enum RelativeClock {
     static func tick(_ update: @escaping @MainActor (Date) -> Void) async {
         for delay in [UInt64(5), UInt64(55)] {
+            // `try?`: the sleep throws only on cancellation, which the guard below handles.
             try? await Task.sleep(nanoseconds: delay * 1_000_000_000)
             guard !Task.isCancelled else { return }
             await MainActor.run { update(Date()) }

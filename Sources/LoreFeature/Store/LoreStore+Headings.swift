@@ -75,6 +75,7 @@ extension LoreStore {
         let key = Self.pathKey(url)
         if headingCacheKey == key { return headingCache }
         let headings =
+            // `try?`: a probe — a note that does not load offers no headings.
             ((try? EngineRegistry.load(url)) as? MarkdownEngine)?
             .outline.map(\.text) ?? []
         headingCacheKey = key

@@ -272,7 +272,7 @@ extension LoreStore {
         reloadRewritten(pass)
 
         coordinator.suppressWatcher(for: VaultIndexCoordinator.selfWriteSuppressionWindow)
-        try? rebuild()
+        Log.store.orNil("rebuild the index after a folder rename") { try rebuild() }
 
         // A rewritten file that lived inside the folder must be reported at its
         // new path: the old one no longer exists by the time the UI renders.
@@ -317,6 +317,7 @@ extension LoreStore {
             probe.deleteLastPathComponent()
         }
         guard
+            // `try?`: a probe — unreadable answers "sensitive" (see above).
             let values = try? probe.resourceValues(
                 forKeys: [.volumeSupportsCaseSensitiveNamesKey]),
             let sensitive = values.volumeSupportsCaseSensitiveNames

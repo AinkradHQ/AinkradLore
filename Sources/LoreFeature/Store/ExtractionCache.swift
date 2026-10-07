@@ -111,6 +111,7 @@ final class ExtractionCache: @unchecked Sendable {
 
     private static func key(for url: URL) -> Key? {
         let path = VaultIndexCoordinator.canonical(url).path
+        // `try?`: a probe — no stat means no key, so the caller extracts uncached.
         guard let attributes = try? FileManager.default.attributesOfItem(atPath: path),
             let mtime = attributes[.modificationDate] as? Date,
             let size = attributes[.size] as? Int

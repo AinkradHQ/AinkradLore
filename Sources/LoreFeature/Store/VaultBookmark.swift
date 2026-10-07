@@ -15,9 +15,13 @@ enum VaultBookmark {
         guard let data = documents.data(forKey: key) else { return nil }
         var stale = false
         guard
-            let url = try? URL(
-                resolvingBookmarkData: data, options: .withSecurityScope,
-                relativeTo: nil, bookmarkDataIsStale: &stale)
+            let url = Log.store.orNil(
+                "resolve the vault bookmark",
+                {
+                    try URL(
+                        resolvingBookmarkData: data, options: .withSecurityScope,
+                        relativeTo: nil, bookmarkDataIsStale: &stale)
+                })
         else { return nil }
         _ = url.startAccessingSecurityScopedResource()
         return url

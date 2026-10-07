@@ -46,12 +46,14 @@ struct ObsidianSource: ImportSource {
             }
 
             guard
+                // `try?`: a probe — an entry that cannot be stat'ed is skipped.
                 (try? url.resourceValues(forKeys: [.isDirectoryKey]))?
                     .isDirectory == false
             else { continue }
 
             let folders = Array(components.dropLast())
             let modified =
+                // `try?`: a probe — an unreadable mtime imports as now.
                 (try? url.resourceValues(forKeys: [.contentModificationDateKey]))?
                 .contentModificationDate ?? Date()
 
@@ -88,6 +90,7 @@ struct ObsidianSource: ImportSource {
     ) -> ImportItem {
         var fidelity: [FidelityWarning] = []
         let text: String
+        // `try?`: an unreadable file is flagged in the else, never imported as empty.
         if let data = try? Data(contentsOf: url), let decoded = String(data: data, encoding: .utf8) {
             text = decoded
             fidelity.append(contentsOf: pluginWarnings(in: decoded))

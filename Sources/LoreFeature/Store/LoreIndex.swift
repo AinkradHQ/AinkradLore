@@ -154,8 +154,11 @@ final class LoreIndex: @unchecked Sendable {
     /// caller could act on.
     private static func recreate(at path: URL) {
         for suffix in ["", "-wal", "-shm"] {
-            try? FileManager.default.removeItem(
-                atPath: path.path + suffix)
+            let file = path.path + suffix
+            guard FileManager.default.fileExists(atPath: file) else { continue }
+            Log.store.orNil("delete the index file \(suffix)") {
+                try FileManager.default.removeItem(atPath: file)
+            }
         }
     }
 
@@ -427,6 +430,7 @@ final class LoreIndex: @unchecked Sendable {
                 )
             else { return nil }
             guard let data = raw.data(using: .utf8),
+                // `try?`: an undecodable row is "never recorded" (see above).
                 let decoded = try? JSONDecoder().decode([String].self, from: data)
             else { return nil }
             return Set(decoded)
