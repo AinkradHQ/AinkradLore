@@ -92,12 +92,9 @@ public struct LoreApp: AinkradApp {
         LoreSettingsCatalog.page(store: store(for: host), theme: host.theme)
     }
 
-    public static func makeSettingsView(host: HostServices) -> AnyView {
-        AnyView(
-            LoreSettingsView(
-                store: store(for: host), theme: host.theme,
-                presentation: host.presentation, modeControl: host.mode))
-    }
+    /// Empty: every host draws `settingsCatalog` instead, and the old
+    /// hand-built page this returned was a second copy of it.
+    public static func makeSettingsView(host: HostServices) -> AnyView { AnyView(EmptyView()) }
     public static func chromeFill(host: HostServices) -> Color? { host.theme.tokens.background }
 }
 
