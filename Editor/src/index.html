@@ -1594,16 +1594,19 @@
      Line decorations rather than one span: a mark over a multi-line range
      paints a ragged staircase. */
   .cm-lore-code, .cm-lore-code-first, .cm-lore-code-last {
-    background: color-mix(in srgb, var(--ak-palette-surface-elevated) 85%, transparent);
-    font-family: var(--lore-font-mono); font-size: 0.92em;
+    background: color-mix(in srgb, var(--ak-palette-surface-elevated) calc(var(--ak-opacity-o85) * 100%), transparent);
+    font-family: var(--lore-font-mono); font-size: calc(var(--lore-mono-scale) * 1em);
   }
-  .cm-lore-code-first { border-radius: 5px 5px 0 0; padding-top: 8px; }
-  .cm-lore-code-last  { border-radius: 0 0 5px 5px; padding-bottom: 8px; }
+  .cm-lore-code-first { border-radius: var(--ak-size-s5) var(--ak-size-s5) 0 0;
+                        padding-top: var(--ak-size-s8); }
+  .cm-lore-code-last  { border-radius: 0 0 var(--ak-size-s5) var(--ak-size-s5);
+                        padding-bottom: var(--ak-size-s8); }
 
-  .cm-lore-table code { font-family: var(--lore-font-mono); font-size: 0.92em;
-                        background: color-mix(in srgb, var(--ak-palette-surface-elevated) 70%,
-                                              transparent);
-                        border-radius: 4px; padding: 1px 4px; }
+  .cm-lore-table code { font-family: var(--lore-font-mono);
+                        font-size: calc(var(--lore-mono-scale) * 1em);
+                        background: color-mix(in srgb, var(--ak-palette-surface-elevated) calc(var(--ak-opacity-o70) * 100%), transparent);
+                        border-radius: var(--ak-size-s4);
+                        padding: var(--ak-size-s1) var(--ak-size-s4); }
 
   /* Padding on a wrapper would be cleaner, but an `hr` IS the element the
      widget returns, so its own box carries the spacing. Margin on a block
@@ -1755,7 +1758,7 @@
   /* The inline-code pill M9.9 draws natively. */
   .cm-lore-inline-code {
     background: var(--ak-palette-surface-elevated);
-    border-radius: 4px; padding: 1px 4px;
+    border-radius: var(--ak-size-s4); padding: var(--ak-size-s1) var(--ak-size-s4);
   }
 
   /* Heading rhythm, from M9.4's measured ratios: space BEFORE a heading scales
@@ -1846,8 +1849,8 @@
 
   .cm-lore-table { border-collapse: collapse; margin: 0; }
   .cm-lore-table th, .cm-lore-table td {
-    border: 1px solid color-mix(in srgb, var(--ak-palette-foreground) 22%, transparent);
-    padding: 6px 12px; text-align: left;
+    border: var(--ak-size-s1) solid color-mix(in srgb, var(--ak-palette-foreground) calc(var(--ak-opacity-o22) * 100%), transparent);
+    padding: var(--ak-size-s6) var(--ak-size-s12); text-align: left;
     /* A one-character header (`#`) otherwise collapses to the narrowest
        possible column and wraps its cells mid-number — `6.1` came out as
        three stacked lines. Found by looking at a real note. */
@@ -1855,7 +1858,8 @@
   }
   .cm-lore-table th { font-weight: 600; }
   .cm-lore-table td:focus, .cm-lore-table th:focus {
-    outline: 2px solid var(--ak-palette-accent-primary); outline-offset: -2px;
+    outline: var(--ak-size-s2) solid var(--ak-palette-accent-primary);
+    outline-offset: calc(-1 * var(--ak-size-s2));
   }
 </style></head>
 <link rel="stylesheet" href="katex.min.css">
