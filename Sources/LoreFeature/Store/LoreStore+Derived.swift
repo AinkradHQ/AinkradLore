@@ -11,13 +11,13 @@ extension LoreStore {
 
     /// Every distinct tag across all indexed notes, sorted — drives the sidebar
     /// tag-filter chips.
-    public var allTags: [String] { Array(Set(rows.flatMap(\.tags))).sorted() }
+    var allTags: [String] { Array(Set(rows.flatMap(\.tags))).sorted() }
 
     /// How many notes carry each tag.
     ///
     /// Computed with `allTags` rather than separately: both walk every row's
     /// tag list, and the chip row reads them together on the same render.
-    public var tagCounts: [String: Int] {
+    var tagCounts: [String: Int] {
         rows.reduce(into: [:]) { counts, row in
             for tag in row.tags { counts[tag, default: 0] += 1 }
         }
@@ -25,7 +25,7 @@ extension LoreStore {
 
     /// Immediate subdirectories of the vault root (dotfiles excluded) — the
     /// choices offered for `defaultNoteFolder` in Settings.
-    public var subfolders: [String] {
+    var subfolders: [String] {
         guard let root = configuredVaultRoot else { return [] }
         let urls =
             (try? FileManager.default.contentsOfDirectory(

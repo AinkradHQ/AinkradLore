@@ -23,13 +23,13 @@ extension LoreStore {
     /// every writer, including a restored value from disk: a sidebar dragged
     /// to 20pt is a sliver with no visible content and no grip wide enough to
     /// drag back.
-    public func setSidebarWidth(_ width: CGFloat) {
+    func setSidebarWidth(_ width: CGFloat) {
         sidebarWidth = LoreMetrics.clampSidebarWidth(width)
         documents.setData("\(sidebarWidth)".data(using: .utf8), forKey: Self.sidebarWidthKey)
     }
 
     /// Persist the editor's own display preferences.
-    public func setEditorSettings(_ settings: EditorSettings) {
+    func setEditorSettings(_ settings: EditorSettings) {
         editorSettings = settings
         if let data = try? JSONEncoder().encode(settings) {
             documents.setData(data, forKey: Self.editorSettingsKey)
@@ -37,22 +37,22 @@ extension LoreStore {
     }
 
     /// ⌘+ / ⌘− / ⌘0.
-    public func zoomEditor(by step: Int) {
+    func zoomEditor(by step: Int) {
         setEditorSettings(editorSettings.zoomed(by: step))
     }
 
-    public func resetEditorZoom() {
+    func resetEditorZoom() {
         setEditorSettings(editorSettings.zoomReset())
     }
 
     /// Persist the sidebar's folder-tree-vs-flat-list choice.
-    public func setSidebarMode(_ mode: SidebarMode) {
+    func setSidebarMode(_ mode: SidebarMode) {
         sidebarMode = mode
         documents.setData(mode.rawValue.data(using: .utf8), forKey: Self.sidebarModeKey)
     }
 
     /// Persist which folders are expanded in `FolderTreeView`.
-    public func setExpandedFolders(_ folders: Set<String>) {
+    func setExpandedFolders(_ folders: Set<String>) {
         expandedFolders = folders
         documents.setData(
             folders.sorted().joined(separator: "\n").data(using: .utf8),
@@ -64,21 +64,21 @@ extension LoreStore {
     /// `DocumentVisibility.visibleRows` on every redraw, so flipping this
     /// needs no reindex and no relaunch — the index never changes shape, only
     /// what of it gets drawn.
-    public func setShowAllFiles(_ show: Bool) {
+    func setShowAllFiles(_ show: Bool) {
         showAllFiles = show
         documents.setData(
             (show ? "true" : "false").data(using: .utf8),
             forKey: Self.showAllFilesKey)
     }
 
-    public func setSidebarCollapsed(_ collapsed: Bool) {
+    func setSidebarCollapsed(_ collapsed: Bool) {
         sidebarCollapsed = collapsed
         documents.setData(
             (collapsed ? "1" : "0").data(using: .utf8),
             forKey: Self.sidebarCollapsedKey)
     }
     /// Persist the default new-note subfolder (relative to the vault root).
-    public func setDefaultNoteFolder(_ relative: String) {
+    func setDefaultNoteFolder(_ relative: String) {
         defaultNoteFolder = relative
         documents.setData(relative.data(using: .utf8), forKey: Self.defaultFolderKey)
     }

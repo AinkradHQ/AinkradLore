@@ -8,16 +8,16 @@ import Foundation
 /// code — because widening it silently deletes links from real notes: a
 /// CommonMark type-6 HTML block runs to the next BLANK line, so `[[R]]` in an
 /// ordinary prose line after a `</div>` would stop being a link at all.
-public enum CodeRegionKind: Sendable, Equatable, Hashable {
+enum CodeRegionKind: Sendable, Equatable, Hashable {
     case fencedCodeBlock
     case indentedCodeBlock
     case inlineCode
     case htmlBlock
 }
 
-public struct CodeRegion: Sendable, Equatable {
-    public let range: NSRange
-    public let kind: CodeRegionKind
+struct CodeRegion: Sendable, Equatable {
+    let range: NSRange
+    let kind: CodeRegionKind
 }
 
 /// "Is this offset inside code?" answered in O(log n) instead of O(n).

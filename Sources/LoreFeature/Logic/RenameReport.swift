@@ -10,7 +10,7 @@ import Foundation
 /// by another app and left alone", which is simply false for the unsaved-edits
 /// case — a report that misattributes a cause is worse than one that omits it,
 /// because the user acts on it.
-public enum SkipReason: Sendable, Equatable {
+enum SkipReason: Sendable, Equatable {
     /// The file's mtime moved past the plan-time baseline: someone edited it
     /// between the preview and the confirmation.
     case changedOnDisk
@@ -23,7 +23,7 @@ public enum SkipReason: Sendable, Equatable {
 
     /// Completes the sentence "This file …". Present tense, because each of
     /// these is still true when the user reads it.
-    public var phrase: String {
+    var phrase: String {
         switch self {
         case .changedOnDisk: "was changed outside Lore after the preview"
         case .unverifiable: "could not be confirmed unchanged since the preview"
@@ -33,10 +33,10 @@ public enum SkipReason: Sendable, Equatable {
 }
 
 /// One file a rewrite pass declined to write, with the reason it declined.
-public struct SkippedFile: Sendable, Equatable {
-    public let url: URL
-    public let reason: SkipReason
-    public init(url: URL, reason: SkipReason) {
+struct SkippedFile: Sendable, Equatable {
+    let url: URL
+    let reason: SkipReason
+    init(url: URL, reason: SkipReason) {
         self.url = url
         self.reason = reason
     }
@@ -46,24 +46,24 @@ public struct SkippedFile: Sendable, Equatable {
 /// EXPECTED case, not an error state: a file that changed on disk is skipped
 /// so an edit made seconds ago in another app is not destroyed. `apply` does
 /// not throw — the caller decides how to present this.
-public struct RenameReport: Sendable {
+struct RenameReport: Sendable {
     /// Files whose inbound links were rewritten.
-    public let rewritten: [URL]
+    let rewritten: [URL]
     /// Files left ALONE, each carrying WHY — see `SkipReason`. Their links still
     /// point at the old name; nothing was lost.
-    public let skipped: [SkippedFile]
+    let skipped: [SkippedFile]
     /// Files that were opened and matched nothing — no delimiter-anchored
     /// occurrence of the old target survived to rewrite time. Nothing was
     /// written, so they must not be listed as `rewritten` (an untruthful
     /// report) nor as `skipped` (nothing was refused).
-    public let unchanged: [URL]
+    let unchanged: [URL]
     /// Files that could not be processed, with a human-readable reason. Also
     /// carries plan-time unrewritable links and a refused move.
-    public let failed: [(url: URL, reason: String)]
+    let failed: [(url: URL, reason: String)]
     /// The new location, or nil if the file was not moved.
-    public let movedTo: URL?
+    let movedTo: URL?
 
-    public init(
+    init(
         rewritten: [URL], skipped: [SkippedFile], unchanged: [URL] = [],
         failed: [(url: URL, reason: String)], movedTo: URL?
     ) {
@@ -76,5 +76,5 @@ public struct RenameReport: Sendable {
 
     /// True when every file the plan named was handled and the move (if any)
     /// happened. The UI shows a confirmation only for this.
-    public var isCompleteSuccess: Bool { skipped.isEmpty && failed.isEmpty }
+    var isCompleteSuccess: Bool { skipped.isEmpty && failed.isEmpty }
 }

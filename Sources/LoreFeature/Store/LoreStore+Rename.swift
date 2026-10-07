@@ -43,7 +43,7 @@ extension LoreStore {
 
     /// Computes the change set for renaming `source` to `newName` (a basename,
     /// no extension). Nothing is written.
-    public func plan(rename source: URL, to newName: String) -> RenamePlan {
+    func plan(rename source: URL, to newName: String) -> RenamePlan {
         let canonicalSource = VaultIndexCoordinator.canonical(source)
         let parent = canonicalSource.deletingLastPathComponent()
         if let refusal = nameRejection(newName, in: parent) {
@@ -60,7 +60,7 @@ extension LoreStore {
 
     /// Moving is renaming without the name change: it must still rewrite,
     /// because a move changes how an explicit-path link resolves.
-    public func plan(move source: URL, toFolder folder: URL) -> RenamePlan {
+    func plan(move source: URL, toFolder folder: URL) -> RenamePlan {
         planMove(source, to: folder.appendingPathComponent(source.lastPathComponent))
     }
 
@@ -120,7 +120,7 @@ extension LoreStore {
 
     /// How many documents currently link to `url` — used by the Trash flow to
     /// warn the caller before deleting.
-    public func inboundLinkCount(to url: URL) -> Int {
+    func inboundLinkCount(to url: URL) -> Int {
         coordinator.inboundLinks(to: VaultIndexCoordinator.canonical(url)).count
     }
 
@@ -168,7 +168,7 @@ extension LoreStore {
     ///
     /// This function therefore is no longer load-bearing for anything the store
     /// writes — it is deliberate belt-and-braces for what a CALLER can
-    /// construct. `RenamePlan` and `LinkEdit` are public, so Task 10's preview
+    /// construct. `RenamePlan` and `LinkEdit` are caller-built, so Task 10's preview
     /// UI can hand `apply` an edit file spelled however it likes; keyed raw, a
     /// set membership test then misses and the consequence is silent (an edit
     /// dropped from the plan, a dirty tab's file written anyway) because a
@@ -278,7 +278,7 @@ extension LoreStore {
         var pass = LinkRewritePass()
         var baselines = baselines
         // Keyed by `pathKey`, NOT by `edit.file.path`. Index-sourced edits are
-        // canonical by invariant since Task 8b, but `LinkEdit` is public and a
+        // canonical by invariant since Task 8b, but `LinkEdit` is caller-built and a
         // caller-built plan can spell its edit file any way it likes. Keyed raw,
         // such an edit never matches its own open tab, so `blockedByUnsavedEdits`
         // below never fires and the exclude-dirty-tabs protection quietly does
@@ -383,7 +383,7 @@ extension LoreStore {
     /// Applies `plan`. Never throws: partial success is the expected outcome,
     /// and the caller (the confirmation UI, Task 10) decides how to present it.
     @discardableResult
-    public func apply(_ plan: RenamePlan) -> RenameReport {
+    func apply(_ plan: RenamePlan) -> RenameReport {
         // A refused plan writes nothing and creates nothing.
         if let refusal = plan.refusal {
             return RenameReport(

@@ -4,7 +4,7 @@ import SwiftUI
 
 extension MarkdownEditor {
     @MainActor
-    public final class Coordinator: NSObject, NSTextViewDelegate {
+    final class Coordinator: NSObject, NSTextViewDelegate {
         var text: Binding<String>
         var tokens: HostThemeTokens
         /// Floats a document's opening text beside a hovered `[[link]]`.
@@ -343,7 +343,7 @@ extension MarkdownEditor {
         /// Caret moved without the text changing (click, arrow key). Cheap and
         /// index-free: it can only ever dismiss, never open, so it never asks
         /// the store for rows.
-        public func textViewDidChangeSelection(_ notification: Notification) {
+        func textViewDidChangeSelection(_ notification: Notification) {
             // Live Preview's other half: which markers are hidden depends on
             // where the caret IS, not only on what was typed. Cheap by
             // construction — see `revealForSelectionChange`, which parses
@@ -366,7 +366,7 @@ extension MarkdownEditor {
         /// `tv.onResignFirstResponder`'s doc comment above; this delegate
         /// method is posted from the same `resignFirstResponder` call, before
         /// `NSWindow` has reassigned first responder away from `tv`.
-        public func textDidEndEditing(_ notification: Notification) {
+        func textDidEndEditing(_ notification: Notification) {
             completionPanel.hide()
             revealForSelectionChange(forcedFocus: false)
         }
@@ -377,13 +377,13 @@ extension MarkdownEditor {
         /// this DOES fire (a click that both focuses and edits in one step):
         /// the live read is correct here, since `becomeFirstResponder` has
         /// already returned by the time any edit can happen.
-        public func textDidBeginEditing(_ notification: Notification) {
+        func textDidBeginEditing(_ notification: Notification) {
             revealForSelectionChange()
         }
 
         // MARK: - Keys the popup owns, and only while it is open
 
-        public func textView(_ tv: NSTextView, doCommandBy selector: Selector) -> Bool {
+        func textView(_ tv: NSTextView, doCommandBy selector: Selector) -> Bool {
             // The panel owns Enter, Tab, the arrows and Escape WHILE IT IS
             // OPEN. Only once it is closed do Enter and Tab mean "continue this
             // list" and "indent it" — see `MarkdownEditorTyping`.

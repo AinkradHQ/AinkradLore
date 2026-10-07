@@ -10,7 +10,7 @@ import SwiftUI
 /// in a note that might have twenty. A chip says what the document is and
 /// lets the existing wikilink click path open it, which is what the reader
 /// actually wants.
-public enum EmbedKind: Equatable {
+enum EmbedKind: Equatable {
     case image(URL)
     /// A markdown note, rendered inline by the transclusion path. Was a
     /// `.chip` before M7 — the comment above about "a second document's
@@ -22,20 +22,20 @@ public enum EmbedKind: Equatable {
     case unresolved
 }
 
-public enum EmbedRendering {
+enum EmbedRendering {
     /// Case-insensitive: `EmbedRenderingTests` asserts `"PNG"` renders inline
     /// too, because a target is written by hand and Obsidian vaults are full
     /// of screenshots saved with an upper-case extension.
-    public static let imageExtensions: Set<String> = [
+    static let imageExtensions: Set<String> = [
         "png", "jpg", "jpeg", "gif", "heic", "heif", "webp", "tiff", "tif", "bmp", "svg",
     ]
 
     /// Case-insensitive for the same reason `imageExtensions` is —
     /// `EmbedRenderingTests.test_markdownTargetIsCaseInsensitive` pins
     /// `"NOTE.MD"`.
-    public static let markdownExtensions: Set<String> = ["md", "markdown", "mdown"]
+    static let markdownExtensions: Set<String> = ["md", "markdown", "mdown"]
 
-    public static func kind(for target: URL?) -> EmbedKind {
+    static func kind(for target: URL?) -> EmbedKind {
         guard let target else { return .unresolved }
         let ext = target.pathExtension.lowercased()
         if imageExtensions.contains(ext) { return .image(target) }

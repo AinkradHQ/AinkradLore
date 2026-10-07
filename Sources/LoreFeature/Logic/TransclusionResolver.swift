@@ -5,7 +5,7 @@ import Foundation
 /// Never a blank slice: every failure path carries a visible message rather
 /// than an empty `.content("")`, matching `MarkdownExtensions`' "return a
 /// neutral value rather than guess" discipline.
-public enum TransclusionContent: Equatable, Sendable {
+enum TransclusionContent: Equatable, Sendable {
     case content(String)  // the slice to render
     case truncated(String)  // slice + "content truncated" notice
     case missingFragment(String, String)  // (opening content, fragment name)
@@ -21,11 +21,11 @@ public enum TransclusionContent: Equatable, Sendable {
 /// being resolved on this call stack, supplied by the caller — this type
 /// holds no state of its own, so the same resolver instance is safe to call
 /// re-entrantly for nested embeds.
-public enum TransclusionResolver {
-    public static let depthCap = 3
-    public static let byteCap = 256 * 1024
+enum TransclusionResolver {
+    static let depthCap = 3
+    static let byteCap = 256 * 1024
 
-    public static func resolve(
+    static func resolve(
         rawTarget: String,
         resolver: LinkResolver,
         path: [URL],

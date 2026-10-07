@@ -10,9 +10,9 @@ import Foundation
 /// Why a link target could not name a note to create. Its own error type
 /// rather than a `LoreError` case because it never crosses the MCP boundary —
 /// it is reachable only from a "Create note" affordance in the UI.
-public struct UncreatableLinkTarget: LocalizedError, Equatable {
-    public let target: String
-    public var errorDescription: String? { "“\(target)” doesn’t name a note." }
+struct UncreatableLinkTarget: LocalizedError, Equatable {
+    let target: String
+    var errorDescription: String? { "“\(target)” doesn’t name a note." }
 }
 
 extension LoreStore {
@@ -62,7 +62,7 @@ extension LoreStore {
     /// Throws rather than returning an optional: a create that fails must reach
     /// the user, and the caller's job is only to show it.
     @discardableResult
-    public func createAndOpenNote(
+    func createAndOpenNote(
         forLinkTarget target: String,
         syntax: LinkSyntax
     ) throws -> Note {
@@ -83,7 +83,7 @@ extension LoreStore {
     /// and the folder split — so the two doors cannot disagree about what
     /// `[[Projects/Q1|the plan]]` should create.
     @discardableResult
-    public func createNote(
+    func createNote(
         forLinkTarget target: String,
         syntax: LinkSyntax
     ) throws -> Note {
@@ -103,7 +103,7 @@ extension LoreStore {
     /// Lives here rather than in the view because the guarantee needs the
     /// resolver and the vault root; the decision itself is the pure
     /// `LinkCompletionContext.insertableTarget`.
-    public func linkTarget(for row: IndexRow) -> String {
+    func linkTarget(for row: IndexRow) -> String {
         LinkCompletionContext.insertableTarget(
             for: row,
             relativePath: Self.vaultRelativePath(of: row.path, under: vaultRoot),

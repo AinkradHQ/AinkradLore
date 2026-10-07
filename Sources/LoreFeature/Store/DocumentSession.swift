@@ -10,45 +10,45 @@ import Observation
 /// rather than an error the UI had no affordance for.
 @MainActor
 @Observable
-public final class DocumentSession: Identifiable {
+final class DocumentSession: Identifiable {
     /// Stable identity, minted once at init. `url` is mutable (see below), so
     /// tab identity (SwiftUI `ForEach`, dictionary keys, etc.) must key off
     /// `id`, never off `url`.
-    public let id = UUID()
+    let id = UUID()
 
     /// The file this session writes to. MUTABLE: `resolveBySavingCopy()`
     /// repoints it at the copy (see there). Callers that key tab identity off a
     /// session must follow this value rather than caching it.
-    public private(set) var url: URL
-    public let engine: any DocumentEngine
+    private(set) var url: URL
+    let engine: any DocumentEngine
 
-    public private(set) var isDirty = false
-    public private(set) var conflict = false
+    private(set) var isDirty = false
+    private(set) var conflict = false
 
     /// The last save failure that was NOT a conflict — disk full, permissions,
     /// a read-only volume, an engine refusing to round-trip. Conflicts have
     /// their own flag and their own three resolutions; everything else used to
     /// vanish into the autosave's `try?` with `isDirty` as the only hint.
     /// Cleared by every successful write and every successful resolution.
-    public private(set) var lastSaveError: Error?
+    private(set) var lastSaveError: Error?
     /// When this session last wrote to disk, or nil if it never has.
     ///
     /// Only ever set by `write()`, so it means "bytes reached the file",
     /// never "the user stopped typing".
-    public private(set) var lastSavedAt: Date?
+    private(set) var lastSavedAt: Date?
 
     /// True when the engine cannot write this document back faithfully — today
     /// only a `PlainTextEngine` whose bytes failed a strict UTF-8 decode. Such
     /// a session never autosaves and `saveNow()` refuses up front, so a single
     /// keystroke does not turn into one failed write per keystroke.
-    public private(set) var isReadOnly: Bool
+    private(set) var isReadOnly: Bool
 
     /// Bumped on every successful `resolveByReloading()`. The engines' editor
     /// views seed their SwiftUI `@State` from the engine in `.onAppear`, so an
     /// in-place reload would otherwise leave the OLD text on screen — the user
     /// clicks "Reload" and sees nothing change. Views use this as part of their
     /// `.id()` so a reload forces a fresh view.
-    public private(set) var reloadGeneration = 0
+    private(set) var reloadGeneration = 0
 
     private let coordinator: VaultIndexCoordinator
     /// mtime as of the last successful load or save. Detection is mtime-based
@@ -98,7 +98,7 @@ public final class DocumentSession: Identifiable {
         VaultIndexCoordinator.selfWriteSuppressionWindow
     }
 
-    public init(url: URL, engine: any DocumentEngine, coordinator: VaultIndexCoordinator) {
+    init(url: URL, engine: any DocumentEngine, coordinator: VaultIndexCoordinator) {
         self.url = url
         self.engine = engine
         self.coordinator = coordinator
@@ -108,7 +108,7 @@ public final class DocumentSession: Identifiable {
         self.isReadOnly = !engine.isEditable
     }
 
-    public static func open(url: URL, coordinator: VaultIndexCoordinator) throws -> DocumentSession {
+    static func open(url: URL, coordinator: VaultIndexCoordinator) throws -> DocumentSession {
         let engine = try EngineRegistry.load(url)
         return DocumentSession(url: url, engine: engine, coordinator: coordinator)
     }
@@ -116,7 +116,7 @@ public final class DocumentSession: Identifiable {
     /// `LoreStore.commitTitleChange`'s no-op guard: has the title genuinely
     /// changed since the last load/reload/explicit sync — see `titleAtLoad`'s
     /// own doc comment for why this must NOT be `cachedTitle`.
-    public var titleSinceLoad: String { titleAtLoad }
+    var titleSinceLoad: String { titleAtLoad }
 
     /// Called by `LoreStore.commitTitleChange` once a rename it initiated has
     /// actually happened (`RenameReport.movedTo != nil`), regardless of
@@ -124,16 +124,16 @@ public final class DocumentSession: Identifiable {
     /// no-op baseline to `title` so a LATER, unrelated commit is measured
     /// against what was just deliberately synced, not the session's original
     /// load.
-    public func noteTitleSynced(_ title: String) {
+    func noteTitleSynced(_ title: String) {
         titleAtLoad = title
     }
 
     /// The title as of the last load or save — see `cachedTitle`.
-    public var title: String { cachedTitle }
+    var title: String { cachedTitle }
 
     /// Called by the engine's editor after every user mutation. Debounced, so
     /// typing produces one write per pause rather than one per keystroke.
-    public func markChanged() {
+    func markChanged() {
         // A read-only document can never be written, so it is never marked
         // dirty either: scheduling an autosave would produce a failed write per
         // typing pause, and a dirty flag nothing can ever clear would make the
@@ -169,12 +169,12 @@ public final class DocumentSession: Identifiable {
     ///
     /// Deliberately does NOT clear `isDirty`: the in-memory document really is
     /// unsaved, and callers that want it on disk call `saveNow()` first.
-    public func cancelPendingSave() {
+    func cancelPendingSave() {
         saveTask?.cancel()
         saveTask = nil
     }
 
-    public func saveNow() throws {
+    func saveNow() throws {
         try guardWritable()
         if let disk = Self.mtime(of: url), disk > baseline {
             // A conflict is not a `lastSaveError`: it has its own flag and its
@@ -186,7 +186,7 @@ public final class DocumentSession: Identifiable {
         try write()
     }
 
-    public func resolveByOverwriting() throws {
+    func resolveByOverwriting() throws {
         try guardWritable()
         try write()
     }
@@ -201,7 +201,7 @@ public final class DocumentSession: Identifiable {
         throw error
     }
 
-    public func resolveByReloading() throws {
+    func resolveByReloading() throws {
         let fresh = try EngineRegistry.load(url)
         // The engine is `let`, so reloading copies the fresh contents into the
         // engine this session already owns rather than swapping the object.
@@ -227,7 +227,7 @@ public final class DocumentSession: Identifiable {
     /// subsequent autosave fails silently through its `try?` and the user's
     /// ongoing work is persisted nowhere while the tab looks clean.
     @discardableResult
-    public func resolveBySavingCopy() throws -> URL {
+    func resolveBySavingCopy() throws -> URL {
         try guardWritable()
         let base = url.deletingPathExtension().lastPathComponent
         let ext = url.pathExtension
@@ -269,7 +269,7 @@ public final class DocumentSession: Identifiable {
     /// text silently — the rename would have laundered a conflict into a data
     /// loss. `.distantPast` keeps `saveNow` throwing until the user picks one
     /// of the three resolutions, exactly as before the rename.
-    public func adoptRenamed(_ newURL: URL) {
+    func adoptRenamed(_ newURL: URL) {
         let unresolvedConflict = conflict && isDirty
         url = newURL
         baseline =

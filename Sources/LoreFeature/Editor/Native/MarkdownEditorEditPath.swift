@@ -29,7 +29,7 @@ extension MarkdownEditor.Coordinator {
     ///
     /// A nil `replacementString` is an attributes-only change: there is no
     /// delta to shift by, so the cache is left to notice the mismatch.
-    public func textView(
+    func textView(
         _ tv: NSTextView, shouldChangeTextIn affected: NSRange,
         replacementString: String?
     ) -> Bool {
@@ -108,7 +108,7 @@ extension MarkdownEditor.Coordinator {
         text.utf16.contains { $0 == 0x0A || $0 == 0x0D || $0 == 0x60 || $0 == 0x7E }
     }
 
-    public func textDidChange(_ notification: Notification) {
+    func textDidChange(_ notification: Notification) {
         guard let tv = textView else { return }
         text.wrappedValue = tv.string
         if let edit = pendingEdit {

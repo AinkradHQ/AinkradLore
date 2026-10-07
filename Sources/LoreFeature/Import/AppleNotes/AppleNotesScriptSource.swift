@@ -1,6 +1,6 @@
 import Foundation
 
-public protocol ScriptRunner: Sendable {
+protocol ScriptRunner: Sendable {
     func run(_ source: String) throws -> String
 }
 
@@ -15,10 +15,10 @@ public protocol ScriptRunner: Sendable {
 /// make `ScriptRunner` unusable as a plain injected dependency, which is the
 /// one thing it exists to be. `AppleNotesScriptSource.scan` hops to the main
 /// actor before every call.
-public struct OSAScriptRunner: ScriptRunner {
-    public init() {}
+struct OSAScriptRunner: ScriptRunner {
+    init() {}
 
-    public func run(_ source: String) throws -> String {
+    func run(_ source: String) throws -> String {
         try MainActor.assumeIsolated {
             var error: NSDictionary?
             guard let script = NSAppleScript(source: source) else {
@@ -57,8 +57,8 @@ public struct OSAScriptRunner: ScriptRunner {
 /// WITHOUT driving Notes.app. A test must never launch Notes: it would depend
 /// on the contents of the developer's own note library, prompt for an
 /// Automation grant mid-suite, and fail differently on every machine.
-public struct AppleNotesScriptSource: ImportSource {
-    public static let identifier = "apple-notes"
+struct AppleNotesScriptSource: ImportSource {
+    static let identifier = "apple-notes"
     private let runner: ScriptRunner
     /// Where the script drops attachment bytes so `ImportApplier` has a
     /// `sourceURL` to copy FROM. Under the system temporary directory, so a
@@ -67,7 +67,7 @@ public struct AppleNotesScriptSource: ImportSource {
     /// promise is about the VAULT; staging bytes outside it does not break it.
     private let stagingRoot: URL
 
-    public init(
+    init(
         runner: ScriptRunner = OSAScriptRunner(),
         stagingRoot: URL = FileManager.default.temporaryDirectory
             .appendingPathComponent("lore-notes-import-" + UUID().uuidString)
@@ -188,7 +188,7 @@ public struct AppleNotesScriptSource: ImportSource {
         """
     }
 
-    public func scan() async throws -> [ImportItem] {
+    func scan() async throws -> [ImportItem] {
         let runner = self.runner
         let source = Self.script(stagingRoot: stagingRoot.path)
         let output = try await MainActor.run { try runner.run(source) }

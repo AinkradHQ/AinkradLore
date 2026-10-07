@@ -10,14 +10,14 @@ import SwiftUI
 /// dependency graph — and why fidelity is "good enough to read", which is all a
 /// read-only citizen owes. Editing these formats is explicitly out of scope;
 /// converting them to markdown is M4's job, not this engine's.
-public final class RichTextEngine: DocumentEngine {
-    public static let identifier = "richtext"
+final class RichTextEngine: DocumentEngine {
+    static let identifier = "richtext"
 
-    public static let extensions: Set<String> = ["doc", "docx", "rtf", "rtfd", "odt", "html", "htm"]
+    static let extensions: Set<String> = ["doc", "docx", "rtf", "rtfd", "odt", "html", "htm"]
 
-    public private(set) var sourceURL: URL
-    public private(set) var attributed: NSAttributedString
-    public private(set) var loadFailure: String?
+    private(set) var sourceURL: URL
+    private(set) var attributed: NSAttributedString
+    private(set) var loadFailure: String?
 
     private init(sourceURL: URL, attributed: NSAttributedString, loadFailure: String?) {
         self.sourceURL = sourceURL
@@ -25,7 +25,7 @@ public final class RichTextEngine: DocumentEngine {
         self.loadFailure = loadFailure
     }
 
-    public static func canOpen(_ url: URL) -> Bool {
+    static func canOpen(_ url: URL) -> Bool {
         extensions.contains(url.pathExtension.lowercased())
     }
 
@@ -52,7 +52,7 @@ public final class RichTextEngine: DocumentEngine {
     /// HERE and is caught downstream instead, in `makeEditor`'s
     /// `hasNoExtractableText` check: a load that "succeeds" with next to no
     /// extracted text must still not render as a silently blank pane.
-    public static func load(_ url: URL) throws -> RichTextEngine {
+    static func load(_ url: URL) throws -> RichTextEngine {
         let options: [NSAttributedString.DocumentReadingOptionKey: Any] = [
             .characterEncoding: String.Encoding.utf8.rawValue
         ]
@@ -78,23 +78,23 @@ public final class RichTextEngine: DocumentEngine {
         }
     }
 
-    public func save(to url: URL) throws {
+    func save(to url: URL) throws {
         throw EngineError.readOnly(url)
     }
 
-    public var isEditable: Bool { false }
+    var isEditable: Bool { false }
 
-    public func replaceContents(with other: RichTextEngine) {
+    func replaceContents(with other: RichTextEngine) {
         sourceURL = other.sourceURL
         attributed = other.attributed
         loadFailure = other.loadFailure
     }
 
-    public var indexTitle: String {
+    var indexTitle: String {
         sourceURL.deletingPathExtension().lastPathComponent
     }
 
-    public var indexPayload: IndexPayload {
+    var indexPayload: IndexPayload {
         IndexPayload(title: indexTitle, plaintext: cachedExtraction().text)
     }
 
@@ -106,7 +106,7 @@ public final class RichTextEngine: DocumentEngine {
     /// route hit the cache and the other read `attributed` fresh after
     /// `replaceContents` swapped it — sharing one lookup makes that
     /// impossible by construction, not just unlikely.
-    public var isContentTruncated: Bool {
+    var isContentTruncated: Bool {
         cachedExtraction().isTruncated
     }
 
@@ -156,7 +156,7 @@ public final class RichTextEngine: DocumentEngine {
         attributed.string.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
-    @MainActor public func makeEditor(_ ctx: EditorContext) -> AnyView {
+    @MainActor func makeEditor(_ ctx: EditorContext) -> AnyView {
         if let loadFailure {
             return AnyView(
                 DocumentErrorCard(

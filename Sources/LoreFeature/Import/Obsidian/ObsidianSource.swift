@@ -4,13 +4,13 @@ import Foundation
 /// is converted here. This source walks the tree and emits one `ImportItem` per file,
 /// flagging syntax Lore renders differently (Dataview blocks, callouts) rather than
 /// silently rewriting it.
-public struct ObsidianSource: ImportSource {
-    public static let identifier = "obsidian"
+struct ObsidianSource: ImportSource {
+    static let identifier = "obsidian"
     private let vaultURL: URL
 
-    public init(vaultURL: URL) { self.vaultURL = vaultURL }
+    init(vaultURL: URL) { self.vaultURL = vaultURL }
 
-    public func scan() async throws -> [ImportItem] {
+    func scan() async throws -> [ImportItem] {
         let vaultURL = self.vaultURL
         // Off the calling actor: `FileManager.enumerator` walks the whole tree
         // synchronously and can be slow on large vaults.

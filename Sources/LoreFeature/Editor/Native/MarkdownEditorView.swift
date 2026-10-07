@@ -9,7 +9,7 @@ import SwiftUI
 // `Coordinator`); this file is the AppKit object graph those properties
 // describe.
 extension MarkdownEditor {
-    public func makeNSView(context: Context) -> NSScrollView {
+    func makeNSView(context: Context) -> NSScrollView {
         // Built by hand rather than via `NSTextView.scrollableTextView()`
         // because the text view has to be a subclass — Cmd-click detection has
         // no delegate hook, only `mouseDown(with:)`.
@@ -209,7 +209,7 @@ extension MarkdownEditor {
         return notice
     }
 
-    public func updateNSView(_ nsView: NSScrollView, context: Context) {
+    func updateNSView(_ nsView: NSScrollView, context: Context) {
         guard let tv = context.coordinator.textView else { return }
         context.coordinator.completions = completions
         context.coordinator.tagCompletions = tagCompletions
@@ -296,7 +296,7 @@ extension MarkdownEditor {
     /// main thread, but asserting that would turn a wrong assumption into a
     /// crash in the user's editor; off the main thread this degrades to a hop
     /// instead.
-    public static func dismantleNSView(_ nsView: NSScrollView, coordinator: Coordinator) {
+    static func dismantleNSView(_ nsView: NSScrollView, coordinator: Coordinator) {
         if Thread.isMainThread {
             MainActor.assumeIsolated { coordinator.tearDown() }
         } else {

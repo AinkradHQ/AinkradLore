@@ -22,7 +22,7 @@ import Foundation
 extension RenameReport {
 
     /// One line, first: what happened at the top level.
-    public var headline: String {
+    var headline: String {
         if let refusal = refusalReason { return refusal }
         if movedTo != nil {
             return isCompleteSuccess ? "Renamed." : "Renamed, with some files left alone."
@@ -34,7 +34,7 @@ extension RenameReport {
     /// plan, a name that is not a name, a destination that already exists. Such
     /// a report has a `failed` entry and NOTHING else, and reads better as its
     /// own sentence than as a bullet under "Renamed."
-    public var refusalReason: String? {
+    var refusalReason: String? {
         guard movedTo == nil, rewritten.isEmpty, skipped.isEmpty, unchanged.isEmpty,
             failed.count == 1
         else { return nil }
@@ -43,7 +43,7 @@ extension RenameReport {
 
     /// The body of the report: one line per fact, in decreasing severity.
     /// Empty only when there is genuinely nothing to add to the headline.
-    public var detailLines: [String] {
+    var detailLines: [String] {
         guard refusalReason == nil else { return [] }
         var lines: [String] = []
 
@@ -102,7 +102,7 @@ extension RenameReport {
 
     /// True when the operation did nothing at all to any link — the case that
     /// used to render as an empty success.
-    public var rewroteNothing: Bool { rewritten.isEmpty }
+    var rewroteNothing: Bool { rewritten.isEmpty }
 
     private static func files(_ n: Int) -> String {
         "\(n) file\(n == 1 ? "" : "s")"

@@ -22,14 +22,14 @@ import Foundation
 ///    header. Those go in `ImportLedger`, which stores the landed path
 ///    alongside the ID so the same "deleted means not imported" rule applies:
 ///    an entry whose file is gone is not reported as imported.
-public enum ImportIDReader {
+enum ImportIDReader {
     /// Every source item this vault can prove it already contains.
     ///
     /// Failures are absorbed, deliberately: an unreadable note yields no ID,
     /// which at worst offers the user a duplicate they can see and deselect in
     /// the preview. Throwing here would instead block the whole import on one
     /// bad file.
-    public static func read(vaultRoot: URL) -> Set<String> {
+    static func read(vaultRoot: URL) -> Set<String> {
         var ids = ImportLedger.liveIDs(vaultRoot: vaultRoot)
         let root = URL(fileURLWithPath: vaultRoot.resolvingSymlinksInPath().path)
         let rootDepth = root.standardizedFileURL.pathComponents.count
@@ -91,7 +91,7 @@ public enum ImportIDReader {
 /// This is provenance, not content. Files remain truth for what a vault HOLDS;
 /// the ledger only remembers where a binary came from, which is a fact no byte
 /// of the file itself records.
-public enum ImportLedger {
+enum ImportLedger {
     static let directoryName = ".lore"
     static let fileName = "import-ledger.tsv"
 

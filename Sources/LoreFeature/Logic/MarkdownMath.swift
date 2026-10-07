@@ -140,7 +140,7 @@ extension MarkdownDocumentModel {
     /// Code regions are handed over so a `$PATH` in a shell fence cannot open
     /// an expression — the same suppression the link scanner uses, for the same
     /// class of false positive.
-    public var mathSpans: [StyleSpan] {
+    var mathSpans: [StyleSpan] {
         let text = fullText as NSString
         var out: [StyleSpan] = []
         for span in MarkdownMath.spans(in: text, isSuppressed: { isInsideCode(utf16Offset: $0) }) {

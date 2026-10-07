@@ -22,13 +22,13 @@ import Foundation
 /// arbitrary user (or agent) text: `Meeting: Q3` emitted raw produces invalid
 /// YAML and Obsidian then shows NO properties at all for the note, and a title
 /// containing a newline would inject a whole new top-level property.
-public enum Frontmatter {
+enum Frontmatter {
     /// Keys `Note` models. Everything else is preserved but never interpreted.
     static let modelledKeys = ["id", "title", "tags", "created", "updated"]
 
     // MARK: - parse
 
-    public static func parse(_ text: String, path: URL) -> Note {
+    static func parse(_ text: String, path: URL) -> Note {
         let layout = splitLines(text)
         guard let split = splitBlock(layout) else { return fallback(path: path, layout: layout) }
         let entries = scan(split.headerLines)
@@ -137,7 +137,7 @@ public enum Frontmatter {
 
     // MARK: - serialize
 
-    public static func serialize(_ note: Note) -> String {
+    static func serialize(_ note: Note) -> String {
         guard let raw = note.rawFrontmatter else { return serializeFromModel(note) }
 
         let le = note.lineEnding

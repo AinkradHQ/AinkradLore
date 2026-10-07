@@ -21,11 +21,11 @@ import Foundation
 /// better long-term answer; it needs a schema bump and a rebuild, which is a
 /// larger change than this feature justifies on its own.
 /// A document's headings, and the target that provably reaches THAT document.
-public struct HeadingCompletions: Equatable, Sendable {
+struct HeadingCompletions: Equatable, Sendable {
     /// What to write before the `#` — resolver-verified, so the finished link
     /// cannot land on a namesake in another folder.
-    public let insertTarget: String
-    public let headings: [String]
+    let insertTarget: String
+    let headings: [String]
 }
 
 extension LoreStore {
@@ -35,7 +35,7 @@ extension LoreStore {
     /// Empty when the name resolves to nothing, or to a document with no
     /// headings — both of which are ordinary while the name is still being
     /// typed, and neither of which is an error.
-    public func headingCompletions(
+    func headingCompletions(
         inDocumentNamed name: String,
         matching prefix: String
     ) -> HeadingCompletions? {

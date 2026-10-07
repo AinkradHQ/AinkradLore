@@ -12,9 +12,9 @@ import Foundation
 ///
 /// `@unchecked Sendable` with an `NSLock`: `scanVault` is `nonisolated` and runs
 /// off the main actor, so this is reached concurrently by design.
-public final class ExtractionCache: @unchecked Sendable {
-    public static let shared = ExtractionCache()
-    public static let maxEntries = 512
+final class ExtractionCache: @unchecked Sendable {
+    static let shared = ExtractionCache()
+    static let maxEntries = 512
 
     /// What gets cached for one file: the capped text AND whether extraction
     /// truncated it.
@@ -29,11 +29,11 @@ public final class ExtractionCache: @unchecked Sendable {
     /// `isContentTruncated == false` on the second scan — a truthful flag
     /// going quietly wrong. Caching the flag alongside the text, computed once
     /// at extraction time, is what keeps it truthful on every subsequent hit.
-    public struct ExtractionResult: Sendable {
-        public let text: String
-        public let isTruncated: Bool
+    struct ExtractionResult: Sendable {
+        let text: String
+        let isTruncated: Bool
 
-        public init(text: String, isTruncated: Bool) {
+        init(text: String, isTruncated: Bool) {
             self.text = text
             self.isTruncated = isTruncated
         }
@@ -52,13 +52,13 @@ public final class ExtractionCache: @unchecked Sendable {
 
     private init() {}
 
-    public var count: Int {
+    var count: Int {
         lock.lock()
         defer { lock.unlock() }
         return storage.count
     }
 
-    public func removeAll() {
+    func removeAll() {
         lock.lock()
         defer { lock.unlock() }
         storage.removeAll()
@@ -72,7 +72,7 @@ public final class ExtractionCache: @unchecked Sendable {
     /// test). The result is still stored keyed by file identity, in the SAME
     /// underlying table `result(for:extract:)` reads and writes, so a hit
     /// here and a hit there share one entry per file.
-    public func text(for url: URL, extract: () -> String) -> String {
+    func text(for url: URL, extract: () -> String) -> String {
         result(for: url) { ExtractionResult(text: extract(), isTruncated: false) }.text
     }
 
@@ -82,7 +82,7 @@ public final class ExtractionCache: @unchecked Sendable {
     /// A file whose attributes cannot be read is NOT cached — it is extracted
     /// every time. That is the safe direction: caching under a degenerate key
     /// would serve one file's text for another's.
-    public func result(for url: URL, extract: () -> ExtractionResult) -> ExtractionResult {
+    func result(for url: URL, extract: () -> ExtractionResult) -> ExtractionResult {
         guard let key = Self.key(for: url) else { return extract() }
         lock.lock()
         if let hit = storage[key] {

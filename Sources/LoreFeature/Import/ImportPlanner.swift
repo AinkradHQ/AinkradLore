@@ -10,8 +10,8 @@ import Foundation
 /// that equality is the entire dry-run promise. `nonCollidingURL` is
 /// deliberately NOT used here: it resolves against files already on disk,
 /// which is the applier's job (Task 11), not the planner's.
-public enum ImportPlanner {
-    public static func plan(
+enum ImportPlanner {
+    static func plan(
         items: [ImportItem],
         vaultRoot: URL,
         existingImportIDs: Set<String>

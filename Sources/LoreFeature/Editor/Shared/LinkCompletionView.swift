@@ -9,10 +9,10 @@ import SwiftUI
 /// The offset-taking entry points speak CHARACTER offsets, not UTF-16 offsets.
 /// `MarkdownEditor` converts at the AppKit boundary, because that is the only
 /// place the two index spaces meet.
-public enum LinkCompletionContext {
+enum LinkCompletionContext {
     /// The text between the nearest unclosed `[[` before `caret` and `caret`,
     /// or `nil` when the caret is not inside an open wikilink.
-    public static func activePrefix(in text: String, caret: Int) -> String? {
+    static func activePrefix(in text: String, caret: Int) -> String? {
         guard caret >= 0,
             let index = text.index(
                 text.startIndex, offsetBy: caret,
@@ -50,7 +50,7 @@ public enum LinkCompletionContext {
     /// Raw: any `#heading` or `|alias` syntax is preserved, because
     /// `LinkResolver` — not this function — owns what those mean. Use
     /// `documentName(of:)` for the part that names a document.
-    public static func target(in text: String, at offset: Int) -> String? {
+    static func target(in text: String, at offset: Int) -> String? {
         let chars = Array(text)
         guard offset >= 0, offset <= chars.count else { return nil }
         let start = normalised(offset, in: chars)
@@ -108,7 +108,7 @@ public enum LinkCompletionContext {
     ///
     /// `LinkResolver.basename` strips the fragment but not the alias, so
     /// `Design|why` would otherwise be looked up — and created — verbatim.
-    public static func documentName(of rawTarget: String) -> String {
+    static func documentName(of rawTarget: String) -> String {
         var target = rawTarget
         if let pipe = target.firstIndex(of: "|") { target = String(target[..<pipe]) }
         return LinkResolver.basename(of: target)
@@ -168,7 +168,7 @@ public enum LinkCompletionContext {
     ///   - relativePath: `row`'s path relative to the vault root, without the
     ///     extension (`Projects/Design`). Empty when there is no vault root.
     ///   - resolves: the resolver, injected so this stays pure and testable.
-    public static func insertableTarget(
+    static func insertableTarget(
         for row: IndexRow, relativePath: String,
         resolves: (String) -> URL?
     ) -> String {
@@ -217,7 +217,7 @@ public enum LinkCompletionContext {
 
     /// The store-blind form, for callers with no resolver — it can only apply
     /// the punctuation rule, so it is NOT round-trip guaranteed.
-    public static func insertableTarget(for row: IndexRow) -> String {
+    static func insertableTarget(for row: IndexRow) -> String {
         let title = row.title.trimmingCharacters(in: .whitespaces)
         return isUsableTarget(title)
             ? title

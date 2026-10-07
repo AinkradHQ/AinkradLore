@@ -13,7 +13,7 @@ import Foundation
 // redesign that decides where note-level read/write really belongs.
 extension LoreStore {
 
-    public func load(_ row: IndexRow) throws -> Note {
+    func load(_ row: IndexRow) throws -> Note {
         let text = try String(contentsOf: row.path, encoding: .utf8)
         let note = Frontmatter.parse(text, path: row.path)
         openMTimes[Self.pathKey(row.path)] = try mtime(of: row.path)
@@ -25,7 +25,7 @@ extension LoreStore {
     ///   where `[[Projects/Design]]` names a folder as well as a note; empty
     ///   everywhere else, which is the pre-existing behaviour exactly.
     @discardableResult
-    public func create(title: String, in subfolder: String = "") throws -> Note {
+    func create(title: String, in subfolder: String = "") throws -> Note {
         guard let root = vaultRoot, coordinator.hasIndex else { throw LoreError.noVault }
         let slug =
             title.isEmpty
@@ -83,7 +83,7 @@ extension LoreStore {
     /// Detection is mtime-based and therefore best-effort — a write inside the
     /// filesystem's timestamp granularity can still slip through. A much
     /// smaller hole than not checking at all.
-    public func save(_ note: Note, overwritingExternalChanges: Bool = false) throws {
+    func save(_ note: Note, overwritingExternalChanges: Bool = false) throws {
         guard coordinator.hasIndex else { throw LoreError.noVault }
         if !overwritingExternalChanges, externalChangeDetected(for: note) {
             throw LoreError.externalChange(note.path)
@@ -126,7 +126,7 @@ extension LoreStore {
     /// `try?`: a file that cannot be stat'ed (deleted, unmounted) is not
     /// proof of a newer write, and the save that asks this will hit the real
     /// error itself.
-    public func externalChangeDetected(for note: Note) -> Bool {
+    func externalChangeDetected(for note: Note) -> Bool {
         guard let known = openMTimes[Self.pathKey(note.path)],
             let disk = try? mtime(of: note.path)
         else { return false }

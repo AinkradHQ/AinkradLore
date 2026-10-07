@@ -8,10 +8,10 @@ import Foundation
 /// is the opposite case: `AttachmentEngine` claims everything, so it being
 /// consulted LAST is not a tie-break at all but the entire point — it is
 /// where order genuinely matters.
-public enum EngineRegistry {
+enum EngineRegistry {
     /// Engines that claim specific formats. Required to be mutually exclusive
     /// with one another — `EngineRegistryTests` enforces it.
-    public static let specificEngines: [any DocumentEngine.Type] = [
+    static let specificEngines: [any DocumentEngine.Type] = [
         MarkdownEngine.self,
         PlainTextEngine.self,
         PDFEngine.self,
@@ -21,26 +21,26 @@ public enum EngineRegistry {
     /// Consulted ONLY when every specific engine declines. `AttachmentEngine`
     /// claims everything, so it must never be in `specificEngines` and must
     /// never be consulted first — both halves are asserted by test.
-    public static let fallbackEngine: any DocumentEngine.Type = AttachmentEngine.self
+    static let fallbackEngine: any DocumentEngine.Type = AttachmentEngine.self
 
     /// Every engine, fallback last. Kept for call sites that enumerate.
-    public static var engines: [any DocumentEngine.Type] {
+    static var engines: [any DocumentEngine.Type] {
         specificEngines + [fallbackEngine]
     }
 
     /// Total: every file resolves to an engine. There is no longer an
     /// "unclaimed" outcome — that type is gone, and with it the class of bug
     /// where a vault full of PDFs looked like a vault full of dead rows.
-    public static func engine(for url: URL) -> any DocumentEngine.Type {
+    static func engine(for url: URL) -> any DocumentEngine.Type {
         specificEngines.first { $0.canOpen(url) } ?? fallbackEngine
     }
 
-    public static func load(_ url: URL) throws -> any DocumentEngine {
+    static func load(_ url: URL) throws -> any DocumentEngine {
         try engine(for: url).load(url)
     }
 }
 
-public enum EngineError: Error, Equatable {
+enum EngineError: Error, Equatable {
     case unsupported(URL)
     /// The in-memory document cannot reproduce the file's original bytes
     /// (e.g. a non-UTF-8 file was opened via a lossy decode), so writing it

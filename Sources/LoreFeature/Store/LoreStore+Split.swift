@@ -14,14 +14,14 @@ import Foundation
 extension LoreStore {
 
     /// Whether the view is split.
-    public var isSplit: Bool { secondaryPane != nil }
+    var isSplit: Bool { secondaryPane != nil }
 
     /// Opens `url` beside the current document, splitting if needed.
     ///
     /// Focus MOVES to the new pane: the user asked for this document to appear
     /// beside the other, and leaving focus behind would send the next
     /// keystroke to the document they just navigated away from.
-    public func openInSecondaryPane(url: URL) {
+    func openInSecondaryPane(url: URL) {
         if secondaryPane == nil { secondaryPane = PaneState() }
         focusIsSecondary = true
         open(url: url)
@@ -33,7 +33,7 @@ extension LoreStore {
     /// Returns false when there is nothing to split on — an empty pane beside
     /// an empty pane is not a useful state to be able to reach.
     @discardableResult
-    public func splitCurrentDocument() -> Bool {
+    func splitCurrentDocument() -> Bool {
         guard !isSplit, let url = pane.session?.url else { return false }
         openInSecondaryPane(url: url)
         return true
@@ -49,7 +49,7 @@ extension LoreStore {
     /// Focus returns to the primary pane unconditionally — leaving
     /// `focusIsSecondary` true with no secondary pane is the one way commands
     /// could quietly act on nothing.
-    public func closeSecondaryPane() {
+    func closeSecondaryPane() {
         secondaryPane = nil
         focusIsSecondary = false
     }
@@ -59,7 +59,7 @@ extension LoreStore {
     /// Ignored when asked to focus a pane that does not exist, rather than
     /// creating one: focus is a consequence of the split, never a way to make
     /// one.
-    public func focusPane(secondary: Bool) {
+    func focusPane(secondary: Bool) {
         guard !secondary || isSplit else { return }
         focusIsSecondary = secondary
     }

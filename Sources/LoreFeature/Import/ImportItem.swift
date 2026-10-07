@@ -1,33 +1,33 @@
 import Foundation
 
-public enum ImportBody: Sendable, Equatable {
+enum ImportBody: Sendable, Equatable {
     case html(String)
     case markdown(String)
 }
 
-public struct ImportAttachment: Sendable, Equatable {
-    public let sourceID: String
-    public let preferredName: String
+struct ImportAttachment: Sendable, Equatable {
+    let sourceID: String
+    let preferredName: String
     /// Where the bytes live right now. Nil when the source could not produce them,
     /// in which case the item carries a `.attachmentUnavailable` warning instead.
-    public let sourceURL: URL?
-    public init(sourceID: String, preferredName: String, sourceURL: URL?) {
+    let sourceURL: URL?
+    init(sourceID: String, preferredName: String, sourceURL: URL?) {
         self.sourceID = sourceID
         self.preferredName = preferredName
         self.sourceURL = sourceURL
     }
 }
 
-public struct FidelityWarning: Sendable, Equatable {
-    public enum Kind: String, Sendable, Equatable {
+struct FidelityWarning: Sendable, Equatable {
+    enum Kind: String, Sendable, Equatable {
         case unsupportedElement  // converter met markup it does not model
         case attachmentUnavailable  // referenced media could not be read
         case lockedNote  // encrypted; skipped by design
         case pluginSyntax  // Dataview/callout copied through verbatim
     }
-    public let kind: Kind
-    public let detail: String
-    public init(kind: Kind, detail: String) {
+    let kind: Kind
+    let detail: String
+    init(kind: Kind, detail: String) {
         self.kind = kind
         self.detail = detail
     }
@@ -45,7 +45,7 @@ public struct FidelityWarning: Sendable, Equatable {
 ///
 /// A source knows which of the two it is emitting. Asking it is not a
 /// refinement of the guess; it is the thing the guess was approximating.
-public enum ImportItemKind: Sendable, Equatable {
+enum ImportItemKind: Sendable, Equatable {
     /// A document. Always written as a note file, even when its body is empty
     /// — an empty note the user wrote is still their note, and a note whose
     /// body could not be read needs somewhere to carry the warning saying so.
@@ -56,16 +56,16 @@ public enum ImportItemKind: Sendable, Equatable {
     case file
 }
 
-public struct ImportItem: Sendable, Equatable {
-    public let sourceID: String
-    public let title: String
-    public let body: ImportBody
-    public let attachments: [ImportAttachment]
-    public let folderPath: [String]
-    public let created: Date
-    public let modified: Date
-    public let fidelity: [FidelityWarning]
-    public let kind: ImportItemKind
+struct ImportItem: Sendable, Equatable {
+    let sourceID: String
+    let title: String
+    let body: ImportBody
+    let attachments: [ImportAttachment]
+    let folderPath: [String]
+    let created: Date
+    let modified: Date
+    let fidelity: [FidelityWarning]
+    let kind: ImportItemKind
 
     /// `kind` defaults to `.note`, which is the safe default in the precise
     /// sense that matters here: a `.note` misdeclared always produces a FILE
@@ -73,7 +73,7 @@ public struct ImportItem: Sendable, Equatable {
     /// recoverable, while a `.file` misdeclared produces data LOST (title,
     /// dates and warnings with nowhere to live). Given a source that forgets
     /// to say, err toward the recoverable failure.
-    public init(
+    init(
         sourceID: String, title: String, body: ImportBody,
         attachments: [ImportAttachment], folderPath: [String],
         created: Date, modified: Date, fidelity: [FidelityWarning],

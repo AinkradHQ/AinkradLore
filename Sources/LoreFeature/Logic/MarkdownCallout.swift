@@ -7,7 +7,7 @@ import Foundation
 /// wikilinks — the AST gives us the quote and this gives us what the quote
 /// MEANS. Kept pure and text-only so the rule can be asserted directly rather
 /// than through a text view.
-public enum MarkdownCallout {
+enum MarkdownCallout {
 
     /// The callout types Obsidian ships, each with the spellings it accepts.
     ///
@@ -16,13 +16,13 @@ public enum MarkdownCallout {
     /// and `[!caution]`, and a type Lore does not recognise falls back to a
     /// plain quote — which is a silent downgrade the author would have to
     /// notice for themselves. Cheaper to accept all of them.
-    public enum Kind: String, Equatable, Sendable, CaseIterable {
+    enum Kind: String, Equatable, Sendable, CaseIterable {
         case note, abstract, info, todo, tip, success
         case question, warning, failure, danger, bug, example, quote
 
         /// The type name as written, mapped to a kind. Case-insensitive,
         /// because Obsidian's is.
-        public static func named(_ raw: String) -> Kind? {
+        static func named(_ raw: String) -> Kind? {
             switch raw.lowercased() {
             case "note": return .note
             case "abstract", "summary", "tldr": return .abstract
@@ -47,7 +47,7 @@ public enum MarkdownCallout {
         /// "Note" — so this is not a nicety. It is DRAWN rather than inserted:
         /// putting it in the text would change the document, and every offset
         /// the index and the link graph hold with it.
-        public var displayTitle: String {
+        var displayTitle: String {
             switch self {
             case .note: return "Note"
             case .abstract: return "Abstract"
@@ -66,7 +66,7 @@ public enum MarkdownCallout {
         }
 
         /// The SF Symbol drawn beside the title.
-        public var symbolName: String {
+        var symbolName: String {
             switch self {
             case .note: return "pencil"
             case .abstract: return "doc.text"
@@ -97,7 +97,7 @@ public enum MarkdownCallout {
         /// no callout hues yet, so the table stays here as a token gap. The CM6
         /// stylesheet's `--callout-hue` values must match it (5B.9).
         // design-lint: allow raw-color token-gap syntax.callout.hue
-        public var hue: CGFloat {
+        var hue: CGFloat {
             switch self {
             case .note, .info: return 210  // blue
             case .abstract, .tip: return 175  // teal
@@ -113,23 +113,23 @@ public enum MarkdownCallout {
 
         /// `quote` is a callout with no colour of its own — Obsidian renders it
         /// as an ordinary quote with a heading. Its `hue` is meaningless.
-        public var isNeutral: Bool { self == .quote }
+        var isNeutral: Bool { self == .quote }
     }
 
     /// What a callout's opening line contains.
-    public struct Header: Equatable, Sendable {
-        public let kind: Kind
+    struct Header: Equatable, Sendable {
+        let kind: Kind
         /// The `[!type]` text, INCLUDING the brackets, in absolute UTF-16
         /// offsets. Collapsed by the same marker machinery that hides `**`.
-        public let markerRange: Range<Int>
+        let markerRange: Range<Int>
         /// The author's own title, if they wrote one — the rest of the first
         /// line after the marker, trimmed. Empty when they did not, in which
         /// case `kind.displayTitle` is drawn instead.
-        public let titleRange: Range<Int>?
+        let titleRange: Range<Int>?
         /// Whether the author wrote a fold marker (`[!note]-` / `[!note]+`).
         /// Parsed so the syntax does not render as stray punctuation; folding
         /// itself is not implemented.
-        public let isFoldable: Bool
+        let isFoldable: Bool
     }
 
     /// Reads the header out of a block quote whose absolute range is `range`.
@@ -141,7 +141,7 @@ public enum MarkdownCallout {
     /// - Parameters:
     ///   - range: the quote's own UTF-16 range, as the AST resolved it.
     ///   - text: the WHOLE editor string, which `range` indexes.
-    public static func header(ofQuoteAt range: Range<Int>, in text: NSString) -> Header? {
+    static func header(ofQuoteAt range: Range<Int>, in text: NSString) -> Header? {
         guard range.lowerBound >= 0, range.upperBound <= text.length,
             range.lowerBound < range.upperBound
         else { return nil }

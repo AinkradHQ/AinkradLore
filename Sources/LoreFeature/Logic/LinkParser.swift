@@ -4,13 +4,13 @@ import Foundation
 /// that must not be guessed from the target text alone: whether the target is
 /// percent-ENCODED (markdown links are, wikilinks never are), and therefore
 /// whether a rewritten target must be re-encoded on the way back out.
-public enum LinkSyntax: String, Equatable, Hashable, Sendable {
+enum LinkSyntax: String, Equatable, Hashable, Sendable {
     case wikilink
     case markdown
 }
 
 /// One outbound link found in a document.
-public struct DocumentLink: Equatable, Sendable {
+struct DocumentLink: Equatable, Sendable {
     /// The target exactly as written, including any `#Heading` or `#^block`
     /// fragment. Never includes the `|display` part.
     ///
@@ -18,12 +18,12 @@ public struct DocumentLink: Equatable, Sendable {
     /// syntax: a link written `[[design]]` becomes `[[new-name]]`, never
     /// `[[Projects/New Name.md]]`. For a markdown link this is also the
     /// possibly percent-ENCODED form — see `resolutionTarget`.
-    public let rawTarget: String
-    public let displayText: String?
-    public let isEmbed: Bool
-    public let syntax: LinkSyntax
+    let rawTarget: String
+    let displayText: String?
+    let isEmbed: Bool
+    let syntax: LinkSyntax
 
-    public init(
+    init(
         rawTarget: String, displayText: String? = nil, isEmbed: Bool = false,
         syntax: LinkSyntax = .wikilink
     ) {
@@ -43,7 +43,7 @@ public struct DocumentLink: Equatable, Sendable {
     /// Wikilink targets are returned UNTOUCHED. Obsidian does not encode them,
     /// so a `%` in a `[[…]]` target is a literal `%` in a filename, and
     /// decoding it would resolve the link to the wrong document (or to none).
-    public var resolutionTarget: String {
+    var resolutionTarget: String {
         guard syntax == .markdown, let decoded = rawTarget.removingPercentEncoding
         else { return rawTarget }
         return decoded
@@ -59,10 +59,10 @@ public struct DocumentLink: Equatable, Sendable {
 /// a whole-document `replacingOccurrences` also mutates every `[[Design]]`
 /// written inside a fenced block or inline code, which this parser deliberately
 /// excludes from the graph. One scanner, one answer.
-public struct LinkSpan: Equatable, Sendable {
-    public let link: DocumentLink
-    public let targetRange: Range<Int>
-    public init(link: DocumentLink, targetRange: Range<Int>) {
+struct LinkSpan: Equatable, Sendable {
+    let link: DocumentLink
+    let targetRange: Range<Int>
+    init(link: DocumentLink, targetRange: Range<Int>) {
         self.link = link
         self.targetRange = targetRange
     }
@@ -76,8 +76,8 @@ public struct LinkSpan: Equatable, Sendable {
 /// had exactly this gap and produced phantom headings from `#` comments in
 /// code; a phantom LINK would be worse, because it appears in another
 /// document's backlinks and survives into rename rewriting.
-public enum LinkParser {
-    public static func links(in body: String) -> [DocumentLink] {
+enum LinkParser {
+    static func links(in body: String) -> [DocumentLink] {
         spans(in: body).map(\.link)
     }
 
@@ -87,7 +87,7 @@ public enum LinkParser {
     /// consumes the ranges so that the rewrite covers EXACTLY the regions the
     /// graph covers — no second, subtly different notion of "inside a code
     /// block" to keep in step.
-    public static func spans(in body: String) -> [LinkSpan] {
+    static func spans(in body: String) -> [LinkSpan] {
         spans(in: body, codeRegions: nil)
     }
 

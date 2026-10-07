@@ -14,13 +14,13 @@ import Foundation
 /// The excerpt comes from SQLite's own `snippet()`, not from re-reading files.
 /// That matters at vault scale: a 17,000-object vault with 200 hits would
 /// otherwise mean 200 file reads on the main actor to draw one list.
-public struct SearchSnippet: Equatable, Sendable {
+struct SearchSnippet: Equatable, Sendable {
     /// The excerpt, with the markers stripped.
-    public let text: String
+    let text: String
     /// Ranges within `text` that matched the query, in order.
-    public let matches: [Range<String.Index>]
+    let matches: [Range<String.Index>]
 
-    public init(text: String, matches: [Range<String.Index>]) {
+    init(text: String, matches: [Range<String.Index>]) {
         self.text = text
         self.matches = matches
     }
@@ -47,7 +47,7 @@ public struct SearchSnippet: Equatable, Sendable {
     /// unmatched tail rather than dropping it). A malformed snippet should
     /// degrade to "no highlight", never to "no result" — the row is still a
     /// real hit.
-    public static func parse(marked: String) -> SearchSnippet {
+    static func parse(marked: String) -> SearchSnippet {
         var text = ""
         var matches: [Range<String.Index>] = []
         var pendingStart: String.Index?
@@ -84,7 +84,7 @@ extension SearchSnippet {
     ///
     /// `styleMatch` is passed in rather than hard-coded so this stays free of
     /// SwiftUI colour and can be asserted on the plain string.
-    public func attributed(styleMatch: (inout AttributedString) -> Void) -> AttributedString {
+    func attributed(styleMatch: (inout AttributedString) -> Void) -> AttributedString {
         var out = AttributedString()
         var cursor = text.startIndex
         for match in matches where match.lowerBound >= cursor {
@@ -100,16 +100,16 @@ extension SearchSnippet {
 }
 
 /// One search result: the document, and why it matched.
-public struct SearchHit: Identifiable, Sendable {
-    public var id: URL { row.path }
-    public let row: IndexRow
+struct SearchHit: Identifiable, Sendable {
+    var id: URL { row.path }
+    let row: IndexRow
     /// Nil when the match was in the TITLE only, or when the document has no
     /// indexable text (an attachment). A title match needs no excerpt — the
     /// title is already the row's headline — and inventing one from an empty
     /// body would show a blank line under every attachment hit.
-    public let snippet: SearchSnippet?
+    let snippet: SearchSnippet?
 
-    public init(row: IndexRow, snippet: SearchSnippet?) {
+    init(row: IndexRow, snippet: SearchSnippet?) {
         self.row = row
         self.snippet = snippet
     }

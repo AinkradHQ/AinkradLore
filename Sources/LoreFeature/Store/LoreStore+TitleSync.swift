@@ -36,7 +36,7 @@ extension LoreStore {
     /// the caller revert a title field for a file that had ALREADY been
     /// renamed, which is worse than either outcome alone (whole-branch
     /// review, Critical 3).
-    public enum TitleCommitOutcome: Sendable, Equatable {
+    enum TitleCommitOutcome: Sendable, Equatable {
         /// Nothing needed to change, or the rename (if any) and the
         /// frontmatter write both succeeded.
         case success
@@ -96,7 +96,7 @@ extension LoreStore {
     /// refuses before touching anything — matching every other write path's
     /// treatment of `isReadOnly`.
     @discardableResult
-    public func commitTitleChange(for session: DocumentSession, to newTitle: String) -> TitleCommitOutcome {
+    func commitTitleChange(for session: DocumentSession, to newTitle: String) -> TitleCommitOutcome {
         guard !session.isReadOnly else {
             return .refused("This document is read-only, so its title cannot be changed.")
         }
@@ -251,7 +251,7 @@ extension LoreStore {
     /// reconciliation of pre-existing divergence is explicitly out of scope
     /// and must not happen as a side effect of opening, indexing or scanning
     /// a note.
-    public func syncTitleAfterFileRename(at destination: URL) {
+    func syncTitleAfterFileRename(at destination: URL) {
         guard MarkdownEngine.canOpen(destination) else { return }
         // `try?`: an unreadable file has no title to sync; the rename itself
         // already succeeded, and the next rescan sees whatever is there.

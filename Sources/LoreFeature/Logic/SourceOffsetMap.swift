@@ -19,7 +19,7 @@ import Foundation
 /// Out-of-range positions return `nil` rather than clamping. A dropped span is
 /// invisible; a span applied to the wrong range is a visible defect and, if it
 /// ever drove an edit, a destructive one.
-public struct SourceOffsetMap: Sendable {
+struct SourceOffsetMap: Sendable {
     /// UTF-16 offset (relative to the body) where each 1-based line begins.
     private let lineStarts: [Int]
     /// Per line, the UTF-16 offset of each 1-based UTF-8 byte column.
@@ -27,7 +27,7 @@ public struct SourceOffsetMap: Sendable {
     private let bodyUTF16Offset: Int
     private let bodyUTF16Length: Int
 
-    public init(body: String, bodyUTF16Offset: Int) {
+    init(body: String, bodyUTF16Offset: Int) {
         self.bodyUTF16Offset = bodyUTF16Offset
         let units = Array(body.utf16)
         self.bodyUTF16Length = units.count
@@ -78,14 +78,14 @@ public struct SourceOffsetMap: Sendable {
         return table
     }
 
-    public func utf16Offset(line: Int, column: Int) -> Int? {
+    func utf16Offset(line: Int, column: Int) -> Int? {
         guard line >= 1, line <= columnTables.count, column >= 1 else { return nil }
         let table = columnTables[line - 1]
         guard column <= table.count else { return nil }
         return bodyUTF16Offset + table[column - 1]
     }
 
-    public func utf16Range(
+    func utf16Range(
         fromLine: Int, fromColumn: Int,
         toLine: Int, toColumn: Int
     ) -> NSRange? {

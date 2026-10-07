@@ -4,24 +4,24 @@ import Observation
 
 @MainActor
 @Observable
-public final class LoreStore {
-    // Persisted preferences are `internal(set)`, not `private(set)`: their
+final class LoreStore {
+    // Persisted preferences are module-settable, not `private(set)`: their
     // setters live in `LoreStore+Preferences.swift` and `private(set)` is
     // file-scoped. All are plain stored values with no `didSet` and no
     // invariant to guard, and the setters remain their only writers.
 
     /// Relative subfolder (under the vault root) where ⌘N quick-capture writes
     /// new notes. Empty string == the vault root itself.
-    public internal(set) var defaultNoteFolder: String = ""
+    var defaultNoteFolder: String = ""
 
     /// Sidebar layout choice: folder tree or the flat, searchable list.
-    public enum SidebarMode: String, Sendable { case tree, all }
+    enum SidebarMode: String, Sendable { case tree, all }
 
-    public internal(set) var sidebarMode: SidebarMode = .tree
+    var sidebarMode: SidebarMode = .tree
     /// Folder ids (relative paths under the vault root) currently expanded in
     /// `FolderTreeView`. Persisted so returning to a vault restores the tree
     /// the user left open, rather than collapsing everything.
-    public internal(set) var expandedFolders: Set<String> = []
+    var expandedFolders: Set<String> = []
 
     /// "Show all files" — OFF by default, so a non-document attachment (a
     /// `.zip`, a stray binary, an OAuth credentials file) is hidden from the
@@ -29,18 +29,18 @@ public final class LoreStore {
     /// owner opts in. See `DocumentVisibility` for what "hidden" does and
     /// does not mean — it is a browse-list filter only, never an indexing or
     /// resolution decision.
-    public internal(set) var showAllFiles: Bool = false
+    var showAllFiles: Bool = false
 
     /// Whether the sidebar is hidden. Persisted the same way as `sidebarMode`:
     /// a per-vault-host UI choice, not per-document.
-    public internal(set) var sidebarCollapsed: Bool = false
+    var sidebarCollapsed: Bool = false
 
     /// Sidebar width in points, persisted like the other layout choices.
     ///
     /// Clamped on read as well as on write: the stored value comes from a
     /// file a user can edit, and a 4000pt sidebar would leave no editor at all
     /// with no way to drag it back.
-    public internal(set) var sidebarWidth: CGFloat = LoreMetrics.defaultSidebarWidth
+    var sidebarWidth: CGFloat = LoreMetrics.defaultSidebarWidth
 
     /// Canonical path keys of pinned documents — see `LoreStore+Shortcuts`.
     internal var pinnedPaths: Set<String> = []
@@ -52,7 +52,7 @@ public final class LoreStore {
     /// The reader's preferences for the writing surface — see `EditorSettings`
     /// for why the editor owns these rather than inheriting them from the host
     /// theme.
-    public internal(set) var editorSettings: EditorSettings = .default
+    var editorSettings: EditorSettings = .default
 
     /// The one file `trash(_:)` most recently moved to the Trash, and where
     /// macOS put it — the whole of what `undoTrash()` needs to put it back.
@@ -66,24 +66,24 @@ public final class LoreStore {
     ///
     /// Nil whenever there is nothing to undo — including after a successful
     /// undo, so the same record can never be replayed twice.
-    /// `internal(set)`, not `private(set)`: `trash(_:)` and `undoTrash()` live
+    /// Module-settable, not `private(set)`: `trash(_:)` and `undoTrash()` live
     /// in `LoreStore+Trash.swift`, and Swift's `private(set)` is file-scoped.
-    /// Still closed to callers outside the module, which is the access this
+    /// Like the whole module, still closed to callers outside it, the access this
     /// property actually needs.
-    public internal(set) var lastTrash: TrashUndo?
+    var lastTrash: TrashUndo?
 
     /// Everything needed to reverse one `trash(_:)`.
-    public struct TrashUndo: Equatable, Sendable {
+    struct TrashUndo: Equatable, Sendable {
         /// Where the file lived in the vault, CANONICAL — the same spelling
         /// `trash` removed from the index, so the restore re-indexes under a
         /// path that matches.
-        public let original: URL
+        let original: URL
         /// Where macOS actually put it, from `trashItem`'s
         /// `resultingItemURL`. Lore used to pass `nil` here and throw this
         /// away, which is the only reason undo looked expensive.
-        public let trashed: URL
+        let trashed: URL
         /// What to call the file in the toast.
-        public let name: String
+        let name: String
     }
 
     /// Internal, not private: the persisted-preference setters live in
@@ -115,7 +115,7 @@ public final class LoreStore {
     /// store must not have to care about notifications.
     var reporter: LoreSignalReporter?
 
-    public init(documents: PluginDocumentStore, indexPath: URL) {
+    init(documents: PluginDocumentStore, indexPath: URL) {
         self.documents = documents
         self.coordinator = VaultIndexCoordinator(indexPath: indexPath)
         if let data = documents.data(forKey: Self.defaultFolderKey),
@@ -175,11 +175,11 @@ public final class LoreStore {
 
     /// The vault folder the user chose, whether or not it is indexed yet —
     /// for display (Settings), never as a sign that the index is ready.
-    public var configuredVaultRoot: URL? { vaultRoot ?? pendingVaultRoot }
+    var configuredVaultRoot: URL? { vaultRoot ?? pendingVaultRoot }
 
     /// Activates the bookmarked vault the first time a Lore view or tool
     /// needs it. A no-op once active, or when no vault was ever chosen.
-    public func activateVaultIfNeeded() {
+    func activateVaultIfNeeded() {
         guard let root = pendingVaultRoot else { return }
         pendingVaultRoot = nil
         Log.store.orNil("activate the bookmarked vault") { try coordinator.activate(root: root) }
@@ -187,38 +187,38 @@ public final class LoreStore {
 
     // MARK: - Index facade
 
-    public var rows: [IndexRow] { coordinator.rows }
-    public var vaultRoot: URL? { coordinator.vaultRoot }
+    var rows: [IndexRow] { coordinator.rows }
+    var vaultRoot: URL? { coordinator.vaultRoot }
     /// Vault-relative paths of every directory — see
     /// `VaultIndexCoordinator.directoryPaths`'s doc comment. `FolderTreeView`
     /// reads this (not a filesystem walk of its own) to show empty folders.
     var directoryPaths: [String] { coordinator.directoryPaths }
-    public func search(_ query: String) -> [IndexRow] { coordinator.search(query) }
+    func search(_ query: String) -> [IndexRow] { coordinator.search(query) }
 
     /// Search results carrying the matched excerpt — see `SearchSnippet`.
-    public func searchHits(_ query: String) -> [SearchHit] { coordinator.searchHits(query) }
+    func searchHits(_ query: String) -> [SearchHit] { coordinator.searchHits(query) }
     /// Whether `undoTrash()` currently has a delete to reverse.
-    public var canUndoTrash: Bool { lastTrash != nil }
+    var canUndoTrash: Bool { lastTrash != nil }
 
-    public func rebuild() throws { try coordinator.rebuild() }
+    func rebuild() throws { try coordinator.rebuild() }
 
     /// See `VaultIndexCoordinator.registerExternalChangeHandler` — the
     /// pass-through `EditorContext.registerExternalChangeHandler` reaches.
-    public func registerExternalChangeHandler(_ handler: @escaping (URL) -> Void) -> UUID {
+    func registerExternalChangeHandler(_ handler: @escaping (URL) -> Void) -> UUID {
         coordinator.registerExternalChangeHandler(handler)
     }
 
     /// Pairs with `registerExternalChangeHandler` above.
-    public func unregisterExternalChangeHandler(_ token: UUID) {
+    func unregisterExternalChangeHandler(_ token: UUID) {
         coordinator.unregisterExternalChangeHandler(token)
     }
 
     /// True while a vault rescan is running — drives the sidebar's "Indexing…"
     /// state and the Settings spinner.
-    public var isIndexing: Bool { coordinator.isRebuilding }
+    var isIndexing: Bool { coordinator.isRebuilding }
 
     /// Why the last rescan failed, or nil. Used to be discarded entirely.
-    public var indexError: String? { coordinator.lastRebuildError }
+    var indexError: String? { coordinator.lastRebuildError }
 
     /// Rescan the vault WITHOUT blocking the main actor.
     ///
@@ -228,22 +228,22 @@ public final class LoreStore {
     /// report of a failure. Same background path a vault change already takes;
     /// synchronous `rebuild()` stays for tests and callers that must observe
     /// the result immediately.
-    public func rebuildInBackground() {
+    func rebuildInBackground() {
         activateVaultIfNeeded()
         coordinator.startBackgroundRebuild()
     }
 
     // MARK: - Links
 
-    public struct Backlink: Identifiable, Sendable {
-        public let id: URL
-        public let row: IndexRow
+    struct Backlink: Identifiable, Sendable {
+        let id: URL
+        let row: IndexRow
         /// The line in the source document that contains the link. Empty when
         /// the file cannot be read — context is a nicety, never a failure.
-        public let context: String
+        let context: String
     }
 
-    public func backlinks(to url: URL) -> [Backlink] {
+    func backlinks(to url: URL) -> [Backlink] {
         coordinator.backlinkRows(to: url).map { row in
             Backlink(id: row.path, row: row, context: Self.context(in: row.path, for: url))
         }
@@ -288,23 +288,23 @@ public final class LoreStore {
         return String(url.path.dropFirst(rootPath.count))
     }
 
-    public func unresolvedLinks(from url: URL) -> [UnresolvedLink] {
+    func unresolvedLinks(from url: URL) -> [UnresolvedLink] {
         coordinator.unresolvedLinks(from: url)
     }
 
-    public func resolveLink(_ rawTarget: String) -> URL? {
+    func resolveLink(_ rawTarget: String) -> URL? {
         coordinator.currentResolver().resolve(rawTarget)
     }
 
     @discardableResult
-    public func openLink(_ rawTarget: String) -> Bool {
+    func openLink(_ rawTarget: String) -> Bool {
         guard let url = resolveLink(rawTarget) else { return false }
         open(url: url)
         return true
     }
 
     /// Documents whose title or an alias starts with `prefix`, for `[[` completion.
-    public func linkCompletions(matching prefix: String) -> [IndexRow] {
+    func linkCompletions(matching prefix: String) -> [IndexRow] {
         let needle = prefix.lowercased()
         guard !needle.isEmpty else { return Array(rows.prefix(20)) }
         return rows.filter { row in
@@ -315,7 +315,7 @@ public final class LoreStore {
     /// Releases the vault. Tabs are flushed FIRST — see `closeAllTabs` — so a
     /// teardown never costs the user unsaved work, and so the flush still has a
     /// live index to update before the coordinator drops it.
-    public func shutdown() {
+    func shutdown() {
         closeAllTabs()
         coordinator.shutdown()
     }
@@ -359,7 +359,7 @@ public final class LoreStore {
 
     // MARK: - Tabs
 
-    public internal(set) var tabs: [DocumentSession] = []
+    var tabs: [DocumentSession] = []
 
     /// The single pane Lore shows today — see `PaneState` for why the
     /// document and its history live in a value rather than as loose
@@ -403,22 +403,22 @@ public final class LoreStore {
     /// Forwards, so every existing caller and every test is untouched: with no
     /// split, the focused pane is the only pane and this means exactly what it
     /// always did.
-    public var selectedTab: DocumentSession? {
+    var selectedTab: DocumentSession? {
         get { focusedPane.session }
         set { focusedPane.session = newValue }
     }
     /// Set when the last open attempt failed. The UI renders the fallback
     /// viewer from this rather than silently doing nothing — a file the list
     /// shows must always produce a visible response when clicked.
-    /// `internal(set)`: the open path lives in `LoreStore+Sessions.swift` and
-    /// Swift's `private(set)` is file-scoped. Still closed outside the module.
-    public internal(set) var openError: (url: URL, error: Error)?
+    /// Module-settable: the open path lives in `LoreStore+Sessions.swift` and
+    /// Swift's `private(set)` is file-scoped. The module itself is closed to the host.
+    var openError: (url: URL, error: Error)?
 
     /// Switching vaults is a teardown of the old one, not just a new root:
     /// tabs, selection and `openError` all point INTO the previous vault, and
     /// left alone they keep autosaving into vault A while the user is looking
     /// at vault B. Same lifecycle as `shutdown`.
-    public func setVaultRoot(_ url: URL) throws {
+    func setVaultRoot(_ url: URL) throws {
         try VaultBookmark.save(url, to: documents)
         closeAllTabs()
         pendingVaultRoot = nil
@@ -437,7 +437,7 @@ public final class LoreStore {
     // convention (`LoreStore+Folders.swift`, `LoreStore+Trash.swift`, …).
 }
 
-public enum LoreError: Error, Equatable {
+enum LoreError: Error, Equatable {
     case noVault
     /// The note's file changed on disk since it was loaded. Saving would
     /// discard those changes, so the caller must decide: reload, or overwrite

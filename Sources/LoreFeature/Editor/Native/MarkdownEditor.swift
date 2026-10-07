@@ -2,7 +2,7 @@ import AinkradAppKit
 import AppKit
 import SwiftUI
 
-public struct MarkdownEditor: NSViewRepresentable {
+struct MarkdownEditor: NSViewRepresentable {
     @Binding var text: String
     let tokens: HostThemeTokens
     /// Display preferences. Threaded down from `EditorContext` so the five
@@ -79,7 +79,7 @@ public struct MarkdownEditor: NSViewRepresentable {
     /// menu should run. See `MarkdownEditorMenu.swift`.
     let registerMenuActions: (@MainActor (EditorMenuActions) -> Void)?
 
-    public init(
+    init(
         text: Binding<String>, tokens: HostThemeTokens,
         settings: EditorSettings = .default,
         headingCompletions: (@MainActor (String, String) -> HeadingCompletions?)? = nil,
@@ -123,7 +123,7 @@ public struct MarkdownEditor: NSViewRepresentable {
         self.registerMenuActions = registerMenuActions
     }
 
-    public func makeCoordinator() -> Coordinator {
+    func makeCoordinator() -> Coordinator {
         Coordinator(text: $text, tokens: tokens, settings: settings)
     }
 

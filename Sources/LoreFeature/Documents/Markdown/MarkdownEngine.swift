@@ -7,23 +7,23 @@ import SwiftUI
 /// A thin adapter over the existing `Note` + `Frontmatter` pair. Loading and
 /// saving must stay byte-identical to what `LoreStore` did before M0 — this is
 /// an extraction, not a rewrite.
-public final class MarkdownEngine: DocumentEngine {
-    public static let identifier = "markdown"
+final class MarkdownEngine: DocumentEngine {
+    static let identifier = "markdown"
 
-    public var note: Note
+    var note: Note
 
     private init(note: Note) { self.note = note }
 
-    public static func canOpen(_ url: URL) -> Bool {
+    static func canOpen(_ url: URL) -> Bool {
         ["md", "markdown", "mdown"].contains(url.pathExtension.lowercased())
     }
 
-    public static func load(_ url: URL) throws -> MarkdownEngine {
+    static func load(_ url: URL) throws -> MarkdownEngine {
         let text = try String(contentsOf: url, encoding: .utf8)
         return MarkdownEngine(note: Frontmatter.parse(text, path: url))
     }
 
-    public func save(to url: URL) throws {
+    func save(to url: URL) throws {
         try Frontmatter.serialize(note).write(to: url, atomically: true, encoding: .utf8)
     }
 
@@ -51,7 +51,7 @@ public final class MarkdownEngine: DocumentEngine {
     /// `indexPayload` (title/tags/properties/links) is worth recomputing for.
     /// Reaching through `indexPayload` for just the outline would also run
     /// `LinkParser.links(in:)` — a second, unrelated scan — for no reason.
-    public var outline: [OutlineEntry] {
+    var outline: [OutlineEntry] {
         MarkdownDocumentModel(body: note.body).outline
     }
 
@@ -59,7 +59,7 @@ public final class MarkdownEngine: DocumentEngine {
     /// parse involved. Overriding the protocol's `indexPayload.title` default
     /// is what keeps `DocumentSession`'s four title refreshes free; see
     /// `DocumentEngine.indexTitle`.
-    public var indexTitle: String { note.title }
+    var indexTitle: String { note.title }
 
     /// ONE parse, feeding both halves.
     ///
@@ -76,7 +76,7 @@ public final class MarkdownEngine: DocumentEngine {
     /// because `LinkParser` normalises before scanning and pre-normalisation
     /// UTF-16 offsets would misplace suppression. Correctness over the saved
     /// parse; see `injectableSuppressionIndex`.
-    public var indexPayload: IndexPayload {
+    var indexPayload: IndexPayload {
         let model = MarkdownDocumentModel(body: note.body)
         return IndexPayload(
             title: note.title,
@@ -94,11 +94,11 @@ public final class MarkdownEngine: DocumentEngine {
             id: note.id)
     }
 
-    public func replaceContents(with other: MarkdownEngine) {
+    func replaceContents(with other: MarkdownEngine) {
         note = other.note
     }
 
-    @MainActor public func makeEditor(_ ctx: EditorContext) -> AnyView {
+    @MainActor func makeEditor(_ ctx: EditorContext) -> AnyView {
         AnyView(MarkdownDocumentEditor(engine: self, ctx: ctx))
     }
 }

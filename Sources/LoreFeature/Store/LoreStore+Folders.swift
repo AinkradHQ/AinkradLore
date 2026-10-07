@@ -7,33 +7,33 @@ import Foundation
 /// takes it. A folder can hold hundreds of documents and be linked from
 /// hundreds more, and "Move to Trash" on a triangle in a sidebar is one
 /// mis-click away from every one of them.
-public struct FolderTrashPlan: Sendable {
-    public let folder: URL
+struct FolderTrashPlan: Sendable {
+    let folder: URL
     /// Every indexed document inside the folder, at any depth.
-    public let documents: [IndexRow]
+    let documents: [IndexRow]
     /// How many links from OUTSIDE the folder point into any document inside
     /// it — the count that tells the user what they are about to break. Links
     /// from one soon-to-be-trashed document to another, inside the same
     /// folder, are not counted: both sides are leaving together, so nothing
     /// about that link "breaks" relative to the folder's own contents.
-    public let inboundLinkCount: Int
+    let inboundLinkCount: Int
     /// The distinct files OUTSIDE the folder that hold one of those inbound
     /// links — computed once here so `apply` can reindex exactly these files
     /// (and nothing else) instead of the whole vault. See `applyTrashFolder`.
-    public let referrers: [URL]
+    let referrers: [URL]
     /// How many open tabs, anywhere under the folder, currently hold unsaved
     /// edits. Surfaced in the preview so the user sees this BEFORE confirming
     /// — `apply` still refuses per-session if a flush fails, same as
     /// `LoreStore.trash`, but a silent refusal after a confirm click reads as
     /// a broken button.
-    public let dirtySessionCount: Int
+    let dirtySessionCount: Int
     /// Non-nil when the folder itself cannot be trashed — no vault open, the
     /// target is the vault ROOT itself, or the target resolves outside the
     /// vault entirely (a symlink, or a caller-supplied absolute URL). Shown
     /// INSTEAD of a preview, exactly like `FolderRenamePlan.refusal`.
-    public let refusal: String?
+    let refusal: String?
 
-    public init(
+    init(
         folder: URL, documents: [IndexRow] = [], inboundLinkCount: Int = 0,
         referrers: [URL] = [], dirtySessionCount: Int = 0, refusal: String? = nil
     ) {
@@ -68,7 +68,7 @@ extension LoreStore {
     /// create a folder they did not ask for and they would have no reason to
     /// notice the difference until they went looking for the one they thought
     /// they made. A refusal, with a message, is the safer failure here.
-    public func createFolder(named name: String, in parent: URL) throws -> URL {
+    func createFolder(named name: String, in parent: URL) throws -> URL {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         let hasControlCharacter = trimmed.unicodeScalars.contains {
             CharacterSet.controlCharacters.contains($0)
@@ -126,7 +126,7 @@ extension LoreStore {
     /// guard (the root tree node has no folder menu) is one menu change away
     /// from reaching this with the vault root, so the guard belongs HERE, not
     /// only in the view.
-    public func planTrashFolder(_ folder: URL) -> FolderTrashPlan {
+    func planTrashFolder(_ folder: URL) -> FolderTrashPlan {
         let canonical = VaultIndexCoordinator.canonical(folder)
         guard let root = vaultRoot else {
             return FolderTrashPlan(folder: canonical, refusal: "No vault is open.")
@@ -211,7 +211,7 @@ extension LoreStore {
     /// same reason: rewriting them would edit files the user did not ask to
     /// touch, to erase a reference they may want to restore from the Trash.
     @discardableResult
-    public func applyTrashFolder(_ plan: FolderTrashPlan) throws -> Int {
+    func applyTrashFolder(_ plan: FolderTrashPlan) throws -> Int {
         guard coordinator.hasIndex else { throw LoreError.noVault }
         // Re-derived independently of `plan.refusal`, the same way `createFolder`
         // checks containment itself rather than trusting a caller to have
