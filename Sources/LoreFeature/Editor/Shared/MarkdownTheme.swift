@@ -120,7 +120,17 @@ struct MarkdownTheme: Equatable {
     ) {
         self.tokens = tokens
         self.skin = skin
-        bodySize = settings.bodySize
+        // R2: the skin sets the DEFAULT body size (`type.size.15`, what
+        // Standard density means); a density the user picked is their own
+        // size and wins. Zoom scales either. Same arithmetic as
+        // `EditorSettings.bodySize`, so the default skin is byte-identical.
+        let baseSize =
+            settings.density == .standard
+            ? CGFloat(skin.type.sizes.t15) : settings.density.bodySize
+        bodySize = baseSize * settings.zoomFactor
+        // The skin has no editor line height yet; Standard's 1.5 stays in
+        // `EditorSettings.Density`.
+        // design-lint: allow font-size token-gap type.editor.lineHeight
         lineHeightMultiple = settings.density.lineHeightMultiple
         paragraphSpacing = settings.density.paragraphSpacing * settings.zoomFactor
         listIndentStep = 22 * settings.zoomFactor
@@ -128,9 +138,9 @@ struct MarkdownTheme: Equatable {
         maxMeasure = settings.maxMeasure
         renderTagsAsChips = settings.renderTagsAsChips
         isDarkSurface = tokens.foreground.relativeLuminance > Self.darkSurfaceLuminance
-        bodyFont = .systemFont(ofSize: settings.bodySize)  // design-lint: allow font-size token-gap nsfont
+        bodyFont = .systemFont(ofSize: bodySize)  // design-lint: allow font-size token-gap nsfont
         monoFont = .monospacedSystemFont(
-            ofSize: settings.bodySize * Self.monoRatio,
+            ofSize: bodySize * Self.monoRatio,
             weight: .regular)
         spaceAdvance =
             (" " as NSString)
@@ -209,7 +219,11 @@ struct MarkdownTheme: Equatable {
     /// At default settings this returns [27, 24, 21, 18.75, 16.9, 15.75];
     /// every adjacent pair differs by at least 1.1 pt and the top three by
     /// three.
+    ///
+    /// The ratios belong in the skin's `type` group (R2), which has none yet,
+    /// so they stay here — the one source 5B.9 points the CM6 editor at.
     func headingSize(_ level: Int) -> CGFloat {
+        // design-lint: allow font-size token-gap type.editor.headingRatios
         let ratios: [CGFloat] = [1.80, 1.60, 1.40, 1.25, 1.125, 1.05]
         return bodySize * ratios[min(max(level, 1), 6) - 1]
     }

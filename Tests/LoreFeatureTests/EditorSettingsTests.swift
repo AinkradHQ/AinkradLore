@@ -1,3 +1,4 @@
+import AinkradAppKit
 import XCTest
 
 @testable import LoreFeature
@@ -251,5 +252,22 @@ final class EditorSettingsTests: XCTestCase {
         let old = Data(#"{"density":"standard","measure":"standard"}"#.utf8)
         let decoded = try JSONDecoder().decode(EditorSettings.self, from: old)
         XCTAssertTrue(decoded.renderTagsAsChips)
+    }
+
+    /// R2: the skin supplies the DEFAULT body size, and a size the user chose
+    /// still wins. A skin with an 18 pt body sets Standard density at 18 (and
+    /// zoom scales it); Comfortable is the user's own pick and stays at 17.
+    func test_aUserSetBodySizeWinsOverTheSkinDefault() {
+        var skin = AinkradSkin.standard
+        skin.type.sizes.t15 = 18
+        let tokens = TestTokens.make()
+
+        XCTAssertEqual(MarkdownTheme(tokens: tokens, skin: skin).bodySize, 18)
+        XCTAssertEqual(
+            MarkdownTheme(tokens: tokens, settings: .default.zoomed(by: 1), skin: skin).bodySize,
+            18 * 1.1, accuracy: 0.0001)
+        let comfortable = EditorSettings(density: .comfortable, measure: .full, zoomStep: 0)
+        XCTAssertEqual(MarkdownTheme(tokens: tokens, settings: comfortable, skin: skin).bodySize, 17)
+        XCTAssertEqual(MarkdownTheme(tokens: tokens, settings: comfortable, skin: skin).bodyFont.pointSize, 17)
     }
 }
