@@ -10,6 +10,7 @@ struct ImportEntryView: View {
     @Bindable var coordinator: ImportCoordinator
     let theme: HostTheme
     @Environment(\.ainkradTypography) private var typo
+    @Environment(\.ainkradSkin) private var skin
     let onClose: () -> Void
 
     var body: some View {
@@ -46,7 +47,7 @@ struct ImportEntryView: View {
                     action: coordinator.reset)
             }
         }
-        .frame(minWidth: 620, minHeight: 460)
+        .frame(minWidth: CGFloat(skin.size.s620), minHeight: CGFloat(skin.size.s460))
         .background(theme.tokens.surface)
         .environment(\.ainkradTheme, theme.tokens)
     }
@@ -63,8 +64,8 @@ struct ImportEntryView: View {
                 "Lore shows you everything it would write, and writes nothing until you "
                     + "approve it. Anything you have already imported is skipped."
             )
-            .font(.callout)
-            .foregroundStyle(theme.tokens.foreground.opacity(0.7))
+            .font(.callout)  // design-lint: allow font-size token-gap type.callout
+            .foregroundStyle(theme.tokens.foreground.opacity(skin.opacity.o70))
             .fixedSize(horizontal: false, vertical: true)
             AinkradListRow(
                 onTap: coordinator.chooseObsidianVault,
@@ -109,10 +110,12 @@ struct ImportEntryView: View {
                 ForEach(report.renamed, id: \.from) { _, from, to in
                     line(
                         from, "already existed — imported as “\(to)”",
-                        icon: "pencil", tint: theme.tokens.foreground.opacity(0.8))
+                        icon: "pencil", tint: theme.tokens.foreground.opacity(skin.opacity.o80))
                 }
                 ForEach(report.skipped, id: \.0) { id, reason in
-                    line(id, reason, icon: "arrow.turn.down.right", tint: theme.tokens.foreground.opacity(0.6))
+                    line(
+                        id, reason, icon: "arrow.turn.down.right",
+                        tint: theme.tokens.foreground.opacity(skin.opacity.o60))
                 }
                 ForEach(report.failed, id: \.0) { id, reason in
                     line(id, reason, icon: "exclamationmark.circle", tint: .red)
@@ -134,10 +137,10 @@ struct ImportEntryView: View {
     private func line(_ id: String, _ reason: String, icon: String, tint: Color) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: AinkradSpacing.sm) {
             Image(systemName: icon).foregroundStyle(tint)
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: AinkradSpacing.xs / 2) {
                 Text(id).foregroundStyle(theme.tokens.foreground)
                 Text(reason).font(AinkradFontResolver.font(.caption, typography: typo))
-                    .foregroundStyle(theme.tokens.foreground.opacity(0.7))
+                    .foregroundStyle(theme.tokens.foreground.opacity(skin.opacity.o70))
             }
         }
     }

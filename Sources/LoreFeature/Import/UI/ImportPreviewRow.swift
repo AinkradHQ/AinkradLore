@@ -15,6 +15,7 @@ struct ImportPreviewRow: View {
     let toggle: () -> Void
 
     @Environment(\.ainkradTheme) private var theme
+    @Environment(\.ainkradSkin) private var skin
 
     var body: some View {
         AinkradListRow(
@@ -25,7 +26,7 @@ struct ImportPreviewRow: View {
             subtitle: subtitle,
             trailing: { EmptyView() }
         )
-        .opacity(isAlreadyImported ? 0.5 : 1)
+        .opacity(isAlreadyImported ? skin.opacity.o50 : 1)
     }
 
     /// Deliberately an INDICATOR, not a control. `AinkradToggle` is a `Button`,

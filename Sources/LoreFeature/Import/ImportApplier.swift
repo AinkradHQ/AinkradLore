@@ -341,17 +341,27 @@ public struct ImportApplier {
             // Only ever removes a file still the size we reserved it at —
             // an empty placeholder. A body that got written before a later
             // step failed is the user's data and stays.
+            // `try?`: a file that cannot be stat'ed is not a placeholder we can
+            // prove is empty, so it is left alone — the safe answer, not an error.
             let size =
                 (try? FileManager.default
                     .attributesOfItem(atPath: url.path)[.size] as? Int) ?? nil
-            if size == 0 { try? FileManager.default.removeItem(at: url) }
+            if size == 0 {
+                Log.import_.orNil("roll back an empty placeholder") {
+                    try FileManager.default.removeItem(at: url)
+                }
+            }
         }
+        // `try?`: a directory that cannot be listed cannot be proven empty, so
+        // it stays — removing it is only ever a tidy-up.
         if !reservation.directoryPreexisted,
             let remaining = try? FileManager.default
                 .contentsOfDirectory(atPath: reservation.directory.path),
             remaining.isEmpty
         {
-            try? FileManager.default.removeItem(at: reservation.directory)
+            Log.import_.orNil("roll back an empty import directory") {
+                try FileManager.default.removeItem(at: reservation.directory)
+            }
         }
     }
 

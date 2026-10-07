@@ -50,7 +50,7 @@ public enum ImportIDReader {
                 continue
             }
             guard url.pathExtension.lowercased() == "md",
-                let text = try? String(contentsOf: url, encoding: .utf8),
+                let text = Log.import_.orNil("read a note", { try String(contentsOf: url, encoding: .utf8) }),
                 let id = importID(in: text)
             else { continue }
             ids.insert(id)
@@ -114,8 +114,10 @@ public enum ImportLedger {
         // Append, never rewrite: the ledger accumulates across runs, and a
         // read-modify-write would lose every earlier entry if this write failed
         // halfway.
+        // `try?`: no handle means no ledger yet — the first binary import —
+        // and the `else` creates it; a real write failure throws there.
         if let handle = try? FileHandle(forWritingTo: file) {
-            defer { try? handle.close() }
+            defer { Log.import_.orNil("close the import ledger") { try handle.close() } }
             try handle.seekToEnd()
             try handle.write(contentsOf: line)
         } else {
@@ -135,6 +137,8 @@ public enum ImportLedger {
     }
 
     static func entries(vaultRoot: URL) -> [(relativePath: String, id: String)] {
+        // `try?`: a vault that never imported a binary has no ledger, which is
+        // the common case and means "nothing recorded", not a failure.
         guard let text = try? String(contentsOf: url(vaultRoot: vaultRoot), encoding: .utf8)
         else { return [] }
         return text.split(separator: "\n", omittingEmptySubsequences: true).compactMap { line in
