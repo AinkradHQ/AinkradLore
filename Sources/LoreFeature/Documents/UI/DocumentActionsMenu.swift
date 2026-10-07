@@ -41,16 +41,7 @@ struct DocumentActionsMenu: View {
         // stretched to the width of the window. The rows still fill, they just
         // fill this.
         .frame(width: CGFloat(skin.size.s240), alignment: .leading)
-        .background(theme.tokens.surfaceElevated)
-        .clipShape(ChamferShape(cut: LoreMetrics.chamfer))
-        .overlay(
-            ChamferShape(cut: LoreMetrics.chamfer)
-                .strokeBorder(theme.tokens.foreground.opacity(skin.opacity.o15), lineWidth: 1)
-        )
-        .shadow(
-            color: .black.opacity(skin.opacity.o35),
-            radius: 12, y: 4  // design-lint: allow radius-literal token-gap material.popover
-        )
+        .ainkradPanel()
         .environment(\.ainkradTheme, theme.tokens)
     }
 
