@@ -1626,12 +1626,13 @@
   /* E2T2. Obsidian's tag pill: the `#` stays, the shape is a chip. */
   .cm-lore-tag {
     color: var(--ak-palette-accent-primary);
-    background: color-mix(in srgb, var(--ak-palette-accent-primary) 14%, transparent);
-    border-radius: 999px; padding: 1px 7px; cursor: pointer;
+    background: color-mix(in srgb, var(--ak-palette-accent-primary) calc(var(--ak-opacity-o14) * 100%), transparent);
+    border-radius: var(--lore-radius-pill); padding: var(--ak-size-s1) var(--ak-size-s7);
+    cursor: pointer;
     white-space: nowrap;
   }
   .cm-lore-tag:hover {
-    background: color-mix(in srgb, var(--ak-palette-accent-primary) 26%, transparent);
+    background: color-mix(in srgb, var(--ak-palette-accent-primary) calc(var(--lore-opacity-o26) * 100%), transparent);
   }
 
   /* E2T4. A real input, sized to sit on the text baseline rather than above
@@ -1641,8 +1642,8 @@
     appearance: none; -webkit-appearance: none;
     width: 1em; height: 1em; margin: 0 0.45em 0 0;
     vertical-align: -0.1em;
-    border: 1.5px solid color-mix(in srgb, var(--ak-palette-foreground) 45%, transparent);
-    border-radius: 3px; background: transparent; cursor: pointer;
+    border: var(--ak-size-s1-5) solid var(--ak-text-faint);
+    border-radius: var(--ak-size-s3); background: transparent; cursor: pointer;
     display: inline-block; position: relative;
   }
   .cm-lore-checkbox:checked {
@@ -1654,12 +1655,11 @@
     display: flex; align-items: center; justify-content: center;
     font-size: 0.8em; color: var(--ak-palette-background);
   }
-  .cm-lore-checkbox:disabled { cursor: default; opacity: 0.5; }
+  .cm-lore-checkbox:disabled { cursor: default; opacity: var(--ak-opacity-o50); }
   /* A done task, struck and dimmed — the same treatment the native renderer
      applies to `.checkbox(true)`. The checkbox itself is spared, or the tick
      is struck through too. */
-  .cm-lore-task-done { color: color-mix(in srgb, var(--ak-palette-foreground) 45%, transparent);
-                       text-decoration: line-through; }
+  .cm-lore-task-done { color: var(--ak-text-faint); text-decoration: line-through; }
   .cm-lore-task-done .cm-lore-checkbox { text-decoration: none; }
 
   /* E2T3. Thirteen callout kinds, one stylesheet.
