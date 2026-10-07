@@ -189,13 +189,11 @@ private struct MarkdownDocumentEditor: View {
                     }
                 }
 
-            // E4T1: the CodeMirror surface, behind `EditorSettings.usesCM6`
-            // and OFF by default. Both surfaces bind the SAME `body_`, so the
-            // document is unaffected by which one is showing and switching is
-            // reversible. Opening a link and Cmd-clicking it now reach the same
-            // closures the native editor is given (E2T1b); completion, hover
-            // preview and tags are still native-only, which is what keeps this
-            // defaulting off rather than the flag being cosmetic.
+            // E4T1: the CodeMirror surface, behind `EditorSettings.usesCM6`,
+            // which is ON by default since M10 E4T3. Both surfaces bind the SAME
+            // `body_`, so the document is unaffected by which one is showing and
+            // switching is reversible. Opening a link and Cmd-clicking it reach
+            // the same closures the native editor is given (E2T1b).
             if ctx.editorSettings.usesCM6, mayUseCM6 == true {
                 CM6EditorView(
                     text: $body_, tokens: ctx.theme.tokens,

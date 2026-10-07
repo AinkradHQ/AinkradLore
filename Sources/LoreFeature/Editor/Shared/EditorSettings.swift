@@ -115,8 +115,7 @@ struct EditorSettings: Equatable, Sendable, Codable {
 
     /// Render with CodeMirror instead of the native `NSTextView`.
     ///
-    /// OFF by default, and it stays off until the parity checklist in the M10
-    /// plan is signed off. Both surfaces read and write the same document
+    /// ON by default (see below). Both surfaces read and write the same document
     /// string, so switching is reversible and costs nothing but a reload of the
     /// pane.
     ///
