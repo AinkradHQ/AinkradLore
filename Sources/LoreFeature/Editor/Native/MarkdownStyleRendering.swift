@@ -28,7 +28,7 @@ enum MarkdownStyleRenderer {
     /// The default skin's body size (`type.size.15`): a static has no
     /// environment to read the live skin from, and a last resort does not
     /// need one. The kit has no NSFont resolver, hence the allow.
-    static let fallbackFont = NSFont.systemFont(ofSize: fallbackSize)  // design-lint: allow font-size token-gap nsfont
+    static let fallbackFont = NSFont.systemFont(ofSize: fallbackSize)  // design-lint: allow font-size kit-gap nsfont
     private static let fallbackSize = CGFloat(AinkradSkin.standard.type.sizes.t15)
 
     /// How much text on either side of the visible range is styled in viewport

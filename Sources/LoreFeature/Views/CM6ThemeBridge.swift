@@ -73,11 +73,11 @@ enum CM6ThemeBridge {
             "--lore-callout-lightness": "58%",
         ]
         for level in 1...6 {
-            lore["--lore-heading-\(level)-scale"] = number(MarkdownTheme.headingRatios[level - 1])
+            lore["--lore-heading-\(level)-scale"] = number(theme.headingRatio(level))
             lore["--lore-heading-\(level)-weight"] = theme.headingWeight(level) == .bold ? "700" : "600"
         }
         for kind in MarkdownCallout.Kind.allCases where !kind.isNeutral {
-            lore["--lore-callout-\(kind.rawValue)-hue"] = number(kind.hue)
+            lore["--lore-callout-\(kind.rawValue)-hue"] = number(kind.hue(skin.syntax.callout))
         }
         return lore
     }

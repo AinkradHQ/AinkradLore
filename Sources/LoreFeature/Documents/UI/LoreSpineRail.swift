@@ -140,7 +140,7 @@ struct LoreSpineRail: View {
         .clipShape(ChamferShape(cut: CGFloat(skin.cut.c6)))
         .shadow(
             color: .black.opacity(skin.opacity.o30),
-            radius: 12, x: 2  // design-lint: allow radius-literal token-gap material.drawer
+            radius: CGFloat(skin.size.s12), x: 2
         )
         .transition(.opacity)
     }

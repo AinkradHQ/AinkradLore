@@ -18,12 +18,12 @@ enum LoreMetrics {
     // is the host Settings window's), and these are read by the STORE, which
     // has no environment to read a skin from.
     /// The sidebar's width when nothing has been chosen.
-    static let defaultSidebarWidth: CGFloat = 280  // design-lint: allow frame-literal token-gap chrome.sidebarWidth
+    static let defaultSidebarWidth: CGFloat = 280  // design-lint: allow frame-literal kit-gap chrome.sidebarWidth
     /// Narrow enough to be a list of names, wide enough to still show one.
-    static let minSidebarWidth: CGFloat = 180  // design-lint: allow frame-literal token-gap chrome.sidebarMinWidth
+    static let minSidebarWidth: CGFloat = 180  // design-lint: allow frame-literal kit-gap chrome.sidebarMinWidth
     /// Wide enough for deep trees, bounded so the editor cannot be squeezed
     /// out of existence on a small display.
-    static let maxSidebarWidth: CGFloat = 520  // design-lint: allow frame-literal token-gap chrome.sidebarMaxWidth
+    static let maxSidebarWidth: CGFloat = 520  // design-lint: allow frame-literal kit-gap chrome.sidebarMaxWidth
 
     static func clampSidebarWidth(_ width: CGFloat) -> CGFloat {
         min(max(width, minSidebarWidth), maxSidebarWidth)

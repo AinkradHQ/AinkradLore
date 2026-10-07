@@ -103,7 +103,7 @@ struct FolderTreeView: View {
 
     var body: some View {
         ScrollView {
-            LazyVStack(alignment: .leading, spacing: 2) {  // design-lint: allow spacing-literal token-gap spacing.xxs
+            LazyVStack(alignment: .leading, spacing: CGFloat(skin.size.s2)) {
                 if let root = store.vaultRoot {
                     // Filtered to the browse-list rows only — `directories`
                     // is passed UNFILTERED below, so a folder holding

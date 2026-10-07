@@ -437,7 +437,7 @@ struct LinkCompletionView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             ForEach(Array(matches.prefix(Self.maxRows).enumerated()), id: \.offset) { pair in
-                Button {  // design-lint: allow raw-control token-gap AinkradMenuRow
+                Button {  // design-lint: allow raw-control kit-gap AinkradMenuRow
                     onPick(pair.element)
                 } label: {
                     HStack(spacing: AinkradSpacing.xs) {
