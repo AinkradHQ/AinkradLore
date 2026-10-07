@@ -1,0 +1,483 @@
+[0,2) "# "
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFontDemi 27.0000 traits=2 weight=0.3000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 12.15, ParagraphSpacingBefore 36.45, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[2,13) "Heading one"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFontDemi 27.0000 traits=2 weight=0.3000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 12.15, ParagraphSpacingBefore 36.45, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[13,14) "\n"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 12.15, ParagraphSpacingBefore 36.45, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[14,15) "\n"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[15,18) "## "
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFontDemi 24.0000 traits=2 weight=0.3000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 10.8, ParagraphSpacingBefore 12.15, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[18,29) "Heading two"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFontDemi 24.0000 traits=2 weight=0.3000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 10.8, ParagraphSpacingBefore 12.15, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[29,30) "\n"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 10.8, ParagraphSpacingBefore 12.15, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[30,31) "\n"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[31,35) "### "
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFontDemi 21.0000 traits=2 weight=0.3000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 9.45, ParagraphSpacingBefore 10.8, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[35,48) "Heading three"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFontDemi 21.0000 traits=2 weight=0.3000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 9.45, ParagraphSpacingBefore 10.8, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[48,49) "\n"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 9.45, ParagraphSpacingBefore 10.8, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[49,61) "\nProse with "
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[61,63) "**"
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.SFNS-Bold 15.0000 traits=2 weight=0.4000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[63,67) "bold"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.SFNS-Bold 15.0000 traits=2 weight=0.4000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[67,69) "**"
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.SFNS-Bold 15.0000 traits=2 weight=0.4000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[69,71) ", "
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[71,72) "*"
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.SFNS-RegularItalic 15.0000 traits=1 weight=-)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[72,78) "italic"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.SFNS-RegularItalic 15.0000 traits=1 weight=-)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[78,79) "*"
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.SFNS-RegularItalic 15.0000 traits=1 weight=-)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[79,81) ", "
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[81,83) "~~"
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+  NSStrikethrough = 1
+[83,96) "strikethrough"
+  NSColor = rgba(1.0000 1.0000 1.0000 0.5500)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+  NSStrikethrough = 1
+[96,98) "~~"
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+  NSStrikethrough = 1
+[98,100) ", "
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[100,101) "`"
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFontMonospaced-Regular 13.8000 traits=17408 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[101,112) "inline code"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFontMonospaced-Regular 13.8000 traits=17408 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[112,113) "`"
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFontMonospaced-Regular 13.8000 traits=17408 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[113,175) ", and a\nhard-wrapped line so paragraph spacing is visible.\n\nA "
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[175,177) "[["
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[177,185) "Wikilink"
+  NSColor = rgba(0.0000 0.5686 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[185,187) "]]"
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[187,200) ", an aliased "
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[200,202) "[["
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[202,208) "Target"
+  NSColor = rgba(0.0000 0.5686 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[208,214) "|alias"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[214,216) "]]"
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[216,220) ", a "
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[220,221) "["
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[221,234) "markdown link"
+  NSColor = rgba(0.0000 0.5686 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[234,253) "](https://x.test/p)"
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[253,261) ",\nand a "
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[261,265) "#tag"
+  NSColor = rgba(0.0000 0.5686 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[265,271) " plus "
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[271,282) "#nested/tag"
+  NSColor = rgba(0.0000 0.5686 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[282,285) ".\n\n"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[285,287) "- "
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 3, ParagraphSpacingBefore 0, HeadIndent 22, TailIndent 0, FirstLineHeadIndent 22, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[287,296) "a bullet\n"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 3, ParagraphSpacingBefore 0, HeadIndent 22, TailIndent 0, FirstLineHeadIndent 22, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[296,298) "- "
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 3, ParagraphSpacingBefore 0, HeadIndent 22, TailIndent 0, FirstLineHeadIndent 22, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[298,306) "another\n"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 3, ParagraphSpacingBefore 0, HeadIndent 22, TailIndent 0, FirstLineHeadIndent 22, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[306,310) "    "
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 3, ParagraphSpacingBefore 0, HeadIndent 59.9375, TailIndent 0, FirstLineHeadIndent 44, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[310,312) "- "
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 3, ParagraphSpacingBefore 0, HeadIndent 59.9375, TailIndent 0, FirstLineHeadIndent 44, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[312,319) "nested\n"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 3, ParagraphSpacingBefore 0, HeadIndent 59.9375, TailIndent 0, FirstLineHeadIndent 44, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[319,327) "        "
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 3, ParagraphSpacingBefore 0, HeadIndent 97.875, TailIndent 0, FirstLineHeadIndent 66, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[327,329) "- "
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 3, ParagraphSpacingBefore 0, HeadIndent 97.875, TailIndent 0, FirstLineHeadIndent 66, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[329,336) "deeper\n"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 3, ParagraphSpacingBefore 0, HeadIndent 97.875, TailIndent 0, FirstLineHeadIndent 66, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[336,337) "\n"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[337,340) "1. "
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 3, ParagraphSpacingBefore 0, HeadIndent 22, TailIndent 0, FirstLineHeadIndent 22, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[340,348) "ordered\n"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 3, ParagraphSpacingBefore 0, HeadIndent 22, TailIndent 0, FirstLineHeadIndent 22, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[348,351) "2. "
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 3, ParagraphSpacingBefore 0, HeadIndent 22, TailIndent 0, FirstLineHeadIndent 22, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[351,358) "second\n"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 3, ParagraphSpacingBefore 0, HeadIndent 22, TailIndent 0, FirstLineHeadIndent 22, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[358,359) "\n"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[359,365) "- [ ] "
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 3, ParagraphSpacingBefore 0, HeadIndent 22, TailIndent 0, FirstLineHeadIndent 22, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[365,378) "an open task\n"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 3, ParagraphSpacingBefore 0, HeadIndent 22, TailIndent 0, FirstLineHeadIndent 22, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[378,380) "- "
+  NSColor = rgba(1.0000 1.0000 1.0000 0.5500)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 3, ParagraphSpacingBefore 0, HeadIndent 22, TailIndent 0, FirstLineHeadIndent 22, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+  NSStrikethrough = 1
+[380,384) "[x] "
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 3, ParagraphSpacingBefore 0, HeadIndent 22, TailIndent 0, FirstLineHeadIndent 22, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+  NSStrikethrough = 1
+[384,396) "a done task\n"
+  NSColor = rgba(1.0000 1.0000 1.0000 0.5500)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 3, ParagraphSpacingBefore 0, HeadIndent 22, TailIndent 0, FirstLineHeadIndent 22, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+  NSStrikethrough = 1
+[396,397) "\n"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[397,399) "> "
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 12, ParagraphSpacingBefore 0, HeadIndent 22, TailIndent 0, FirstLineHeadIndent 22, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[399,436) "A plain block quote\n> over two lines."
+  NSColor = rgba(1.0000 1.0000 1.0000 0.8500)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 12, ParagraphSpacingBefore 0, HeadIndent 22, TailIndent 0, FirstLineHeadIndent 22, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[436,437) "\n"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 12, ParagraphSpacingBefore 0, HeadIndent 22, TailIndent 0, FirstLineHeadIndent 22, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[437,438) "\n"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[438,447) "> [!note]"
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 6, ParagraphSpacingBefore 0, HeadIndent 30, TailIndent 0, FirstLineHeadIndent 30, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[447,448) " "
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 6, ParagraphSpacingBefore 0, HeadIndent 30, TailIndent 0, FirstLineHeadIndent 30, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[448,470) "A callout with a title"
+  NSColor = rgba(0.4275 0.6887 0.9500 1.0000)
+  NSFont = font(.SFNS-Bold 15.0000 traits=2 weight=0.4000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 6, ParagraphSpacingBefore 0, HeadIndent 30, TailIndent 0, FirstLineHeadIndent 30, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[470,483) "\n> Its body.\n"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 6, ParagraphSpacingBefore 0, HeadIndent 30, TailIndent 0, FirstLineHeadIndent 30, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[483,484) "\n"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[484,496) "> [!warning]"
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 6, ParagraphSpacingBefore 0, HeadIndent 30, TailIndent 0, FirstLineHeadIndent 30, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[496,524) "\n> A callout with no title.\n"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 6, ParagraphSpacingBefore 0, HeadIndent 30, TailIndent 0, FirstLineHeadIndent 30, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[524,525) "\n"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[525,528) "```"
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFontMonospaced-Regular 13.8000 traits=17408 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 11, TailIndent 0, FirstLineHeadIndent 11, LineHeight 0/0, LineHeightMultiple 1.2 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[528,533) "swift"
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFont 12.7500 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 11, TailIndent 0, FirstLineHeadIndent 11, LineHeight 0/0, LineHeightMultiple 1.2 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[533,534) "\n"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFontMonospaced-Regular 13.8000 traits=17408 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 11, TailIndent 0, FirstLineHeadIndent 11, LineHeight 0/0, LineHeightMultiple 1.2 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[534,537) "let"
+  NSColor = rgba(0.8312 0.4750 0.9500 1.0000)
+  NSFont = font(.AppleSystemUIFontMonospaced-Regular 13.8000 traits=17408 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 11, TailIndent 0, FirstLineHeadIndent 11, LineHeight 0/0, LineHeightMultiple 1.2 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[537,547) " fenced = "
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFontMonospaced-Regular 13.8000 traits=17408 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 11, TailIndent 0, FirstLineHeadIndent 11, LineHeight 0/0, LineHeightMultiple 1.2 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[547,559) "\"code block\""
+  NSColor = rgba(0.4750 0.9500 0.6333 1.0000)
+  NSFont = font(.AppleSystemUIFontMonospaced-Regular 13.8000 traits=17408 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 11, TailIndent 0, FirstLineHeadIndent 11, LineHeight 0/0, LineHeightMultiple 1.2 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[559,560) "\n"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFontMonospaced-Regular 13.8000 traits=17408 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 11, TailIndent 0, FirstLineHeadIndent 11, LineHeight 0/0, LineHeightMultiple 1.2 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[560,563) "```"
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFontMonospaced-Regular 13.8000 traits=17408 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 11, TailIndent 0, FirstLineHeadIndent 11, LineHeight 0/0, LineHeightMultiple 1.2 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[563,564) "\n"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 11, TailIndent 0, FirstLineHeadIndent 11, LineHeight 0/0, LineHeightMultiple 1.2 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[564,565) "\n"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[565,588) "| Area | Owner | Note |"
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.SFNS-Bold 15.0000 traits=2 weight=0.4000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[588,589) "\n"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[589,602) "|---|---|---|"
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[602,603) "\n"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[603,628) "| Editor | Ahmed | see [["
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[628,638) "Design Doc"
+  NSColor = rgba(0.0000 0.5686 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[638,642) "]] |"
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[642,643) "\n"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[643,661) "| Index | Ahmed | "
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[661,674) "**unchanged**"
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.SFNS-Bold 15.0000 traits=2 weight=0.4000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[674,676) " |"
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[676,692) "\n\nMaths: inline "
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[692,701) "$\\pi r^2$"
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[701,716) " and a block:\n\n"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[716,755) "$$\\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}$$"
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[755,757) "\n\n"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[757,761) "---\n"
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 18/18, LineHeightMultiple 0 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[761,782) "\nA footnote reference"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[782,784) "[^"
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[784,785) "1"
+  NSBaselineOffset = 4.2
+  NSColor = rgba(0.0000 0.5686 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 11.2500 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[785,786) "]"
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[786,811) " and an unresolved embed "
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[811,814) "![["
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[814,825) "missing.png"
+  NSColor = rgba(0.0000 0.5686 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[825,827) "]]"
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[827,830) ".\n\n"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[830,832) "[^"
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[832,833) "1"
+  NSColor = rgba(1.0000 1.0000 1.0000 0.7500)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[833,835) "]:"
+  NSColor = rgba(1.0000 1.0000 1.0000 0.4000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
+[835,855) " The footnote text.\n"
+  NSColor = rgba(1.0000 1.0000 1.0000 1.0000)
+  NSFont = font(.AppleSystemUIFont 15.0000 traits=0 weight=0.0000)
+  NSParagraphStyle = Alignment Natural, LineSpacing 0, ParagraphSpacing 0, ParagraphSpacingBefore 0, HeadIndent 0, TailIndent 0, FirstLineHeadIndent 0, LineHeight 0/0, LineHeightMultiple 1.5 LineBreakMode WordWrapping, Tabs (     28L,     56L,     84L,     112L,     140L,     168L,     196L,     224L,     252L,     280L,     308L,     336L ), DefaultTabInterval 0, Blocks ( ), Lists ( ), BaseWritingDirection Natural, HyphenationFactor 0, TighteningForTruncation YES, HeaderLevel 0 LineBreakStrategy 0 PresentationIntents ( ) ListIntentOrdinal 0 CodeBlockIntentLanguageHint ''
