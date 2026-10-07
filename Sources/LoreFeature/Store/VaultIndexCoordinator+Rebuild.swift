@@ -33,7 +33,7 @@ extension VaultIndexCoordinator {
         // holds, so a reopen shows the vault before the disk is checked.
         if rows.isEmpty {
             let painted = await Task.detached(priority: .userInitiated) {
-                (try? index.all()) ?? []
+                Log.store.orNil("paint from index") { try index.all() } ?? []
             }.value
             guard self.index === index else { return }  // shut down meanwhile
             if rows.isEmpty { rows = painted }
@@ -59,13 +59,13 @@ extension VaultIndexCoordinator {
         // path unfireable at launch, the one case it exists for. See
         // `LoreIndex.indexedDirectories()`'s doc comment.
         //
-        // `try? index.indexedDirectories()` flattens (Swift auto-flattens
-        // `try?` over an already-Optional return since SE-0230): both a throw
-        // and a genuine `nil` ("never recorded") collapse to `nil` here, and
-        // the `if let` below fails to bind either way — so "never recorded"
-        // correctly does NOT take the fast path.
-        if let indexed = try? index.fingerprints(),
-            let indexedDirectories = try? index.indexedDirectories()
+        // `orNil` over `index.indexedDirectories()` flattens its already-Optional
+        // return: both a throw (logged) and a genuine `nil` ("never recorded",
+        // not logged) collapse to `nil` here, and the `if let` below fails to
+        // bind either way — so "never recorded" correctly does NOT take the
+        // fast path. A failed read only costs the full rebuild below.
+        if let indexed = Log.store.orNil("read fingerprints", { try index.fingerprints() }),
+            let indexedDirectories = Log.store.orNil("read indexed directories", { try index.indexedDirectories() })
         {
             let (onDisk, onDiskDirectories) = await Task.detached(priority: .utility) {
                 (Self.scanFingerprints(at: root), Set(Self.scanDirectories(under: root)))
@@ -163,9 +163,11 @@ extension VaultIndexCoordinator {
             directoryPaths = refreshed.directories
             // Persisted alongside the in-memory publish above: the next
             // PROCESS's first rebuild needs this on disk, not just in this
-            // instance's memory. `try?` — losing this write costs one extra
-            // full rebuild next launch, not correctness.
-            try? index.setIndexedDirectories(Set(refreshed.directories))
+            // instance's memory. Logged, not thrown — losing this write costs
+            // one extra full rebuild next launch, not correctness.
+            Log.store.orNil("persist indexed directories") {
+                try index.setIndexedDirectories(Set(refreshed.directories))
+            }
         }
     }
 

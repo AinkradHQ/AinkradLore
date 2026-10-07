@@ -85,6 +85,7 @@ extension VaultIndexCoordinator {
         // frontmatter field is day-granularity, so a whole day's notes
         // tie and `ORDER BY updated DESC` sorts them arbitrarily. This
         // changes sidebar ordering for vaults where the two disagree.
+        // Probe: an mtime that cannot be read is "now"; the load below decides.
         let values = try? url.resourceValues(forKeys: [.contentModificationDateKey])
         let updated = values?.contentModificationDate ?? Date()
 
@@ -94,10 +95,11 @@ extension VaultIndexCoordinator {
         // filename and size and nothing else.
         let engineType = EngineRegistry.engine(for: url)
         // An engine that claims a file but fails to LOAD it is left out, as
-        // before: that is a real error, and this scan has nowhere to report
-        // it. `AttachmentEngine.load` cannot fail, so a load failure now
+        // before: that is a real error, so it is logged and the scan goes on.
+        // `AttachmentEngine.load` cannot fail, so a load failure now
         // means a specific engine rejected a file it claimed.
-        guard let engine = try? engineType.load(url) else { return nil }
+        guard let engine = Log.store.orNil("load \(url.lastPathComponent)", { try engineType.load(url) })
+        else { return nil }
         // Captured ONCE: `indexPayload` re-runs a full markdown parse plus
         // link scan on markdown documents, so comparing before/after by
         // calling it twice would double that cost for every document in
@@ -113,6 +115,7 @@ extension VaultIndexCoordinator {
         let isTruncated =
             payload.plaintext.utf8.count < uncappedByteCount
             || engine.isContentTruncated
+        // Probe: a size that cannot be read is recorded as 0; nothing reads it as truth.
         let attributes = try? FileManager.default.attributesOfItem(atPath: url.path)
         let byteSize = (attributes?[.size] as? Int) ?? 0
         return IndexEntry(
@@ -159,6 +162,8 @@ extension VaultIndexCoordinator {
         let root = Self.canonical(root)
         var out: [String: DocumentFingerprint] = [:]
         for url in Self.walkDocumentFiles(at: root) {
+            // Probes: an unreadable stat fingerprints as now/0, which can only
+            // miss the indexed value and so force the full rescan — the answer.
             let values = try? url.resourceValues(forKeys: [.contentModificationDateKey])
             let updated = values?.contentModificationDate ?? Date()
             let attributes = try? FileManager.default.attributesOfItem(atPath: url.path)

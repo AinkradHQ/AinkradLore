@@ -14,29 +14,29 @@ extension VaultIndexCoordinator {
         // vault indexed only via the synchronous `rebuild()` (as every test
         // harness does) never gets its directory set on disk, and a fresh
         // process's fast path can never fire for it.
-        try? index.setIndexedDirectories(Set(directoryPaths))
+        Log.store.orNil("persist indexed directories") { try index.setIndexedDirectories(Set(directoryPaths)) }
         notifyChangedPaths(from: oldRows, to: rows)
     }
 
     public func search(_ query: String) -> [IndexRow] {
-        let keyword = (try? index?.search(query)) ?? []
+        let keyword = Log.search.orNil("search") { try index?.search(query) } ?? []
         return keyword + semanticRows(for: query, excluding: Set(keyword.map(\.path.path)))
     }
 
     /// Search with an excerpt per hit — see `LoreIndex.searchHits`.
     public func searchHits(_ query: String) -> [SearchHit] {
-        let keyword = (try? index?.searchHits(query)) ?? []
+        let keyword = Log.search.orNil("search hits") { try index?.searchHits(query) } ?? []
         return keyword
             + semanticRows(for: query, excluding: Set(keyword.map(\.row.path.path)))
             .map { SearchHit(row: $0, snippet: nil) }
     }
 
     func linkNeighbours(of url: URL) -> [String: Int] {
-        (try? index?.linkNeighbours(of: url)) ?? [:]
+        Log.store.orNil("link neighbours") { try index?.linkNeighbours(of: url) } ?? [:]
     }
 
     func backlinkRows(to url: URL) -> [IndexRow] {
-        (try? index?.backlinks(to: Self.canonical(url))) ?? []
+        Log.store.orNil("backlinks") { try index?.backlinks(to: Self.canonical(url)) } ?? []
     }
 
     /// Every (file, rawTarget) pair pointing at `url` — the raw material for a
@@ -56,7 +56,7 @@ extension VaultIndexCoordinator {
         sourceFile: URL, rawTarget: String,
         syntax: LinkSyntax
     )] {
-        let links = (try? index?.inboundLinks(to: Self.canonical(url))) ?? []
+        let links = Log.store.orNil("inbound links") { try index?.inboundLinks(to: Self.canonical(url)) } ?? []
         return links.map {
             (
                 sourceFile: Self.canonical($0.sourceFile),
@@ -65,7 +65,7 @@ extension VaultIndexCoordinator {
         }
     }
     func unresolvedLinks(from url: URL) -> [UnresolvedLink] {
-        (try? index?.unresolvedLinks(from: Self.canonical(url))) ?? []
+        Log.store.orNil("unresolved links") { try index?.unresolvedLinks(from: Self.canonical(url)) } ?? []
     }
     /// A resolver over the CURRENT index rows, for link clicks, completion
     /// and embed rendering. Cached against `rows`'s identity — see
@@ -160,6 +160,7 @@ extension VaultIndexCoordinator {
         let isTruncated =
             payload.plaintext.utf8.count < uncappedByteCount
             || engine.isContentTruncated
+        // Probe: a size that cannot be read is recorded as 0; nothing reads it as truth.
         let attributes = try? FileManager.default.attributesOfItem(atPath: url.path)
         let byteSize = (attributes?[.size] as? Int) ?? 0
         // Exclude the STALE row for this same document (if it already exists in
