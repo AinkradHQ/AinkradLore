@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "nord",
+  "name": "Nord",
+  "base": "neonBlue",
+  "palette": {
+    "background": "#1B2029",
+    "surface": "#2E3440",
+    "surfaceElevated": "#3B4252",
+    "accentPrimary": "#8FD6EA",
+    "accentSecondary": "#9EC1E8",
+    "accentTertiary": "#A3BE8C",
+    "foreground": "#ECEFF4",
+    "success": "#A3BE8C",
+    "warning": "#EBCB8B",
+    "danger": "#BF616A"
+  },
+  "terminal": {
+    "background": "#2E3440",
+    "foreground": "#D8DEE9",
+    "cursor": "#88C0D0",
+    "selection": "#3B4252",
+    "ansi": [
+      "#3B4252", "#BF616A", "#A3BE8C", "#EBCB8B", "#81A1C1", "#B48EAD", "#88C0D0", "#E5E9F0",
+      "#4C566A", "#BF616A", "#A3BE8C", "#EBCB8B", "#81A1C1", "#B48EAD", "#8FBCBB", "#ECEFF4"
+    ]
+  },
+  "host": {
+    "skyProfile": [0.8, 1.1, 1.2, 0.9, 1.0],
+    "iconColorFamily": "blue"
+  }
+}

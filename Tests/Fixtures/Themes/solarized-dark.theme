@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "solarizedDark",
+  "name": "Solarized Dark",
+  "base": "neonBlue",
+  "palette": {
+    "background": "#002B36",
+    "surface": "#073642",
+    "surfaceElevated": "#0F4A56",
+    "accentPrimary": "#268BD2",
+    "accentSecondary": "#2AA198",
+    "accentTertiary": "#859900",
+    "foreground": "#839496",
+    "success": "#859900",
+    "warning": "#B58900",
+    "danger": "#DC322F"
+  },
+  "terminal": {
+    "background": "#002B36",
+    "foreground": "#839496",
+    "cursor": "#93A1A1",
+    "selection": "#3B4252",
+    "ansi": [
+      "#073642", "#DC322F", "#859900", "#B58900", "#268BD2", "#D33682", "#2AA198", "#EEE8D5",
+      "#002B36", "#CB4B16", "#586E75", "#657B83", "#839496", "#6C71C4", "#93A1A1", "#FDF6E3"
+    ]
+  },
+  "host": {
+    "skyProfile": [0.85, 1.0, 1.25, 0.9, 1.0],
+    "iconColorFamily": "blue"
+  }
+}

@@ -1,7 +1,9 @@
+import AinkradAppKit
 import AppKit
 import SwiftUI
 import WebKit
 import XCTest
+
 @testable import LoreFeature
 
 /// E4T2: one document holding every construct Lore renders, shot in BOTH
@@ -14,92 +16,115 @@ import XCTest
 /// It is a test rather than a pair of hand-made screenshots because a hand-made
 /// pair is out of date the moment either surface changes, and because the two
 /// shots have to come from the same document and the same theme or the
-/// comparison proves nothing. The PNGs are written to a temporary directory and
-/// their path is printed; the assertions are the machine-checkable part —
-/// neither surface may render blank, and every construct must leave a mark.
+/// comparison proves nothing. The PNGs are written to `$LORE_PARITY_DIR` when
+/// it is set (`make parity`, one pair per host palette: `native-<palette>.png`,
+/// `cm6-<palette>.png` — S15/S16 of the Epic 5B screen inventory), otherwise to
+/// a temporary directory for the first palette only, so the normal suite pays
+/// for one pair rather than seven. The assertions are the machine-checkable
+/// part — neither surface may render blank, and every construct must leave a
+/// mark.
 final class CM6ParityShotTests: XCTestCase {
 
     private var windows: [NSWindow] = []
-    override func tearDown() { windows.removeAll(); super.tearDown() }
+    /// The bridges `boot(_:tokens:)` installs; a web view holds its
+    /// navigation delegate weakly.
+    private var coordinators: [CM6EditorView.Coordinator] = []
+    override func tearDown() {
+        windows.removeAll()
+        coordinators.removeAll()
+        super.tearDown()
+    }
 
     /// One of everything. Ordered so the shot reads top to bottom like a
     /// checklist.
     static let parityDocument = """
-    # Heading one
+        # Heading one
 
-    ## Heading two
+        ## Heading two
 
-    ### Heading three
+        ### Heading three
 
-    Prose with **bold**, *italic*, ~~strikethrough~~, `inline code`, and a
-    hard-wrapped line so paragraph spacing is visible.
+        Prose with **bold**, *italic*, ~~strikethrough~~, `inline code`, and a
+        hard-wrapped line so paragraph spacing is visible.
 
-    A [[Wikilink]], an aliased [[Target|alias]], a [markdown link](https://x.test/p),
-    and a #tag plus #nested/tag.
+        A [[Wikilink]], an aliased [[Target|alias]], a [markdown link](https://x.test/p),
+        and a #tag plus #nested/tag.
 
-    - a bullet
-    - another
-        - nested
-            - deeper
+        - a bullet
+        - another
+            - nested
+                - deeper
 
-    1. ordered
-    2. second
+        1. ordered
+        2. second
 
-    - [ ] an open task
-    - [x] a done task
+        - [ ] an open task
+        - [x] a done task
 
-    > A plain block quote
-    > over two lines.
+        > A plain block quote
+        > over two lines.
 
-    > [!note] A callout with a title
-    > Its body.
+        > [!note] A callout with a title
+        > Its body.
 
-    > [!warning]
-    > A callout with no title.
+        > [!warning]
+        > A callout with no title.
 
-    ```swift
-    let fenced = "code block"
-    ```
+        ```swift
+        let fenced = "code block"
+        ```
 
-    | Area | Owner | Note |
-    |---|---|---|
-    | Editor | Ahmed | see [[Design Doc]] |
-    | Index | Ahmed | **unchanged** |
+        | Area | Owner | Note |
+        |---|---|---|
+        | Editor | Ahmed | see [[Design Doc]] |
+        | Index | Ahmed | **unchanged** |
 
-    Maths: inline $\\pi r^2$ and a block:
+        Maths: inline $\\pi r^2$ and a block:
 
-    $$\\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}$$
+        $$\\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}$$
 
-    ---
+        ---
 
-    A footnote reference[^1] and an unresolved embed ![[missing.png]].
+        A footnote reference[^1] and an unresolved embed ![[missing.png]].
 
-    [^1]: The footnote text.
+        [^1]: The footnote text.
 
-    """
+        """
 
     // MARK: - the two shots
 
     @MainActor
     func test_bothSurfacesRenderTheWholeParityDocument() throws {
-        let directory = URL(fileURLWithPath: NSTemporaryDirectory())
-            .appendingPathComponent("lore-parity-\(UUID().uuidString)")
-        try FileManager.default.createDirectory(at: directory,
-                                                withIntermediateDirectories: true)
+        var palettes = try parityPalettes()
+        let directory: URL
+        if let parity = try parityOutputDirectory() {
+            directory = parity
+        } else {
+            directory = URL(fileURLWithPath: NSTemporaryDirectory())
+                .appendingPathComponent("lore-parity-\(UUID().uuidString)")
+            try FileManager.default.createDirectory(
+                at: directory,
+                withIntermediateDirectories: true)
+            palettes = Array(palettes.prefix(1))
+        }
 
-        let native = try shootNative(Self.parityDocument)
-        try write(native, to: directory.appendingPathComponent("native.png"))
+        for palette in palettes {
+            let native = try shootNative(Self.parityDocument, palette: palette)
+            try write(native, to: directory.appendingPathComponent("native-\(palette.id).png"))
 
-        let cm6 = try shootCM6(Self.parityDocument)
-        try write(cm6, to: directory.appendingPathComponent("cm6.png"))
+            let cm6 = try shootCM6(Self.parityDocument, palette: palette)
+            try write(cm6, to: directory.appendingPathComponent("cm6-\(palette.id).png"))
 
-        // Neither may be blank. A uniformly-coloured image is what a surface
-        // that failed to boot produces, and it is indistinguishable from a
-        // working one in a size check.
-        XCTAssertGreaterThan(try distinctRowCount(of: native), 20,
-                             "the native surface rendered nothing")
-        XCTAssertGreaterThan(try distinctRowCount(of: cm6), 20,
-                             "the CM6 surface rendered nothing")
+            // Neither may be blank. A uniformly-coloured image is what a surface
+            // that failed to boot produces, and it is indistinguishable from a
+            // working one in a size check.
+            XCTAssertGreaterThan(
+                distinctRowCount(of: native), 20,
+                "the native surface rendered nothing (\(palette.id))")
+            XCTAssertGreaterThan(
+                distinctRowCount(of: cm6), 20,
+                "the CM6 surface rendered nothing (\(palette.id))")
+        }
 
         print("PARITY SHOTS \(directory.path)")
     }
@@ -124,8 +149,10 @@ final class CM6ParityShotTests: XCTestCase {
         XCTAssertEqual(try number("window.loreEditor.tableCount()"), 1)
         XCTAssertEqual(try number("document.querySelectorAll('.cm-lore-rule').length"), 1)
         XCTAssertGreaterThan(try number("document.querySelectorAll('.cm-lore-bullet').length"), 3)
-        XCTAssertGreaterThan(try number("document.querySelectorAll('.cm-lore-code, "
-                                        + ".cm-lore-code-first, .cm-lore-code-last').length"), 2)
+        XCTAssertGreaterThan(
+            try number(
+                "document.querySelectorAll('.cm-lore-code, "
+                    + ".cm-lore-code-first, .cm-lore-code-last').length"), 2)
         // Maths needs its engine, which arrives on demand.
         try waitFor("the maths engine") {
             ((try? self.js("window.loreEditor.mathEngineLoaded()", in: webView)) as? Bool) == true
@@ -135,8 +162,9 @@ final class CM6ParityShotTests: XCTestCase {
         XCTAssertEqual(try number("window.loreEditor.embedMissingTargets().length"), 1)
 
         // And the document is untouched by all of it.
-        XCTAssertEqual(try js("window.loreEditor.text()", in: webView) as? String,
-                       Self.parityDocument)
+        XCTAssertEqual(
+            try js("window.loreEditor.text()", in: webView) as? String,
+            Self.parityDocument)
     }
 
     /// The four gaps the parity shots found against the Lore that ships, each
@@ -150,12 +178,14 @@ final class CM6ParityShotTests: XCTestCase {
     func test_theFourGapsFoundByTheParityShots() throws {
         let webView = try boot(
             "# A heading\n\nProse with ~~struck~~ text and `inline code`.\n\n"
-            + "A reference[^1] here.\n\n[^1]: The note.\n\n")
+                + "A reference[^1] here.\n\n[^1]: The note.\n\n")
         func number(_ expression: String) throws -> Int {
             (try js(expression, in: webView) as? Int) ?? -1
         }
-        let shown = try js("document.querySelector('.cm-content').innerText",
-                           in: webView) as? String ?? ""
+        let shown =
+            try js(
+                "document.querySelector('.cm-content').innerText",
+                in: webView) as? String ?? ""
 
         // 1. Strikethrough. CommonMark has no such node, so `~~struck~~` kept
         //    its tildes and was never struck; GFM is enabled now.
@@ -184,51 +214,67 @@ final class CM6ParityShotTests: XCTestCase {
         let webView = try boot(
             "| A | B |\n|---|---|\n| one | two |\n\n- [ ] open\n- [x] done\n\n")
         XCTAssertEqual(try js("window.loreEditor.tableCount()", in: webView) as? Int, 1)
-        XCTAssertEqual(try js("window.loreEditor.checkboxStates()", in: webView) as? [Bool],
-                       [false, true])
-        XCTAssertEqual(try js("document.querySelectorAll('.cm-lore-bullet').length",
-                              in: webView) as? Int, 0,
-                       "a task shows its checkbox, not a bullet as well")
+        XCTAssertEqual(
+            try js("window.loreEditor.checkboxStates()", in: webView) as? [Bool],
+            [false, true])
+        XCTAssertEqual(
+            try js(
+                "document.querySelectorAll('.cm-lore-bullet').length",
+                in: webView) as? Int, 0,
+            "a task shows its checkbox, not a bullet as well")
     }
 
     // MARK: - the native surface
 
     @MainActor
-    private func shootNative(_ text: String) throws -> NSBitmapImageRep {
-        let hosting = NSHostingView(rootView: AnyView(
-            MarkdownEditor(text: .constant(text), tokens: TestTokens.make())))
-        hosting.frame = NSRect(x: 0, y: 0, width: 1000, height: 1600)
-        let window = NSWindow(contentRect: hosting.frame, styleMask: [.borderless],
-                              backing: .buffered, defer: false)
-        window.contentView = hosting
-        windows.append(window)
-        hosting.layoutSubtreeIfNeeded()
+    private func shootNative(_ text: String, palette: ParityPalette) throws -> NSBitmapImageRep {
         // Let the editor's own asynchronous styling passes run. The native
         // surface styles on a background actor and applies later, so a shot
         // taken immediately is of unstyled text.
-        settle(2)
-        hosting.layoutSubtreeIfNeeded()
-        let rep = try XCTUnwrap(hosting.bitmapImageRepForCachingDisplay(in: hosting.bounds))
-        hosting.cacheDisplay(in: hosting.bounds, to: rep)
-        return rep
+        try shoot(
+            MarkdownEditor(text: .constant(text), tokens: palette.tokens),
+            size: CGSize(width: 1000, height: 1600), palette: palette, settleFor: 2)
     }
 
     // MARK: - the CM6 surface
 
+    /// With `tokens`, the page boots through the REAL coordinator path —
+    /// document and theme handed over on `didFinish`, exactly as
+    /// `CM6EditorView.makeNSView` does — so a palette reaches the CSS
+    /// variables by the bridge Lore ships, not by a copy of it.
     @MainActor
-    private func boot(_ text: String) throws -> WKWebView {
+    private func boot(_ text: String, tokens: HostThemeTokens? = nil) throws -> WKWebView {
         let webView = WKWebView(frame: NSRect(x: 0, y: 0, width: 1000, height: 1600))
-        let window = NSWindow(contentRect: webView.frame, styleMask: [.borderless],
-                              backing: .buffered, defer: false)
+        let window = makeOffscreenWindow(webView.frame)
         window.contentView = webView
         windows.append(window)
+        var coordinator: CM6EditorView.Coordinator?
+        if let tokens {
+            let bridge = CM6EditorView.Coordinator(text: .constant(text))
+            bridge.webView = webView
+            bridge.pendingDocument = text
+            bridge.pendingTheme = (tokens, .default)
+            webView.navigationDelegate = bridge
+            // As `makeNSView` sets it: the page paints `--bg` itself.
+            webView.setValue(false, forKey: "drawsBackground")
+            coordinators.append(bridge)
+            coordinator = bridge
+        }
         let index = try XCTUnwrap(CM6EditorView.Coordinator.bundledIndexURL)
         webView.loadFileURL(index, allowingReadAccessTo: index.deletingLastPathComponent())
         try waitFor("boot") {
             ((try? self.js("typeof window.loreEditor", in: webView)) as? String) == "object"
         }
-        _ = try js("window.loreEditor.init(\(CM6EditorView.Coordinator.jsString(text)))",
-                   in: webView)
+        if let coordinator {
+            // `finishLoading` clears both once it has pushed them.
+            try waitFor("the theme bridge") {
+                coordinator.pendingTheme == nil && coordinator.pendingDocument == nil
+            }
+        } else {
+            _ = try js(
+                "window.loreEditor.init(\(CM6EditorView.Coordinator.jsString(text)))",
+                in: webView)
+        }
         // The caret at the end, so nothing is revealed as source — the reader's
         // view of a note they have just opened and not yet clicked into.
         _ = try js("window.loreEditor.selectAt(window.loreEditor.text().length)", in: webView)
@@ -236,15 +282,18 @@ final class CM6ParityShotTests: XCTestCase {
     }
 
     @MainActor
-    private func shootCM6(_ text: String) throws -> NSBitmapImageRep {
-        let webView = try boot(text)
+    private func shootCM6(_ text: String, palette: ParityPalette) throws -> NSBitmapImageRep {
+        let webView = try boot(text, tokens: palette.tokens)
         try waitFor("the maths engine") {
             ((try? self.js("window.loreEditor.mathEngineLoaded()", in: webView)) as? Bool) == true
         }
         settle(1)
         var captured: NSImage?
         var done = false
-        webView.takeSnapshot(with: nil) { image, _ in captured = image; done = true }
+        webView.takeSnapshot(with: nil) { image, _ in
+            captured = image
+            done = true
+        }
         let deadline = Date().addingTimeInterval(20)
         while !done, Date() < deadline {
             RunLoop.current.run(mode: .default, before: Date().addingTimeInterval(0.02))
@@ -258,8 +307,14 @@ final class CM6ParityShotTests: XCTestCase {
 
     @MainActor @discardableResult
     private func js(_ source: String, in webView: WKWebView) throws -> Any? {
-        var result: Any?; var failure: Error?; var done = false
-        webView.evaluateJavaScript(source) { v, e in result = v; failure = e; done = true }
+        var result: Any?
+        var failure: Error?
+        var done = false
+        webView.evaluateJavaScript(source) { v, e in
+            result = v
+            failure = e
+            done = true
+        }
         let deadline = Date().addingTimeInterval(20)
         while !done, Date() < deadline {
             RunLoop.current.run(mode: .default, before: Date().addingTimeInterval(0.01))
@@ -276,39 +331,5 @@ final class CM6ParityShotTests: XCTestCase {
             RunLoop.current.run(mode: .default, before: Date().addingTimeInterval(0.02))
         }
         XCTFail("timed out waiting for \(what)")
-    }
-
-    @MainActor
-    private func settle(_ seconds: TimeInterval) {
-        let deadline = Date().addingTimeInterval(seconds)
-        while Date() < deadline {
-            RunLoop.current.run(mode: .default, before: Date().addingTimeInterval(0.02))
-        }
-    }
-
-    private func write(_ rep: NSBitmapImageRep, to url: URL) throws {
-        let png = try XCTUnwrap(rep.representation(using: .png, properties: [:]))
-        try png.write(to: url)
-    }
-
-    /// How many rows of the image differ from their neighbour.
-    ///
-    /// A cheap "did anything render" measure that a size check cannot give: a
-    /// blank surface is one colour, so every row is identical to the last, and
-    /// the count is 1 however many bytes the PNG takes.
-    private func distinctRowCount(of rep: NSBitmapImageRep) throws -> Int {
-        let width = rep.pixelsWide, height = rep.pixelsHigh
-        var previous: [Int] = []
-        var distinct = 0
-        for y in stride(from: 0, to: height, by: 4) {
-            var row: [Int] = []
-            for x in stride(from: 0, to: width, by: 16) {
-                let colour = rep.colorAt(x: x, y: y)
-                row.append(Int(((colour?.brightnessComponent ?? 0) * 255).rounded()))
-            }
-            if row != previous { distinct += 1 }
-            previous = row
-        }
-        return distinct
     }
 }

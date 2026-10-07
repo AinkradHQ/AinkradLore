@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "dracula",
+  "name": "Dracula",
+  "base": "neonBlue",
+  "palette": {
+    "background": "#1A1B23",
+    "surface": "#282A36",
+    "surfaceElevated": "#343746",
+    "accentPrimary": "#BD93F9",
+    "accentSecondary": "#FF79C6",
+    "accentTertiary": "#50FA7B",
+    "foreground": "#F8F8F2",
+    "success": "#50FA7B",
+    "warning": "#F1FA8C",
+    "danger": "#FF5555"
+  },
+  "terminal": {
+    "background": "#282A36",
+    "foreground": "#F8F8F2",
+    "cursor": "#BD93F9",
+    "selection": "#3B4252",
+    "ansi": [
+      "#21222C", "#FF5555", "#50FA7B", "#F1FA8C", "#BD93F9", "#FF79C6", "#8BE9FD", "#F8F8F2",
+      "#6272A4", "#FF6E6E", "#69FF94", "#FFFFA5", "#D6ACFF", "#FF92DF", "#A4FFFF", "#FFFFFF"
+    ]
+  },
+  "host": {
+    "skyProfile": [1.2, 0.85, 0.85, 1.15, 1.0],
+    "iconColorFamily": "purple"
+  }
+}

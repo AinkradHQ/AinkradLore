@@ -1,0 +1,2564 @@
+{
+  "chrome" : {
+    "hudBarHeight" : 30,
+    "overlay" : {
+      "backdropOpacity" : 0.42,
+      "backgroundOpacity" : 0.94,
+      "cutKey" : "panel",
+      "edgeFrom" : "accentSecondary@0.55",
+      "edgeTo" : "accentPrimary@0.28",
+      "edgeWidth" : 1
+    },
+    "pane" : {
+      "bottomInsetKey" : "sm",
+      "horizontalInsetKey" : "sm",
+      "tabStripHeight" : 30,
+      "tabStripSpacingKey" : "xs",
+      "topInsetKey" : "xs"
+    },
+    "settings" : {
+      "controlColumnWidth" : 220,
+      "heightFraction" : 0.85,
+      "miniMapBreakpoint" : 640,
+      "panelMaxHeight" : 900,
+      "panelMaxWidth" : 1440,
+      "panelMinHeight" : 700,
+      "panelMinWidth" : 1100,
+      "sidebarWidth" : 240,
+      "wideBreakpoint" : 900,
+      "widthFraction" : 0.82,
+      "yOffset" : -30
+    }
+  },
+  "components" : {
+    "appTile" : {
+      "fill" : "surfaceElevated@0.85",
+      "glow" : {
+        "color" : {
+          "hover" : "accentPrimary@0.4",
+          "rest" : "accentPrimary@0",
+          "selected" : "accentPrimary@0.5"
+        },
+        "radius" : {
+          "hover" : 8,
+          "rest" : 0,
+          "selected" : 8
+        }
+      },
+      "glyphRatio" : 0.42,
+      "hoverScale" : 1.05,
+      "shape" : {
+        "cutRatio" : 0.22,
+        "style" : "chamfer"
+      },
+      "size" : 44,
+      "stroke" : {
+        "color" : {
+          "hover" : "accentSecondary@0.65",
+          "rest" : "accentSecondary@0.3",
+          "selected" : "accentPrimary@0.9"
+        },
+        "width" : {
+          "rest" : 1,
+          "selected" : 1.5
+        }
+      },
+      "titleColor" : "foreground@0.75",
+      "titleFont" : {
+        "role" : "caption"
+      }
+    },
+    "badge" : {
+      "fill" : "tint@0.16",
+      "font" : {
+        "role" : "caption",
+        "tracking" : 0.6,
+        "weight" : "semibold"
+      },
+      "shape" : {
+        "cut" : 4,
+        "style" : "chamfer"
+      },
+      "stroke" : {
+        "color" : "tint@0.55",
+        "width" : 1
+      }
+    },
+    "banner" : {
+      "bodyColor" : "foreground@0.9",
+      "bodyFont" : {
+        "role" : "body"
+      },
+      "closeColor" : "foreground@0.5",
+      "closeFont" : {
+        "scaled" : false,
+        "size" : 10,
+        "weight" : "bold"
+      },
+      "fill" : "tint@0.12",
+      "iconFont" : {
+        "scaled" : false,
+        "size" : 14,
+        "weight" : "semibold"
+      },
+      "shape" : {
+        "cut" : 8,
+        "style" : "chamfer"
+      },
+      "stroke" : {
+        "color" : "tint@0.5",
+        "width" : 1.25
+      }
+    },
+    "basicShellHeader" : {
+      "glyphFont" : {
+        "scaled" : false,
+        "size" : 12,
+        "weight" : "medium"
+      },
+      "subtitleColor" : "foreground@0.55",
+      "subtitleFont" : {
+        "role" : "caption"
+      },
+      "titleFont" : {
+        "role" : "headline",
+        "weight" : "medium"
+      }
+    },
+    "breadcrumb" : {
+      "activeColor" : "accentSecondary",
+      "activeFont" : {
+        "role" : "caption",
+        "tracking" : 0.6,
+        "weight" : "semibold"
+      },
+      "chevronColor" : "accentSecondary@0.55",
+      "chevronFont" : {
+        "scaled" : false,
+        "size" : 10,
+        "weight" : "bold"
+      },
+      "font" : {
+        "role" : "caption",
+        "tracking" : 0.6
+      },
+      "itemColor" : "foreground@0.6"
+    },
+    "button" : {
+      "fill" : {
+        "disabled" : "tint@0.4",
+        "hover" : "tint@0.95",
+        "pressed" : "tint@0.95",
+        "rest" : "tint@0.9"
+      },
+      "glow" : {
+        "color" : {
+          "hover" : "tint@0.55",
+          "rest" : "tint@0"
+        },
+        "radius" : {
+          "hover" : 6,
+          "rest" : 0
+        }
+      },
+      "hoverScale" : 1.02,
+      "iconFont" : {
+        "scaled" : false,
+        "size" : 12,
+        "weight" : "semibold"
+      },
+      "labelFont" : {
+        "role" : "caption",
+        "tracking" : 0.8,
+        "weight" : "semibold"
+      },
+      "pressedScale" : 0.97,
+      "shape" : {
+        "cut" : 8,
+        "style" : "chamfer"
+      },
+      "spinnerSize" : 14,
+      "stroke" : {
+        "color" : {
+          "hover" : "tint@0.95",
+          "rest" : "tint@0.55"
+        },
+        "width" : 1.25
+      }
+    },
+    "captionedRow" : {
+      "captionColor" : "foreground@0.45",
+      "captionColumnWidth" : 86,
+      "captionFont" : {
+        "role" : "caption",
+        "weight" : "medium"
+      }
+    },
+    "card" : {
+      "fill" : "surface@0.9",
+      "hoverScale" : 1.015,
+      "padding" : 12,
+      "shape" : {
+        "cut" : 12,
+        "style" : "chamfer"
+      },
+      "stroke" : {
+        "color" : {
+          "hover" : "accentSecondary@0.6",
+          "rest" : "accentSecondary@0.25",
+          "selected" : "accentPrimary@0.85"
+        },
+        "width" : {
+          "rest" : 1,
+          "selected" : 1.5
+        }
+      },
+      "hoverBracketInset" : -2,
+      "hoverBracketLength" : 10
+    },
+    "checkbox" : {
+      "checkGlyphFont" : {
+        "scaled" : false,
+        "size" : 10,
+        "weight" : "bold"
+      },
+      "fill" : {
+        "rest" : "surfaceElevated@0.5",
+        "selected" : "accentSecondary@0.22"
+      },
+      "glow" : {
+        "color" : {
+          "rest" : "accentSecondary@0",
+          "selected" : "accentSecondary@0.5"
+        },
+        "radius" : {
+          "rest" : 0,
+          "selected" : 4
+        }
+      },
+      "hoverScale" : 1.04,
+      "labelFont" : {
+        "role" : "body"
+      },
+      "shape" : {
+        "cut" : 3,
+        "style" : "chamfer"
+      },
+      "size" : 18,
+      "stroke" : {
+        "color" : {
+          "hover" : "accentSecondary@0.85",
+          "rest" : "accentSecondary@0.4",
+          "selected" : "accentSecondary@0.85"
+        },
+        "width" : {
+          "rest" : 1.25,
+          "selected" : 1.25
+        }
+      }
+    },
+    "chip" : {
+      "fg" : {
+        "rest" : "foreground@0.85",
+        "selected" : "foreground"
+      },
+      "fill" : {
+        "hover" : "surfaceElevated@0.65",
+        "rest" : "surfaceElevated@0.45",
+        "selected" : "surfaceElevated@0.8"
+      },
+      "hoverScale" : 1.03,
+      "iconFont" : {
+        "scaled" : false,
+        "size" : 10,
+        "weight" : "semibold"
+      },
+      "labelFont" : {
+        "role" : "caption"
+      },
+      "shape" : {
+        "cut" : 5,
+        "style" : "chamfer"
+      },
+      "stroke" : {
+        "color" : {
+          "hover" : "accentSecondary@0.6",
+          "rest" : "accentSecondary@0.3"
+        },
+        "width" : 1
+      },
+      "removeFont" : {
+        "scaled" : false,
+        "size" : 8,
+        "weight" : "bold"
+      },
+      "removePadding" : 3
+    },
+    "codeBlock" : {
+      "codeColor" : "foreground@0.92",
+      "codeFont" : {
+        "role" : "mono"
+      },
+      "fill" : "surface@0.9",
+      "headerColor" : "foreground@0.55",
+      "headerFont" : {
+        "role" : "caption",
+        "tracking" : 0.8,
+        "weight" : "semibold"
+      },
+      "shape" : {
+        "cut" : 8,
+        "style" : "chamfer"
+      },
+      "stroke" : {
+        "color" : "accentSecondary@0.3",
+        "width" : 1
+      }
+    },
+    "colorPicker" : {
+      "channelTickColor" : "accentSecondary@0.55",
+      "panelMaxHeight" : 360,
+      "panelWidth" : 244,
+      "previewHeight" : 28,
+      "previewShape" : {
+        "cut" : 6,
+        "style" : "chamfer"
+      },
+      "previewStroke" : {
+        "color" : "accentPrimary@0.3",
+        "width" : 1
+      },
+      "swatchGlow" : {
+        "color" : {
+          "focused" : "accentPrimary@0.45",
+          "rest" : "accentPrimary@0"
+        },
+        "radius" : {
+          "focused" : 6,
+          "rest" : 0
+        }
+      },
+      "swatchHeight" : 24,
+      "swatchShape" : {
+        "cut" : 6,
+        "style" : "chamfer"
+      },
+      "swatchStroke" : {
+        "color" : {
+          "focused" : "accentPrimary@0.9",
+          "rest" : "accentPrimary@0.35"
+        },
+        "width" : {
+          "focused" : 1.5,
+          "rest" : 1.25
+        }
+      },
+      "swatchWidth" : 28,
+      "channelTickHeight" : 10,
+      "channelTickWidth" : 2,
+      "labelColor" : "foreground@0.8",
+      "valueColor" : "foreground@0.6"
+    },
+    "combobox" : {
+      "fill" : "surfaceElevated@0.5",
+      "glow" : {
+        "color" : {
+          "focused" : "accentPrimary@0.45",
+          "rest" : "accentPrimary@0"
+        },
+        "radius" : {
+          "focused" : 6,
+          "rest" : 0
+        }
+      },
+      "shape" : {
+        "cut" : 8,
+        "style" : "chamfer"
+      },
+      "stroke" : {
+        "color" : {
+          "focused" : "accentPrimary@0.85",
+          "rest" : "accentPrimary@0.3"
+        },
+        "width" : {
+          "focused" : 1.5,
+          "rest" : 1.25
+        }
+      }
+    },
+    "commandMenuRow" : {
+      "detailColor" : "foreground@0.45",
+      "detailFont" : {
+        "role" : "mono"
+      },
+      "fg" : {
+        "rest" : "foreground@0.65",
+        "selected" : "foreground"
+      },
+      "fill" : {
+        "rest" : "surfaceElevated@0.2",
+        "selected" : "accentPrimary@0.85"
+      },
+      "glow" : {
+        "color" : {
+          "rest" : "clear",
+          "selected" : "accentSecondary@0.5"
+        },
+        "radius" : {
+          "rest" : 0,
+          "selected" : 5
+        }
+      },
+      "glyphFont" : {
+        "scaled" : false,
+        "size" : 13,
+        "weight" : "semibold"
+      },
+      "hoverScale" : 1.015,
+      "shape" : {
+        "cut" : 6,
+        "style" : "chamfer"
+      },
+      "stroke" : {
+        "color" : {
+          "rest" : "clear",
+          "selected" : "accentSecondary@0.9"
+        },
+        "width" : 1.25
+      },
+      "titleFont" : {
+        "role" : "caption",
+        "tracking" : 0.6,
+        "weight" : "semibold"
+      },
+      "valueColor" : "accentSecondary@0.85",
+      "valueFont" : {
+        "role" : "mono"
+      },
+      "glyphWidth" : 18,
+      "uppercasedTracking" : 0.6
+    },
+    "confirmDialog" : {
+      "maxWidth" : 360,
+      "messageColor" : "foreground@0.75",
+      "messageFont" : {
+        "role" : "body"
+      },
+      "titleFont" : {
+        "role" : "headline",
+        "tracking" : 0.6,
+        "weight" : "semibold"
+      },
+      "transitionScale" : 0.94
+    },
+    "contextMenu" : {
+      "bodyFont" : {
+        "role" : "body"
+      },
+      "glyphFont" : {
+        "scaled" : false,
+        "size" : 12,
+        "weight" : "semibold"
+      },
+      "rowHoverFill" : "accentSecondary@0.14",
+      "rowShape" : {
+        "cut" : 4,
+        "style" : "chamfer"
+      },
+      "rowGap" : 2,
+      "tint" : "foreground@0.9"
+    },
+    "dataTable" : {
+      "cellColor" : "foreground@0.9",
+      "cellFont" : {
+        "role" : "body"
+      },
+      "headerColor" : "foreground@0.75",
+      "headerFill" : "surfaceElevated@0.7",
+      "headerFont" : {
+        "role" : "caption",
+        "tracking" : 0.8,
+        "weight" : "semibold"
+      },
+      "headerShape" : {
+        "corners" : "top",
+        "cut" : 6,
+        "style" : "chamfer"
+      },
+      "rowFill" : {
+        "hover" : "surfaceElevated@0.4",
+        "rest" : "clear",
+        "selected" : "accentPrimary@0.16"
+      },
+      "rowShape" : {
+        "cut" : 4,
+        "style" : "chamfer"
+      },
+      "sortGlyphFont" : {
+        "scaled" : false,
+        "size" : 8,
+        "weight" : "bold"
+      },
+      "edgeGlow" : {
+        "color" : "accentSecondary@0.6",
+        "radius" : 3
+      },
+      "edgeWidth" : 2,
+      "headerCellGap" : 3,
+      "rowGap" : 2
+    },
+    "disclosureGroup" : {
+      "chevronColor" : "foreground@0.5",
+      "chevronFont" : {
+        "scaled" : false,
+        "size" : 10
+      },
+      "headerFill" : {
+        "hover" : "surfaceElevated@0.5",
+        "rest" : "clear"
+      },
+      "headerShape" : {
+        "cut" : 8,
+        "style" : "chamfer"
+      },
+      "titleColor" : "foreground@0.7",
+      "titleFont" : {
+        "role" : "caption",
+        "tracking" : 1.2,
+        "weight" : "semibold"
+      },
+      "expandAnimation" : {
+        "curve" : "easeOut",
+        "duration" : 0.25
+      },
+      "hoverAnimation" : {
+        "curve" : "easeOut",
+        "duration" : 0.15
+      }
+    },
+    "drawer" : {
+      "scrimColor" : "black@0.45",
+      "width" : 280
+    },
+    "emptyState" : {
+      "glyphColor" : "foreground@0.35",
+      "glyphFont" : {
+        "role" : "display",
+        "scaled" : false
+      },
+      "messageColor" : "foreground@0.6",
+      "messageFont" : {
+        "role" : "body"
+      },
+      "titleFont" : {
+        "role" : "headline",
+        "weight" : "medium"
+      }
+    },
+    "errorState" : {
+      "fill" : "danger@0.12",
+      "glyphColor" : "danger",
+      "glyphFont" : {
+        "role" : "title",
+        "scaled" : false
+      },
+      "messageColor" : "foreground@0.75",
+      "messageFont" : {
+        "role" : "body"
+      },
+      "shape" : {
+        "cut" : 8,
+        "style" : "chamfer"
+      },
+      "stroke" : {
+        "color" : "danger@0.45",
+        "width" : 1.25
+      }
+    },
+    "formRow" : {
+      "hintColor" : "foreground@0.55",
+      "hintFont" : {
+        "role" : "caption"
+      },
+      "labelFont" : {
+        "role" : "body"
+      },
+      "tickColor" : "accentSecondary@0.55",
+      "hintLeading" : 6,
+      "tickHeight" : 12,
+      "tickWidth" : 2
+    },
+    "groupedSelectRows" : {
+      "detailColor" : {
+        "disabled" : "foreground@0.3",
+        "rest" : "foreground@0.5"
+      },
+      "detailFont" : {
+        "role" : "caption"
+      },
+      "emptyColor" : "foreground@0.5",
+      "emptyFont" : {
+        "role" : "caption"
+      },
+      "headerColor" : "foreground@0.45",
+      "headerFont" : {
+        "role" : "caption"
+      },
+      "iconColor" : {
+        "disabled" : "foreground@0.4",
+        "rest" : "foreground@0.75"
+      },
+      "iconFont" : {
+        "scaled" : false,
+        "size" : 11
+      },
+      "titleColor" : {
+        "disabled" : "foreground@0.4",
+        "rest" : "foreground"
+      },
+      "titleFont" : {
+        "role" : "body"
+      },
+      "headerKerning" : 1,
+      "headerPadBottom" : 2,
+      "panelMaxHeight" : 320,
+      "panelMinWidth" : 340
+    },
+    "groupedSelectTrigger" : {
+      "chevron" : {
+        "scaled" : false,
+        "size" : 10,
+        "weight" : "semibold"
+      },
+      "chevronColor" : "accentSecondary@0.85",
+      "fill" : "surfaceElevated@0.5",
+      "glow" : {
+        "color" : {
+          "rest" : "accentPrimary@0",
+          "selected" : "accentPrimary@0.4"
+        },
+        "radius" : {
+          "rest" : 0,
+          "selected" : 5
+        }
+      },
+      "shape" : {
+        "cut" : 8,
+        "style" : "chamfer"
+      },
+      "stroke" : {
+        "color" : {
+          "rest" : "accentPrimary@0.3",
+          "selected" : "accentPrimary@0.75"
+        },
+        "width" : {
+          "rest" : 1.25,
+          "selected" : 1.25
+        }
+      }
+    },
+    "iconButton" : {
+      "fg" : {
+        "hover" : "foreground",
+        "rest" : "foreground@0.75"
+      },
+      "fill" : {
+        "hover" : "surfaceElevated@0.7",
+        "rest" : "surfaceElevated@0.4"
+      },
+      "glow" : {
+        "color" : {
+          "hover" : "accentSecondary@0.5",
+          "rest" : "accentSecondary@0"
+        },
+        "radius" : {
+          "hover" : 5,
+          "rest" : 0
+        }
+      },
+      "glyphRatio" : 0.433,
+      "hoverScale" : 1.05,
+      "shape" : {
+        "cutRatio" : 0.2,
+        "style" : "chamfer"
+      },
+      "size" : 30,
+      "stroke" : {
+        "color" : {
+          "hover" : "accentSecondary@0.85",
+          "rest" : "accentSecondary@0.35"
+        },
+        "width" : 1
+      }
+    },
+    "iconGlyph" : {
+      "fill" : "accentPrimary@0.85",
+      "glyphRatio" : 0.55,
+      "shape" : {
+        "cutRatio" : 0.2,
+        "minCut" : 2,
+        "style" : "chamfer"
+      },
+      "size" : 16,
+      "stroke" : {
+        "color" : {
+          "rest" : "accentSecondary@0.4",
+          "selected" : "clear"
+        },
+        "width" : 1
+      },
+      "glyphColor" : "accentSecondary"
+    },
+    "kbd" : {
+      "color" : "foreground@0.75",
+      "fill" : "surfaceElevated@0.55",
+      "font" : {
+        "role" : "mono",
+        "weight" : "medium"
+      },
+      "shape" : {
+        "cut" : 3,
+        "style" : "chamfer"
+      },
+      "stroke" : {
+        "color" : "foreground@0.2",
+        "width" : 1
+      },
+      "paddingH" : 6,
+      "paddingV" : 2
+    },
+    "listRow" : {
+      "fill" : {
+        "hover" : "surfaceElevated@0.5",
+        "rest" : "clear",
+        "selected" : "accentPrimary@0.16"
+      },
+      "shape" : {
+        "cut" : 6,
+        "style" : "chamfer"
+      },
+      "subtitleColor" : "foreground@0.55",
+      "subtitleFont" : {
+        "role" : "caption"
+      },
+      "titleFont" : {
+        "role" : "body",
+        "weight" : "medium"
+      },
+      "edgeGlow" : {
+        "color" : {
+          "rest" : "clear",
+          "selected" : "accentSecondary@0.6"
+        },
+        "radius" : 3
+      },
+      "edgeWidth" : {
+        "hover" : 2,
+        "rest" : 0,
+        "selected" : 2
+      },
+      "gap" : 2
+    },
+    "loadingState" : {
+      "captionColor" : "foreground@0.6",
+      "spinnerSize" : 28,
+      "captionFont" : {
+        "role" : "caption"
+      }
+    },
+    "logView" : {
+      "ansiSlots" : [
+        "foreground@0.45",
+        "danger",
+        "success",
+        "warning",
+        "accentPrimary",
+        "accentSecondary",
+        "accentPrimary@0.8",
+        "foreground",
+        "foreground@0.6",
+        "danger",
+        "success",
+        "warning",
+        "accentPrimary",
+        "accentSecondary",
+        "accentPrimary@0.9",
+        "foreground"
+      ],
+      "dimOpacity" : 0.6,
+      "font" : {
+        "mono" : "system",
+        "size" : 11
+      },
+      "insetX" : 8,
+      "insetY" : 8,
+      "sourcePrefixOpacity" : 0.45,
+      "stderrSlot" : 1
+    },
+    "meter" : {
+      "arcGlow" : {
+        "color" : "tint@0.55",
+        "radius" : 4
+      },
+      "labelColor" : "foreground@0.55",
+      "labelFont" : {
+        "role" : "caption",
+        "tracking" : 0.6
+      },
+      "size" : 88,
+      "trackColor" : "foreground@0.1",
+      "valueFont" : {
+        "role" : "headline",
+        "weight" : "semibold"
+      },
+      "gap" : 2,
+      "lineMinWidth" : 3,
+      "lineWidthRatio" : 0.07
+    },
+    "modal" : {
+      "contentWidthPadding" : 32,
+      "edgeSheetWidth" : 360,
+      "maxWidth" : 480,
+      "transitionScale" : 0.94
+    },
+    "modeSwitch" : {
+      "fg" : {
+        "hover" : "foreground@0.95",
+        "rest" : "foreground@0.55"
+      },
+      "glyphFont" : {
+        "scaled" : false,
+        "size" : 9,
+        "weight" : "semibold"
+      },
+      "hoverFill" : "foreground@0.08",
+      "labelFont" : {
+        "role" : "caption",
+        "weight" : "medium"
+      },
+      "shape" : {
+        "cut" : 8,
+        "style" : "continuous"
+      },
+      "hoverAnimation" : {
+        "curve" : "easeOut",
+        "duration" : 0.12
+      }
+    },
+    "multiSelectCheck" : {
+      "glyphFont" : {
+        "scaled" : false,
+        "size" : 8,
+        "weight" : "bold"
+      },
+      "shape" : {
+        "cut" : 2,
+        "style" : "chamfer"
+      },
+      "size" : 12,
+      "stroke" : {
+        "color" : "accentSecondary@0.6",
+        "width" : 1
+      }
+    },
+    "multiSelectTrigger" : {
+      "chevron" : {
+        "scaled" : false,
+        "size" : 10,
+        "weight" : "semibold"
+      },
+      "chevronColor" : "accentSecondary@0.85",
+      "fill" : "surfaceElevated@0.5",
+      "glow" : {
+        "color" : {
+          "rest" : "accentPrimary@0",
+          "selected" : "accentPrimary@0.4"
+        },
+        "radius" : {
+          "rest" : 0,
+          "selected" : 5
+        }
+      },
+      "shape" : {
+        "cut" : 8,
+        "style" : "chamfer"
+      },
+      "stroke" : {
+        "color" : {
+          "rest" : "accentPrimary@0.3",
+          "selected" : "accentPrimary@0.75"
+        },
+        "width" : {
+          "rest" : 1.25,
+          "selected" : 1.25
+        }
+      }
+    },
+    "navListRow" : {
+      "bodyFont" : {
+        "role" : "body"
+      },
+      "bodySelectedFont" : {
+        "role" : "body",
+        "weight" : "semibold"
+      },
+      "fg" : {
+        "hover" : "foreground@0.85",
+        "rest" : "foreground@0.6",
+        "selected" : "foreground"
+      },
+      "fill" : {
+        "hover" : "surfaceElevated@0.3",
+        "rest" : "clear",
+        "selected" : "surfaceElevated@0.6"
+      },
+      "glyphFont" : {
+        "scaled" : false,
+        "size" : 12,
+        "weight" : "semibold"
+      },
+      "shape" : {
+        "cut" : 8,
+        "style" : "continuous"
+      },
+      "glyphWidth" : 16,
+      "tickWidth" : 2
+    },
+    "pagination" : {
+      "currentDotSize" : 8,
+      "currentFill" : "accentPrimary",
+      "currentGlow" : {
+        "color" : {
+          "rest" : "clear",
+          "selected" : "accentPrimary@0.6"
+        },
+        "radius" : {
+          "rest" : 0,
+          "selected" : 3
+        }
+      },
+      "disabledOpacity" : 0.3,
+      "dotFill" : "foreground@0.25",
+      "dotSize" : 6
+    },
+    "panel" : {
+      "fill" : "background@0.94",
+      "shape" : {
+        "cut" : 14,
+        "style" : "chamfer"
+      },
+      "stroke" : {
+        "color" : "accentSecondary@0.4",
+        "width" : 1
+      }
+    },
+    "radioGroup" : {
+      "glow" : {
+        "color" : {
+          "rest" : "accentSecondary@0",
+          "selected" : "accentSecondary@0.5"
+        },
+        "radius" : {
+          "rest" : 0,
+          "selected" : 4
+        }
+      },
+      "labelFont" : {
+        "role" : "body"
+      },
+      "markerFill" : "accentSecondary",
+      "markerShape" : "Diamond",
+      "markerSize" : 8,
+      "ringSize" : 16,
+      "ringStroke" : {
+        "color" : {
+          "hover" : "accentSecondary@0.9",
+          "rest" : "accentSecondary@0.4",
+          "selected" : "accentSecondary@0.9"
+        },
+        "width" : {
+          "rest" : 1.25,
+          "selected" : 1.25
+        }
+      }
+    },
+    "rangeSlider" : {
+      "containerFill" : "surfaceElevated@0.3",
+      "containerShape" : {
+        "cut" : 6,
+        "style" : "chamfer"
+      },
+      "containerStroke" : {
+        "color" : "accentPrimary@0.2",
+        "width" : 1
+      }
+    },
+    "searchField" : {
+      "clearGlyphColor" : "foreground@0.45",
+      "clearGlyphFont" : {
+        "scaled" : false,
+        "size" : 12
+      },
+      "font" : {
+        "role" : "body"
+      },
+      "leadingGlyphColor" : "foreground@0.55",
+      "leadingGlyphFont" : {
+        "scaled" : false,
+        "size" : 12
+      },
+      "searchGlyphColor" : {
+        "focused" : "accentSecondary@0.95",
+        "rest" : "accentSecondary@0.55"
+      },
+      "searchGlyphFont" : {
+        "scaled" : false,
+        "size" : 12,
+        "weight" : "semibold"
+      }
+    },
+    "sectionFrame" : {
+      "bodyFill" : "surfaceElevated@0.35",
+      "bodyShape" : {
+        "cut" : 12,
+        "style" : "chamfer"
+      },
+      "bodyStroke" : {
+        "color" : "accentSecondary@0.35",
+        "width" : 1
+      },
+      "tickHeight" : 2,
+      "tickWidth" : 14,
+      "titleColor" : "foreground@0.7",
+      "titleFont" : {
+        "role" : "caption",
+        "tracking" : 1.2,
+        "weight" : "semibold"
+      }
+    },
+    "sectionHeader" : {
+      "subtitleColor" : "foreground@0.4",
+      "subtitleFont" : {
+        "role" : "caption"
+      },
+      "tickHeight" : 2,
+      "tickWidth" : 12,
+      "titleColor" : "foreground@0.65",
+      "titleFont" : {
+        "role" : "caption",
+        "tracking" : 1.2,
+        "weight" : "semibold"
+      }
+    },
+    "secureField" : {
+      "clearGlyphColor" : "foreground@0.45",
+      "clearGlyphFont" : {
+        "scaled" : false,
+        "size" : 12
+      },
+      "font" : {
+        "role" : "mono",
+        "mono" : "family"
+      },
+      "leadingGlyphColor" : "foreground@0.55",
+      "leadingGlyphFont" : {
+        "scaled" : false,
+        "size" : 12
+      },
+      "searchGlyphColor" : "accentSecondary@0.55",
+      "searchGlyphFont" : {
+        "scaled" : false,
+        "size" : 12,
+        "weight" : "semibold"
+      }
+    },
+    "segmentedPicker" : {
+      "fg" : "foreground@0.75",
+      "fill" : {
+        "hover" : "surfaceElevated@0.65",
+        "rest" : "surfaceElevated@0.5",
+        "selected" : "accentPrimary@0.9"
+      },
+      "glow" : {
+        "color" : {
+          "rest" : "accentPrimary@0",
+          "selected" : "accentPrimary@0.4"
+        },
+        "radius" : {
+          "rest" : 0,
+          "selected" : 5
+        }
+      },
+      "labelFont" : {
+        "role" : "caption"
+      },
+      "labelSelectedFont" : {
+        "role" : "caption",
+        "weight" : "medium"
+      },
+      "shape" : {
+        "cut" : 5,
+        "style" : "chamfer"
+      },
+      "stroke" : {
+        "color" : {
+          "hover" : "accentPrimary@0.5",
+          "rest" : "accentPrimary@0.15",
+          "selected" : "clear"
+        },
+        "width" : 1
+      }
+    },
+    "selectTrigger" : {
+      "chevron" : {
+        "scaled" : false,
+        "size" : 10,
+        "weight" : "semibold"
+      },
+      "chevronColor" : "accentSecondary@0.85",
+      "fill" : "surfaceElevated@0.5",
+      "glow" : {
+        "color" : {
+          "rest" : "accentPrimary@0",
+          "selected" : "accentPrimary@0.4"
+        },
+        "radius" : {
+          "rest" : 0,
+          "selected" : 5
+        }
+      },
+      "shape" : {
+        "cut" : 8,
+        "style" : "chamfer"
+      },
+      "stroke" : {
+        "color" : {
+          "rest" : "accentPrimary@0.3",
+          "selected" : "accentPrimary@0.75"
+        },
+        "width" : {
+          "rest" : 1.25,
+          "selected" : 1.25
+        }
+      }
+    },
+    "settingsGroup" : {
+      "captionColor" : "foreground@0.45",
+      "highlightStroke" : {
+        "color" : "accentSecondary@0.9",
+        "width" : 1.5
+      },
+      "searchDimmedOpacity" : 0.35,
+      "captionFont" : {
+        "role" : "caption"
+      },
+      "highlightShape" : {
+        "cut" : 12,
+        "style" : "chamfer"
+      }
+    },
+    "settingsPage" : {
+      "hitsCaptionFont" : {
+        "role" : "caption",
+        "weight" : "medium"
+      },
+      "hitsColor" : "accentSecondary@0.9",
+      "hitsGlyphFont" : {
+        "scaled" : false,
+        "size" : 10
+      },
+      "itemsColor" : "foreground@0.6",
+      "itemsFont" : {
+        "role" : "caption"
+      },
+      "listGap" : 24,
+      "miniMapGutter" : 18,
+      "miniMapPaddingTopTrailing" : 18,
+      "miniMapTitleColor" : "foreground@0.4",
+      "miniMapTitleFont" : {
+        "kerning" : 2.5,
+        "role" : "mono",
+        "weight" : "medium"
+      },
+      "miniMapWidth" : 150,
+      "padding" : 18,
+      "scrollAnimation" : {
+        "curve" : "easeOut",
+        "duration" : 0.2
+      },
+      "tabInsertAnimation" : {
+        "curve" : "easeOut",
+        "duration" : 0.12
+      },
+      "hitsGap" : 6,
+      "itemsGap" : 8
+    },
+    "settingsPanel" : {
+      "fill" : "surfaceElevated@0.32",
+      "hintColor" : "foreground@0.55",
+      "hintFont" : {
+        "role" : "caption"
+      },
+      "hintReadingWidth" : 560,
+      "padding" : 16,
+      "shape" : {
+        "cut" : 12,
+        "style" : "chamfer"
+      },
+      "titleColor" : "foreground@0.95",
+      "titleFont" : {
+        "role" : "headline",
+        "weight" : "medium"
+      }
+    },
+    "settingsRow" : {
+      "fill" : "surfaceElevated@0.5",
+      "hoverAnimation" : {
+        "curve" : "easeOut",
+        "duration" : "fast"
+      },
+      "resetGlyphColor" : "accentSecondary@0.9",
+      "resetGlyphFont" : {
+        "scaled" : false,
+        "size" : 10
+      },
+      "shape" : {
+        "cut" : 12,
+        "style" : "chamfer"
+      },
+      "stroke" : {
+        "color" : {
+          "hover" : "accentPrimary@0.3",
+          "rest" : "accentPrimary@0.15"
+        },
+        "width" : 1
+      },
+      "valueColor" : "foreground@0.8",
+      "valueFont" : {
+        "role" : "mono"
+      }
+    },
+    "signalFeedList" : {
+      "dayHeaderColor" : "foreground@0.42",
+      "dayHeaderFont" : {
+        "mono" : "family",
+        "size" : 9.5,
+        "tracking" : 0.7,
+        "weight" : "semibold"
+      },
+      "emptyGlyphColor" : "foreground@0.3",
+      "emptyGlyphFont" : {
+        "scaled" : false,
+        "size" : 18,
+        "weight" : "light"
+      },
+      "emptyTextColor" : "foreground@0.55",
+      "emptyTextFont" : {
+        "size" : 12,
+        "weight" : "medium"
+      },
+      "fill" : "surface@0.92"
+    },
+    "signalFeedRow" : {
+      "appGlyphFont" : {
+        "scaled" : false,
+        "size" : 13,
+        "weight" : "medium"
+      },
+      "appGlyphSize" : 16,
+      "bodyColor" : "foreground@0.62",
+      "bodyFont" : {
+        "size" : 11.5
+      },
+      "chevronColor" : {
+        "hover" : "foreground@0.6",
+        "rest" : "foreground@0.3"
+      },
+      "chevronFont" : {
+        "scaled" : false,
+        "size" : 8,
+        "weight" : "bold"
+      },
+      "chevronSize" : 12,
+      "fill" : {
+        "hover" : "surfaceElevated@0.9",
+        "rest" : "clear"
+      },
+      "focusRingColor" : "accentPrimary@0.9",
+      "focusRingWidth" : 1.5,
+      "hoverScale" : 1.12,
+      "infoSeverityColor" : "success@0.55",
+      "metaColor" : "foreground@0.45",
+      "metaFont" : {
+        "mono" : "family",
+        "size" : 9.5,
+        "tracking" : 0.4,
+        "weight" : "medium"
+      },
+      "repeatGlyphFont" : {
+        "scaled" : false,
+        "size" : 8.5
+      },
+      "shape" : {
+        "cut" : 8,
+        "style" : "chamfer"
+      },
+      "stroke" : {
+        "color" : {
+          "hover" : "accentSecondary@0.35",
+          "rest" : "clear"
+        },
+        "width" : 1
+      },
+      "timeColor" : "foreground@0.45",
+      "timeFont" : {
+        "mono" : "family",
+        "size" : 10,
+        "weight" : "medium"
+      },
+      "titleFont" : {
+        "size" : 12.5
+      },
+      "unreadDotSize" : 5,
+      "chevronTopPadding" : 3,
+      "hoverOffsetY" : -1,
+      "titleUnreadFont" : {
+        "size" : 12.5,
+        "weight" : "semibold"
+      },
+      "unreadDotTopPadding" : 6
+    },
+    "signalFeedRowAction" : {
+      "fill" : "tint@0.14",
+      "font" : {
+        "size" : 10.5,
+        "weight" : "medium"
+      },
+      "shape" : {
+        "cut" : 4,
+        "style" : "chamfer"
+      },
+      "stroke" : {
+        "color" : "tint@0.5",
+        "width" : 1
+      }
+    },
+    "signalSourceRail" : {
+      "countColor" : "foreground@0.5",
+      "countFont" : {
+        "mono" : "family",
+        "size" : 9.5,
+        "weight" : "medium"
+      },
+      "dotSize" : 5,
+      "edgeCapsuleColor" : "accentSecondary",
+      "edgeCapsuleWidth" : 2,
+      "fill" : {
+        "hover" : "surfaceElevated@0.45",
+        "rest" : "clear",
+        "selected" : "surfaceElevated@0.9"
+      },
+      "nameFont" : {
+        "size" : 11.5
+      },
+      "nameOpacity" : {
+        "hover" : 0.9,
+        "rest" : 0.72,
+        "selected" : 1
+      },
+      "shape" : {
+        "cut" : 8,
+        "style" : "chamfer"
+      },
+      "width" : 168,
+      "edgePaddingV" : 4,
+      "gap" : 1,
+      "nameSelectedFont" : {
+        "size" : 11.5,
+        "weight" : "semibold"
+      }
+    },
+    "signalToast" : {
+      "actionFill" : "tint@0.14",
+      "actionFont" : {
+        "size" : 11,
+        "weight" : "semibold",
+        "scaled" : false
+      },
+      "actionHeight" : 20,
+      "actionShape" : {
+        "cut" : 4,
+        "style" : "chamfer"
+      },
+      "actionStroke" : {
+        "color" : "tint@0.45",
+        "width" : 1
+      },
+      "actionWidth" : 22,
+      "appTileSize" : 34,
+      "bodyColor" : "foreground@0.66",
+      "bodyFont" : {
+        "size" : 11.5
+      },
+      "chevronCloseColor" : {
+        "hover" : "foreground@0.7",
+        "rest" : "foreground@0.4"
+      },
+      "chevronCloseFont" : {
+        "scaled" : false,
+        "size" : 9,
+        "weight" : "bold"
+      },
+      "chevronCloseSize" : 14,
+      "dwellBarHeight" : 1.5,
+      "expandSpring" : {
+        "curve" : "spring",
+        "damping" : 0.86,
+        "response" : 0.3
+      },
+      "fallbackGlyphFont" : {
+        "scaled" : false,
+        "size" : 18,
+        "weight" : "medium"
+      },
+      "fallbackGlyphSize" : 34,
+      "fill" : "surfaceElevated",
+      "listSpring" : {
+        "curve" : "spring",
+        "damping" : 0.82,
+        "response" : 0.34
+      },
+      "moreColor" : "foreground@0.6",
+      "moreFill" : "foreground@0.08",
+      "moreFont" : {
+        "size" : 10,
+        "weight" : "bold",
+        "scaled" : false
+      },
+      "moreHeight" : 20,
+      "moreWidth" : 22,
+      "removalOpacity" : 0,
+      "removalScale" : 0.7,
+      "repeatFont" : {
+        "size" : 10,
+        "weight" : "semibold"
+      },
+      "severityEdgeWidth" : 2.5,
+      "shape" : {
+        "cut" : 12,
+        "style" : "chamfer"
+      },
+      "stroke" : {
+        "color" : {
+          "hover" : "tint@0.45",
+          "rest" : "tint@0.28"
+        },
+        "width" : 1
+      },
+      "timeColor" : "foreground@0.4",
+      "timeFont" : {
+        "size" : 10
+      },
+      "titleFont" : {
+        "size" : 12.5,
+        "weight" : "semibold"
+      },
+      "titleGlyphFont" : {
+        "scaled" : false,
+        "size" : 11,
+        "weight" : "semibold"
+      },
+      "width" : 320,
+      "contentGap" : 3,
+      "dwellBarColor" : "tint@0.7",
+      "failureStrokeColor" : "tint@0.55",
+      "severityEdgeGlow" : {
+        "color" : "tint@0.6",
+        "radius" : 3
+      },
+      "severityEdgePadding" : 8,
+      "stackGap" : 8,
+      "stackPadding" : 16
+    },
+    "slider" : {
+      "containerFill" : "surfaceElevated@0.3",
+      "containerShape" : {
+        "cut" : 6,
+        "style" : "chamfer"
+      },
+      "containerStroke" : {
+        "color" : "accentPrimary@0.2",
+        "width" : 1
+      }
+    },
+    "spinner" : {
+      "arcTrim" : 0.28,
+      "defaultColor" : "accentSecondary",
+      "glow" : {
+        "color" : "tint@0.6",
+        "radius" : 3
+      },
+      "period" : 1,
+      "pulseFloor" : 0.35,
+      "pulsePeriod" : 1.2,
+      "size" : 20,
+      "trackColor" : "foreground@0.12",
+      "lineMinWidth" : 1.5,
+      "lineWidthRatio" : 0.08
+    },
+    "stackedStatusBar" : {
+      "height" : 4,
+      "minRun" : 2,
+      "trackColor" : "foreground@0.12",
+      "gap" : 1
+    },
+    "statRow" : {
+      "labelColor" : "foreground@0.6",
+      "labelFont" : {
+        "role" : "caption",
+        "tracking" : 0.6
+      },
+      "valueFont" : {
+        "role" : "mono",
+        "weight" : "medium"
+      }
+    },
+    "statusBar" : {
+      "emptyFill" : "foreground@0.08",
+      "glow" : {
+        "color" : {
+          "rest" : "tint@0",
+          "selected" : "tint@0.5"
+        },
+        "radius" : {
+          "rest" : 0,
+          "selected" : 2
+        }
+      },
+      "height" : 8,
+      "segments" : 12,
+      "shape" : {
+        "corners" : "all",
+        "cut" : 2,
+        "style" : "chamfer"
+      },
+      "gap" : 2,
+      "gradientFrom" : "tint@0.65"
+    },
+    "stepper" : {
+      "buttonGlyphColor" : {
+        "disabled" : "foreground@0.25",
+        "rest" : "accentSecondary"
+      },
+      "buttonGlyphFont" : {
+        "scaled" : false,
+        "size" : 10,
+        "weight" : "bold"
+      },
+      "fill" : "surfaceElevated@0.5",
+      "shape" : {
+        "cut" : 6,
+        "style" : "chamfer"
+      },
+      "stroke" : {
+        "color" : "accentPrimary@0.3",
+        "width" : 1.25
+      },
+      "valueFont" : {
+        "monospacedDigits" : true,
+        "role" : "mono",
+        "weight" : "medium",
+        "mono" : "family"
+      },
+      "buttonFill" : "surfaceElevated@0.6",
+      "buttonShape" : {
+        "cut" : 4,
+        "style" : "chamfer"
+      },
+      "buttonSize" : 20,
+      "buttonStroke" : {
+        "color" : {
+          "disabled" : "accentSecondary@0.15",
+          "rest" : "accentSecondary@0.5"
+        },
+        "width" : 1
+      },
+      "valueMinWidth" : 28
+    },
+    "swatchChip" : {
+      "glow" : {
+        "color" : {
+          "rest" : "accentPrimary@0",
+          "selected" : "accentPrimary@0.3"
+        },
+        "radius" : {
+          "rest" : 0,
+          "selected" : 4
+        }
+      },
+      "shape" : {
+        "cut" : 5,
+        "style" : "chamfer"
+      },
+      "stroke" : {
+        "color" : {
+          "rest" : "accentSecondary@0.3",
+          "selected" : "accentPrimary@0.85",
+          "hover" : "accentSecondary@0.6"
+        },
+        "width" : {
+          "rest" : 1,
+          "selected" : 1.25
+        }
+      },
+      "swatchShape" : {
+        "corners" : "all",
+        "cut" : 2,
+        "style" : "chamfer"
+      },
+      "swatchSize" : 10,
+      "swatchStroke" : {
+        "color" : "foreground@0.25",
+        "width" : 0.5
+      }
+    },
+    "tabs" : {
+      "fg" : {
+        "hover" : "foreground@0.9",
+        "rest" : "foreground@0.6",
+        "selected" : "foreground"
+      },
+      "fill" : {
+        "hover" : "surfaceElevated@0.5",
+        "rest" : "surfaceElevated@0.25",
+        "selected" : "accentPrimary@0.85"
+      },
+      "hoverScale" : 1.02,
+      "labelFont" : {
+        "role" : "caption",
+        "tracking" : 0.8,
+        "weight" : "semibold"
+      },
+      "shape" : {
+        "cut" : 6,
+        "style" : "chamfer"
+      },
+      "labelGap" : 3,
+      "tickHeight" : 2
+    },
+    "textArea" : {
+      "caretColor" : "accentSecondary",
+      "fill" : "surfaceElevated@0.5",
+      "glow" : {
+        "color" : {
+          "focused" : "accentSecondary@0.4",
+          "rest" : "accentSecondary@0"
+        },
+        "radius" : {
+          "focused" : 6,
+          "rest" : 0
+        }
+      },
+      "minHeight" : 80,
+      "placeholderColor" : "foreground@0.4",
+      "placeholderFont" : {
+        "role" : "body"
+      },
+      "shape" : {
+        "cut" : 8,
+        "style" : "chamfer"
+      },
+      "stroke" : {
+        "color" : {
+          "focused" : "accentPrimary@0.9",
+          "rest" : "accentPrimary@0.25"
+        },
+        "width" : {
+          "focused" : 1.5,
+          "rest" : 1.25
+        }
+      },
+      "placeholderPadHAutoGrow" : 17,
+      "placeholderPadHLegacy" : 16,
+      "placeholderPadVLegacy" : 12
+    },
+    "textField" : {
+      "clearGlyphColor" : "foreground@0.45",
+      "clearGlyphFont" : {
+        "scaled" : false,
+        "size" : 12
+      },
+      "font" : {
+        "role" : "body"
+      },
+      "leadingGlyphColor" : "foreground@0.55",
+      "leadingGlyphFont" : {
+        "scaled" : false,
+        "size" : 12
+      },
+      "searchGlyphColor" : "accentSecondary@0.55",
+      "searchGlyphFont" : {
+        "scaled" : false,
+        "size" : 12,
+        "weight" : "semibold"
+      }
+    },
+    "toast" : {
+      "bodyColor" : "foreground@0.9",
+      "bodyFont" : {
+        "role" : "body"
+      },
+      "closeColor" : "foreground@0.5",
+      "closeFont" : {
+        "scaled" : false,
+        "size" : 9,
+        "weight" : "bold"
+      },
+      "fill" : "surfaceElevated@0.92",
+      "glow" : {
+        "color" : "tint@0.4",
+        "radius" : 6
+      },
+      "iconFont" : {
+        "scaled" : false,
+        "size" : 12,
+        "weight" : "semibold"
+      },
+      "maxWidth" : 340,
+      "minWidth" : 220,
+      "shape" : {
+        "cut" : 8,
+        "style" : "chamfer"
+      },
+      "stroke" : {
+        "color" : "tint@0.6",
+        "width" : 1.25
+      }
+    },
+    "toggle" : {
+      "fill" : {
+        "rest" : "surfaceElevated@0.6",
+        "selected" : "accentPrimary@0.9"
+      },
+      "glow" : {
+        "color" : {
+          "rest" : "accentSecondary@0",
+          "selected" : "accentSecondary@0.45"
+        },
+        "radius" : {
+          "rest" : 0,
+          "selected" : 6
+        }
+      },
+      "height" : 22,
+      "knobColor" : "white",
+      "knobShadow" : {
+        "color" : "black@0.4",
+        "radius" : 3,
+        "x" : 0,
+        "y" : 0
+      },
+      "shape" : {
+        "corners" : "all",
+        "cut" : 6,
+        "style" : "chamfer"
+      },
+      "stroke" : {
+        "color" : {
+          "hover" : "foreground@0.35",
+          "rest" : "foreground@0.18",
+          "selected" : "accentSecondary@0.75"
+        },
+        "width" : {
+          "rest" : 1.25,
+          "selected" : 1.25
+        }
+      },
+      "width" : 40,
+      "knobInset" : 3,
+      "knobSelectedShadowColor" : "accentSecondary@0.75"
+    },
+    "toggleButton" : {
+      "fg" : {
+        "rest" : "foreground@0.75",
+        "selected" : "foreground"
+      },
+      "fill" : {
+        "hover" : "surfaceElevated@0.6",
+        "rest" : "surfaceElevated@0.4",
+        "selected" : "accentPrimary@0.85"
+      },
+      "glow" : {
+        "color" : {
+          "rest" : "accentSecondary@0",
+          "selected" : "accentSecondary@0.55"
+        },
+        "radius" : {
+          "rest" : 0,
+          "selected" : 5
+        }
+      },
+      "hoverScale" : 1.02,
+      "iconFont" : {
+        "scaled" : false,
+        "size" : 12,
+        "weight" : "semibold"
+      },
+      "labelFont" : {
+        "role" : "caption",
+        "tracking" : 0.8,
+        "weight" : "semibold"
+      },
+      "shape" : {
+        "cut" : 6,
+        "style" : "chamfer"
+      },
+      "stroke" : {
+        "color" : {
+          "hover" : "accentSecondary@0.6",
+          "rest" : "accentSecondary@0.3",
+          "selected" : "accentSecondary@0.95"
+        },
+        "width" : 1.25
+      }
+    },
+    "tooltipPopover" : {
+      "popoverMaxHeight" : 420,
+      "showDelay" : 0.45,
+      "textColor" : "foreground@0.9",
+      "textFont" : {
+        "role" : "caption"
+      },
+      "tooltipMaxHeight" : 160
+    },
+    "label" : {
+      "glyphFont" : {
+        "scaled" : false,
+        "size" : 12,
+        "weight" : "medium"
+      }
+    },
+    "commandField" : {
+      "font" : {
+        "size" : 17,
+        "weight" : "regular"
+      },
+      "foreground" : "foreground",
+      "gap" : 12,
+      "height" : 56,
+      "horizontalPadding" : 18,
+      "markColor" : "accentSecondary",
+      "markGlow" : {
+        "color" : "accentSecondary@0.9",
+        "radius" : 6
+      },
+      "markHeight" : 14,
+      "markWidth" : 16,
+      "tint" : "accentSecondary"
+    },
+    "railItem" : {
+      "badgeOffsetX" : 5,
+      "badgeOffsetY" : -5,
+      "badgeOpacity" : {
+        "hover" : 0.45,
+        "rest" : 1,
+        "selected" : 0.45
+      },
+      "badgeScale" : 0.8,
+      "cornerColor" : "foreground@0.7",
+      "cornerFill" : "surfaceElevated",
+      "cornerFont" : {
+        "scaled" : false,
+        "size" : 8,
+        "weight" : "bold"
+      },
+      "cornerOffset" : 4,
+      "cornerPadding" : 3,
+      "edgeColor" : "accentSecondary",
+      "edgeGlow" : {
+        "color" : {
+          "rest" : "clear",
+          "selected" : "accentSecondary@0.7"
+        },
+        "radius" : 3
+      },
+      "edgeHeight" : {
+        "hover" : 10,
+        "rest" : 0,
+        "selected" : 22
+      },
+      "edgeWidth" : 3,
+      "fill" : {
+        "hover" : "surfaceElevated@0.6",
+        "rest" : "clear",
+        "selected" : "accentPrimary@0.18"
+      },
+      "glow" : {
+        "color" : {
+          "hover" : "accentPrimary@0.35",
+          "rest" : "clear",
+          "selected" : "accentPrimary@0.5"
+        },
+        "radius" : {
+          "hover" : 8,
+          "rest" : 0,
+          "selected" : 8
+        }
+      },
+      "glyphColor" : {
+        "hover" : "foreground@0.9",
+        "rest" : "foreground@0.65",
+        "selected" : "accentSecondary"
+      },
+      "glyphDimmedColor" : "foreground@0.45",
+      "glyphFont" : {
+        "scaled" : false,
+        "size" : 17,
+        "weight" : "regular"
+      },
+      "glyphGlow" : {
+        "color" : {
+          "rest" : "clear",
+          "selected" : "accentSecondary@0.5"
+        },
+        "radius" : 4
+      },
+      "glyphSelectedFont" : {
+        "scaled" : false,
+        "size" : 17,
+        "weight" : "semibold"
+      },
+      "hoverScale" : 1.06,
+      "shape" : {
+        "cut" : 7,
+        "style" : "chamfer"
+      },
+      "size" : 42,
+      "stroke" : {
+        "color" : {
+          "hover" : "accentSecondary@0.35",
+          "rest" : "clear",
+          "selected" : "accentSecondary@0.6"
+        },
+        "width" : 1
+      }
+    }
+  },
+  "cut" : {
+    "c2" : 2,
+    "c20" : 20,
+    "c22" : 22,
+    "c3" : 3,
+    "c4" : 4,
+    "c5" : 5,
+    "c6" : 6,
+    "c7" : 7,
+    "c8" : 8,
+    "r0_10" : 0.1,
+    "r0_2" : 0.2,
+    "r0_22" : 0.22
+  },
+  "effects" : {
+    "accentRule" : {
+      "height" : 2,
+      "labelColor" : "foreground@0.7",
+      "labelFont" : {
+        "role" : "caption",
+        "tracking" : 1.5
+      },
+      "width" : 18
+    },
+    "brackets" : {
+      "glow" : "accentSecondary@0.55",
+      "glowRadius" : 2.5,
+      "stroke" : "accentSecondary",
+      "width" : 1.25
+    },
+    "edgeRing" : {
+      "defaultCutKey" : "panel",
+      "from" : "accentSecondary@0.45",
+      "to" : "accentPrimary@0.18",
+      "width" : 1
+    },
+    "glowBloom" : {
+      "color" : "accentPrimary@0.2",
+      "endRadius" : 140,
+      "reducedOpacityColor" : "accentPrimary@0.16"
+    },
+    "hexGrid" : {
+      "opacity" : 0.05,
+      "radius" : 14,
+      "reducedOpacity" : 0.04,
+      "stroke" : "white",
+      "width" : 0.5
+    },
+    "panelGlow" : [
+      {
+        "color" : "accentPrimary@0.35",
+        "radius" : 42,
+        "x" : 0,
+        "y" : 0
+      },
+      {
+        "color" : "black@0.5",
+        "radius" : 24,
+        "x" : 0,
+        "y" : 10
+      }
+    ],
+    "scanline" : {
+      "bandColor" : "white@0.6",
+      "bandFraction" : 0.12,
+      "lineSpacing" : 4,
+      "movingOpacity" : 0.08,
+      "period" : 3.5,
+      "staticOpacity" : 0.05
+    }
+  },
+  "elevation" : {
+    "level0" : {
+      "color" : "clear",
+      "radius" : 0,
+      "x" : 0,
+      "y" : 0
+    },
+    "level1" : {
+      "color" : "black@0.22",
+      "radius" : 8,
+      "x" : 0,
+      "y" : 2
+    },
+    "level2" : {
+      "color" : "black@0.3",
+      "radius" : 20,
+      "x" : 0,
+      "y" : 8
+    }
+  },
+  "id" : "neonBlue",
+  "material" : {
+    "blurEnabled" : true,
+    "hud" : "fullScreenUI",
+    "panel" : "hudWindow",
+    "panelOpacity" : 0.94
+  },
+  "motion" : {
+    "base" : 0.25,
+    "dismiss" : {
+      "curve" : "easeIn",
+      "duration" : "fast"
+    },
+    "durations" : {
+      "breathe" : 3.2,
+      "d0_08" : 0.08,
+      "d0_1" : 0.1,
+      "d0_12" : 0.12,
+      "d0_14" : 0.14,
+      "d0_16" : 0.16,
+      "d0_18" : 0.18,
+      "d0_2" : 0.2,
+      "d0_22" : 0.22,
+      "d0_32" : 0.32
+    },
+    "fast" : 0.15,
+    "hover" : {
+      "curve" : "easeInOut",
+      "duration" : "fast"
+    },
+    "materialize" : 0.55,
+    "materializeAnimation" : {
+      "curve" : "easeOut",
+      "duration" : "materialize"
+    },
+    "present" : {
+      "curve" : "easeOut",
+      "duration" : "base"
+    },
+    "slow" : 0.4,
+    "springs" : {
+      "snappy22" : {
+        "curve" : "snappy",
+        "duration" : 0.22
+      },
+      "snappy26" : {
+        "curve" : "snappy",
+        "duration" : 0.26
+      },
+      "snappy32" : {
+        "curve" : "snappy",
+        "duration" : 0.32
+      },
+      "sp30_70" : {
+        "curve" : "spring",
+        "damping" : 0.7,
+        "response" : 0.3
+      },
+      "sp30_80" : {
+        "curve" : "spring",
+        "damping" : 0.8,
+        "response" : 0.3
+      },
+      "sp30_86" : {
+        "curve" : "spring",
+        "damping" : 0.86,
+        "response" : 0.3
+      },
+      "sp32_74" : {
+        "curve" : "spring",
+        "damping" : 0.74,
+        "response" : 0.32
+      },
+      "sp32_84" : {
+        "curve" : "spring",
+        "damping" : 0.84,
+        "response" : 0.32
+      },
+      "sp32_85" : {
+        "curve" : "spring",
+        "damping" : 0.85,
+        "response" : 0.32
+      },
+      "sp34_80" : {
+        "curve" : "spring",
+        "damping" : 0.8,
+        "response" : 0.34
+      },
+      "sp34_82" : {
+        "curve" : "spring",
+        "damping" : 0.82,
+        "response" : 0.34
+      },
+      "sp42_82" : {
+        "curve" : "spring",
+        "damping" : 0.82,
+        "response" : 0.42
+      },
+      "sp42_88" : {
+        "curve" : "spring",
+        "damping" : 0.88,
+        "response" : 0.42
+      }
+    }
+  },
+  "name" : "Neon Blue",
+  "opacity" : {
+    "hitTarget" : 0.001,
+    "o03" : 0.03,
+    "o05" : 0.05,
+    "o06" : 0.06,
+    "o07" : 0.07,
+    "o08" : 0.08,
+    "o09" : 0.09,
+    "o10" : 0.1,
+    "o12" : 0.12,
+    "o13" : 0.13,
+    "o14" : 0.14,
+    "o15" : 0.15,
+    "o16" : 0.16,
+    "o18" : 0.18,
+    "o20" : 0.2,
+    "o22" : 0.22,
+    "o25" : 0.25,
+    "o28" : 0.28,
+    "o30" : 0.3,
+    "o32" : 0.32,
+    "o35" : 0.35,
+    "o40" : 0.4,
+    "o42" : 0.42,
+    "o45" : 0.45,
+    "o50" : 0.5,
+    "o55" : 0.55,
+    "o60" : 0.6,
+    "o62" : 0.62,
+    "o65" : 0.65,
+    "o66" : 0.66,
+    "o70" : 0.7,
+    "o72" : 0.72,
+    "o75" : 0.75,
+    "o78" : 0.78,
+    "o80" : 0.8,
+    "o82" : 0.82,
+    "o85" : 0.85,
+    "o88" : 0.88,
+    "o90" : 0.9,
+    "o92" : 0.92,
+    "o95" : 0.95,
+    "o96" : 0.96,
+    "o97" : 0.97,
+    "o98" : 0.98
+  },
+  "palette" : {
+    "accentPrimary" : "#2563EB",
+    "accentSecondary" : "#22D3EE",
+    "accentTertiary" : "#10B981",
+    "background" : "#0A0E17",
+    "black" : "#000000",
+    "danger" : "#F85149",
+    "foreground" : "#E2E8F0",
+    "success" : "#3FB950",
+    "surface" : "#111827",
+    "surfaceElevated" : "#1A2233",
+    "warning" : "#E3B341",
+    "white" : "#FFFFFF"
+  },
+  "radius" : {
+    "lg" : 14,
+    "md" : 12,
+    "panel" : 14,
+    "sm" : 8
+  },
+  "roles" : {
+    "accentTick" : {
+      "fill" : "accentSecondary",
+      "glow" : {
+        "color" : "accentSecondary@0.6",
+        "radius" : 2
+      }
+    },
+    "bubble" : {
+      "fill" : "surfaceElevated@0.97",
+      "shadow" : {
+        "color" : "accentSecondary@0.35",
+        "radius" : 8,
+        "x" : 0,
+        "y" : 3
+      },
+      "shape" : {
+        "cut" : 6,
+        "style" : "chamfer"
+      },
+      "stroke" : {
+        "color" : "accentSecondary@0.55",
+        "width" : 1.25
+      }
+    },
+    "field" : {
+      "fill" : "surfaceElevated@0.5",
+      "glow" : {
+        "color" : {
+          "focused" : "accentSecondary@0.45",
+          "rest" : "accentSecondary@0"
+        },
+        "radius" : {
+          "focused" : 6,
+          "rest" : 0
+        }
+      },
+      "shape" : {
+        "cut" : 6,
+        "style" : "chamfer"
+      },
+      "stroke" : {
+        "color" : {
+          "focused" : "accentPrimary@0.9",
+          "rest" : "accentPrimary@0.25"
+        },
+        "width" : {
+          "focused" : 1.5,
+          "rest" : 1.25
+        }
+      }
+    },
+    "materialize" : {
+      "anchor" : "top",
+      "animation" : {
+        "curve" : "easeOut",
+        "duration" : "materialize"
+      },
+      "scale" : 0.96
+    },
+    "optionRow" : {
+      "fill" : {
+        "hover" : "accentSecondary@0.18",
+        "rest" : "clear",
+        "selected" : "accentSecondary@0.18"
+      },
+      "paddingV" : 6,
+      "selectedDot" : {
+        "scaled" : false,
+        "size" : 6
+      },
+      "shape" : {
+        "cut" : 4,
+        "style" : "chamfer"
+      },
+      "swatchDotSize" : 9
+    },
+    "panelSearch" : {
+      "fill" : "surface@0.7",
+      "paddingV" : 6,
+      "shape" : {
+        "cut" : 4,
+        "style" : "chamfer"
+      },
+      "stroke" : {
+        "color" : "accentPrimary@0.3",
+        "width" : 1
+      },
+      "panelMinWidth" : 200
+    },
+    "popover" : {
+      "fill" : "surfaceElevated@0.97",
+      "shadow" : {
+        "color" : "accentSecondary@0.35",
+        "radius" : 10,
+        "x" : 0,
+        "y" : 4
+      },
+      "shape" : {
+        "cut" : 8,
+        "style" : "chamfer"
+      },
+      "stroke" : {
+        "color" : "accentSecondary@0.55",
+        "width" : 1.25
+      },
+      "minWidth" : 160
+    },
+    "scrim" : {
+      "color" : "black@0.45",
+      "material" : "panel",
+      "opacity" : 0.6
+    },
+    "selectedFill" : "accentPrimary@0.16",
+    "thumb" : {
+      "dragGlowRadius" : 8,
+      "dragScale" : 1.15,
+      "fill" : "accentSecondary",
+      "glow" : {
+        "color" : {
+          "pressed" : "accentSecondary@0.9",
+          "rest" : "accentSecondary@0.55"
+        },
+        "radius" : {
+          "pressed" : 8,
+          "rest" : 4
+        }
+      },
+      "offset" : 7,
+      "size" : 14
+    },
+    "track" : {
+      "activeFill" : "accentSecondary@0.85",
+      "fill" : "surfaceElevated@0.6",
+      "height" : 4,
+      "rowHeight" : 20
+    },
+    "trigger" : {
+      "chevron" : {
+        "scaled" : false,
+        "size" : 10,
+        "weight" : "semibold"
+      },
+      "chevronColor" : "accentSecondary@0.85",
+      "fill" : "surfaceElevated@0.5",
+      "glow" : {
+        "color" : {
+          "rest" : "accentPrimary@0",
+          "selected" : "accentPrimary@0.4"
+        },
+        "radius" : {
+          "rest" : 0,
+          "selected" : 5
+        }
+      },
+      "shape" : {
+        "cut" : 8,
+        "style" : "chamfer"
+      },
+      "stroke" : {
+        "color" : {
+          "rest" : "accentPrimary@0.3",
+          "selected" : "accentPrimary@0.75"
+        },
+        "width" : {
+          "rest" : 1.25,
+          "selected" : 1.25
+        }
+      }
+    }
+  },
+  "schemaVersion" : 1,
+  "shape" : {
+    "corners" : "diagonal",
+    "style" : "chamfer"
+  },
+  "size" : {
+    "s1" : 1,
+    "s10" : 10,
+    "s104" : 104,
+    "s108" : 108,
+    "s11" : 11,
+    "s110" : 110,
+    "s12" : 12,
+    "s120" : 120,
+    "s124" : 124,
+    "s128" : 128,
+    "s14" : 14,
+    "s140" : 140,
+    "s15" : 15,
+    "s150" : 150,
+    "s16" : 16,
+    "s160" : 160,
+    "s164" : 164,
+    "s165" : 165,
+    "s168" : 168,
+    "s18" : 18,
+    "s180" : 180,
+    "s190" : 190,
+    "s1_5" : 1.5,
+    "s2" : 2,
+    "s20" : 20,
+    "s200" : 200,
+    "s22" : 22,
+    "s220" : 220,
+    "s232" : 232,
+    "s24" : 24,
+    "s240" : 240,
+    "s244" : 244,
+    "s250" : 250,
+    "s26" : 26,
+    "s260" : 260,
+    "s268" : 268,
+    "s28" : 28,
+    "s280" : 280,
+    "s2_5" : 2.5,
+    "s3" : 3,
+    "s30" : 30,
+    "s300" : 300,
+    "s32" : 32,
+    "s320" : 320,
+    "s34" : 34,
+    "s340" : 340,
+    "s36" : 36,
+    "s360" : 360,
+    "s38" : 38,
+    "s380" : 380,
+    "s4" : 4,
+    "s40" : 40,
+    "s400" : 400,
+    "s42" : 42,
+    "s420" : 420,
+    "s44" : 44,
+    "s440" : 440,
+    "s46" : 46,
+    "s460" : 460,
+    "s48" : 48,
+    "s480" : 480,
+    "s5" : 5,
+    "s50" : 50,
+    "s52" : 52,
+    "s520" : 520,
+    "s54" : 54,
+    "s56" : 56,
+    "s560" : 560,
+    "s574" : 574,
+    "s6" : 6,
+    "s60" : 60,
+    "s62" : 62,
+    "s620" : 620,
+    "s64" : 64,
+    "s640" : 640,
+    "s7" : 7,
+    "s70" : 70,
+    "s72" : 72,
+    "s8" : 8,
+    "s80" : 80,
+    "s860" : 860,
+    "s9" : 9,
+    "s90" : 90,
+    "s92" : 92,
+    "s96" : 96
+  },
+  "spacing" : {
+    "lg" : 16,
+    "md" : 12,
+    "sm" : 8,
+    "xl" : 24,
+    "xs" : 4,
+    "xxl" : 32
+  },
+  "syntax" : {
+    "comment" : "foreground@0.45",
+    "keywordHue" : 285,
+    "numberHue" : 30,
+    "onDark" : {
+      "brightness" : 0.95,
+      "saturation" : 0.5
+    },
+    "onLight" : {
+      "brightness" : 0.66,
+      "saturation" : 0.72
+    },
+    "stringHue" : 140,
+    "typeHue" : 200
+  },
+  "terminal" : {
+    "ansi" : [
+      "#1A1D24",
+      "#E06C75",
+      "#98C379",
+      "#E5C07B",
+      "#61AFEF",
+      "#C678DD",
+      "#56B6C2",
+      "#ABB2BF",
+      "#5C6370",
+      "#E06C75",
+      "#98C379",
+      "#E5C07B",
+      "#61AFEF",
+      "#C678DD",
+      "#56B6C2",
+      "#FFFFFF"
+    ],
+    "background" : "#0A0E17",
+    "cursor" : "#22D3EE",
+    "foreground" : "#E2E8F0",
+    "selection" : "#3B4252"
+  },
+  "text" : {
+    "faint" : "foreground@0.45",
+    "muted" : "foreground@0.55",
+    "primary" : "foreground"
+  },
+  "type" : {
+    "monoFamily" : "JetBrains Mono",
+    "roles" : {
+      "body" : 14,
+      "caption" : 11,
+      "display" : 28,
+      "headline" : 16,
+      "mono" : 13,
+      "title" : 20
+    },
+    "sizes" : {
+      "t10" : 10,
+      "t10_5" : 10.5,
+      "t11" : 11,
+      "t12" : 12,
+      "t12_5" : 12.5,
+      "t13" : 13,
+      "t14" : 14,
+      "t15" : 15,
+      "t16" : 16,
+      "t17" : 17,
+      "t18" : 18,
+      "t20" : 20,
+      "t21" : 21,
+      "t24" : 24,
+      "t26" : 26,
+      "t28" : 28,
+      "t30" : 30,
+      "t34" : 34,
+      "t40" : 40,
+      "t6" : 6,
+      "t6_5" : 6.5,
+      "t7" : 7,
+      "t8" : 8,
+      "t8_5" : 8.5,
+      "t9" : 9,
+      "t9_5" : 9.5
+    }
+  }
+}
