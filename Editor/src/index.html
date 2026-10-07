@@ -1,0 +1,354 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+  /* Every value here is a token the host sets — see CM6EditorView. Nothing in
+     this file should hard-code a colour or a size. */
+  :root {
+    --bg: #16161c; --fg: #e6e6ea; --text-faint: #8a8a96;
+    --accent-primary: #7c6cf0; --surface-elevated: #23232c;
+    --font-text: -apple-system, "SF Pro Text", system-ui, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+    --body-size: 15px; --line-height: 1.5;
+    --measure: 760px; --content-inset: 28px;
+  }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); }
+  #root { height: 100%; }
+  .cm-editor { height: 100%; background: var(--bg); color: var(--fg);
+               font-size: var(--body-size); }
+  .cm-editor.cm-focused { outline: none; }
+
+  /* THE CARET, and the selection.
+     `drawSelection()` replaces the browser's caret with one CodeMirror draws
+     itself, taking its colour from CodeMirror's BASE theme — and the base theme
+     is the light one, which draws `border-left: 1.2px solid black`. A black
+     caret on this background is an invisible caret, which is exactly how it was
+     reported. Every colour added to this file was one of ours; the ones
+     CodeMirror draws were never given any. */
+  /* `!important`, deliberately, and measured rather than assumed.
+     CodeMirror's own rule is `&light .cm-cursor { border-left-color: black }`,
+     which compiles to a two-class descendant selector and outranks anything
+     written as `.cm-cursor` here — the first attempt at this styled the caret
+     and measured it still `rgb(0, 0, 0)` against a `rgb(22, 22, 28)` page.
+     Overriding a vendored library's hard-coded colour is what `!important` is
+     for, and there is no cleaner hook: CodeMirror picks black or `#ddd` from a
+     light/dark flag, while `--fg` is the HOST's actual foreground and is right
+     in both. */
+  .cm-cursor, .cm-dropCursor,
+  .cm-editor .cm-cursor, .cm-editor.cm-focused .cm-cursor {
+    border-left-color: var(--fg) !important;
+    border-left-width: 2px !important;
+  }
+  .cm-selectionBackground,
+  .cm-editor .cm-selectionBackground,
+  .cm-editor.cm-focused .cm-selectionBackground,
+  ::selection {
+    background: color-mix(in srgb, var(--accent-primary) 38%, transparent) !important;
+  }
+
+  /* THE FONT FAMILY GOES ON `.cm-content`, NOT `.cm-editor`.
+     CodeMirror's own base theme sets `font-family: monospace` on `.cm-content`,
+     which is more specific than a rule on the editor wrapper — so setting the
+     family there loses silently and the whole document renders monospaced. The
+     spike did exactly that and its S3 "theming passes" result covered colour
+     and size but NOT family. This is the same class of defect M9 spent a
+     milestone on: the font not being what the code appears to say it is. */
+  /* Measure and inset come from EditorSettings, like the native renderer's —
+     the same numbers, so switching surfaces does not reflow the reader's
+     document. */
+  /* The inset and the measure, with `!important` for the same measured reason
+     the caret needed it: CodeMirror's base theme sets `padding: 4px 0` on
+     `.cm-content` and won — the computed padding-left was 0px, not 28px, so
+     every line sat flush against the left edge of the pane.
+     `font-family` on the same selector DID win, which is why this went
+     unnoticed: one property of the rule applied and another did not.
+     Left-aligned and capped at the measure, matching
+     `MarkdownEditorLayout.containerWidth` — the native editor deliberately
+     stopped centring this column. */
+  .cm-content { font-family: var(--font-text); line-height: var(--line-height); }
+  .cm-editor .cm-content {
+    padding: var(--content-inset) !important;
+    max-width: var(--measure);
+    /* CENTRED, so the padding is equal on both sides.
+       The measure now defaults to "full width", where centring changes nothing
+       — but when a reader caps the column at Narrow, Standard or Wide, this is
+       what keeps it balanced in the pane instead of jammed against the left
+       edge. The native editor still left-aligns a capped column; that is a
+       one-line divergence, noted rather than hidden. */
+    margin-inline: auto;
+  }
+  .cm-line { padding: 0; }
+
+  /* Mono at 0.92 of body: a monospaced face reads larger at equal points. */
+  .cm-content .tok-monospace { font-family: var(--font-mono); font-size: 0.92em; }
+
+  /* A fenced block reads as a panel, not as loose monospaced text on the page.
+     Line decorations rather than one span: a mark over a multi-line range
+     paints a ragged staircase. */
+  .cm-lore-code, .cm-lore-code-first, .cm-lore-code-last {
+    background: color-mix(in srgb, var(--surface-elevated) 85%, transparent);
+    font-family: var(--font-mono); font-size: 0.92em;
+  }
+  .cm-lore-code-first { border-radius: 5px 5px 0 0; padding-top: 8px; }
+  .cm-lore-code-last  { border-radius: 0 0 5px 5px; padding-bottom: 8px; }
+
+  .cm-lore-table code { font-family: var(--font-mono); font-size: 0.92em;
+                        background: color-mix(in srgb, var(--surface-elevated) 70%,
+                                              transparent);
+                        border-radius: 4px; padding: 1px 4px; }
+
+  /* Padding on a wrapper would be cleaner, but an `hr` IS the element the
+     widget returns, so its own box carries the spacing. Margin on a block
+     widget is measured no better than margin on a line — `padding` with a
+     transparent border keeps the rule one pixel and the box predictable. */
+  .cm-lore-rule { border: none; border-top: 1px solid
+                  color-mix(in srgb, var(--fg) 45%, transparent);
+                  margin: 0; padding: 12px 0 0; }
+  .cm-lore-bullet { color: color-mix(in srgb, var(--fg) 55%, transparent);
+                    margin-right: 6px; }
+
+  /* E2T1b. Obsidian's internal link: accent-coloured, underlined only on
+     hover, and the cursor is a pointer so it reads as clickable before it is
+     clicked. No dimming for an unresolved target — Lore has no resolution
+     query on this surface, and inventing one is not a UI enhancement. */
+  .cm-lore-wikilink { color: var(--accent-primary); cursor: pointer; }
+  .cm-lore-wikilink:hover { text-decoration: underline; }
+
+  /* E2T2. Obsidian's tag pill: the `#` stays, the shape is a chip. */
+  .cm-lore-tag {
+    color: var(--accent-primary);
+    background: color-mix(in srgb, var(--accent-primary) 14%, transparent);
+    border-radius: 999px; padding: 1px 7px; cursor: pointer;
+    white-space: nowrap;
+  }
+  .cm-lore-tag:hover {
+    background: color-mix(in srgb, var(--accent-primary) 26%, transparent);
+  }
+
+  /* E2T4. A real input, sized to sit on the text baseline rather than above
+     it — a checkbox that floats is the tell that it is a control bolted onto
+     prose instead of part of the line. */
+  .cm-lore-checkbox {
+    appearance: none; -webkit-appearance: none;
+    width: 1em; height: 1em; margin: 0 0.45em 0 0;
+    vertical-align: -0.1em;
+    border: 1.5px solid color-mix(in srgb, var(--fg) 45%, transparent);
+    border-radius: 3px; background: transparent; cursor: pointer;
+    display: inline-block; position: relative;
+  }
+  .cm-lore-checkbox:checked {
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
+  }
+  .cm-lore-checkbox:checked::after {
+    content: "\2713"; position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8em; color: var(--bg);
+  }
+  .cm-lore-checkbox:disabled { cursor: default; opacity: 0.5; }
+  /* A done task, struck and dimmed — the same treatment the native renderer
+     applies to `.checkbox(true)`. The checkbox itself is spared, or the tick
+     is struck through too. */
+  .cm-lore-task-done { color: color-mix(in srgb, var(--fg) 45%, transparent);
+                       text-decoration: line-through; }
+  .cm-lore-task-done .cm-lore-checkbox { text-decoration: none; }
+
+  /* E2T3. Thirteen callout kinds, one stylesheet.
+
+     The hue is per-kind and FIXED — danger is red in every theme or it is not
+     saying "danger" — while saturation, lightness and the panel tint are all
+     derived from the theme, so the result sits correctly on a light or a dark
+     surface. Same division as `MarkdownBlockBackgrounds.Palette`. */
+  .cm-lore-callout {
+    --callout: hsl(var(--callout-hue) 65% 58%);
+    background: color-mix(in srgb, hsl(var(--callout-hue) 65% 58%) 9%, transparent);
+    border-left: 3px solid var(--callout);
+    padding-left: 12px;
+  }
+  .cm-lore-callout-head { padding-top: 6px; font-weight: 600; color: var(--callout);
+                          border-radius: 4px 4px 0 0; }
+  .cm-lore-callout-body { color: var(--fg); }
+  .cm-lore-callout-last { padding-bottom: 6px; border-radius: 0 0 4px 4px; }
+  /* A one-line callout is both the first line and the last. */
+  .cm-lore-callout-head.cm-lore-callout-last { border-radius: 4px; }
+  .cm-lore-callout-icon { margin-right: 6px; }
+  .cm-lore-callout-default-title { font-weight: 600; }
+
+  .cm-lore-callout-note,    .cm-lore-callout-info     { --callout-hue: 210; }
+  .cm-lore-callout-abstract, .cm-lore-callout-tip     { --callout-hue: 175; }
+  .cm-lore-callout-todo,    .cm-lore-callout-question { --callout-hue: 45; }
+  .cm-lore-callout-success                            { --callout-hue: 140; }
+  .cm-lore-callout-warning                            { --callout-hue: 30; }
+  .cm-lore-callout-failure, .cm-lore-callout-danger   { --callout-hue: 0; }
+  .cm-lore-callout-bug                                { --callout-hue: 350; }
+  .cm-lore-callout-example                            { --callout-hue: 275; }
+  /* `quote` is a callout with no colour of its own — Obsidian renders it as an
+     ordinary quote with a heading, so it borrows the foreground. */
+  .cm-lore-callout-quote {
+    --callout: color-mix(in srgb, var(--fg) 45%, transparent);
+    background: transparent;
+  }
+
+  /* E2T5. An embedded image never widens the editor: `max-width` is the
+     measure, and the height follows so nothing is squashed. */
+  .cm-lore-embed-image {
+    max-width: 100%; height: auto; border-radius: 4px;
+    display: inline-block; vertical-align: top;
+  }
+  /* The `[[` and `#` completion list. Positioned by the editor against the
+     caret, so it needs no screen coordinates and cannot point at where the
+     caret used to be. */
+  .cm-lore-completion {
+    position: absolute; z-index: 20;
+    min-width: 220px; max-width: 420px; max-height: 260px; overflow-y: auto;
+    background: var(--surface-elevated);
+    border: 1px solid color-mix(in srgb, var(--fg) 18%, transparent);
+    border-radius: 6px; padding: 4px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    font-size: 0.95em;
+    /* Explicit, not inherited: the list hangs off `.cm-editor`, and the text
+       face is set on `.cm-content` — so without this it fell back to the
+       browser's default serif, which the first snapshot showed. */
+    font-family: var(--font-text);
+  }
+  .cm-lore-completion-row {
+    display: flex; align-items: baseline; gap: 8px;
+    padding: 4px 8px; border-radius: 4px; cursor: pointer;
+    white-space: nowrap;
+  }
+  .cm-lore-completion-row.is-selected {
+    background: color-mix(in srgb, var(--accent-primary) 30%, transparent);
+  }
+  .cm-lore-completion-label { color: var(--fg); overflow: hidden;
+                              text-overflow: ellipsis; }
+  .cm-lore-completion-detail {
+    color: color-mix(in srgb, var(--fg) 45%, transparent);
+    font-size: 0.85em; margin-left: auto;
+  }
+
+  /* The hover preview. Placed against the link's own rect by the page, so it
+     never trails the pointer. */
+  .cm-lore-preview {
+    position: absolute; z-index: 25;
+    max-width: 380px;
+    background: var(--surface-elevated);
+    border: 1px solid color-mix(in srgb, var(--fg) 18%, transparent);
+    border-radius: 6px; padding: 8px 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    font-family: var(--font-text); font-size: 0.9em;
+    pointer-events: none;
+  }
+  .cm-lore-preview-title { font-weight: 600; margin-bottom: 4px; }
+  .cm-lore-preview-body {
+    color: color-mix(in srgb, var(--fg) 70%, transparent);
+    line-height: 1.4;
+  }
+
+  /* E4T2. Four gaps the parity shots found against the Lore that ships. */
+
+  /* The inline-code pill M9.9 draws natively. */
+  .cm-lore-inline-code {
+    background: var(--surface-elevated);
+    border-radius: 4px; padding: 1px 4px;
+  }
+
+  /* Heading rhythm, from M9.4's measured ratios: space BEFORE a heading scales
+     with its size, space after is roughly a third of that. The first line of a
+     document gets no space above it — a margin there just pushes the note down
+     from the top of the pane. */
+  /* PADDING, never margin.
+     These are `.cm-line` elements, and CodeMirror measures line heights to map
+     a click to a position. Its height oracle does not account for margins, and
+     adjacent margins COLLAPSE — so the drawn position and the computed one
+     diverge, cumulatively, further down the document. The symptom is selecting
+     one line and getting another, which is what these caused. */
+  .cm-lore-h1 { padding: 32px 0 12px; }
+  .cm-lore-h2 { padding: 28px 0 10px; }
+  .cm-lore-h3 { padding: 24px 0 9px; }
+  .cm-lore-h4 { padding: 20px 0 9px; }
+  .cm-lore-h5 { padding: 18px 0 7px; }
+  .cm-lore-h6 { padding: 16px 0 6px; }
+  .cm-content > .cm-line:first-child { padding-top: 0; }
+
+  /* A footnote reference is a small superscript; a definition's label opens its
+     line. Both dimmed, as notation rather than prose. */
+  .cm-lore-footnote-ref {
+    color: var(--accent-primary); font-size: 0.75em; vertical-align: super;
+  }
+  .cm-lore-footnote-def {
+    color: color-mix(in srgb, var(--fg) 55%, transparent);
+    margin-right: 4px;
+  }
+
+  /* E2T6. Maths. KaTeX brings its own typography; these rules only place it.
+
+     An expression KaTeX cannot parse is left as plain source and NOT given a
+     class of its own — the earlier version styled a class nothing generated,
+     and its line decoration crashed the range builder. Unparseable maths reads
+     as source, which is `MarkdownMath`'s rule for the same case. */
+  .cm-lore-math { display: inline-block; vertical-align: baseline; }
+  .cm-lore-math-block { display: block; padding: 8px 0; text-align: center; }
+  /* KaTeX's error rendering is a red copy of the source. It must never appear:
+     an unparseable expression is skipped and left as plain source instead. This
+     rule exists so that if one ever does slip through it is obvious in a
+     screenshot rather than subtly mis-coloured. */
+  .katex-error { outline: 2px dashed red; }
+
+  /* E2T1c. A transcluded note: somebody else's text, bounded so it reads that
+     way. A left rule in the accent tint and a hairline frame — the same two
+     signals `TransclusionStyling` draws natively. */
+  .cm-lore-transclusion {
+    border: 1px solid color-mix(in srgb, var(--fg) 18%, transparent);
+    border-left: 3px solid color-mix(in srgb, var(--accent-primary) 55%, transparent);
+    border-radius: 4px; padding: 6px 10px;
+    background: color-mix(in srgb, var(--fg) 3%, transparent);
+  }
+  .cm-lore-transclusion-title {
+    color: color-mix(in srgb, var(--fg) 55%, transparent);
+    font-size: 0.85em; margin-bottom: 4px;
+  }
+  .cm-lore-transclusion-waiting,
+  .cm-lore-transclusion-problem {
+    color: color-mix(in srgb, var(--fg) 45%, transparent); font-size: 0.9em;
+  }
+  /* The nested editor must not add its own padding or its own scrollbar: it is
+     content inside a box, not a second editor. */
+  .cm-lore-transclusion-body .cm-editor { background: transparent; }
+  .cm-lore-transclusion-body .cm-scroller { overflow: visible; }
+  .cm-lore-transclusion-body .cm-content { padding: 0; }
+  .cm-lore-transclusion-body .cm-cursor { display: none; }
+  .cm-lore-transclusion-body .cm-gutters { display: none; }
+
+  /* An embed whose target does not resolve. Dimmed and struck, so it reads as
+     "this file is missing" rather than as a browser error — WebKit draws a grey
+     box with a `?` for a failed image and does not show the alt text. */
+  .cm-lore-embed-missing {
+    color: color-mix(in srgb, var(--fg) 45%, transparent);
+    text-decoration: line-through;
+    text-decoration-color: color-mix(in srgb, var(--fg) 30%, transparent);
+  }
+
+  /* A PDF or a Word file: the same pill the native renderer draws, because
+     putting a second document's renderer inside the editor is a different
+     project. */
+  .cm-lore-embed-chip {
+    color: var(--accent-primary); cursor: pointer;
+    background: var(--surface-elevated);
+    border-radius: 4px; padding: 1px 6px;
+    text-decoration: underline;
+  }
+
+  .cm-lore-table { border-collapse: collapse; margin: 0; }
+  .cm-lore-table th, .cm-lore-table td {
+    border: 1px solid color-mix(in srgb, var(--fg) 22%, transparent);
+    padding: 6px 12px; text-align: left;
+    /* A one-character header (`#`) otherwise collapses to the narrowest
+       possible column and wraps its cells mid-number — `6.1` came out as
+       three stacked lines. Found by looking at a real note. */
+    min-width: 3em;
+  }
+  .cm-lore-table th { font-weight: 600; }
+  .cm-lore-table td:focus, .cm-lore-table th:focus {
+    outline: 2px solid var(--accent-primary); outline-offset: -2px;
+  }
+</style></head>
+<link rel="stylesheet" href="katex.min.css">
+<body><div id="root"></div><script src="editor.js"></script></body></html>
