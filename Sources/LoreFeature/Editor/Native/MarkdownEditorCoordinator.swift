@@ -286,7 +286,7 @@ extension MarkdownEditor {
         var pendingEdit: PendingEdit?
 
         var cachedSpansForTesting: [StyleSpan] { styleCache.spans }
-        /// `nonisolated(unsafe)` only so `deinit` can unregister it. It is
+        /// `nonisolated(unsafe)` with main-actor-only access, so `deinit` can unregister it. It is
         /// written and read exclusively on the main actor; `deinit` merely
         /// hands the opaque token back to `NotificationCenter`, which is
         /// thread-safe. Without the deinit an editor that is released without a

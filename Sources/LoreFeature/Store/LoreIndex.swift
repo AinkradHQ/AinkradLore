@@ -1,7 +1,7 @@
 import Foundation
 import GRDB
 
-/// `@unchecked Sendable`: the only stored property is a GRDB `DatabaseQueue`,
+/// `@unchecked Sendable` with a GRDB `DatabaseQueue`: the only stored property,
 /// which serializes every access internally and is safe to use from any thread.
 /// This is what lets `LoreStore` run a whole-vault rebuild off the main actor.
 final class LoreIndex: @unchecked Sendable {

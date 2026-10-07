@@ -98,6 +98,7 @@ struct CodeRegionIndex: Sendable {
 /// it, and `@testable import` reaches it exactly as it is.
 enum MarkdownParseCounter {
     private static let lock = NSLock()
+    /// `nonisolated(unsafe)` with an `NSLock`: every read and write holds `lock`.
     nonisolated(unsafe) private static var stored = 0
 
     static var count: Int {

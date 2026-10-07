@@ -8,7 +8,7 @@ import AppKit
 /// every caret move — the exact per-render regression `MarkdownStylingBenchmark`
 /// exists to catch.
 ///
-/// `@unchecked Sendable` with a lock for the same reason `ExtractionCache` is:
+/// `@unchecked Sendable` with an `NSLock`, for the same reason `ExtractionCache` is:
 /// nothing here touches AppKit's main-actor state, only a private dictionary.
 final class EmbedImageCache: @unchecked Sendable {
     static let shared = EmbedImageCache()

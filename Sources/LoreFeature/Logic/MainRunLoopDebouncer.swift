@@ -14,7 +14,7 @@ import Foundation
 /// anything.
 @MainActor
 final class MainRunLoopDebouncer {
-    // `nonisolated(unsafe)`: `deinit` on a `@MainActor` class is itself
+    // `nonisolated(unsafe)` with main-actor-only access: `deinit` on a `@MainActor` class is itself
     // nonisolated (it may run once nothing else can reach `self`), so it
     // cannot touch a main-actor-isolated stored property without this. Every
     // OTHER access to `timer` is still on the main actor, through this
