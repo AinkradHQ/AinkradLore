@@ -14,7 +14,7 @@ extension View {
     func loreSidebarOperations(_ ops: SidebarOperations, theme: HostTheme) -> some View {
         self
             .overlay { LoreNoticeBridge(ops: ops) }
-            .sheet(
+            .sheet(  // design-lint: allow raw-control kit-gap AinkradTextField-focus
                 isPresented: Binding(
                     get: { ops.activeSheet != nil },
                     set: { if !$0 { ops.dismissAll() } })
