@@ -36,6 +36,20 @@ struct MarkdownTheme: Equatable {
     /// "settings resolved for rendering".
     let renderTagsAsChips: Bool
 
+    /// Whether the editor paints on a dark surface, judged from the
+    /// FOREGROUND rather than from a theme name: a light foreground implies a
+    /// dark background, and this works for any host theme without the tokens
+    /// having to declare an appearance. Decides which `syntax` tone a hue is
+    /// drawn at (see `syntaxColor(forHue:onDark:onLight:)`).
+    let isDarkSurface: Bool
+
+    /// The luminance `isDarkSurface` splits at: sRGB 50% grey's WCAG relative
+    /// luminance. The test used to be Rec. 601 luma > 0.5, which is the same
+    /// line on the grey axis, so every grey — and every shipped palette's
+    /// foreground — falls on the side it did before. Luminance itself is the
+    /// kit's (`Color.relativeLuminance`), not a second formula here.
+    static let darkSurfaceLuminance = pow((0.5 + 0.055) / 1.055, 2.4)
+
     /// The prose face.
     ///
     /// PROPORTIONAL, and that is the whole of M9.1. The editor rendered every
@@ -113,6 +127,7 @@ struct MarkdownTheme: Equatable {
         contentInset = 28 * settings.zoomFactor
         maxMeasure = settings.maxMeasure
         renderTagsAsChips = settings.renderTagsAsChips
+        isDarkSurface = tokens.foreground.relativeLuminance > Self.darkSurfaceLuminance
         bodyFont = .systemFont(ofSize: settings.bodySize)
         monoFont = .monospacedSystemFont(
             ofSize: settings.bodySize * Self.monoRatio,
@@ -148,6 +163,29 @@ struct MarkdownTheme: Equatable {
         case "foreground": return tokens.foreground
         default: return nil
         }
+    }
+
+    /// A semantic hue — a code token kind, a callout kind — at the skin's
+    /// `syntax` saturation and brightness for THIS surface.
+    ///
+    /// The hue is fixed and the rest is derived, which is the whole trade:
+    /// `danger` has to read as red in every theme, but a red picked for a dark
+    /// surface glares on a light one. `onDark`/`onLight` override the skin's
+    /// code tones for a caller that has its own (callouts).
+    func syntaxColor(
+        forHue hue: CGFloat,
+        onDark: AinkradSyntaxTone? = nil,
+        onLight: AinkradSyntaxTone? = nil
+    ) -> NSColor {
+        let tone =
+            isDarkSurface
+            ? (onDark ?? skin.syntax.onDark)
+            : (onLight ?? skin.syntax.onLight)
+        return NSColor(
+            hue: hue / 360,
+            saturation: tone.saturation,
+            brightness: tone.brightness,
+            alpha: 1)
     }
 
     /// h1…h6. Clamped so an out-of-range level from a malformed document

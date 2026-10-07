@@ -53,7 +53,7 @@ extension MarkdownStyleRenderer {
         }
     }
 
-    /// Syntax colours: fixed hues, theme-derived brightness.
+    /// Syntax colours: the skin's `syntax` hues, theme-derived brightness.
     ///
     /// The same trade `MarkdownCallout` makes, for the same reason. These are
     /// SEMANTIC — a reader who knows one editor expects strings and comments to
@@ -71,22 +71,14 @@ extension MarkdownStyleRenderer {
         let type: NSColor
 
         init(theme: MarkdownTheme) {
-            let tokens = theme.tokens
-            let onDark = MarkdownBlockBackgrounds.Palette.isDarkSurface(tokens: tokens)
-            func hued(_ hue: CGFloat) -> NSColor {
-                NSColor(
-                    hue: hue / 360,
-                    saturation: onDark ? 0.50 : 0.72,
-                    brightness: onDark ? 0.95 : 0.66,
-                    alpha: 1)
-            }
+            let syntax = theme.skin.syntax
             // Comments are quiet foreground rather than a hue: they are the one
             // token kind meant to recede.
-            comment = NSColor(tokens.foreground).withAlphaComponent(0.45)
-            string = hued(140)  // green
-            number = hued(30)  // orange
-            keyword = hued(285)  // violet
-            type = hued(200)  // blue
+            comment = theme.color(syntax.comment)
+            string = theme.syntaxColor(forHue: CGFloat(syntax.stringHue))  // green
+            number = theme.syntaxColor(forHue: CGFloat(syntax.numberHue))  // orange
+            keyword = theme.syntaxColor(forHue: CGFloat(syntax.keywordHue))  // violet
+            type = theme.syntaxColor(forHue: CGFloat(syntax.typeHue))  // blue
         }
 
         func colour(for kind: CodeToken.Kind) -> NSColor {
