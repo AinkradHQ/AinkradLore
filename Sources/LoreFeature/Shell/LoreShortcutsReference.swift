@@ -40,7 +40,7 @@ struct LoreShortcutsReference: View {
                 AinkradKbd("esc")
                 Text("Close the palette, a side panel, or the link suggestions")
                     .font(AinkradFontResolver.font(.body, typography: typo))
-                    .foregroundStyle(theme.tokens.foreground.opacity(0.85))
+                    .foregroundStyle(theme.tokens.foreground.opacity(skin.opacity.o85))
                 Spacer(minLength: 0)
             }
             HStack(spacing: AinkradSpacing.sm) {
@@ -50,14 +50,14 @@ struct LoreShortcutsReference: View {
                         + "and back"
                 )
                 .font(AinkradFontResolver.font(.body, typography: typo))
-                .foregroundStyle(theme.tokens.foreground.opacity(0.85))
+                .foregroundStyle(theme.tokens.foreground.opacity(skin.opacity.o85))
                 Spacer(minLength: 0)
             }
             HStack(spacing: AinkradSpacing.sm) {
                 AinkradIconGlyph(systemName: "number", size: 11)
                 Text("Click a #tag to filter the note list to it")
                     .font(AinkradFontResolver.font(.body, typography: typo))
-                    .foregroundStyle(theme.tokens.foreground.opacity(0.85))
+                    .foregroundStyle(theme.tokens.foreground.opacity(skin.opacity.o85))
                 Spacer(minLength: 0)
             }
         }
@@ -69,7 +69,7 @@ struct LoreShortcutsReference: View {
             AinkradIconGlyph(systemName: command.systemName, size: 11)
             Text(command.title)
                 .font(AinkradFontResolver.font(.body, typography: typo))
-                .foregroundStyle(theme.tokens.foreground.opacity(0.85))
+                .foregroundStyle(theme.tokens.foreground.opacity(skin.opacity.o85))
             Spacer(minLength: AinkradSpacing.sm)
             if let shortcut = command.shortcut {
                 AinkradKbd(shortcut.display)

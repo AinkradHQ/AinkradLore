@@ -145,6 +145,7 @@ struct RenamePreviewSheet: View {
     let report: RenameReport?
     let theme: HostTheme
     @Environment(\.ainkradTypography) private var typo
+    @Environment(\.ainkradSkin) private var skin
     let onConfirm: () -> Void
     let onCancel: () -> Void
 
@@ -173,7 +174,7 @@ struct RenamePreviewSheet: View {
             }
         }
         .padding(AinkradSpacing.lg)
-        .frame(width: 460)
+        .frame(width: CGFloat(skin.size.s460))
         .background(theme.tokens.surface)
         .environment(\.ainkradTheme, theme.tokens)
     }
@@ -182,7 +183,7 @@ struct RenamePreviewSheet: View {
         if let refusal = preview.refusal {
             Text(refusal).foregroundStyle(theme.tokens.foreground)
         } else {
-            Text(preview.summary).foregroundStyle(theme.tokens.foreground.opacity(0.85))
+            Text(preview.summary).foregroundStyle(theme.tokens.foreground.opacity(skin.opacity.o85))
             if preview.files.isEmpty {
                 EmptyView()
             } else {
@@ -196,7 +197,7 @@ struct RenamePreviewSheet: View {
             Text(report.headline).foregroundStyle(theme.tokens.foreground)
             ForEach(Array(report.detailLines.enumerated()), id: \.offset) { line in
                 Text(line.element)
-                    .foregroundStyle(theme.tokens.foreground.opacity(0.85))
+                    .foregroundStyle(theme.tokens.foreground.opacity(skin.opacity.o85))
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
@@ -204,14 +205,14 @@ struct RenamePreviewSheet: View {
 
     private func fileList(_ names: [String]) -> some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 2) {  // design-lint: allow spacing-literal token-gap spacing.xxs
                 ForEach(Array(names.enumerated()), id: \.offset) { name in
                     Text(name.element).lineLimit(1)
-                        .foregroundStyle(theme.tokens.foreground.opacity(0.7))
+                        .foregroundStyle(theme.tokens.foreground.opacity(skin.opacity.o70))
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
         }
-        .frame(maxHeight: 200)
+        .frame(maxHeight: CGFloat(skin.size.s200))
     }
 }

@@ -32,10 +32,14 @@ struct SidebarPinnedSection: View {
     var body: some View {
         let pinned = store.pinnedRows
         if !pinned.isEmpty {
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 2) {  // design-lint: allow spacing-literal token-gap spacing.xxs
                 header("Pinned")
                 ForEach(pinned, id: \.path) { row in shortcutRow(row) }
-                Divider().opacity(0.4).padding(.vertical, AinkradSpacing.xs)
+                // The gap a separator line used to fill, kept so the browse
+                // list below does not move up; the line itself is gone (no
+                // separator lines — the section header already says where
+                // the pinned rows end).
+                Color.clear.frame(height: CGFloat(skin.size.s1)).padding(.vertical, AinkradSpacing.xs)
             }
             .padding(.horizontal, AinkradSpacing.md)
         }

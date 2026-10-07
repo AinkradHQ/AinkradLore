@@ -113,6 +113,7 @@ struct NameSheet: View {
     @Binding var text: String
     let theme: HostTheme
     @Environment(\.ainkradTypography) private var typo
+    @Environment(\.ainkradSkin) private var skin
     let onConfirm: () -> Void
     let onCancel: () -> Void
 
@@ -120,11 +121,10 @@ struct NameSheet: View {
         VStack(alignment: .leading, spacing: AinkradSpacing.md) {
             Text(title).font(AinkradFontResolver.font(.headline, typography: typo)).foregroundStyle(
                 theme.tokens.foreground)
-            TextField("New name", text: $text)
-                .textFieldStyle(.roundedBorder)
+            AinkradTextField(text: $text, placeholder: "New name")
                 .onSubmit(onConfirm)
             Text("You will see exactly what changes before anything is written.")
-                .foregroundStyle(theme.tokens.foreground.opacity(0.7))
+                .foregroundStyle(theme.tokens.foreground.opacity(skin.opacity.o70))
             HStack {
                 Spacer()
                 AinkradButton(title: "Cancel", style: .ghost, action: onCancel)
@@ -132,7 +132,7 @@ struct NameSheet: View {
             }
         }
         .padding(AinkradSpacing.lg)
-        .frame(width: 420)
+        .frame(width: CGFloat(skin.size.s420))
         .background(theme.tokens.surface)
         .environment(\.ainkradTheme, theme.tokens)
     }
@@ -144,13 +144,14 @@ struct MessageSheet: View {
     let text: String
     let theme: HostTheme
     @Environment(\.ainkradTypography) private var typo
+    @Environment(\.ainkradSkin) private var skin
     let onDismiss: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: AinkradSpacing.md) {
             Text("Not done").font(AinkradFontResolver.font(.headline, typography: typo)).foregroundStyle(
                 theme.tokens.foreground)
-            Text(text).foregroundStyle(theme.tokens.foreground.opacity(0.85))
+            Text(text).foregroundStyle(theme.tokens.foreground.opacity(skin.opacity.o85))
                 .fixedSize(horizontal: false, vertical: true)
             HStack {
                 Spacer()
@@ -158,7 +159,7 @@ struct MessageSheet: View {
             }
         }
         .padding(AinkradSpacing.lg)
-        .frame(width: 420)
+        .frame(width: CGFloat(skin.size.s420))
         .background(theme.tokens.surface)
         .environment(\.ainkradTheme, theme.tokens)
     }
@@ -178,7 +179,7 @@ struct MessageSheet: View {
 /// `AinkradAppKit/Sources/AinkradAppKitUI/Components/AinkradContextMenu.swift`)
 /// takes an item array, not a `@ViewBuilder`, so there is no `Button`/`Divider`
 /// tree to build here. The kit has no divider primitive; the visual break
-/// `Divider()` gave the destructive row is expressed instead by
+/// a `Divider` gave the destructive row is expressed instead by
 /// `AinkradMenuItem.isDestructive`'s own tint, which is what the row-hover
 /// design already leans on to separate "safe" actions from the trash one.
 /// - Parameter store: Supplied only so the menu can offer Pin / Unpin, which
