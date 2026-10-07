@@ -221,12 +221,15 @@ struct MarkdownTheme: Equatable {
     /// three.
     ///
     /// The ratios belong in the skin's `type` group (R2), which has none yet,
-    /// so they stay here — the one source 5B.9 points the CM6 editor at.
+    /// so they stay here — the one source both editors read (the CM6 page
+    /// through `CM6ThemeBridge`).
     func headingSize(_ level: Int) -> CGFloat {
-        // design-lint: allow font-size token-gap type.editor.headingRatios
-        let ratios: [CGFloat] = [1.80, 1.60, 1.40, 1.25, 1.125, 1.05]
-        return bodySize * ratios[min(max(level, 1), 6) - 1]
+        bodySize * Self.headingRatios[min(max(level, 1), 6) - 1]
     }
+
+    /// h1…h6 as multiples of the body size. See `headingSize(_:)`.
+    // design-lint: allow font-size token-gap type.editor.headingRatios
+    static let headingRatios: [CGFloat] = [1.80, 1.60, 1.40, 1.25, 1.125, 1.05]
 
     /// The weight a heading is set at.
     ///

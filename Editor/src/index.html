@@ -1,19 +1,1528 @@
 <!doctype html><html><head><meta charset="utf-8">
 <style>
-  /* Every value here is a token the host sets — see CM6EditorView. Nothing in
-     this file should hard-code a colour or a size. */
+  /* Every value here is a token the host sets — see CM6ThemeBridge, which
+     pushes this whole set on load and on every theme or settings change.
+     These defaults ARE its output for the default skin (CM6ThemeBridgeTests
+     fails, and writes the block to regenerate, when they drift), so a first
+     paint before the push still looks right. Nothing below this block may
+     hard-code a colour or a size. */
   :root {
-    --bg: #16161c; --fg: #e6e6ea; --text-faint: #8a8a96;
-    --accent-primary: #7c6cf0; --surface-elevated: #23232c;
-    --font-text: -apple-system, "SF Pro Text", system-ui, sans-serif;
-    --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
-    --body-size: 15px; --line-height: 1.5;
-    --measure: 760px; --content-inset: 28px;
+    --ak-chrome-hud-bar-height: 30;
+    --ak-chrome-overlay-backdrop-opacity: 0.42;
+    --ak-chrome-overlay-background-opacity: 0.94;
+    --ak-chrome-overlay-cut-key: panel;
+    --ak-chrome-overlay-edge-from: color-mix(in srgb, rgb(34, 211, 238) 55%, transparent);
+    --ak-chrome-overlay-edge-to: color-mix(in srgb, rgb(37, 99, 235) 28%, transparent);
+    --ak-chrome-overlay-edge-width: 1;
+    --ak-chrome-pane-bottom-inset-key: sm;
+    --ak-chrome-pane-horizontal-inset-key: sm;
+    --ak-chrome-pane-tab-strip-height: 30;
+    --ak-chrome-pane-tab-strip-spacing-key: xs;
+    --ak-chrome-pane-top-inset-key: xs;
+    --ak-chrome-settings-control-column-width: 220;
+    --ak-chrome-settings-height-fraction: 0.85;
+    --ak-chrome-settings-mini-map-breakpoint: 640;
+    --ak-chrome-settings-panel-max-height: 900;
+    --ak-chrome-settings-panel-max-width: 1440;
+    --ak-chrome-settings-panel-min-height: 700;
+    --ak-chrome-settings-panel-min-width: 1100;
+    --ak-chrome-settings-sidebar-width: 240;
+    --ak-chrome-settings-wide-breakpoint: 900;
+    --ak-chrome-settings-width-fraction: 0.82;
+    --ak-chrome-settings-y-offset: -30;
+    --ak-components-app-tile-fill: color-mix(in srgb, rgb(26, 34, 51) 85%, transparent);
+    --ak-components-app-tile-glow-color-hover: color-mix(in srgb, rgb(37, 99, 235) 40%, transparent);
+    --ak-components-app-tile-glow-color-rest: color-mix(in srgb, rgb(37, 99, 235) 0%, transparent);
+    --ak-components-app-tile-glow-color-selected: color-mix(in srgb, rgb(37, 99, 235) 50%, transparent);
+    --ak-components-app-tile-glow-radius-hover: 8;
+    --ak-components-app-tile-glow-radius-rest: 0;
+    --ak-components-app-tile-glow-radius-selected: 8;
+    --ak-components-app-tile-glyph-ratio: 0.42;
+    --ak-components-app-tile-hover-scale: 1.05;
+    --ak-components-app-tile-shape-cut-ratio: 0.22;
+    --ak-components-app-tile-shape-style: chamfer;
+    --ak-components-app-tile-size: 44;
+    --ak-components-app-tile-stroke-color-hover: color-mix(in srgb, rgb(34, 211, 238) 65%, transparent);
+    --ak-components-app-tile-stroke-color-rest: color-mix(in srgb, rgb(34, 211, 238) 30%, transparent);
+    --ak-components-app-tile-stroke-color-selected: color-mix(in srgb, rgb(37, 99, 235) 90%, transparent);
+    --ak-components-app-tile-stroke-width-rest: 1;
+    --ak-components-app-tile-stroke-width-selected: 1.5;
+    --ak-components-app-tile-title-color: color-mix(in srgb, rgb(226, 232, 240) 75%, transparent);
+    --ak-components-app-tile-title-font-role: caption;
+    --ak-components-badge-fill: color-mix(in srgb, rgb(37, 99, 235) 16%, transparent);
+    --ak-components-badge-font-role: caption;
+    --ak-components-badge-font-tracking: 0.6;
+    --ak-components-badge-font-weight: semibold;
+    --ak-components-badge-shape-cut: 4;
+    --ak-components-badge-shape-style: chamfer;
+    --ak-components-badge-stroke-color: color-mix(in srgb, rgb(37, 99, 235) 55%, transparent);
+    --ak-components-badge-stroke-width: 1;
+    --ak-components-banner-body-color: color-mix(in srgb, rgb(226, 232, 240) 90%, transparent);
+    --ak-components-banner-body-font-role: body;
+    --ak-components-banner-close-color: color-mix(in srgb, rgb(226, 232, 240) 50%, transparent);
+    --ak-components-banner-close-font-scaled: false;
+    --ak-components-banner-close-font-size: 10;
+    --ak-components-banner-close-font-weight: bold;
+    --ak-components-banner-fill: color-mix(in srgb, rgb(37, 99, 235) 12%, transparent);
+    --ak-components-banner-icon-font-scaled: false;
+    --ak-components-banner-icon-font-size: 14;
+    --ak-components-banner-icon-font-weight: semibold;
+    --ak-components-banner-shape-cut: 8;
+    --ak-components-banner-shape-style: chamfer;
+    --ak-components-banner-stroke-color: color-mix(in srgb, rgb(37, 99, 235) 50%, transparent);
+    --ak-components-banner-stroke-width: 1.25;
+    --ak-components-basic-shell-header-glyph-font-scaled: false;
+    --ak-components-basic-shell-header-glyph-font-size: 12;
+    --ak-components-basic-shell-header-glyph-font-weight: medium;
+    --ak-components-basic-shell-header-subtitle-color: color-mix(in srgb, rgb(226, 232, 240) 55%, transparent);
+    --ak-components-basic-shell-header-subtitle-font-role: caption;
+    --ak-components-basic-shell-header-title-font-role: headline;
+    --ak-components-basic-shell-header-title-font-weight: medium;
+    --ak-components-breadcrumb-active-color: rgb(34, 211, 238);
+    --ak-components-breadcrumb-active-font-role: caption;
+    --ak-components-breadcrumb-active-font-tracking: 0.6;
+    --ak-components-breadcrumb-active-font-weight: semibold;
+    --ak-components-breadcrumb-chevron-color: color-mix(in srgb, rgb(34, 211, 238) 55%, transparent);
+    --ak-components-breadcrumb-chevron-font-scaled: false;
+    --ak-components-breadcrumb-chevron-font-size: 10;
+    --ak-components-breadcrumb-chevron-font-weight: bold;
+    --ak-components-breadcrumb-font-role: caption;
+    --ak-components-breadcrumb-font-tracking: 0.6;
+    --ak-components-breadcrumb-item-color: color-mix(in srgb, rgb(226, 232, 240) 60%, transparent);
+    --ak-components-button-fill-disabled: color-mix(in srgb, rgb(37, 99, 235) 40%, transparent);
+    --ak-components-button-fill-hover: color-mix(in srgb, rgb(37, 99, 235) 95%, transparent);
+    --ak-components-button-fill-pressed: color-mix(in srgb, rgb(37, 99, 235) 95%, transparent);
+    --ak-components-button-fill-rest: color-mix(in srgb, rgb(37, 99, 235) 90%, transparent);
+    --ak-components-button-glow-color-hover: color-mix(in srgb, rgb(37, 99, 235) 55%, transparent);
+    --ak-components-button-glow-color-rest: color-mix(in srgb, rgb(37, 99, 235) 0%, transparent);
+    --ak-components-button-glow-radius-hover: 6;
+    --ak-components-button-glow-radius-rest: 0;
+    --ak-components-button-hover-scale: 1.02;
+    --ak-components-button-icon-font-scaled: false;
+    --ak-components-button-icon-font-size: 12;
+    --ak-components-button-icon-font-weight: semibold;
+    --ak-components-button-label-font-role: caption;
+    --ak-components-button-label-font-tracking: 0.8;
+    --ak-components-button-label-font-weight: semibold;
+    --ak-components-button-pressed-scale: 0.97;
+    --ak-components-button-shape-cut: 8;
+    --ak-components-button-shape-style: chamfer;
+    --ak-components-button-spinner-size: 14;
+    --ak-components-button-stroke-color-hover: color-mix(in srgb, rgb(37, 99, 235) 95%, transparent);
+    --ak-components-button-stroke-color-rest: color-mix(in srgb, rgb(37, 99, 235) 55%, transparent);
+    --ak-components-button-stroke-width: 1.25;
+    --ak-components-captioned-row-caption-color: color-mix(in srgb, rgb(226, 232, 240) 45%, transparent);
+    --ak-components-captioned-row-caption-column-width: 86;
+    --ak-components-captioned-row-caption-font-role: caption;
+    --ak-components-captioned-row-caption-font-weight: medium;
+    --ak-components-card-fill: color-mix(in srgb, rgb(17, 24, 39) 90%, transparent);
+    --ak-components-card-hover-bracket-inset: -2;
+    --ak-components-card-hover-bracket-length: 10;
+    --ak-components-card-hover-scale: 1.015;
+    --ak-components-card-padding: 12;
+    --ak-components-card-shape-cut: 12;
+    --ak-components-card-shape-style: chamfer;
+    --ak-components-card-stroke-color-hover: color-mix(in srgb, rgb(34, 211, 238) 60%, transparent);
+    --ak-components-card-stroke-color-rest: color-mix(in srgb, rgb(34, 211, 238) 25%, transparent);
+    --ak-components-card-stroke-color-selected: color-mix(in srgb, rgb(37, 99, 235) 85%, transparent);
+    --ak-components-card-stroke-width-rest: 1;
+    --ak-components-card-stroke-width-selected: 1.5;
+    --ak-components-checkbox-check-glyph-font-scaled: false;
+    --ak-components-checkbox-check-glyph-font-size: 10;
+    --ak-components-checkbox-check-glyph-font-weight: bold;
+    --ak-components-checkbox-fill-rest: color-mix(in srgb, rgb(26, 34, 51) 50%, transparent);
+    --ak-components-checkbox-fill-selected: color-mix(in srgb, rgb(34, 211, 238) 22%, transparent);
+    --ak-components-checkbox-glow-color-rest: color-mix(in srgb, rgb(34, 211, 238) 0%, transparent);
+    --ak-components-checkbox-glow-color-selected: color-mix(in srgb, rgb(34, 211, 238) 50%, transparent);
+    --ak-components-checkbox-glow-radius-rest: 0;
+    --ak-components-checkbox-glow-radius-selected: 4;
+    --ak-components-checkbox-hover-scale: 1.04;
+    --ak-components-checkbox-label-font-role: body;
+    --ak-components-checkbox-shape-cut: 3;
+    --ak-components-checkbox-shape-style: chamfer;
+    --ak-components-checkbox-size: 18;
+    --ak-components-checkbox-stroke-color-hover: color-mix(in srgb, rgb(34, 211, 238) 85%, transparent);
+    --ak-components-checkbox-stroke-color-rest: color-mix(in srgb, rgb(34, 211, 238) 40%, transparent);
+    --ak-components-checkbox-stroke-color-selected: color-mix(in srgb, rgb(34, 211, 238) 85%, transparent);
+    --ak-components-checkbox-stroke-width-rest: 1.25;
+    --ak-components-checkbox-stroke-width-selected: 1.25;
+    --ak-components-chip-fg-rest: color-mix(in srgb, rgb(226, 232, 240) 85%, transparent);
+    --ak-components-chip-fg-selected: rgb(226, 232, 240);
+    --ak-components-chip-fill-hover: color-mix(in srgb, rgb(26, 34, 51) 65%, transparent);
+    --ak-components-chip-fill-rest: color-mix(in srgb, rgb(26, 34, 51) 45%, transparent);
+    --ak-components-chip-fill-selected: color-mix(in srgb, rgb(26, 34, 51) 80%, transparent);
+    --ak-components-chip-hover-scale: 1.03;
+    --ak-components-chip-icon-font-scaled: false;
+    --ak-components-chip-icon-font-size: 10;
+    --ak-components-chip-icon-font-weight: semibold;
+    --ak-components-chip-label-font-role: caption;
+    --ak-components-chip-remove-font-scaled: false;
+    --ak-components-chip-remove-font-size: 8;
+    --ak-components-chip-remove-font-weight: bold;
+    --ak-components-chip-remove-padding: 3;
+    --ak-components-chip-shape-cut: 5;
+    --ak-components-chip-shape-style: chamfer;
+    --ak-components-chip-stroke-color-hover: color-mix(in srgb, rgb(34, 211, 238) 60%, transparent);
+    --ak-components-chip-stroke-color-rest: color-mix(in srgb, rgb(34, 211, 238) 30%, transparent);
+    --ak-components-chip-stroke-width: 1;
+    --ak-components-code-block-code-color: color-mix(in srgb, rgb(226, 232, 240) 92%, transparent);
+    --ak-components-code-block-code-font-role: mono;
+    --ak-components-code-block-fill: color-mix(in srgb, rgb(17, 24, 39) 90%, transparent);
+    --ak-components-code-block-header-color: color-mix(in srgb, rgb(226, 232, 240) 55%, transparent);
+    --ak-components-code-block-header-font-role: caption;
+    --ak-components-code-block-header-font-tracking: 0.8;
+    --ak-components-code-block-header-font-weight: semibold;
+    --ak-components-code-block-shape-cut: 8;
+    --ak-components-code-block-shape-style: chamfer;
+    --ak-components-code-block-stroke-color: color-mix(in srgb, rgb(34, 211, 238) 30%, transparent);
+    --ak-components-code-block-stroke-width: 1;
+    --ak-components-color-picker-channel-tick-color: color-mix(in srgb, rgb(34, 211, 238) 55%, transparent);
+    --ak-components-color-picker-channel-tick-height: 10;
+    --ak-components-color-picker-channel-tick-width: 2;
+    --ak-components-color-picker-label-color: color-mix(in srgb, rgb(226, 232, 240) 80%, transparent);
+    --ak-components-color-picker-panel-max-height: 360;
+    --ak-components-color-picker-panel-width: 244;
+    --ak-components-color-picker-preview-height: 28;
+    --ak-components-color-picker-preview-shape-cut: 6;
+    --ak-components-color-picker-preview-shape-style: chamfer;
+    --ak-components-color-picker-preview-stroke-color: color-mix(in srgb, rgb(37, 99, 235) 30%, transparent);
+    --ak-components-color-picker-preview-stroke-width: 1;
+    --ak-components-color-picker-swatch-glow-color-focused: color-mix(in srgb, rgb(37, 99, 235) 45%, transparent);
+    --ak-components-color-picker-swatch-glow-color-rest: color-mix(in srgb, rgb(37, 99, 235) 0%, transparent);
+    --ak-components-color-picker-swatch-glow-radius-focused: 6;
+    --ak-components-color-picker-swatch-glow-radius-rest: 0;
+    --ak-components-color-picker-swatch-height: 24;
+    --ak-components-color-picker-swatch-shape-cut: 6;
+    --ak-components-color-picker-swatch-shape-style: chamfer;
+    --ak-components-color-picker-swatch-stroke-color-focused: color-mix(in srgb, rgb(37, 99, 235) 90%, transparent);
+    --ak-components-color-picker-swatch-stroke-color-rest: color-mix(in srgb, rgb(37, 99, 235) 35%, transparent);
+    --ak-components-color-picker-swatch-stroke-width-focused: 1.5;
+    --ak-components-color-picker-swatch-stroke-width-rest: 1.25;
+    --ak-components-color-picker-swatch-width: 28;
+    --ak-components-color-picker-value-color: color-mix(in srgb, rgb(226, 232, 240) 60%, transparent);
+    --ak-components-combobox-fill: color-mix(in srgb, rgb(26, 34, 51) 50%, transparent);
+    --ak-components-combobox-glow-color-focused: color-mix(in srgb, rgb(37, 99, 235) 45%, transparent);
+    --ak-components-combobox-glow-color-rest: color-mix(in srgb, rgb(37, 99, 235) 0%, transparent);
+    --ak-components-combobox-glow-radius-focused: 6;
+    --ak-components-combobox-glow-radius-rest: 0;
+    --ak-components-combobox-shape-cut: 8;
+    --ak-components-combobox-shape-style: chamfer;
+    --ak-components-combobox-stroke-color-focused: color-mix(in srgb, rgb(37, 99, 235) 85%, transparent);
+    --ak-components-combobox-stroke-color-rest: color-mix(in srgb, rgb(37, 99, 235) 30%, transparent);
+    --ak-components-combobox-stroke-width-focused: 1.5;
+    --ak-components-combobox-stroke-width-rest: 1.25;
+    --ak-components-command-field-font-size: 17;
+    --ak-components-command-field-font-weight: regular;
+    --ak-components-command-field-foreground: rgb(226, 232, 240);
+    --ak-components-command-field-gap: 12;
+    --ak-components-command-field-height: 56;
+    --ak-components-command-field-horizontal-padding: 18;
+    --ak-components-command-field-mark-color: rgb(34, 211, 238);
+    --ak-components-command-field-mark-glow-color: color-mix(in srgb, rgb(34, 211, 238) 90%, transparent);
+    --ak-components-command-field-mark-glow-radius: 6;
+    --ak-components-command-field-mark-height: 14;
+    --ak-components-command-field-mark-width: 16;
+    --ak-components-command-field-tint: rgb(34, 211, 238);
+    --ak-components-command-menu-row-detail-color: color-mix(in srgb, rgb(226, 232, 240) 45%, transparent);
+    --ak-components-command-menu-row-detail-font-role: mono;
+    --ak-components-command-menu-row-fg-rest: color-mix(in srgb, rgb(226, 232, 240) 65%, transparent);
+    --ak-components-command-menu-row-fg-selected: rgb(226, 232, 240);
+    --ak-components-command-menu-row-fill-rest: color-mix(in srgb, rgb(26, 34, 51) 20%, transparent);
+    --ak-components-command-menu-row-fill-selected: color-mix(in srgb, rgb(37, 99, 235) 85%, transparent);
+    --ak-components-command-menu-row-glow-color-rest: color-mix(in srgb, rgb(0, 0, 0) 0%, transparent);
+    --ak-components-command-menu-row-glow-color-selected: color-mix(in srgb, rgb(34, 211, 238) 50%, transparent);
+    --ak-components-command-menu-row-glow-radius-rest: 0;
+    --ak-components-command-menu-row-glow-radius-selected: 5;
+    --ak-components-command-menu-row-glyph-font-scaled: false;
+    --ak-components-command-menu-row-glyph-font-size: 13;
+    --ak-components-command-menu-row-glyph-font-weight: semibold;
+    --ak-components-command-menu-row-glyph-width: 18;
+    --ak-components-command-menu-row-hover-scale: 1.015;
+    --ak-components-command-menu-row-shape-cut: 6;
+    --ak-components-command-menu-row-shape-style: chamfer;
+    --ak-components-command-menu-row-stroke-color-rest: color-mix(in srgb, rgb(0, 0, 0) 0%, transparent);
+    --ak-components-command-menu-row-stroke-color-selected: color-mix(in srgb, rgb(34, 211, 238) 90%, transparent);
+    --ak-components-command-menu-row-stroke-width: 1.25;
+    --ak-components-command-menu-row-title-font-role: caption;
+    --ak-components-command-menu-row-title-font-tracking: 0.6;
+    --ak-components-command-menu-row-title-font-weight: semibold;
+    --ak-components-command-menu-row-uppercased-tracking: 0.6;
+    --ak-components-command-menu-row-value-color: color-mix(in srgb, rgb(34, 211, 238) 85%, transparent);
+    --ak-components-command-menu-row-value-font-role: mono;
+    --ak-components-confirm-dialog-max-width: 360;
+    --ak-components-confirm-dialog-message-color: color-mix(in srgb, rgb(226, 232, 240) 75%, transparent);
+    --ak-components-confirm-dialog-message-font-role: body;
+    --ak-components-confirm-dialog-title-font-role: headline;
+    --ak-components-confirm-dialog-title-font-tracking: 0.6;
+    --ak-components-confirm-dialog-title-font-weight: semibold;
+    --ak-components-confirm-dialog-transition-scale: 0.94;
+    --ak-components-context-menu-body-font-role: body;
+    --ak-components-context-menu-glyph-font-scaled: false;
+    --ak-components-context-menu-glyph-font-size: 12;
+    --ak-components-context-menu-glyph-font-weight: semibold;
+    --ak-components-context-menu-row-gap: 2;
+    --ak-components-context-menu-row-hover-fill: color-mix(in srgb, rgb(34, 211, 238) 14%, transparent);
+    --ak-components-context-menu-row-shape-cut: 4;
+    --ak-components-context-menu-row-shape-style: chamfer;
+    --ak-components-context-menu-tint: color-mix(in srgb, rgb(226, 232, 240) 90%, transparent);
+    --ak-components-data-table-cell-color: color-mix(in srgb, rgb(226, 232, 240) 90%, transparent);
+    --ak-components-data-table-cell-font-role: body;
+    --ak-components-data-table-edge-glow-color: color-mix(in srgb, rgb(34, 211, 238) 60%, transparent);
+    --ak-components-data-table-edge-glow-radius: 3;
+    --ak-components-data-table-edge-width: 2;
+    --ak-components-data-table-header-cell-gap: 3;
+    --ak-components-data-table-header-color: color-mix(in srgb, rgb(226, 232, 240) 75%, transparent);
+    --ak-components-data-table-header-fill: color-mix(in srgb, rgb(26, 34, 51) 70%, transparent);
+    --ak-components-data-table-header-font-role: caption;
+    --ak-components-data-table-header-font-tracking: 0.8;
+    --ak-components-data-table-header-font-weight: semibold;
+    --ak-components-data-table-header-shape-corners: top;
+    --ak-components-data-table-header-shape-cut: 6;
+    --ak-components-data-table-header-shape-style: chamfer;
+    --ak-components-data-table-row-fill-hover: color-mix(in srgb, rgb(26, 34, 51) 40%, transparent);
+    --ak-components-data-table-row-fill-rest: color-mix(in srgb, rgb(0, 0, 0) 0%, transparent);
+    --ak-components-data-table-row-fill-selected: color-mix(in srgb, rgb(37, 99, 235) 16%, transparent);
+    --ak-components-data-table-row-gap: 2;
+    --ak-components-data-table-row-shape-cut: 4;
+    --ak-components-data-table-row-shape-style: chamfer;
+    --ak-components-data-table-sort-glyph-font-scaled: false;
+    --ak-components-data-table-sort-glyph-font-size: 8;
+    --ak-components-data-table-sort-glyph-font-weight: bold;
+    --ak-components-disclosure-group-chevron-color: color-mix(in srgb, rgb(226, 232, 240) 50%, transparent);
+    --ak-components-disclosure-group-chevron-font-scaled: false;
+    --ak-components-disclosure-group-chevron-font-size: 10;
+    --ak-components-disclosure-group-expand-animation-curve: easeOut;
+    --ak-components-disclosure-group-expand-animation-duration: 0.25;
+    --ak-components-disclosure-group-header-fill-hover: color-mix(in srgb, rgb(26, 34, 51) 50%, transparent);
+    --ak-components-disclosure-group-header-fill-rest: color-mix(in srgb, rgb(0, 0, 0) 0%, transparent);
+    --ak-components-disclosure-group-header-shape-cut: 8;
+    --ak-components-disclosure-group-header-shape-style: chamfer;
+    --ak-components-disclosure-group-hover-animation-curve: easeOut;
+    --ak-components-disclosure-group-hover-animation-duration: 0.15;
+    --ak-components-disclosure-group-title-color: color-mix(in srgb, rgb(226, 232, 240) 70%, transparent);
+    --ak-components-disclosure-group-title-font-role: caption;
+    --ak-components-disclosure-group-title-font-tracking: 1.2;
+    --ak-components-disclosure-group-title-font-weight: semibold;
+    --ak-components-drawer-scrim-color: color-mix(in srgb, rgb(0, 0, 0) 45%, transparent);
+    --ak-components-drawer-width: 280;
+    --ak-components-empty-state-glyph-color: color-mix(in srgb, rgb(226, 232, 240) 35%, transparent);
+    --ak-components-empty-state-glyph-font-role: display;
+    --ak-components-empty-state-glyph-font-scaled: false;
+    --ak-components-empty-state-message-color: color-mix(in srgb, rgb(226, 232, 240) 60%, transparent);
+    --ak-components-empty-state-message-font-role: body;
+    --ak-components-empty-state-title-font-role: headline;
+    --ak-components-empty-state-title-font-weight: medium;
+    --ak-components-error-state-fill: color-mix(in srgb, rgb(248, 81, 73) 12%, transparent);
+    --ak-components-error-state-glyph-color: rgb(248, 81, 73);
+    --ak-components-error-state-glyph-font-role: title;
+    --ak-components-error-state-glyph-font-scaled: false;
+    --ak-components-error-state-message-color: color-mix(in srgb, rgb(226, 232, 240) 75%, transparent);
+    --ak-components-error-state-message-font-role: body;
+    --ak-components-error-state-shape-cut: 8;
+    --ak-components-error-state-shape-style: chamfer;
+    --ak-components-error-state-stroke-color: color-mix(in srgb, rgb(248, 81, 73) 45%, transparent);
+    --ak-components-error-state-stroke-width: 1.25;
+    --ak-components-form-row-hint-color: color-mix(in srgb, rgb(226, 232, 240) 55%, transparent);
+    --ak-components-form-row-hint-font-role: caption;
+    --ak-components-form-row-hint-leading: 6;
+    --ak-components-form-row-label-font-role: body;
+    --ak-components-form-row-tick-color: color-mix(in srgb, rgb(34, 211, 238) 55%, transparent);
+    --ak-components-form-row-tick-height: 12;
+    --ak-components-form-row-tick-width: 2;
+    --ak-components-grouped-select-rows-detail-color-disabled: color-mix(in srgb, rgb(226, 232, 240) 30%, transparent);
+    --ak-components-grouped-select-rows-detail-color-rest: color-mix(in srgb, rgb(226, 232, 240) 50%, transparent);
+    --ak-components-grouped-select-rows-detail-font-role: caption;
+    --ak-components-grouped-select-rows-empty-color: color-mix(in srgb, rgb(226, 232, 240) 50%, transparent);
+    --ak-components-grouped-select-rows-empty-font-role: caption;
+    --ak-components-grouped-select-rows-header-color: color-mix(in srgb, rgb(226, 232, 240) 45%, transparent);
+    --ak-components-grouped-select-rows-header-font-role: caption;
+    --ak-components-grouped-select-rows-header-kerning: 1;
+    --ak-components-grouped-select-rows-header-pad-bottom: 2;
+    --ak-components-grouped-select-rows-icon-color-disabled: color-mix(in srgb, rgb(226, 232, 240) 40%, transparent);
+    --ak-components-grouped-select-rows-icon-color-rest: color-mix(in srgb, rgb(226, 232, 240) 75%, transparent);
+    --ak-components-grouped-select-rows-icon-font-scaled: false;
+    --ak-components-grouped-select-rows-icon-font-size: 11;
+    --ak-components-grouped-select-rows-panel-max-height: 320;
+    --ak-components-grouped-select-rows-panel-min-width: 340;
+    --ak-components-grouped-select-rows-title-color-disabled: color-mix(in srgb, rgb(226, 232, 240) 40%, transparent);
+    --ak-components-grouped-select-rows-title-color-rest: rgb(226, 232, 240);
+    --ak-components-grouped-select-rows-title-font-role: body;
+    --ak-components-grouped-select-trigger-chevron-color: color-mix(in srgb, rgb(34, 211, 238) 85%, transparent);
+    --ak-components-grouped-select-trigger-chevron-scaled: false;
+    --ak-components-grouped-select-trigger-chevron-size: 10;
+    --ak-components-grouped-select-trigger-chevron-weight: semibold;
+    --ak-components-grouped-select-trigger-fill: color-mix(in srgb, rgb(26, 34, 51) 50%, transparent);
+    --ak-components-grouped-select-trigger-glow-color-rest: color-mix(in srgb, rgb(37, 99, 235) 0%, transparent);
+    --ak-components-grouped-select-trigger-glow-color-selected: color-mix(in srgb, rgb(37, 99, 235) 40%, transparent);
+    --ak-components-grouped-select-trigger-glow-radius-rest: 0;
+    --ak-components-grouped-select-trigger-glow-radius-selected: 5;
+    --ak-components-grouped-select-trigger-shape-cut: 8;
+    --ak-components-grouped-select-trigger-shape-style: chamfer;
+    --ak-components-grouped-select-trigger-stroke-color-rest: color-mix(in srgb, rgb(37, 99, 235) 30%, transparent);
+    --ak-components-grouped-select-trigger-stroke-color-selected: color-mix(in srgb, rgb(37, 99, 235) 75%, transparent);
+    --ak-components-grouped-select-trigger-stroke-width-rest: 1.25;
+    --ak-components-grouped-select-trigger-stroke-width-selected: 1.25;
+    --ak-components-icon-button-fg-hover: rgb(226, 232, 240);
+    --ak-components-icon-button-fg-rest: color-mix(in srgb, rgb(226, 232, 240) 75%, transparent);
+    --ak-components-icon-button-fill-hover: color-mix(in srgb, rgb(26, 34, 51) 70%, transparent);
+    --ak-components-icon-button-fill-rest: color-mix(in srgb, rgb(26, 34, 51) 40%, transparent);
+    --ak-components-icon-button-glow-color-hover: color-mix(in srgb, rgb(34, 211, 238) 50%, transparent);
+    --ak-components-icon-button-glow-color-rest: color-mix(in srgb, rgb(34, 211, 238) 0%, transparent);
+    --ak-components-icon-button-glow-radius-hover: 5;
+    --ak-components-icon-button-glow-radius-rest: 0;
+    --ak-components-icon-button-glyph-ratio: 0.433;
+    --ak-components-icon-button-hover-scale: 1.05;
+    --ak-components-icon-button-shape-cut-ratio: 0.2;
+    --ak-components-icon-button-shape-style: chamfer;
+    --ak-components-icon-button-size: 30;
+    --ak-components-icon-button-stroke-color-hover: color-mix(in srgb, rgb(34, 211, 238) 85%, transparent);
+    --ak-components-icon-button-stroke-color-rest: color-mix(in srgb, rgb(34, 211, 238) 35%, transparent);
+    --ak-components-icon-button-stroke-width: 1;
+    --ak-components-icon-glyph-fill: color-mix(in srgb, rgb(37, 99, 235) 85%, transparent);
+    --ak-components-icon-glyph-glyph-color: rgb(34, 211, 238);
+    --ak-components-icon-glyph-glyph-ratio: 0.55;
+    --ak-components-icon-glyph-shape-cut-ratio: 0.2;
+    --ak-components-icon-glyph-shape-min-cut: 2;
+    --ak-components-icon-glyph-shape-style: chamfer;
+    --ak-components-icon-glyph-size: 16;
+    --ak-components-icon-glyph-stroke-color-rest: color-mix(in srgb, rgb(34, 211, 238) 40%, transparent);
+    --ak-components-icon-glyph-stroke-color-selected: color-mix(in srgb, rgb(0, 0, 0) 0%, transparent);
+    --ak-components-icon-glyph-stroke-width: 1;
+    --ak-components-kbd-color: color-mix(in srgb, rgb(226, 232, 240) 75%, transparent);
+    --ak-components-kbd-fill: color-mix(in srgb, rgb(26, 34, 51) 55%, transparent);
+    --ak-components-kbd-font-role: mono;
+    --ak-components-kbd-font-weight: medium;
+    --ak-components-kbd-padding-h: 6;
+    --ak-components-kbd-padding-v: 2;
+    --ak-components-kbd-shape-cut: 3;
+    --ak-components-kbd-shape-style: chamfer;
+    --ak-components-kbd-stroke-color: color-mix(in srgb, rgb(226, 232, 240) 20%, transparent);
+    --ak-components-kbd-stroke-width: 1;
+    --ak-components-label-glyph-font-scaled: false;
+    --ak-components-label-glyph-font-size: 12;
+    --ak-components-label-glyph-font-weight: medium;
+    --ak-components-list-row-edge-glow-color-rest: color-mix(in srgb, rgb(0, 0, 0) 0%, transparent);
+    --ak-components-list-row-edge-glow-color-selected: color-mix(in srgb, rgb(34, 211, 238) 60%, transparent);
+    --ak-components-list-row-edge-glow-radius: 3;
+    --ak-components-list-row-edge-width-hover: 2;
+    --ak-components-list-row-edge-width-rest: 0;
+    --ak-components-list-row-edge-width-selected: 2;
+    --ak-components-list-row-fill-hover: color-mix(in srgb, rgb(26, 34, 51) 50%, transparent);
+    --ak-components-list-row-fill-rest: color-mix(in srgb, rgb(0, 0, 0) 0%, transparent);
+    --ak-components-list-row-fill-selected: color-mix(in srgb, rgb(37, 99, 235) 16%, transparent);
+    --ak-components-list-row-gap: 2;
+    --ak-components-list-row-shape-cut: 6;
+    --ak-components-list-row-shape-style: chamfer;
+    --ak-components-list-row-subtitle-color: color-mix(in srgb, rgb(226, 232, 240) 55%, transparent);
+    --ak-components-list-row-subtitle-font-role: caption;
+    --ak-components-list-row-title-font-role: body;
+    --ak-components-list-row-title-font-weight: medium;
+    --ak-components-loading-state-caption-color: color-mix(in srgb, rgb(226, 232, 240) 60%, transparent);
+    --ak-components-loading-state-caption-font-role: caption;
+    --ak-components-loading-state-spinner-size: 28;
+    --ak-components-log-view-ansi-slots-0: color-mix(in srgb, rgb(226, 232, 240) 45%, transparent);
+    --ak-components-log-view-ansi-slots-1: rgb(248, 81, 73);
+    --ak-components-log-view-ansi-slots-10: rgb(63, 185, 80);
+    --ak-components-log-view-ansi-slots-11: rgb(227, 179, 65);
+    --ak-components-log-view-ansi-slots-12: rgb(37, 99, 235);
+    --ak-components-log-view-ansi-slots-13: rgb(34, 211, 238);
+    --ak-components-log-view-ansi-slots-14: color-mix(in srgb, rgb(37, 99, 235) 90%, transparent);
+    --ak-components-log-view-ansi-slots-15: rgb(226, 232, 240);
+    --ak-components-log-view-ansi-slots-2: rgb(63, 185, 80);
+    --ak-components-log-view-ansi-slots-3: rgb(227, 179, 65);
+    --ak-components-log-view-ansi-slots-4: rgb(37, 99, 235);
+    --ak-components-log-view-ansi-slots-5: rgb(34, 211, 238);
+    --ak-components-log-view-ansi-slots-6: color-mix(in srgb, rgb(37, 99, 235) 80%, transparent);
+    --ak-components-log-view-ansi-slots-7: rgb(226, 232, 240);
+    --ak-components-log-view-ansi-slots-8: color-mix(in srgb, rgb(226, 232, 240) 60%, transparent);
+    --ak-components-log-view-ansi-slots-9: rgb(248, 81, 73);
+    --ak-components-log-view-dim-opacity: 0.6;
+    --ak-components-log-view-font-mono: system;
+    --ak-components-log-view-font-size: 11;
+    --ak-components-log-view-inset-x: 8;
+    --ak-components-log-view-inset-y: 8;
+    --ak-components-log-view-source-prefix-opacity: 0.45;
+    --ak-components-log-view-stderr-slot: 1;
+    --ak-components-meter-arc-glow-color: color-mix(in srgb, rgb(37, 99, 235) 55%, transparent);
+    --ak-components-meter-arc-glow-radius: 4;
+    --ak-components-meter-gap: 2;
+    --ak-components-meter-label-color: color-mix(in srgb, rgb(226, 232, 240) 55%, transparent);
+    --ak-components-meter-label-font-role: caption;
+    --ak-components-meter-label-font-tracking: 0.6;
+    --ak-components-meter-line-min-width: 3;
+    --ak-components-meter-line-width-ratio: 0.07;
+    --ak-components-meter-size: 88;
+    --ak-components-meter-track-color: color-mix(in srgb, rgb(226, 232, 240) 10%, transparent);
+    --ak-components-meter-value-font-role: headline;
+    --ak-components-meter-value-font-weight: semibold;
+    --ak-components-modal-content-width-padding: 32;
+    --ak-components-modal-edge-sheet-width: 360;
+    --ak-components-modal-max-width: 480;
+    --ak-components-modal-transition-scale: 0.94;
+    --ak-components-mode-switch-fg-hover: color-mix(in srgb, rgb(226, 232, 240) 95%, transparent);
+    --ak-components-mode-switch-fg-rest: color-mix(in srgb, rgb(226, 232, 240) 55%, transparent);
+    --ak-components-mode-switch-glyph-font-scaled: false;
+    --ak-components-mode-switch-glyph-font-size: 9;
+    --ak-components-mode-switch-glyph-font-weight: semibold;
+    --ak-components-mode-switch-hover-animation-curve: easeOut;
+    --ak-components-mode-switch-hover-animation-duration: 0.12;
+    --ak-components-mode-switch-hover-fill: color-mix(in srgb, rgb(226, 232, 240) 8%, transparent);
+    --ak-components-mode-switch-label-font-role: caption;
+    --ak-components-mode-switch-label-font-weight: medium;
+    --ak-components-mode-switch-shape-cut: 8;
+    --ak-components-mode-switch-shape-style: continuous;
+    --ak-components-multi-select-check-glyph-font-scaled: false;
+    --ak-components-multi-select-check-glyph-font-size: 8;
+    --ak-components-multi-select-check-glyph-font-weight: bold;
+    --ak-components-multi-select-check-shape-cut: 2;
+    --ak-components-multi-select-check-shape-style: chamfer;
+    --ak-components-multi-select-check-size: 12;
+    --ak-components-multi-select-check-stroke-color: color-mix(in srgb, rgb(34, 211, 238) 60%, transparent);
+    --ak-components-multi-select-check-stroke-width: 1;
+    --ak-components-multi-select-trigger-chevron-color: color-mix(in srgb, rgb(34, 211, 238) 85%, transparent);
+    --ak-components-multi-select-trigger-chevron-scaled: false;
+    --ak-components-multi-select-trigger-chevron-size: 10;
+    --ak-components-multi-select-trigger-chevron-weight: semibold;
+    --ak-components-multi-select-trigger-fill: color-mix(in srgb, rgb(26, 34, 51) 50%, transparent);
+    --ak-components-multi-select-trigger-glow-color-rest: color-mix(in srgb, rgb(37, 99, 235) 0%, transparent);
+    --ak-components-multi-select-trigger-glow-color-selected: color-mix(in srgb, rgb(37, 99, 235) 40%, transparent);
+    --ak-components-multi-select-trigger-glow-radius-rest: 0;
+    --ak-components-multi-select-trigger-glow-radius-selected: 5;
+    --ak-components-multi-select-trigger-shape-cut: 8;
+    --ak-components-multi-select-trigger-shape-style: chamfer;
+    --ak-components-multi-select-trigger-stroke-color-rest: color-mix(in srgb, rgb(37, 99, 235) 30%, transparent);
+    --ak-components-multi-select-trigger-stroke-color-selected: color-mix(in srgb, rgb(37, 99, 235) 75%, transparent);
+    --ak-components-multi-select-trigger-stroke-width-rest: 1.25;
+    --ak-components-multi-select-trigger-stroke-width-selected: 1.25;
+    --ak-components-nav-list-row-body-font-role: body;
+    --ak-components-nav-list-row-body-selected-font-role: body;
+    --ak-components-nav-list-row-body-selected-font-weight: semibold;
+    --ak-components-nav-list-row-fg-hover: color-mix(in srgb, rgb(226, 232, 240) 85%, transparent);
+    --ak-components-nav-list-row-fg-rest: color-mix(in srgb, rgb(226, 232, 240) 60%, transparent);
+    --ak-components-nav-list-row-fg-selected: rgb(226, 232, 240);
+    --ak-components-nav-list-row-fill-hover: color-mix(in srgb, rgb(26, 34, 51) 30%, transparent);
+    --ak-components-nav-list-row-fill-rest: color-mix(in srgb, rgb(0, 0, 0) 0%, transparent);
+    --ak-components-nav-list-row-fill-selected: color-mix(in srgb, rgb(26, 34, 51) 60%, transparent);
+    --ak-components-nav-list-row-glyph-font-scaled: false;
+    --ak-components-nav-list-row-glyph-font-size: 12;
+    --ak-components-nav-list-row-glyph-font-weight: semibold;
+    --ak-components-nav-list-row-glyph-width: 16;
+    --ak-components-nav-list-row-shape-cut: 8;
+    --ak-components-nav-list-row-shape-style: continuous;
+    --ak-components-nav-list-row-tick-width: 2;
+    --ak-components-pagination-current-dot-size: 8;
+    --ak-components-pagination-current-fill: rgb(37, 99, 235);
+    --ak-components-pagination-current-glow-color-rest: color-mix(in srgb, rgb(0, 0, 0) 0%, transparent);
+    --ak-components-pagination-current-glow-color-selected: color-mix(in srgb, rgb(37, 99, 235) 60%, transparent);
+    --ak-components-pagination-current-glow-radius-rest: 0;
+    --ak-components-pagination-current-glow-radius-selected: 3;
+    --ak-components-pagination-disabled-opacity: 0.3;
+    --ak-components-pagination-dot-fill: color-mix(in srgb, rgb(226, 232, 240) 25%, transparent);
+    --ak-components-pagination-dot-size: 6;
+    --ak-components-panel-fill: color-mix(in srgb, rgb(10, 14, 23) 94%, transparent);
+    --ak-components-panel-shape-cut: 14;
+    --ak-components-panel-shape-style: chamfer;
+    --ak-components-panel-stroke-color: color-mix(in srgb, rgb(34, 211, 238) 40%, transparent);
+    --ak-components-panel-stroke-width: 1;
+    --ak-components-radio-group-glow-color-rest: color-mix(in srgb, rgb(34, 211, 238) 0%, transparent);
+    --ak-components-radio-group-glow-color-selected: color-mix(in srgb, rgb(34, 211, 238) 50%, transparent);
+    --ak-components-radio-group-glow-radius-rest: 0;
+    --ak-components-radio-group-glow-radius-selected: 4;
+    --ak-components-radio-group-label-font-role: body;
+    --ak-components-radio-group-marker-fill: rgb(34, 211, 238);
+    --ak-components-radio-group-marker-shape: Diamond;
+    --ak-components-radio-group-marker-size: 8;
+    --ak-components-radio-group-ring-size: 16;
+    --ak-components-radio-group-ring-stroke-color-hover: color-mix(in srgb, rgb(34, 211, 238) 90%, transparent);
+    --ak-components-radio-group-ring-stroke-color-rest: color-mix(in srgb, rgb(34, 211, 238) 40%, transparent);
+    --ak-components-radio-group-ring-stroke-color-selected: color-mix(in srgb, rgb(34, 211, 238) 90%, transparent);
+    --ak-components-radio-group-ring-stroke-width-rest: 1.25;
+    --ak-components-radio-group-ring-stroke-width-selected: 1.25;
+    --ak-components-rail-item-badge-offset-x: 5;
+    --ak-components-rail-item-badge-offset-y: -5;
+    --ak-components-rail-item-badge-opacity-hover: 0.45;
+    --ak-components-rail-item-badge-opacity-rest: 1;
+    --ak-components-rail-item-badge-opacity-selected: 0.45;
+    --ak-components-rail-item-badge-scale: 0.8;
+    --ak-components-rail-item-corner-color: color-mix(in srgb, rgb(226, 232, 240) 70%, transparent);
+    --ak-components-rail-item-corner-fill: rgb(26, 34, 51);
+    --ak-components-rail-item-corner-font-scaled: false;
+    --ak-components-rail-item-corner-font-size: 8;
+    --ak-components-rail-item-corner-font-weight: bold;
+    --ak-components-rail-item-corner-offset: 4;
+    --ak-components-rail-item-corner-padding: 3;
+    --ak-components-rail-item-edge-color: rgb(34, 211, 238);
+    --ak-components-rail-item-edge-glow-color-rest: color-mix(in srgb, rgb(0, 0, 0) 0%, transparent);
+    --ak-components-rail-item-edge-glow-color-selected: color-mix(in srgb, rgb(34, 211, 238) 70%, transparent);
+    --ak-components-rail-item-edge-glow-radius: 3;
+    --ak-components-rail-item-edge-height-hover: 10;
+    --ak-components-rail-item-edge-height-rest: 0;
+    --ak-components-rail-item-edge-height-selected: 22;
+    --ak-components-rail-item-edge-width: 3;
+    --ak-components-rail-item-fill-hover: color-mix(in srgb, rgb(26, 34, 51) 60%, transparent);
+    --ak-components-rail-item-fill-rest: color-mix(in srgb, rgb(0, 0, 0) 0%, transparent);
+    --ak-components-rail-item-fill-selected: color-mix(in srgb, rgb(37, 99, 235) 18%, transparent);
+    --ak-components-rail-item-glow-color-hover: color-mix(in srgb, rgb(37, 99, 235) 35%, transparent);
+    --ak-components-rail-item-glow-color-rest: color-mix(in srgb, rgb(0, 0, 0) 0%, transparent);
+    --ak-components-rail-item-glow-color-selected: color-mix(in srgb, rgb(37, 99, 235) 50%, transparent);
+    --ak-components-rail-item-glow-radius-hover: 8;
+    --ak-components-rail-item-glow-radius-rest: 0;
+    --ak-components-rail-item-glow-radius-selected: 8;
+    --ak-components-rail-item-glyph-color-hover: color-mix(in srgb, rgb(226, 232, 240) 90%, transparent);
+    --ak-components-rail-item-glyph-color-rest: color-mix(in srgb, rgb(226, 232, 240) 65%, transparent);
+    --ak-components-rail-item-glyph-color-selected: rgb(34, 211, 238);
+    --ak-components-rail-item-glyph-dimmed-color: color-mix(in srgb, rgb(226, 232, 240) 45%, transparent);
+    --ak-components-rail-item-glyph-font-scaled: false;
+    --ak-components-rail-item-glyph-font-size: 17;
+    --ak-components-rail-item-glyph-font-weight: regular;
+    --ak-components-rail-item-glyph-glow-color-rest: color-mix(in srgb, rgb(0, 0, 0) 0%, transparent);
+    --ak-components-rail-item-glyph-glow-color-selected: color-mix(in srgb, rgb(34, 211, 238) 50%, transparent);
+    --ak-components-rail-item-glyph-glow-radius: 4;
+    --ak-components-rail-item-glyph-selected-font-scaled: false;
+    --ak-components-rail-item-glyph-selected-font-size: 17;
+    --ak-components-rail-item-glyph-selected-font-weight: semibold;
+    --ak-components-rail-item-hover-scale: 1.06;
+    --ak-components-rail-item-shape-cut: 7;
+    --ak-components-rail-item-shape-style: chamfer;
+    --ak-components-rail-item-size: 42;
+    --ak-components-rail-item-stroke-color-hover: color-mix(in srgb, rgb(34, 211, 238) 35%, transparent);
+    --ak-components-rail-item-stroke-color-rest: color-mix(in srgb, rgb(0, 0, 0) 0%, transparent);
+    --ak-components-rail-item-stroke-color-selected: color-mix(in srgb, rgb(34, 211, 238) 60%, transparent);
+    --ak-components-rail-item-stroke-width: 1;
+    --ak-components-range-slider-container-fill: color-mix(in srgb, rgb(26, 34, 51) 30%, transparent);
+    --ak-components-range-slider-container-shape-cut: 6;
+    --ak-components-range-slider-container-shape-style: chamfer;
+    --ak-components-range-slider-container-stroke-color: color-mix(in srgb, rgb(37, 99, 235) 20%, transparent);
+    --ak-components-range-slider-container-stroke-width: 1;
+    --ak-components-search-field-clear-glyph-color: color-mix(in srgb, rgb(226, 232, 240) 45%, transparent);
+    --ak-components-search-field-clear-glyph-font-scaled: false;
+    --ak-components-search-field-clear-glyph-font-size: 12;
+    --ak-components-search-field-font-role: body;
+    --ak-components-search-field-leading-glyph-color: color-mix(in srgb, rgb(226, 232, 240) 55%, transparent);
+    --ak-components-search-field-leading-glyph-font-scaled: false;
+    --ak-components-search-field-leading-glyph-font-size: 12;
+    --ak-components-search-field-search-glyph-color-focused: color-mix(in srgb, rgb(34, 211, 238) 95%, transparent);
+    --ak-components-search-field-search-glyph-color-rest: color-mix(in srgb, rgb(34, 211, 238) 55%, transparent);
+    --ak-components-search-field-search-glyph-font-scaled: false;
+    --ak-components-search-field-search-glyph-font-size: 12;
+    --ak-components-search-field-search-glyph-font-weight: semibold;
+    --ak-components-section-frame-body-fill: color-mix(in srgb, rgb(26, 34, 51) 35%, transparent);
+    --ak-components-section-frame-body-shape-cut: 12;
+    --ak-components-section-frame-body-shape-style: chamfer;
+    --ak-components-section-frame-body-stroke-color: color-mix(in srgb, rgb(34, 211, 238) 35%, transparent);
+    --ak-components-section-frame-body-stroke-width: 1;
+    --ak-components-section-frame-tick-height: 2;
+    --ak-components-section-frame-tick-width: 14;
+    --ak-components-section-frame-title-color: color-mix(in srgb, rgb(226, 232, 240) 70%, transparent);
+    --ak-components-section-frame-title-font-role: caption;
+    --ak-components-section-frame-title-font-tracking: 1.2;
+    --ak-components-section-frame-title-font-weight: semibold;
+    --ak-components-section-header-subtitle-color: color-mix(in srgb, rgb(226, 232, 240) 40%, transparent);
+    --ak-components-section-header-subtitle-font-role: caption;
+    --ak-components-section-header-tick-height: 2;
+    --ak-components-section-header-tick-width: 12;
+    --ak-components-section-header-title-color: color-mix(in srgb, rgb(226, 232, 240) 65%, transparent);
+    --ak-components-section-header-title-font-role: caption;
+    --ak-components-section-header-title-font-tracking: 1.2;
+    --ak-components-section-header-title-font-weight: semibold;
+    --ak-components-secure-field-clear-glyph-color: color-mix(in srgb, rgb(226, 232, 240) 45%, transparent);
+    --ak-components-secure-field-clear-glyph-font-scaled: false;
+    --ak-components-secure-field-clear-glyph-font-size: 12;
+    --ak-components-secure-field-font-mono: family;
+    --ak-components-secure-field-font-role: mono;
+    --ak-components-secure-field-leading-glyph-color: color-mix(in srgb, rgb(226, 232, 240) 55%, transparent);
+    --ak-components-secure-field-leading-glyph-font-scaled: false;
+    --ak-components-secure-field-leading-glyph-font-size: 12;
+    --ak-components-secure-field-search-glyph-color: color-mix(in srgb, rgb(34, 211, 238) 55%, transparent);
+    --ak-components-secure-field-search-glyph-font-scaled: false;
+    --ak-components-secure-field-search-glyph-font-size: 12;
+    --ak-components-secure-field-search-glyph-font-weight: semibold;
+    --ak-components-segmented-picker-fg: color-mix(in srgb, rgb(226, 232, 240) 75%, transparent);
+    --ak-components-segmented-picker-fill-hover: color-mix(in srgb, rgb(26, 34, 51) 65%, transparent);
+    --ak-components-segmented-picker-fill-rest: color-mix(in srgb, rgb(26, 34, 51) 50%, transparent);
+    --ak-components-segmented-picker-fill-selected: color-mix(in srgb, rgb(37, 99, 235) 90%, transparent);
+    --ak-components-segmented-picker-glow-color-rest: color-mix(in srgb, rgb(37, 99, 235) 0%, transparent);
+    --ak-components-segmented-picker-glow-color-selected: color-mix(in srgb, rgb(37, 99, 235) 40%, transparent);
+    --ak-components-segmented-picker-glow-radius-rest: 0;
+    --ak-components-segmented-picker-glow-radius-selected: 5;
+    --ak-components-segmented-picker-label-font-role: caption;
+    --ak-components-segmented-picker-label-selected-font-role: caption;
+    --ak-components-segmented-picker-label-selected-font-weight: medium;
+    --ak-components-segmented-picker-shape-cut: 5;
+    --ak-components-segmented-picker-shape-style: chamfer;
+    --ak-components-segmented-picker-stroke-color-hover: color-mix(in srgb, rgb(37, 99, 235) 50%, transparent);
+    --ak-components-segmented-picker-stroke-color-rest: color-mix(in srgb, rgb(37, 99, 235) 15%, transparent);
+    --ak-components-segmented-picker-stroke-color-selected: color-mix(in srgb, rgb(0, 0, 0) 0%, transparent);
+    --ak-components-segmented-picker-stroke-width: 1;
+    --ak-components-select-trigger-chevron-color: color-mix(in srgb, rgb(34, 211, 238) 85%, transparent);
+    --ak-components-select-trigger-chevron-scaled: false;
+    --ak-components-select-trigger-chevron-size: 10;
+    --ak-components-select-trigger-chevron-weight: semibold;
+    --ak-components-select-trigger-fill: color-mix(in srgb, rgb(26, 34, 51) 50%, transparent);
+    --ak-components-select-trigger-glow-color-rest: color-mix(in srgb, rgb(37, 99, 235) 0%, transparent);
+    --ak-components-select-trigger-glow-color-selected: color-mix(in srgb, rgb(37, 99, 235) 40%, transparent);
+    --ak-components-select-trigger-glow-radius-rest: 0;
+    --ak-components-select-trigger-glow-radius-selected: 5;
+    --ak-components-select-trigger-shape-cut: 8;
+    --ak-components-select-trigger-shape-style: chamfer;
+    --ak-components-select-trigger-stroke-color-rest: color-mix(in srgb, rgb(37, 99, 235) 30%, transparent);
+    --ak-components-select-trigger-stroke-color-selected: color-mix(in srgb, rgb(37, 99, 235) 75%, transparent);
+    --ak-components-select-trigger-stroke-width-rest: 1.25;
+    --ak-components-select-trigger-stroke-width-selected: 1.25;
+    --ak-components-settings-group-caption-color: color-mix(in srgb, rgb(226, 232, 240) 45%, transparent);
+    --ak-components-settings-group-caption-font-role: caption;
+    --ak-components-settings-group-highlight-shape-cut: 12;
+    --ak-components-settings-group-highlight-shape-style: chamfer;
+    --ak-components-settings-group-highlight-stroke-color: color-mix(in srgb, rgb(34, 211, 238) 90%, transparent);
+    --ak-components-settings-group-highlight-stroke-width: 1.5;
+    --ak-components-settings-group-search-dimmed-opacity: 0.35;
+    --ak-components-settings-page-hits-caption-font-role: caption;
+    --ak-components-settings-page-hits-caption-font-weight: medium;
+    --ak-components-settings-page-hits-color: color-mix(in srgb, rgb(34, 211, 238) 90%, transparent);
+    --ak-components-settings-page-hits-gap: 6;
+    --ak-components-settings-page-hits-glyph-font-scaled: false;
+    --ak-components-settings-page-hits-glyph-font-size: 10;
+    --ak-components-settings-page-items-color: color-mix(in srgb, rgb(226, 232, 240) 60%, transparent);
+    --ak-components-settings-page-items-font-role: caption;
+    --ak-components-settings-page-items-gap: 8;
+    --ak-components-settings-page-list-gap: 24;
+    --ak-components-settings-page-mini-map-gutter: 18;
+    --ak-components-settings-page-mini-map-padding-top-trailing: 18;
+    --ak-components-settings-page-mini-map-title-color: color-mix(in srgb, rgb(226, 232, 240) 40%, transparent);
+    --ak-components-settings-page-mini-map-title-font-kerning: 2.5;
+    --ak-components-settings-page-mini-map-title-font-role: mono;
+    --ak-components-settings-page-mini-map-title-font-weight: medium;
+    --ak-components-settings-page-mini-map-width: 150;
+    --ak-components-settings-page-padding: 18;
+    --ak-components-settings-page-scroll-animation-curve: easeOut;
+    --ak-components-settings-page-scroll-animation-duration: 0.2;
+    --ak-components-settings-page-tab-insert-animation-curve: easeOut;
+    --ak-components-settings-page-tab-insert-animation-duration: 0.12;
+    --ak-components-settings-panel-fill: color-mix(in srgb, rgb(26, 34, 51) 32%, transparent);
+    --ak-components-settings-panel-hint-color: color-mix(in srgb, rgb(226, 232, 240) 55%, transparent);
+    --ak-components-settings-panel-hint-font-role: caption;
+    --ak-components-settings-panel-hint-reading-width: 560;
+    --ak-components-settings-panel-padding: 16;
+    --ak-components-settings-panel-shape-cut: 12;
+    --ak-components-settings-panel-shape-style: chamfer;
+    --ak-components-settings-panel-title-color: color-mix(in srgb, rgb(226, 232, 240) 95%, transparent);
+    --ak-components-settings-panel-title-font-role: headline;
+    --ak-components-settings-panel-title-font-weight: medium;
+    --ak-components-settings-row-fill: color-mix(in srgb, rgb(26, 34, 51) 50%, transparent);
+    --ak-components-settings-row-hover-animation-curve: easeOut;
+    --ak-components-settings-row-hover-animation-duration: fast;
+    --ak-components-settings-row-reset-glyph-color: color-mix(in srgb, rgb(34, 211, 238) 90%, transparent);
+    --ak-components-settings-row-reset-glyph-font-scaled: false;
+    --ak-components-settings-row-reset-glyph-font-size: 10;
+    --ak-components-settings-row-shape-cut: 12;
+    --ak-components-settings-row-shape-style: chamfer;
+    --ak-components-settings-row-stroke-color-hover: color-mix(in srgb, rgb(37, 99, 235) 30%, transparent);
+    --ak-components-settings-row-stroke-color-rest: color-mix(in srgb, rgb(37, 99, 235) 15%, transparent);
+    --ak-components-settings-row-stroke-width: 1;
+    --ak-components-settings-row-value-color: color-mix(in srgb, rgb(226, 232, 240) 80%, transparent);
+    --ak-components-settings-row-value-font-role: mono;
+    --ak-components-signal-feed-list-day-header-color: color-mix(in srgb, rgb(226, 232, 240) 42%, transparent);
+    --ak-components-signal-feed-list-day-header-font-mono: family;
+    --ak-components-signal-feed-list-day-header-font-size: 9.5;
+    --ak-components-signal-feed-list-day-header-font-tracking: 0.7;
+    --ak-components-signal-feed-list-day-header-font-weight: semibold;
+    --ak-components-signal-feed-list-empty-glyph-color: color-mix(in srgb, rgb(226, 232, 240) 30%, transparent);
+    --ak-components-signal-feed-list-empty-glyph-font-scaled: false;
+    --ak-components-signal-feed-list-empty-glyph-font-size: 18;
+    --ak-components-signal-feed-list-empty-glyph-font-weight: light;
+    --ak-components-signal-feed-list-empty-text-color: color-mix(in srgb, rgb(226, 232, 240) 55%, transparent);
+    --ak-components-signal-feed-list-empty-text-font-size: 12;
+    --ak-components-signal-feed-list-empty-text-font-weight: medium;
+    --ak-components-signal-feed-list-fill: color-mix(in srgb, rgb(17, 24, 39) 92%, transparent);
+    --ak-components-signal-feed-row-action-fill: color-mix(in srgb, rgb(37, 99, 235) 14%, transparent);
+    --ak-components-signal-feed-row-action-font-size: 10.5;
+    --ak-components-signal-feed-row-action-font-weight: medium;
+    --ak-components-signal-feed-row-action-shape-cut: 4;
+    --ak-components-signal-feed-row-action-shape-style: chamfer;
+    --ak-components-signal-feed-row-action-stroke-color: color-mix(in srgb, rgb(37, 99, 235) 50%, transparent);
+    --ak-components-signal-feed-row-action-stroke-width: 1;
+    --ak-components-signal-feed-row-app-glyph-font-scaled: false;
+    --ak-components-signal-feed-row-app-glyph-font-size: 13;
+    --ak-components-signal-feed-row-app-glyph-font-weight: medium;
+    --ak-components-signal-feed-row-app-glyph-size: 16;
+    --ak-components-signal-feed-row-body-color: color-mix(in srgb, rgb(226, 232, 240) 62%, transparent);
+    --ak-components-signal-feed-row-body-font-size: 11.5;
+    --ak-components-signal-feed-row-chevron-color-hover: color-mix(in srgb, rgb(226, 232, 240) 60%, transparent);
+    --ak-components-signal-feed-row-chevron-color-rest: color-mix(in srgb, rgb(226, 232, 240) 30%, transparent);
+    --ak-components-signal-feed-row-chevron-font-scaled: false;
+    --ak-components-signal-feed-row-chevron-font-size: 8;
+    --ak-components-signal-feed-row-chevron-font-weight: bold;
+    --ak-components-signal-feed-row-chevron-size: 12;
+    --ak-components-signal-feed-row-chevron-top-padding: 3;
+    --ak-components-signal-feed-row-fill-hover: color-mix(in srgb, rgb(26, 34, 51) 90%, transparent);
+    --ak-components-signal-feed-row-fill-rest: color-mix(in srgb, rgb(0, 0, 0) 0%, transparent);
+    --ak-components-signal-feed-row-focus-ring-color: color-mix(in srgb, rgb(37, 99, 235) 90%, transparent);
+    --ak-components-signal-feed-row-focus-ring-width: 1.5;
+    --ak-components-signal-feed-row-hover-offset-y: -1;
+    --ak-components-signal-feed-row-hover-scale: 1.12;
+    --ak-components-signal-feed-row-info-severity-color: color-mix(in srgb, rgb(63, 185, 80) 55%, transparent);
+    --ak-components-signal-feed-row-meta-color: color-mix(in srgb, rgb(226, 232, 240) 45%, transparent);
+    --ak-components-signal-feed-row-meta-font-mono: family;
+    --ak-components-signal-feed-row-meta-font-size: 9.5;
+    --ak-components-signal-feed-row-meta-font-tracking: 0.4;
+    --ak-components-signal-feed-row-meta-font-weight: medium;
+    --ak-components-signal-feed-row-repeat-glyph-font-scaled: false;
+    --ak-components-signal-feed-row-repeat-glyph-font-size: 8.5;
+    --ak-components-signal-feed-row-shape-cut: 8;
+    --ak-components-signal-feed-row-shape-style: chamfer;
+    --ak-components-signal-feed-row-stroke-color-hover: color-mix(in srgb, rgb(34, 211, 238) 35%, transparent);
+    --ak-components-signal-feed-row-stroke-color-rest: color-mix(in srgb, rgb(0, 0, 0) 0%, transparent);
+    --ak-components-signal-feed-row-stroke-width: 1;
+    --ak-components-signal-feed-row-time-color: color-mix(in srgb, rgb(226, 232, 240) 45%, transparent);
+    --ak-components-signal-feed-row-time-font-mono: family;
+    --ak-components-signal-feed-row-time-font-size: 10;
+    --ak-components-signal-feed-row-time-font-weight: medium;
+    --ak-components-signal-feed-row-title-font-size: 12.5;
+    --ak-components-signal-feed-row-title-unread-font-size: 12.5;
+    --ak-components-signal-feed-row-title-unread-font-weight: semibold;
+    --ak-components-signal-feed-row-unread-dot-size: 5;
+    --ak-components-signal-feed-row-unread-dot-top-padding: 6;
+    --ak-components-signal-source-rail-count-color: color-mix(in srgb, rgb(226, 232, 240) 50%, transparent);
+    --ak-components-signal-source-rail-count-font-mono: family;
+    --ak-components-signal-source-rail-count-font-size: 9.5;
+    --ak-components-signal-source-rail-count-font-weight: medium;
+    --ak-components-signal-source-rail-dot-size: 5;
+    --ak-components-signal-source-rail-edge-capsule-color: rgb(34, 211, 238);
+    --ak-components-signal-source-rail-edge-capsule-width: 2;
+    --ak-components-signal-source-rail-edge-padding-v: 4;
+    --ak-components-signal-source-rail-fill-hover: color-mix(in srgb, rgb(26, 34, 51) 45%, transparent);
+    --ak-components-signal-source-rail-fill-rest: color-mix(in srgb, rgb(0, 0, 0) 0%, transparent);
+    --ak-components-signal-source-rail-fill-selected: color-mix(in srgb, rgb(26, 34, 51) 90%, transparent);
+    --ak-components-signal-source-rail-gap: 1;
+    --ak-components-signal-source-rail-name-font-size: 11.5;
+    --ak-components-signal-source-rail-name-opacity-hover: 0.9;
+    --ak-components-signal-source-rail-name-opacity-rest: 0.72;
+    --ak-components-signal-source-rail-name-opacity-selected: 1;
+    --ak-components-signal-source-rail-name-selected-font-size: 11.5;
+    --ak-components-signal-source-rail-name-selected-font-weight: semibold;
+    --ak-components-signal-source-rail-shape-cut: 8;
+    --ak-components-signal-source-rail-shape-style: chamfer;
+    --ak-components-signal-source-rail-width: 168;
+    --ak-components-signal-toast-action-fill: color-mix(in srgb, rgb(37, 99, 235) 14%, transparent);
+    --ak-components-signal-toast-action-font-scaled: false;
+    --ak-components-signal-toast-action-font-size: 11;
+    --ak-components-signal-toast-action-font-weight: semibold;
+    --ak-components-signal-toast-action-height: 20;
+    --ak-components-signal-toast-action-shape-cut: 4;
+    --ak-components-signal-toast-action-shape-style: chamfer;
+    --ak-components-signal-toast-action-stroke-color: color-mix(in srgb, rgb(37, 99, 235) 45%, transparent);
+    --ak-components-signal-toast-action-stroke-width: 1;
+    --ak-components-signal-toast-action-width: 22;
+    --ak-components-signal-toast-app-tile-size: 34;
+    --ak-components-signal-toast-body-color: color-mix(in srgb, rgb(226, 232, 240) 66%, transparent);
+    --ak-components-signal-toast-body-font-size: 11.5;
+    --ak-components-signal-toast-chevron-close-color-hover: color-mix(in srgb, rgb(226, 232, 240) 70%, transparent);
+    --ak-components-signal-toast-chevron-close-color-rest: color-mix(in srgb, rgb(226, 232, 240) 40%, transparent);
+    --ak-components-signal-toast-chevron-close-font-scaled: false;
+    --ak-components-signal-toast-chevron-close-font-size: 9;
+    --ak-components-signal-toast-chevron-close-font-weight: bold;
+    --ak-components-signal-toast-chevron-close-size: 14;
+    --ak-components-signal-toast-content-gap: 3;
+    --ak-components-signal-toast-dwell-bar-color: color-mix(in srgb, rgb(37, 99, 235) 70%, transparent);
+    --ak-components-signal-toast-dwell-bar-height: 1.5;
+    --ak-components-signal-toast-expand-spring-curve: spring;
+    --ak-components-signal-toast-expand-spring-damping: 0.86;
+    --ak-components-signal-toast-expand-spring-response: 0.3;
+    --ak-components-signal-toast-failure-stroke-color: color-mix(in srgb, rgb(37, 99, 235) 55%, transparent);
+    --ak-components-signal-toast-fallback-glyph-font-scaled: false;
+    --ak-components-signal-toast-fallback-glyph-font-size: 18;
+    --ak-components-signal-toast-fallback-glyph-font-weight: medium;
+    --ak-components-signal-toast-fallback-glyph-size: 34;
+    --ak-components-signal-toast-fill: rgb(26, 34, 51);
+    --ak-components-signal-toast-list-spring-curve: spring;
+    --ak-components-signal-toast-list-spring-damping: 0.82;
+    --ak-components-signal-toast-list-spring-response: 0.34;
+    --ak-components-signal-toast-more-color: color-mix(in srgb, rgb(226, 232, 240) 60%, transparent);
+    --ak-components-signal-toast-more-fill: color-mix(in srgb, rgb(226, 232, 240) 8%, transparent);
+    --ak-components-signal-toast-more-font-scaled: false;
+    --ak-components-signal-toast-more-font-size: 10;
+    --ak-components-signal-toast-more-font-weight: bold;
+    --ak-components-signal-toast-more-height: 20;
+    --ak-components-signal-toast-more-width: 22;
+    --ak-components-signal-toast-removal-opacity: 0;
+    --ak-components-signal-toast-removal-scale: 0.7;
+    --ak-components-signal-toast-repeat-font-size: 10;
+    --ak-components-signal-toast-repeat-font-weight: semibold;
+    --ak-components-signal-toast-severity-edge-glow-color: color-mix(in srgb, rgb(37, 99, 235) 60%, transparent);
+    --ak-components-signal-toast-severity-edge-glow-radius: 3;
+    --ak-components-signal-toast-severity-edge-padding: 8;
+    --ak-components-signal-toast-severity-edge-width: 2.5;
+    --ak-components-signal-toast-shape-cut: 12;
+    --ak-components-signal-toast-shape-style: chamfer;
+    --ak-components-signal-toast-stack-gap: 8;
+    --ak-components-signal-toast-stack-padding: 16;
+    --ak-components-signal-toast-stroke-color-hover: color-mix(in srgb, rgb(37, 99, 235) 45%, transparent);
+    --ak-components-signal-toast-stroke-color-rest: color-mix(in srgb, rgb(37, 99, 235) 28%, transparent);
+    --ak-components-signal-toast-stroke-width: 1;
+    --ak-components-signal-toast-time-color: color-mix(in srgb, rgb(226, 232, 240) 40%, transparent);
+    --ak-components-signal-toast-time-font-size: 10;
+    --ak-components-signal-toast-title-font-size: 12.5;
+    --ak-components-signal-toast-title-font-weight: semibold;
+    --ak-components-signal-toast-title-glyph-font-scaled: false;
+    --ak-components-signal-toast-title-glyph-font-size: 11;
+    --ak-components-signal-toast-title-glyph-font-weight: semibold;
+    --ak-components-signal-toast-width: 320;
+    --ak-components-slider-container-fill: color-mix(in srgb, rgb(26, 34, 51) 30%, transparent);
+    --ak-components-slider-container-shape-cut: 6;
+    --ak-components-slider-container-shape-style: chamfer;
+    --ak-components-slider-container-stroke-color: color-mix(in srgb, rgb(37, 99, 235) 20%, transparent);
+    --ak-components-slider-container-stroke-width: 1;
+    --ak-components-spinner-arc-trim: 0.28;
+    --ak-components-spinner-default-color: rgb(34, 211, 238);
+    --ak-components-spinner-glow-color: color-mix(in srgb, rgb(37, 99, 235) 60%, transparent);
+    --ak-components-spinner-glow-radius: 3;
+    --ak-components-spinner-line-min-width: 1.5;
+    --ak-components-spinner-line-width-ratio: 0.08;
+    --ak-components-spinner-period: 1;
+    --ak-components-spinner-pulse-floor: 0.35;
+    --ak-components-spinner-pulse-period: 1.2;
+    --ak-components-spinner-size: 20;
+    --ak-components-spinner-track-color: color-mix(in srgb, rgb(226, 232, 240) 12%, transparent);
+    --ak-components-stacked-status-bar-gap: 1;
+    --ak-components-stacked-status-bar-height: 4;
+    --ak-components-stacked-status-bar-min-run: 2;
+    --ak-components-stacked-status-bar-track-color: color-mix(in srgb, rgb(226, 232, 240) 12%, transparent);
+    --ak-components-stat-row-label-color: color-mix(in srgb, rgb(226, 232, 240) 60%, transparent);
+    --ak-components-stat-row-label-font-role: caption;
+    --ak-components-stat-row-label-font-tracking: 0.6;
+    --ak-components-stat-row-value-font-role: mono;
+    --ak-components-stat-row-value-font-weight: medium;
+    --ak-components-status-bar-empty-fill: color-mix(in srgb, rgb(226, 232, 240) 8%, transparent);
+    --ak-components-status-bar-gap: 2;
+    --ak-components-status-bar-glow-color-rest: color-mix(in srgb, rgb(37, 99, 235) 0%, transparent);
+    --ak-components-status-bar-glow-color-selected: color-mix(in srgb, rgb(37, 99, 235) 50%, transparent);
+    --ak-components-status-bar-glow-radius-rest: 0;
+    --ak-components-status-bar-glow-radius-selected: 2;
+    --ak-components-status-bar-gradient-from: color-mix(in srgb, rgb(37, 99, 235) 65%, transparent);
+    --ak-components-status-bar-height: 8;
+    --ak-components-status-bar-segments: 12;
+    --ak-components-status-bar-shape-corners: all;
+    --ak-components-status-bar-shape-cut: 2;
+    --ak-components-status-bar-shape-style: chamfer;
+    --ak-components-stepper-button-fill: color-mix(in srgb, rgb(26, 34, 51) 60%, transparent);
+    --ak-components-stepper-button-glyph-color-disabled: color-mix(in srgb, rgb(226, 232, 240) 25%, transparent);
+    --ak-components-stepper-button-glyph-color-rest: rgb(34, 211, 238);
+    --ak-components-stepper-button-glyph-font-scaled: false;
+    --ak-components-stepper-button-glyph-font-size: 10;
+    --ak-components-stepper-button-glyph-font-weight: bold;
+    --ak-components-stepper-button-shape-cut: 4;
+    --ak-components-stepper-button-shape-style: chamfer;
+    --ak-components-stepper-button-size: 20;
+    --ak-components-stepper-button-stroke-color-disabled: color-mix(in srgb, rgb(34, 211, 238) 15%, transparent);
+    --ak-components-stepper-button-stroke-color-rest: color-mix(in srgb, rgb(34, 211, 238) 50%, transparent);
+    --ak-components-stepper-button-stroke-width: 1;
+    --ak-components-stepper-fill: color-mix(in srgb, rgb(26, 34, 51) 50%, transparent);
+    --ak-components-stepper-shape-cut: 6;
+    --ak-components-stepper-shape-style: chamfer;
+    --ak-components-stepper-stroke-color: color-mix(in srgb, rgb(37, 99, 235) 30%, transparent);
+    --ak-components-stepper-stroke-width: 1.25;
+    --ak-components-stepper-value-font-mono: family;
+    --ak-components-stepper-value-font-monospaced-digits: true;
+    --ak-components-stepper-value-font-role: mono;
+    --ak-components-stepper-value-font-weight: medium;
+    --ak-components-stepper-value-min-width: 28;
+    --ak-components-swatch-chip-glow-color-rest: color-mix(in srgb, rgb(37, 99, 235) 0%, transparent);
+    --ak-components-swatch-chip-glow-color-selected: color-mix(in srgb, rgb(37, 99, 235) 30%, transparent);
+    --ak-components-swatch-chip-glow-radius-rest: 0;
+    --ak-components-swatch-chip-glow-radius-selected: 4;
+    --ak-components-swatch-chip-shape-cut: 5;
+    --ak-components-swatch-chip-shape-style: chamfer;
+    --ak-components-swatch-chip-stroke-color-hover: color-mix(in srgb, rgb(34, 211, 238) 60%, transparent);
+    --ak-components-swatch-chip-stroke-color-rest: color-mix(in srgb, rgb(34, 211, 238) 30%, transparent);
+    --ak-components-swatch-chip-stroke-color-selected: color-mix(in srgb, rgb(37, 99, 235) 85%, transparent);
+    --ak-components-swatch-chip-stroke-width-rest: 1;
+    --ak-components-swatch-chip-stroke-width-selected: 1.25;
+    --ak-components-swatch-chip-swatch-shape-corners: all;
+    --ak-components-swatch-chip-swatch-shape-cut: 2;
+    --ak-components-swatch-chip-swatch-shape-style: chamfer;
+    --ak-components-swatch-chip-swatch-size: 10;
+    --ak-components-swatch-chip-swatch-stroke-color: color-mix(in srgb, rgb(226, 232, 240) 25%, transparent);
+    --ak-components-swatch-chip-swatch-stroke-width: 0.5;
+    --ak-components-tabs-fg-hover: color-mix(in srgb, rgb(226, 232, 240) 90%, transparent);
+    --ak-components-tabs-fg-rest: color-mix(in srgb, rgb(226, 232, 240) 60%, transparent);
+    --ak-components-tabs-fg-selected: rgb(226, 232, 240);
+    --ak-components-tabs-fill-hover: color-mix(in srgb, rgb(26, 34, 51) 50%, transparent);
+    --ak-components-tabs-fill-rest: color-mix(in srgb, rgb(26, 34, 51) 25%, transparent);
+    --ak-components-tabs-fill-selected: color-mix(in srgb, rgb(37, 99, 235) 85%, transparent);
+    --ak-components-tabs-hover-scale: 1.02;
+    --ak-components-tabs-label-font-role: caption;
+    --ak-components-tabs-label-font-tracking: 0.8;
+    --ak-components-tabs-label-font-weight: semibold;
+    --ak-components-tabs-label-gap: 3;
+    --ak-components-tabs-shape-cut: 6;
+    --ak-components-tabs-shape-style: chamfer;
+    --ak-components-tabs-tick-height: 2;
+    --ak-components-text-area-caret-color: rgb(34, 211, 238);
+    --ak-components-text-area-fill: color-mix(in srgb, rgb(26, 34, 51) 50%, transparent);
+    --ak-components-text-area-glow-color-focused: color-mix(in srgb, rgb(34, 211, 238) 40%, transparent);
+    --ak-components-text-area-glow-color-rest: color-mix(in srgb, rgb(34, 211, 238) 0%, transparent);
+    --ak-components-text-area-glow-radius-focused: 6;
+    --ak-components-text-area-glow-radius-rest: 0;
+    --ak-components-text-area-min-height: 80;
+    --ak-components-text-area-placeholder-color: color-mix(in srgb, rgb(226, 232, 240) 40%, transparent);
+    --ak-components-text-area-placeholder-font-role: body;
+    --ak-components-text-area-placeholder-pad-h-auto-grow: 17;
+    --ak-components-text-area-placeholder-pad-h-legacy: 16;
+    --ak-components-text-area-placeholder-pad-v-legacy: 12;
+    --ak-components-text-area-shape-cut: 8;
+    --ak-components-text-area-shape-style: chamfer;
+    --ak-components-text-area-stroke-color-focused: color-mix(in srgb, rgb(37, 99, 235) 90%, transparent);
+    --ak-components-text-area-stroke-color-rest: color-mix(in srgb, rgb(37, 99, 235) 25%, transparent);
+    --ak-components-text-area-stroke-width-focused: 1.5;
+    --ak-components-text-area-stroke-width-rest: 1.25;
+    --ak-components-text-field-clear-glyph-color: color-mix(in srgb, rgb(226, 232, 240) 45%, transparent);
+    --ak-components-text-field-clear-glyph-font-scaled: false;
+    --ak-components-text-field-clear-glyph-font-size: 12;
+    --ak-components-text-field-font-role: body;
+    --ak-components-text-field-leading-glyph-color: color-mix(in srgb, rgb(226, 232, 240) 55%, transparent);
+    --ak-components-text-field-leading-glyph-font-scaled: false;
+    --ak-components-text-field-leading-glyph-font-size: 12;
+    --ak-components-text-field-search-glyph-color: color-mix(in srgb, rgb(34, 211, 238) 55%, transparent);
+    --ak-components-text-field-search-glyph-font-scaled: false;
+    --ak-components-text-field-search-glyph-font-size: 12;
+    --ak-components-text-field-search-glyph-font-weight: semibold;
+    --ak-components-toast-body-color: color-mix(in srgb, rgb(226, 232, 240) 90%, transparent);
+    --ak-components-toast-body-font-role: body;
+    --ak-components-toast-close-color: color-mix(in srgb, rgb(226, 232, 240) 50%, transparent);
+    --ak-components-toast-close-font-scaled: false;
+    --ak-components-toast-close-font-size: 9;
+    --ak-components-toast-close-font-weight: bold;
+    --ak-components-toast-fill: color-mix(in srgb, rgb(26, 34, 51) 92%, transparent);
+    --ak-components-toast-glow-color: color-mix(in srgb, rgb(37, 99, 235) 40%, transparent);
+    --ak-components-toast-glow-radius: 6;
+    --ak-components-toast-icon-font-scaled: false;
+    --ak-components-toast-icon-font-size: 12;
+    --ak-components-toast-icon-font-weight: semibold;
+    --ak-components-toast-max-width: 340;
+    --ak-components-toast-min-width: 220;
+    --ak-components-toast-shape-cut: 8;
+    --ak-components-toast-shape-style: chamfer;
+    --ak-components-toast-stroke-color: color-mix(in srgb, rgb(37, 99, 235) 60%, transparent);
+    --ak-components-toast-stroke-width: 1.25;
+    --ak-components-toggle-button-fg-rest: color-mix(in srgb, rgb(226, 232, 240) 75%, transparent);
+    --ak-components-toggle-button-fg-selected: rgb(226, 232, 240);
+    --ak-components-toggle-button-fill-hover: color-mix(in srgb, rgb(26, 34, 51) 60%, transparent);
+    --ak-components-toggle-button-fill-rest: color-mix(in srgb, rgb(26, 34, 51) 40%, transparent);
+    --ak-components-toggle-button-fill-selected: color-mix(in srgb, rgb(37, 99, 235) 85%, transparent);
+    --ak-components-toggle-button-glow-color-rest: color-mix(in srgb, rgb(34, 211, 238) 0%, transparent);
+    --ak-components-toggle-button-glow-color-selected: color-mix(in srgb, rgb(34, 211, 238) 55%, transparent);
+    --ak-components-toggle-button-glow-radius-rest: 0;
+    --ak-components-toggle-button-glow-radius-selected: 5;
+    --ak-components-toggle-button-hover-scale: 1.02;
+    --ak-components-toggle-button-icon-font-scaled: false;
+    --ak-components-toggle-button-icon-font-size: 12;
+    --ak-components-toggle-button-icon-font-weight: semibold;
+    --ak-components-toggle-button-label-font-role: caption;
+    --ak-components-toggle-button-label-font-tracking: 0.8;
+    --ak-components-toggle-button-label-font-weight: semibold;
+    --ak-components-toggle-button-shape-cut: 6;
+    --ak-components-toggle-button-shape-style: chamfer;
+    --ak-components-toggle-button-stroke-color-hover: color-mix(in srgb, rgb(34, 211, 238) 60%, transparent);
+    --ak-components-toggle-button-stroke-color-rest: color-mix(in srgb, rgb(34, 211, 238) 30%, transparent);
+    --ak-components-toggle-button-stroke-color-selected: color-mix(in srgb, rgb(34, 211, 238) 95%, transparent);
+    --ak-components-toggle-button-stroke-width: 1.25;
+    --ak-components-toggle-fill-rest: color-mix(in srgb, rgb(26, 34, 51) 60%, transparent);
+    --ak-components-toggle-fill-selected: color-mix(in srgb, rgb(37, 99, 235) 90%, transparent);
+    --ak-components-toggle-glow-color-rest: color-mix(in srgb, rgb(34, 211, 238) 0%, transparent);
+    --ak-components-toggle-glow-color-selected: color-mix(in srgb, rgb(34, 211, 238) 45%, transparent);
+    --ak-components-toggle-glow-radius-rest: 0;
+    --ak-components-toggle-glow-radius-selected: 6;
+    --ak-components-toggle-height: 22;
+    --ak-components-toggle-knob-color: rgb(255, 255, 255);
+    --ak-components-toggle-knob-inset: 3;
+    --ak-components-toggle-knob-selected-shadow-color: color-mix(in srgb, rgb(34, 211, 238) 75%, transparent);
+    --ak-components-toggle-knob-shadow-color: color-mix(in srgb, rgb(0, 0, 0) 40%, transparent);
+    --ak-components-toggle-knob-shadow-radius: 3;
+    --ak-components-toggle-knob-shadow-x: 0;
+    --ak-components-toggle-knob-shadow-y: 0;
+    --ak-components-toggle-shape-corners: all;
+    --ak-components-toggle-shape-cut: 6;
+    --ak-components-toggle-shape-style: chamfer;
+    --ak-components-toggle-stroke-color-hover: color-mix(in srgb, rgb(226, 232, 240) 35%, transparent);
+    --ak-components-toggle-stroke-color-rest: color-mix(in srgb, rgb(226, 232, 240) 18%, transparent);
+    --ak-components-toggle-stroke-color-selected: color-mix(in srgb, rgb(34, 211, 238) 75%, transparent);
+    --ak-components-toggle-stroke-width-rest: 1.25;
+    --ak-components-toggle-stroke-width-selected: 1.25;
+    --ak-components-toggle-width: 40;
+    --ak-components-tooltip-popover-popover-max-height: 420;
+    --ak-components-tooltip-popover-show-delay: 0.45;
+    --ak-components-tooltip-popover-text-color: color-mix(in srgb, rgb(226, 232, 240) 90%, transparent);
+    --ak-components-tooltip-popover-text-font-role: caption;
+    --ak-components-tooltip-popover-tooltip-max-height: 160;
+    --ak-cut-c2: 2;
+    --ak-cut-c20: 20;
+    --ak-cut-c22: 22;
+    --ak-cut-c3: 3;
+    --ak-cut-c4: 4;
+    --ak-cut-c5: 5;
+    --ak-cut-c6: 6;
+    --ak-cut-c7: 7;
+    --ak-cut-c8: 8;
+    --ak-cut-r0-10: 0.1;
+    --ak-cut-r0-2: 0.2;
+    --ak-cut-r0-22: 0.22;
+    --ak-effects-accent-rule-height: 2;
+    --ak-effects-accent-rule-label-color: color-mix(in srgb, rgb(226, 232, 240) 70%, transparent);
+    --ak-effects-accent-rule-label-font-role: caption;
+    --ak-effects-accent-rule-label-font-tracking: 1.5;
+    --ak-effects-accent-rule-width: 18;
+    --ak-effects-brackets-glow: color-mix(in srgb, rgb(34, 211, 238) 55%, transparent);
+    --ak-effects-brackets-glow-radius: 2.5;
+    --ak-effects-brackets-stroke: rgb(34, 211, 238);
+    --ak-effects-brackets-width: 1.25;
+    --ak-effects-edge-ring-default-cut-key: panel;
+    --ak-effects-edge-ring-from: color-mix(in srgb, rgb(34, 211, 238) 45%, transparent);
+    --ak-effects-edge-ring-to: color-mix(in srgb, rgb(37, 99, 235) 18%, transparent);
+    --ak-effects-edge-ring-width: 1;
+    --ak-effects-glow-bloom-color: color-mix(in srgb, rgb(37, 99, 235) 20%, transparent);
+    --ak-effects-glow-bloom-end-radius: 140;
+    --ak-effects-glow-bloom-reduced-opacity-color: color-mix(in srgb, rgb(37, 99, 235) 16%, transparent);
+    --ak-effects-hex-grid-opacity: 0.05;
+    --ak-effects-hex-grid-radius: 14;
+    --ak-effects-hex-grid-reduced-opacity: 0.04;
+    --ak-effects-hex-grid-stroke: rgb(255, 255, 255);
+    --ak-effects-hex-grid-width: 0.5;
+    --ak-effects-panel-glow-0-color: color-mix(in srgb, rgb(37, 99, 235) 35%, transparent);
+    --ak-effects-panel-glow-0-radius: 42;
+    --ak-effects-panel-glow-0-x: 0;
+    --ak-effects-panel-glow-0-y: 0;
+    --ak-effects-panel-glow-1-color: color-mix(in srgb, rgb(0, 0, 0) 50%, transparent);
+    --ak-effects-panel-glow-1-radius: 24;
+    --ak-effects-panel-glow-1-x: 0;
+    --ak-effects-panel-glow-1-y: 10;
+    --ak-effects-scanline-band-color: color-mix(in srgb, rgb(255, 255, 255) 60%, transparent);
+    --ak-effects-scanline-band-fraction: 0.12;
+    --ak-effects-scanline-line-spacing: 4;
+    --ak-effects-scanline-moving-opacity: 0.08;
+    --ak-effects-scanline-period: 3.5;
+    --ak-effects-scanline-static-opacity: 0.05;
+    --ak-elevation-level0-color: color-mix(in srgb, rgb(0, 0, 0) 0%, transparent);
+    --ak-elevation-level0-radius: 0;
+    --ak-elevation-level0-x: 0;
+    --ak-elevation-level0-y: 0;
+    --ak-elevation-level1-color: color-mix(in srgb, rgb(0, 0, 0) 22%, transparent);
+    --ak-elevation-level1-radius: 8;
+    --ak-elevation-level1-x: 0;
+    --ak-elevation-level1-y: 2;
+    --ak-elevation-level2-color: color-mix(in srgb, rgb(0, 0, 0) 30%, transparent);
+    --ak-elevation-level2-radius: 20;
+    --ak-elevation-level2-x: 0;
+    --ak-elevation-level2-y: 8;
+    --ak-id: neonBlue;
+    --ak-material-blur-enabled: true;
+    --ak-material-hud: fullScreenUI;
+    --ak-material-panel: hudWindow;
+    --ak-material-panel-opacity: 0.94;
+    --ak-motion-base: 0.25;
+    --ak-motion-dismiss-curve: easeIn;
+    --ak-motion-dismiss-duration: fast;
+    --ak-motion-durations-breathe: 3.2;
+    --ak-motion-durations-d0-08: 0.08;
+    --ak-motion-durations-d0-1: 0.1;
+    --ak-motion-durations-d0-12: 0.12;
+    --ak-motion-durations-d0-14: 0.14;
+    --ak-motion-durations-d0-16: 0.16;
+    --ak-motion-durations-d0-18: 0.18;
+    --ak-motion-durations-d0-2: 0.2;
+    --ak-motion-durations-d0-22: 0.22;
+    --ak-motion-durations-d0-32: 0.32;
+    --ak-motion-fast: 0.15;
+    --ak-motion-hover-curve: easeInOut;
+    --ak-motion-hover-duration: fast;
+    --ak-motion-materialize: 0.55;
+    --ak-motion-materialize-animation-curve: easeOut;
+    --ak-motion-materialize-animation-duration: materialize;
+    --ak-motion-present-curve: easeOut;
+    --ak-motion-present-duration: base;
+    --ak-motion-slow: 0.4;
+    --ak-motion-springs-snappy22-curve: snappy;
+    --ak-motion-springs-snappy22-duration: 0.22;
+    --ak-motion-springs-snappy26-curve: snappy;
+    --ak-motion-springs-snappy26-duration: 0.26;
+    --ak-motion-springs-snappy32-curve: snappy;
+    --ak-motion-springs-snappy32-duration: 0.32;
+    --ak-motion-springs-sp30-70-curve: spring;
+    --ak-motion-springs-sp30-70-damping: 0.7;
+    --ak-motion-springs-sp30-70-response: 0.3;
+    --ak-motion-springs-sp30-80-curve: spring;
+    --ak-motion-springs-sp30-80-damping: 0.8;
+    --ak-motion-springs-sp30-80-response: 0.3;
+    --ak-motion-springs-sp30-86-curve: spring;
+    --ak-motion-springs-sp30-86-damping: 0.86;
+    --ak-motion-springs-sp30-86-response: 0.3;
+    --ak-motion-springs-sp32-74-curve: spring;
+    --ak-motion-springs-sp32-74-damping: 0.74;
+    --ak-motion-springs-sp32-74-response: 0.32;
+    --ak-motion-springs-sp32-84-curve: spring;
+    --ak-motion-springs-sp32-84-damping: 0.84;
+    --ak-motion-springs-sp32-84-response: 0.32;
+    --ak-motion-springs-sp32-85-curve: spring;
+    --ak-motion-springs-sp32-85-damping: 0.85;
+    --ak-motion-springs-sp32-85-response: 0.32;
+    --ak-motion-springs-sp34-80-curve: spring;
+    --ak-motion-springs-sp34-80-damping: 0.8;
+    --ak-motion-springs-sp34-80-response: 0.34;
+    --ak-motion-springs-sp34-82-curve: spring;
+    --ak-motion-springs-sp34-82-damping: 0.82;
+    --ak-motion-springs-sp34-82-response: 0.34;
+    --ak-motion-springs-sp42-82-curve: spring;
+    --ak-motion-springs-sp42-82-damping: 0.82;
+    --ak-motion-springs-sp42-82-response: 0.42;
+    --ak-motion-springs-sp42-88-curve: spring;
+    --ak-motion-springs-sp42-88-damping: 0.88;
+    --ak-motion-springs-sp42-88-response: 0.42;
+    --ak-name: Neon Blue;
+    --ak-opacity-hit-target: 0.001;
+    --ak-opacity-o03: 0.03;
+    --ak-opacity-o05: 0.05;
+    --ak-opacity-o06: 0.06;
+    --ak-opacity-o07: 0.07;
+    --ak-opacity-o08: 0.08;
+    --ak-opacity-o09: 0.09;
+    --ak-opacity-o10: 0.1;
+    --ak-opacity-o12: 0.12;
+    --ak-opacity-o13: 0.13;
+    --ak-opacity-o14: 0.14;
+    --ak-opacity-o15: 0.15;
+    --ak-opacity-o16: 0.16;
+    --ak-opacity-o18: 0.18;
+    --ak-opacity-o20: 0.2;
+    --ak-opacity-o22: 0.22;
+    --ak-opacity-o25: 0.25;
+    --ak-opacity-o28: 0.28;
+    --ak-opacity-o30: 0.3;
+    --ak-opacity-o32: 0.32;
+    --ak-opacity-o35: 0.35;
+    --ak-opacity-o40: 0.4;
+    --ak-opacity-o42: 0.42;
+    --ak-opacity-o45: 0.45;
+    --ak-opacity-o50: 0.5;
+    --ak-opacity-o55: 0.55;
+    --ak-opacity-o60: 0.6;
+    --ak-opacity-o62: 0.62;
+    --ak-opacity-o65: 0.65;
+    --ak-opacity-o66: 0.66;
+    --ak-opacity-o70: 0.7;
+    --ak-opacity-o72: 0.72;
+    --ak-opacity-o75: 0.75;
+    --ak-opacity-o78: 0.78;
+    --ak-opacity-o80: 0.8;
+    --ak-opacity-o82: 0.82;
+    --ak-opacity-o85: 0.85;
+    --ak-opacity-o88: 0.88;
+    --ak-opacity-o90: 0.9;
+    --ak-opacity-o92: 0.92;
+    --ak-opacity-o95: 0.95;
+    --ak-opacity-o96: 0.96;
+    --ak-opacity-o97: 0.97;
+    --ak-opacity-o98: 0.98;
+    --ak-palette-accent-primary: rgb(37, 99, 235);
+    --ak-palette-accent-secondary: rgb(34, 211, 238);
+    --ak-palette-accent-tertiary: rgb(16, 185, 129);
+    --ak-palette-background: rgb(10, 14, 23);
+    --ak-palette-black: rgb(0, 0, 0);
+    --ak-palette-danger: rgb(248, 81, 73);
+    --ak-palette-foreground: rgb(226, 232, 240);
+    --ak-palette-success: rgb(63, 185, 80);
+    --ak-palette-surface: rgb(17, 24, 39);
+    --ak-palette-surface-elevated: rgb(26, 34, 51);
+    --ak-palette-warning: rgb(227, 179, 65);
+    --ak-palette-white: rgb(255, 255, 255);
+    --ak-radius-lg: 14px;
+    --ak-radius-md: 12px;
+    --ak-radius-panel: 14px;
+    --ak-radius-sm: 8px;
+    --ak-roles-accent-tick-fill: rgb(34, 211, 238);
+    --ak-roles-accent-tick-glow-color: color-mix(in srgb, rgb(34, 211, 238) 60%, transparent);
+    --ak-roles-accent-tick-glow-radius: 2;
+    --ak-roles-bubble-fill: color-mix(in srgb, rgb(26, 34, 51) 97%, transparent);
+    --ak-roles-bubble-shadow-color: color-mix(in srgb, rgb(34, 211, 238) 35%, transparent);
+    --ak-roles-bubble-shadow-radius: 8;
+    --ak-roles-bubble-shadow-x: 0;
+    --ak-roles-bubble-shadow-y: 3;
+    --ak-roles-bubble-shape-cut: 6;
+    --ak-roles-bubble-shape-style: chamfer;
+    --ak-roles-bubble-stroke-color: color-mix(in srgb, rgb(34, 211, 238) 55%, transparent);
+    --ak-roles-bubble-stroke-width: 1.25;
+    --ak-roles-field-fill: color-mix(in srgb, rgb(26, 34, 51) 50%, transparent);
+    --ak-roles-field-glow-color-focused: color-mix(in srgb, rgb(34, 211, 238) 45%, transparent);
+    --ak-roles-field-glow-color-rest: color-mix(in srgb, rgb(34, 211, 238) 0%, transparent);
+    --ak-roles-field-glow-radius-focused: 6;
+    --ak-roles-field-glow-radius-rest: 0;
+    --ak-roles-field-shape-cut: 6;
+    --ak-roles-field-shape-style: chamfer;
+    --ak-roles-field-stroke-color-focused: color-mix(in srgb, rgb(37, 99, 235) 90%, transparent);
+    --ak-roles-field-stroke-color-rest: color-mix(in srgb, rgb(37, 99, 235) 25%, transparent);
+    --ak-roles-field-stroke-width-focused: 1.5;
+    --ak-roles-field-stroke-width-rest: 1.25;
+    --ak-roles-materialize-anchor: top;
+    --ak-roles-materialize-animation-curve: easeOut;
+    --ak-roles-materialize-animation-duration: materialize;
+    --ak-roles-materialize-scale: 0.96;
+    --ak-roles-option-row-fill-hover: color-mix(in srgb, rgb(34, 211, 238) 18%, transparent);
+    --ak-roles-option-row-fill-rest: color-mix(in srgb, rgb(0, 0, 0) 0%, transparent);
+    --ak-roles-option-row-fill-selected: color-mix(in srgb, rgb(34, 211, 238) 18%, transparent);
+    --ak-roles-option-row-padding-v: 6;
+    --ak-roles-option-row-selected-dot-scaled: false;
+    --ak-roles-option-row-selected-dot-size: 6;
+    --ak-roles-option-row-shape-cut: 4;
+    --ak-roles-option-row-shape-style: chamfer;
+    --ak-roles-option-row-swatch-dot-size: 9;
+    --ak-roles-panel-search-fill: color-mix(in srgb, rgb(17, 24, 39) 70%, transparent);
+    --ak-roles-panel-search-padding-v: 6;
+    --ak-roles-panel-search-panel-min-width: 200;
+    --ak-roles-panel-search-shape-cut: 4;
+    --ak-roles-panel-search-shape-style: chamfer;
+    --ak-roles-panel-search-stroke-color: color-mix(in srgb, rgb(37, 99, 235) 30%, transparent);
+    --ak-roles-panel-search-stroke-width: 1;
+    --ak-roles-popover-fill: color-mix(in srgb, rgb(26, 34, 51) 97%, transparent);
+    --ak-roles-popover-min-width: 160;
+    --ak-roles-popover-shadow-color: color-mix(in srgb, rgb(34, 211, 238) 35%, transparent);
+    --ak-roles-popover-shadow-radius: 10;
+    --ak-roles-popover-shadow-x: 0;
+    --ak-roles-popover-shadow-y: 4;
+    --ak-roles-popover-shape-cut: 8;
+    --ak-roles-popover-shape-style: chamfer;
+    --ak-roles-popover-stroke-color: color-mix(in srgb, rgb(34, 211, 238) 55%, transparent);
+    --ak-roles-popover-stroke-width: 1.25;
+    --ak-roles-scrim-color: color-mix(in srgb, rgb(0, 0, 0) 45%, transparent);
+    --ak-roles-scrim-material: panel;
+    --ak-roles-scrim-opacity: 0.6;
+    --ak-roles-selected-fill: color-mix(in srgb, rgb(37, 99, 235) 16%, transparent);
+    --ak-roles-thumb-drag-glow-radius: 8;
+    --ak-roles-thumb-drag-scale: 1.15;
+    --ak-roles-thumb-fill: rgb(34, 211, 238);
+    --ak-roles-thumb-glow-color-pressed: color-mix(in srgb, rgb(34, 211, 238) 90%, transparent);
+    --ak-roles-thumb-glow-color-rest: color-mix(in srgb, rgb(34, 211, 238) 55%, transparent);
+    --ak-roles-thumb-glow-radius-pressed: 8;
+    --ak-roles-thumb-glow-radius-rest: 4;
+    --ak-roles-thumb-offset: 7;
+    --ak-roles-thumb-size: 14;
+    --ak-roles-track-active-fill: color-mix(in srgb, rgb(34, 211, 238) 85%, transparent);
+    --ak-roles-track-fill: color-mix(in srgb, rgb(26, 34, 51) 60%, transparent);
+    --ak-roles-track-height: 4;
+    --ak-roles-track-row-height: 20;
+    --ak-roles-trigger-chevron-color: color-mix(in srgb, rgb(34, 211, 238) 85%, transparent);
+    --ak-roles-trigger-chevron-scaled: false;
+    --ak-roles-trigger-chevron-size: 10;
+    --ak-roles-trigger-chevron-weight: semibold;
+    --ak-roles-trigger-fill: color-mix(in srgb, rgb(26, 34, 51) 50%, transparent);
+    --ak-roles-trigger-glow-color-rest: color-mix(in srgb, rgb(37, 99, 235) 0%, transparent);
+    --ak-roles-trigger-glow-color-selected: color-mix(in srgb, rgb(37, 99, 235) 40%, transparent);
+    --ak-roles-trigger-glow-radius-rest: 0;
+    --ak-roles-trigger-glow-radius-selected: 5;
+    --ak-roles-trigger-shape-cut: 8;
+    --ak-roles-trigger-shape-style: chamfer;
+    --ak-roles-trigger-stroke-color-rest: color-mix(in srgb, rgb(37, 99, 235) 30%, transparent);
+    --ak-roles-trigger-stroke-color-selected: color-mix(in srgb, rgb(37, 99, 235) 75%, transparent);
+    --ak-roles-trigger-stroke-width-rest: 1.25;
+    --ak-roles-trigger-stroke-width-selected: 1.25;
+    --ak-schema-version: 1;
+    --ak-shape-corners: diagonal;
+    --ak-shape-style: chamfer;
+    --ak-size-s1: 1px;
+    --ak-size-s1-5: 1.5px;
+    --ak-size-s10: 10px;
+    --ak-size-s104: 104px;
+    --ak-size-s108: 108px;
+    --ak-size-s11: 11px;
+    --ak-size-s110: 110px;
+    --ak-size-s12: 12px;
+    --ak-size-s120: 120px;
+    --ak-size-s124: 124px;
+    --ak-size-s128: 128px;
+    --ak-size-s14: 14px;
+    --ak-size-s140: 140px;
+    --ak-size-s15: 15px;
+    --ak-size-s150: 150px;
+    --ak-size-s16: 16px;
+    --ak-size-s160: 160px;
+    --ak-size-s164: 164px;
+    --ak-size-s165: 165px;
+    --ak-size-s168: 168px;
+    --ak-size-s18: 18px;
+    --ak-size-s180: 180px;
+    --ak-size-s190: 190px;
+    --ak-size-s2: 2px;
+    --ak-size-s2-5: 2.5px;
+    --ak-size-s20: 20px;
+    --ak-size-s200: 200px;
+    --ak-size-s22: 22px;
+    --ak-size-s220: 220px;
+    --ak-size-s232: 232px;
+    --ak-size-s24: 24px;
+    --ak-size-s240: 240px;
+    --ak-size-s244: 244px;
+    --ak-size-s250: 250px;
+    --ak-size-s26: 26px;
+    --ak-size-s260: 260px;
+    --ak-size-s268: 268px;
+    --ak-size-s28: 28px;
+    --ak-size-s280: 280px;
+    --ak-size-s3: 3px;
+    --ak-size-s30: 30px;
+    --ak-size-s300: 300px;
+    --ak-size-s32: 32px;
+    --ak-size-s320: 320px;
+    --ak-size-s34: 34px;
+    --ak-size-s340: 340px;
+    --ak-size-s36: 36px;
+    --ak-size-s360: 360px;
+    --ak-size-s38: 38px;
+    --ak-size-s380: 380px;
+    --ak-size-s4: 4px;
+    --ak-size-s40: 40px;
+    --ak-size-s400: 400px;
+    --ak-size-s42: 42px;
+    --ak-size-s420: 420px;
+    --ak-size-s44: 44px;
+    --ak-size-s440: 440px;
+    --ak-size-s46: 46px;
+    --ak-size-s460: 460px;
+    --ak-size-s48: 48px;
+    --ak-size-s480: 480px;
+    --ak-size-s5: 5px;
+    --ak-size-s50: 50px;
+    --ak-size-s52: 52px;
+    --ak-size-s520: 520px;
+    --ak-size-s54: 54px;
+    --ak-size-s56: 56px;
+    --ak-size-s560: 560px;
+    --ak-size-s574: 574px;
+    --ak-size-s6: 6px;
+    --ak-size-s60: 60px;
+    --ak-size-s62: 62px;
+    --ak-size-s620: 620px;
+    --ak-size-s64: 64px;
+    --ak-size-s640: 640px;
+    --ak-size-s7: 7px;
+    --ak-size-s70: 70px;
+    --ak-size-s72: 72px;
+    --ak-size-s8: 8px;
+    --ak-size-s80: 80px;
+    --ak-size-s860: 860px;
+    --ak-size-s9: 9px;
+    --ak-size-s90: 90px;
+    --ak-size-s92: 92px;
+    --ak-size-s96: 96px;
+    --ak-spacing-lg: 16px;
+    --ak-spacing-md: 12px;
+    --ak-spacing-sm: 8px;
+    --ak-spacing-xl: 24px;
+    --ak-spacing-xs: 4px;
+    --ak-spacing-xxl: 32px;
+    --ak-syntax-comment: color-mix(in srgb, rgb(226, 232, 240) 45%, transparent);
+    --ak-syntax-keyword-hue: 285;
+    --ak-syntax-number-hue: 30;
+    --ak-syntax-on-dark-brightness: 0.95;
+    --ak-syntax-on-dark-saturation: 0.5;
+    --ak-syntax-on-light-brightness: 0.66;
+    --ak-syntax-on-light-saturation: 0.72;
+    --ak-syntax-string-hue: 140;
+    --ak-syntax-type-hue: 200;
+    --ak-terminal-ansi-0: rgb(26, 29, 36);
+    --ak-terminal-ansi-1: rgb(224, 108, 117);
+    --ak-terminal-ansi-10: rgb(152, 195, 121);
+    --ak-terminal-ansi-11: rgb(229, 192, 123);
+    --ak-terminal-ansi-12: rgb(97, 175, 239);
+    --ak-terminal-ansi-13: rgb(198, 120, 221);
+    --ak-terminal-ansi-14: rgb(86, 182, 194);
+    --ak-terminal-ansi-15: rgb(255, 255, 255);
+    --ak-terminal-ansi-2: rgb(152, 195, 121);
+    --ak-terminal-ansi-3: rgb(229, 192, 123);
+    --ak-terminal-ansi-4: rgb(97, 175, 239);
+    --ak-terminal-ansi-5: rgb(198, 120, 221);
+    --ak-terminal-ansi-6: rgb(86, 182, 194);
+    --ak-terminal-ansi-7: rgb(171, 178, 191);
+    --ak-terminal-ansi-8: rgb(92, 99, 112);
+    --ak-terminal-ansi-9: rgb(224, 108, 117);
+    --ak-terminal-background: rgb(10, 14, 23);
+    --ak-terminal-cursor: rgb(34, 211, 238);
+    --ak-terminal-foreground: rgb(226, 232, 240);
+    --ak-terminal-selection: rgb(59, 66, 82);
+    --ak-text-faint: color-mix(in srgb, rgb(226, 232, 240) 45%, transparent);
+    --ak-text-muted: color-mix(in srgb, rgb(226, 232, 240) 55%, transparent);
+    --ak-text-primary: rgb(226, 232, 240);
+    --ak-type-mono-family: JetBrains Mono;
+    --ak-type-roles-body: 14;
+    --ak-type-roles-caption: 11;
+    --ak-type-roles-display: 28;
+    --ak-type-roles-headline: 16;
+    --ak-type-roles-mono: 13;
+    --ak-type-roles-title: 20;
+    --ak-type-sizes-t10: 10px;
+    --ak-type-sizes-t10-5: 10.5px;
+    --ak-type-sizes-t11: 11px;
+    --ak-type-sizes-t12: 12px;
+    --ak-type-sizes-t12-5: 12.5px;
+    --ak-type-sizes-t13: 13px;
+    --ak-type-sizes-t14: 14px;
+    --ak-type-sizes-t15: 15px;
+    --ak-type-sizes-t16: 16px;
+    --ak-type-sizes-t17: 17px;
+    --ak-type-sizes-t18: 18px;
+    --ak-type-sizes-t20: 20px;
+    --ak-type-sizes-t21: 21px;
+    --ak-type-sizes-t24: 24px;
+    --ak-type-sizes-t26: 26px;
+    --ak-type-sizes-t28: 28px;
+    --ak-type-sizes-t30: 30px;
+    --ak-type-sizes-t34: 34px;
+    --ak-type-sizes-t40: 40px;
+    --ak-type-sizes-t6: 6px;
+    --ak-type-sizes-t6-5: 6.5px;
+    --ak-type-sizes-t7: 7px;
+    --ak-type-sizes-t8: 8px;
+    --ak-type-sizes-t8-5: 8.5px;
+    --ak-type-sizes-t9: 9px;
+    --ak-type-sizes-t9-5: 9.5px;
+    --lore-body-size: 15px;
+    --lore-callout-abstract-hue: 175;
+    --lore-callout-bug-hue: 350;
+    --lore-callout-danger-hue: 0;
+    --lore-callout-example-hue: 275;
+    --lore-callout-failure-hue: 0;
+    --lore-callout-info-hue: 210;
+    --lore-callout-lightness: 58%;
+    --lore-callout-note-hue: 210;
+    --lore-callout-question-hue: 45;
+    --lore-callout-saturation: 65%;
+    --lore-callout-success-hue: 140;
+    --lore-callout-tip-hue: 175;
+    --lore-callout-todo-hue: 45;
+    --lore-callout-warning-hue: 30;
+    --lore-content-inset: 28px;
+    --lore-font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+    --lore-font-text: -apple-system, "SF Pro Text", system-ui, sans-serif;
+    --lore-heading-1-scale: 1.8;
+    --lore-heading-1-weight: 600;
+    --lore-heading-2-scale: 1.6;
+    --lore-heading-2-weight: 600;
+    --lore-heading-3-scale: 1.4;
+    --lore-heading-3-weight: 600;
+    --lore-heading-4-scale: 1.25;
+    --lore-heading-4-weight: 700;
+    --lore-heading-5-scale: 1.125;
+    --lore-heading-5-weight: 700;
+    --lore-heading-6-scale: 1.05;
+    --lore-heading-6-weight: 700;
+    --lore-line-height: 1.5;
+    --lore-measure: none;
+    --lore-meta: rgba(226, 232, 240, 0.4);
+    --lore-mono-scale: 0.92;
+    --lore-opacity-o26: 0.26;
+    --lore-opacity-o38: 0.38;
+    --lore-radius-pill: 999px;
   }
-  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); }
+  html, body { margin: 0; height: 100%; background: var(--ak-palette-background); color: var(--ak-palette-foreground); }
   #root { height: 100%; }
-  .cm-editor { height: 100%; background: var(--bg); color: var(--fg);
-               font-size: var(--body-size); }
+  .cm-editor { height: 100%; background: var(--ak-palette-background); color: var(--ak-palette-foreground);
+               font-size: var(--lore-body-size); }
   .cm-editor.cm-focused { outline: none; }
 
   /* THE CARET, and the selection.
@@ -30,18 +1539,18 @@
      and measured it still `rgb(0, 0, 0)` against a `rgb(22, 22, 28)` page.
      Overriding a vendored library's hard-coded colour is what `!important` is
      for, and there is no cleaner hook: CodeMirror picks black or `#ddd` from a
-     light/dark flag, while `--fg` is the HOST's actual foreground and is right
-     in both. */
+     light/dark flag, while `--ak-palette-foreground` is the HOST's actual
+     foreground and is right in both. */
   .cm-cursor, .cm-dropCursor,
   .cm-editor .cm-cursor, .cm-editor.cm-focused .cm-cursor {
-    border-left-color: var(--fg) !important;
+    border-left-color: var(--ak-palette-foreground) !important;
     border-left-width: 2px !important;
   }
   .cm-selectionBackground,
   .cm-editor .cm-selectionBackground,
   .cm-editor.cm-focused .cm-selectionBackground,
   ::selection {
-    background: color-mix(in srgb, var(--accent-primary) 38%, transparent) !important;
+    background: color-mix(in srgb, var(--ak-palette-accent-primary) 38%, transparent) !important;
   }
 
   /* THE FONT FAMILY GOES ON `.cm-content`, NOT `.cm-editor`.
@@ -63,10 +1572,10 @@
      Left-aligned and capped at the measure, matching
      `MarkdownEditorLayout.containerWidth` — the native editor deliberately
      stopped centring this column. */
-  .cm-content { font-family: var(--font-text); line-height: var(--line-height); }
+  .cm-content { font-family: var(--lore-font-text); line-height: var(--lore-line-height); }
   .cm-editor .cm-content {
-    padding: var(--content-inset) !important;
-    max-width: var(--measure);
+    padding: var(--lore-content-inset) !important;
+    max-width: var(--lore-measure);
     /* CENTRED, so the padding is equal on both sides.
        The measure now defaults to "full width", where centring changes nothing
        — but when a reader caps the column at Narrow, Standard or Wide, this is
@@ -78,20 +1587,20 @@
   .cm-line { padding: 0; }
 
   /* Mono at 0.92 of body: a monospaced face reads larger at equal points. */
-  .cm-content .tok-monospace { font-family: var(--font-mono); font-size: 0.92em; }
+  .cm-content .tok-monospace { font-family: var(--lore-font-mono); font-size: 0.92em; }
 
   /* A fenced block reads as a panel, not as loose monospaced text on the page.
      Line decorations rather than one span: a mark over a multi-line range
      paints a ragged staircase. */
   .cm-lore-code, .cm-lore-code-first, .cm-lore-code-last {
-    background: color-mix(in srgb, var(--surface-elevated) 85%, transparent);
-    font-family: var(--font-mono); font-size: 0.92em;
+    background: color-mix(in srgb, var(--ak-palette-surface-elevated) 85%, transparent);
+    font-family: var(--lore-font-mono); font-size: 0.92em;
   }
   .cm-lore-code-first { border-radius: 5px 5px 0 0; padding-top: 8px; }
   .cm-lore-code-last  { border-radius: 0 0 5px 5px; padding-bottom: 8px; }
 
-  .cm-lore-table code { font-family: var(--font-mono); font-size: 0.92em;
-                        background: color-mix(in srgb, var(--surface-elevated) 70%,
+  .cm-lore-table code { font-family: var(--lore-font-mono); font-size: 0.92em;
+                        background: color-mix(in srgb, var(--ak-palette-surface-elevated) 70%,
                                               transparent);
                         border-radius: 4px; padding: 1px 4px; }
 
@@ -100,27 +1609,27 @@
      widget is measured no better than margin on a line — `padding` with a
      transparent border keeps the rule one pixel and the box predictable. */
   .cm-lore-rule { border: none; border-top: 1px solid
-                  color-mix(in srgb, var(--fg) 45%, transparent);
+                  color-mix(in srgb, var(--ak-palette-foreground) 45%, transparent);
                   margin: 0; padding: 12px 0 0; }
-  .cm-lore-bullet { color: color-mix(in srgb, var(--fg) 55%, transparent);
+  .cm-lore-bullet { color: color-mix(in srgb, var(--ak-palette-foreground) 55%, transparent);
                     margin-right: 6px; }
 
   /* E2T1b. Obsidian's internal link: accent-coloured, underlined only on
      hover, and the cursor is a pointer so it reads as clickable before it is
      clicked. No dimming for an unresolved target — Lore has no resolution
      query on this surface, and inventing one is not a UI enhancement. */
-  .cm-lore-wikilink { color: var(--accent-primary); cursor: pointer; }
+  .cm-lore-wikilink { color: var(--ak-palette-accent-primary); cursor: pointer; }
   .cm-lore-wikilink:hover { text-decoration: underline; }
 
   /* E2T2. Obsidian's tag pill: the `#` stays, the shape is a chip. */
   .cm-lore-tag {
-    color: var(--accent-primary);
-    background: color-mix(in srgb, var(--accent-primary) 14%, transparent);
+    color: var(--ak-palette-accent-primary);
+    background: color-mix(in srgb, var(--ak-palette-accent-primary) 14%, transparent);
     border-radius: 999px; padding: 1px 7px; cursor: pointer;
     white-space: nowrap;
   }
   .cm-lore-tag:hover {
-    background: color-mix(in srgb, var(--accent-primary) 26%, transparent);
+    background: color-mix(in srgb, var(--ak-palette-accent-primary) 26%, transparent);
   }
 
   /* E2T4. A real input, sized to sit on the text baseline rather than above
@@ -130,24 +1639,24 @@
     appearance: none; -webkit-appearance: none;
     width: 1em; height: 1em; margin: 0 0.45em 0 0;
     vertical-align: -0.1em;
-    border: 1.5px solid color-mix(in srgb, var(--fg) 45%, transparent);
+    border: 1.5px solid color-mix(in srgb, var(--ak-palette-foreground) 45%, transparent);
     border-radius: 3px; background: transparent; cursor: pointer;
     display: inline-block; position: relative;
   }
   .cm-lore-checkbox:checked {
-    background: var(--accent-primary);
-    border-color: var(--accent-primary);
+    background: var(--ak-palette-accent-primary);
+    border-color: var(--ak-palette-accent-primary);
   }
   .cm-lore-checkbox:checked::after {
     content: "\2713"; position: absolute; inset: 0;
     display: flex; align-items: center; justify-content: center;
-    font-size: 0.8em; color: var(--bg);
+    font-size: 0.8em; color: var(--ak-palette-background);
   }
   .cm-lore-checkbox:disabled { cursor: default; opacity: 0.5; }
   /* A done task, struck and dimmed — the same treatment the native renderer
      applies to `.checkbox(true)`. The checkbox itself is spared, or the tick
      is struck through too. */
-  .cm-lore-task-done { color: color-mix(in srgb, var(--fg) 45%, transparent);
+  .cm-lore-task-done { color: color-mix(in srgb, var(--ak-palette-foreground) 45%, transparent);
                        text-decoration: line-through; }
   .cm-lore-task-done .cm-lore-checkbox { text-decoration: none; }
 
@@ -165,7 +1674,7 @@
   }
   .cm-lore-callout-head { padding-top: 6px; font-weight: 600; color: var(--callout);
                           border-radius: 4px 4px 0 0; }
-  .cm-lore-callout-body { color: var(--fg); }
+  .cm-lore-callout-body { color: var(--ak-palette-foreground); }
   .cm-lore-callout-last { padding-bottom: 6px; border-radius: 0 0 4px 4px; }
   /* A one-line callout is both the first line and the last. */
   .cm-lore-callout-head.cm-lore-callout-last { border-radius: 4px; }
@@ -183,7 +1692,7 @@
   /* `quote` is a callout with no colour of its own — Obsidian renders it as an
      ordinary quote with a heading, so it borrows the foreground. */
   .cm-lore-callout-quote {
-    --callout: color-mix(in srgb, var(--fg) 45%, transparent);
+    --callout: color-mix(in srgb, var(--ak-palette-foreground) 45%, transparent);
     background: transparent;
   }
 
@@ -199,15 +1708,15 @@
   .cm-lore-completion {
     position: absolute; z-index: 20;
     min-width: 220px; max-width: 420px; max-height: 260px; overflow-y: auto;
-    background: var(--surface-elevated);
-    border: 1px solid color-mix(in srgb, var(--fg) 18%, transparent);
+    background: var(--ak-palette-surface-elevated);
+    border: 1px solid color-mix(in srgb, var(--ak-palette-foreground) 18%, transparent);
     border-radius: 6px; padding: 4px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
     font-size: 0.95em;
     /* Explicit, not inherited: the list hangs off `.cm-editor`, and the text
        face is set on `.cm-content` — so without this it fell back to the
        browser's default serif, which the first snapshot showed. */
-    font-family: var(--font-text);
+    font-family: var(--lore-font-text);
   }
   .cm-lore-completion-row {
     display: flex; align-items: baseline; gap: 8px;
@@ -215,12 +1724,12 @@
     white-space: nowrap;
   }
   .cm-lore-completion-row.is-selected {
-    background: color-mix(in srgb, var(--accent-primary) 30%, transparent);
+    background: color-mix(in srgb, var(--ak-palette-accent-primary) 30%, transparent);
   }
-  .cm-lore-completion-label { color: var(--fg); overflow: hidden;
+  .cm-lore-completion-label { color: var(--ak-palette-foreground); overflow: hidden;
                               text-overflow: ellipsis; }
   .cm-lore-completion-detail {
-    color: color-mix(in srgb, var(--fg) 45%, transparent);
+    color: color-mix(in srgb, var(--ak-palette-foreground) 45%, transparent);
     font-size: 0.85em; margin-left: auto;
   }
 
@@ -229,16 +1738,16 @@
   .cm-lore-preview {
     position: absolute; z-index: 25;
     max-width: 380px;
-    background: var(--surface-elevated);
-    border: 1px solid color-mix(in srgb, var(--fg) 18%, transparent);
+    background: var(--ak-palette-surface-elevated);
+    border: 1px solid color-mix(in srgb, var(--ak-palette-foreground) 18%, transparent);
     border-radius: 6px; padding: 8px 10px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-    font-family: var(--font-text); font-size: 0.9em;
+    font-family: var(--lore-font-text); font-size: 0.9em;
     pointer-events: none;
   }
   .cm-lore-preview-title { font-weight: 600; margin-bottom: 4px; }
   .cm-lore-preview-body {
-    color: color-mix(in srgb, var(--fg) 70%, transparent);
+    color: color-mix(in srgb, var(--ak-palette-foreground) 70%, transparent);
     line-height: 1.4;
   }
 
@@ -246,7 +1755,7 @@
 
   /* The inline-code pill M9.9 draws natively. */
   .cm-lore-inline-code {
-    background: var(--surface-elevated);
+    background: var(--ak-palette-surface-elevated);
     border-radius: 4px; padding: 1px 4px;
   }
 
@@ -271,10 +1780,10 @@
   /* A footnote reference is a small superscript; a definition's label opens its
      line. Both dimmed, as notation rather than prose. */
   .cm-lore-footnote-ref {
-    color: var(--accent-primary); font-size: 0.75em; vertical-align: super;
+    color: var(--ak-palette-accent-primary); font-size: 0.75em; vertical-align: super;
   }
   .cm-lore-footnote-def {
-    color: color-mix(in srgb, var(--fg) 55%, transparent);
+    color: color-mix(in srgb, var(--ak-palette-foreground) 55%, transparent);
     margin-right: 4px;
   }
 
@@ -296,18 +1805,18 @@
      way. A left rule in the accent tint and a hairline frame — the same two
      signals `TransclusionStyling` draws natively. */
   .cm-lore-transclusion {
-    border: 1px solid color-mix(in srgb, var(--fg) 18%, transparent);
-    border-left: 3px solid color-mix(in srgb, var(--accent-primary) 55%, transparent);
+    border: 1px solid color-mix(in srgb, var(--ak-palette-foreground) 18%, transparent);
+    border-left: 3px solid color-mix(in srgb, var(--ak-palette-accent-primary) 55%, transparent);
     border-radius: 4px; padding: 6px 10px;
-    background: color-mix(in srgb, var(--fg) 3%, transparent);
+    background: color-mix(in srgb, var(--ak-palette-foreground) 3%, transparent);
   }
   .cm-lore-transclusion-title {
-    color: color-mix(in srgb, var(--fg) 55%, transparent);
+    color: color-mix(in srgb, var(--ak-palette-foreground) 55%, transparent);
     font-size: 0.85em; margin-bottom: 4px;
   }
   .cm-lore-transclusion-waiting,
   .cm-lore-transclusion-problem {
-    color: color-mix(in srgb, var(--fg) 45%, transparent); font-size: 0.9em;
+    color: color-mix(in srgb, var(--ak-palette-foreground) 45%, transparent); font-size: 0.9em;
   }
   /* The nested editor must not add its own padding or its own scrollbar: it is
      content inside a box, not a second editor. */
@@ -321,24 +1830,24 @@
      "this file is missing" rather than as a browser error — WebKit draws a grey
      box with a `?` for a failed image and does not show the alt text. */
   .cm-lore-embed-missing {
-    color: color-mix(in srgb, var(--fg) 45%, transparent);
+    color: color-mix(in srgb, var(--ak-palette-foreground) 45%, transparent);
     text-decoration: line-through;
-    text-decoration-color: color-mix(in srgb, var(--fg) 30%, transparent);
+    text-decoration-color: color-mix(in srgb, var(--ak-palette-foreground) 30%, transparent);
   }
 
   /* A PDF or a Word file: the same pill the native renderer draws, because
      putting a second document's renderer inside the editor is a different
      project. */
   .cm-lore-embed-chip {
-    color: var(--accent-primary); cursor: pointer;
-    background: var(--surface-elevated);
+    color: var(--ak-palette-accent-primary); cursor: pointer;
+    background: var(--ak-palette-surface-elevated);
     border-radius: 4px; padding: 1px 6px;
     text-decoration: underline;
   }
 
   .cm-lore-table { border-collapse: collapse; margin: 0; }
   .cm-lore-table th, .cm-lore-table td {
-    border: 1px solid color-mix(in srgb, var(--fg) 22%, transparent);
+    border: 1px solid color-mix(in srgb, var(--ak-palette-foreground) 22%, transparent);
     padding: 6px 12px; text-align: left;
     /* A one-character header (`#`) otherwise collapses to the narrowest
        possible column and wraps its cells mid-number — `6.1` came out as
@@ -347,7 +1856,7 @@
   }
   .cm-lore-table th { font-weight: 600; }
   .cm-lore-table td:focus, .cm-lore-table th:focus {
-    outline: 2px solid var(--accent-primary); outline-offset: -2px;
+    outline: 2px solid var(--ak-palette-accent-primary); outline-offset: -2px;
   }
 </style></head>
 <link rel="stylesheet" href="katex.min.css">

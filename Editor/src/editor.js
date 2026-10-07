@@ -22,9 +22,9 @@ const highlight = HighlightStyle.define([
   { tag: t.strong, fontWeight: "700" },
   { tag: t.emphasis, fontStyle: "italic" },
   { tag: t.strikethrough, textDecoration: "line-through" },
-  { tag: [t.link, t.url], color: "var(--accent-primary)" },
-  { tag: t.monospace, fontFamily: "var(--font-mono)" },
-  { tag: t.meta, color: "var(--text-faint)" },
+  { tag: [t.link, t.url], color: "var(--ak-palette-accent-primary)" },
+  { tag: t.monospace, fontFamily: "var(--lore-font-mono)" },
+  { tag: t.meta, color: "var(--lore-meta)" },
 ])
 
 // ---------------------------------------------------- inline live preview
