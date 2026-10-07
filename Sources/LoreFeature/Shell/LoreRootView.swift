@@ -94,9 +94,14 @@ struct LoreRootView: View {
                     // `surface` went entirely unused in the app.
                     .background(theme.tokens.surface)
                     .transition(.move(edge: .leading).combined(with: .opacity))
-                SidebarResizeHandle(width: store.sidebarWidth, theme: theme) { width in
-                    store.setSidebarWidth(width)
-                }
+                PaneDivider(
+                    value: store.sidebarWidth, theme: theme,
+                    accessibilityLabel: "Resize sidebar",
+                    accessibilityValue: "\(Int(store.sidebarWidth)) points",
+                    onDrag: { start, translation in
+                        store.setSidebarWidth(SidebarResize.width(start: start, translation: translation))
+                    },
+                    onAdjust: { step in store.setSidebarWidth(store.sidebarWidth + step * 20) })
             }
             content
                 // Attached HERE, not at the root, on purpose: `loreSidebarOperations`
