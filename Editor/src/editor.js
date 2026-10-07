@@ -13,6 +13,12 @@ const highlight = HighlightStyle.define([
   { tag: t.heading1, fontSize: "1.8em", fontWeight: "600" },
   { tag: t.heading2, fontSize: "1.6em", fontWeight: "600" },
   { tag: t.heading3, fontSize: "1.4em", fontWeight: "600" },
+  // 5B.F1: h4–h6 were never sized — the stylesheet's `.tok-heading<N>` rules
+  // matched nothing. Ratios and weights are `MarkdownTheme.headingSize` /
+  // `headingWeight`: semibold at the top, bold at the bottom.
+  { tag: t.heading4, fontSize: "1.25em", fontWeight: "700" },
+  { tag: t.heading5, fontSize: "1.125em", fontWeight: "700" },
+  { tag: t.heading6, fontSize: "1.05em", fontWeight: "700" },
   { tag: t.strong, fontWeight: "700" },
   { tag: t.emphasis, fontStyle: "italic" },
   { tag: t.strikethrough, textDecoration: "line-through" },

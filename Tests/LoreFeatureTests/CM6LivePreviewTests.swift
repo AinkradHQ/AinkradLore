@@ -1,3 +1,4 @@
+import AinkradAppKit
 import AppKit
 import WebKit
 import XCTest
@@ -230,6 +231,34 @@ final class CM6LivePreviewTests: XCTestCase {
             measured, lineHeight * 4,
             "a one-pixel rule is costing \(measured)px against a "
                 + "\(lineHeight)px line")
+    }
+
+    /// 5B.F1: every heading level is sized, h4–h6 included, at the native
+    /// editor's ratios (`MarkdownTheme.headingSize`). The stylesheet's
+    /// `.tok-heading<N>` rules never matched — nothing emits those classes — so
+    /// only the three levels `HighlightStyle` named were ever sized.
+    @MainActor
+    func test_everyHeadingLevelIsSizedLikeTheNativeEditor() throws {
+        try boot("# H1\n\n## H2\n\n### H3\n\n#### H4\n\n##### H5\n\n###### H6\n\nbody\n\n")
+        let theme = MarkdownTheme(tokens: HostThemeTokens(skin: .standard))
+        for level in 1...6 {
+            // The largest computed size on the line: the heading mark is a
+            // span inside it, and the line itself stays at body size.
+            let size =
+                try js(
+                    """
+                    (() => {
+                      const line = document.querySelector('.cm-lore-h\(level)');
+                      if (!line) return -1;
+                      return Math.max(...[line, ...line.querySelectorAll('*')]
+                        .map(e => parseFloat(getComputedStyle(e).fontSize)));
+                    })()
+                    """) as? Double ?? -1
+            XCTAssertEqual(size, Double(theme.headingSize(level)), accuracy: 0.01, "h\(level)")
+        }
+        XCTAssertEqual(
+            try js("document.querySelectorAll('[class*=\"tok-heading\"]').length") as? Int, 0,
+            "no element carries a .tok-heading class, so rules on it are dead")
     }
 
 }
