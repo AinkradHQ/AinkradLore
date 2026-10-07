@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "cyberPurple",
+  "name": "Cyber Purple",
+  "base": "neonBlue",
+  "palette": {
+    "background": "#080814",
+    "surface": "#141420",
+    "surfaceElevated": "#1F182E",
+    "accentPrimary": "#7C1AED",
+    "accentSecondary": "#C084FC",
+    "accentTertiary": "#EC4899",
+    "foreground": "#EDE9FE",
+    "success": "#3FB950",
+    "warning": "#E3B341",
+    "danger": "#F85149"
+  },
+  "terminal": {
+    "background": "#080814",
+    "foreground": "#EDE9FE",
+    "cursor": "#C084FC",
+    "selection": "#3B4252",
+    "ansi": [
+      "#1A1D24", "#E06C75", "#98C379", "#E5C07B", "#61AFEF", "#C678DD", "#56B6C2", "#ABB2BF",
+      "#5C6370", "#E06C75", "#98C379", "#E5C07B", "#61AFEF", "#C678DD", "#56B6C2", "#FFFFFF"
+    ]
+  },
+  "host": {
+    "skyProfile": [1.25, 0.9, 0.8, 1.1, 1.0],
+    "iconColorFamily": "purple"
+  }
+}

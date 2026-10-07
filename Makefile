@@ -34,7 +34,7 @@ DEBUG_APP := $(AINKRAD)/build/Build/Products/Debug/Ainkrad.app
 # success having done nothing. `make editor` silently stopped rebuilding the
 # JavaScript bundle this way; `build` escaped only because its `generate`
 # prerequisite can never be up to date.
-.PHONY: editor generate build sideload run devhost test release
+.PHONY: editor generate build sideload run devhost test parity release
 
 # The CM6 bundle. `dist/` is COMMITTED, so a clean checkout — and the release
 # script, and CI — build the plugin with no node installed. Only someone
@@ -86,6 +86,17 @@ devhost: build
 	open -n "$(DEV_HOST)" --args --bundle "$(HOST_PLUGINS)/LorePlugin.bundle"
 
 test: lint generate ; xcodebuild -scheme LorePlugin -configuration Debug -derivedDataPath build -destination 'platform=macOS' test
+# Tier A parity shots (Epic 5B, 5B.0): both editor surfaces and the SwiftUI
+# screens, under all seven host palettes, rendered off-screen — no host, so it
+# can never touch the daily one. `LORE_PARITY_DIR` is required; xcodebuild only
+# forwards `TEST_RUNNER_`-prefixed variables to the test process.
+#   LORE_PARITY_DIR=~/Home/Projects/Ainkrad/Designs/parity/AinkradLore/before make parity
+parity: generate
+	@test -n "$(LORE_PARITY_DIR)" || { echo "parity: set LORE_PARITY_DIR=<output dir>"; exit 2; }
+	TEST_RUNNER_LORE_PARITY_DIR="$(abspath $(LORE_PARITY_DIR))" xcodebuild -scheme LorePlugin \
+		-configuration Debug -derivedDataPath build -destination 'platform=macOS' test \
+		-only-testing:LoreFeatureTests/CM6ParityShotTests \
+		-only-testing:LoreFeatureTests/LoreScreenSnapshotTests
 release: ; ./scripts/release.sh $(V)
 
 include scripts/guardrails.mk

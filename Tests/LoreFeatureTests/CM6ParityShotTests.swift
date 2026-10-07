@@ -1,3 +1,4 @@
+import AinkradAppKit
 import AppKit
 import SwiftUI
 import WebKit
@@ -14,13 +15,24 @@ import XCTest
 /// It is a test rather than a pair of hand-made screenshots because a hand-made
 /// pair is out of date the moment either surface changes, and because the two
 /// shots have to come from the same document and the same theme or the
-/// comparison proves nothing. The PNGs are written to a temporary directory and
-/// their path is printed; the assertions are the machine-checkable part —
-/// neither surface may render blank, and every construct must leave a mark.
+/// comparison proves nothing. The PNGs are written to `$LORE_PARITY_DIR` when
+/// it is set (`make parity`, one pair per host palette: `native-<palette>.png`,
+/// `cm6-<palette>.png` — S15/S16 of the Epic 5B screen inventory), otherwise to
+/// a temporary directory for the first palette only, so the normal suite pays
+/// for one pair rather than seven. The assertions are the machine-checkable
+/// part — neither surface may render blank, and every construct must leave a
+/// mark.
 final class CM6ParityShotTests: XCTestCase {
 
     private var windows: [NSWindow] = []
-    override func tearDown() { windows.removeAll(); super.tearDown() }
+    /// The bridges `boot(_:tokens:)` installs; a web view holds its
+    /// navigation delegate weakly.
+    private var coordinators: [CM6EditorView.Coordinator] = []
+    override func tearDown() {
+        windows.removeAll()
+        coordinators.removeAll()
+        super.tearDown()
+    }
 
     /// One of everything. Ordered so the shot reads top to bottom like a
     /// checklist.
@@ -82,24 +94,33 @@ final class CM6ParityShotTests: XCTestCase {
 
     @MainActor
     func test_bothSurfacesRenderTheWholeParityDocument() throws {
-        let directory = URL(fileURLWithPath: NSTemporaryDirectory())
-            .appendingPathComponent("lore-parity-\(UUID().uuidString)")
-        try FileManager.default.createDirectory(at: directory,
-                                                withIntermediateDirectories: true)
+        var palettes = try parityPalettes()
+        let directory: URL
+        if let parity = try parityOutputDirectory() {
+            directory = parity
+        } else {
+            directory = URL(fileURLWithPath: NSTemporaryDirectory())
+                .appendingPathComponent("lore-parity-\(UUID().uuidString)")
+            try FileManager.default.createDirectory(at: directory,
+                                                    withIntermediateDirectories: true)
+            palettes = Array(palettes.prefix(1))
+        }
 
-        let native = try shootNative(Self.parityDocument)
-        try write(native, to: directory.appendingPathComponent("native.png"))
+        for palette in palettes {
+            let native = try shootNative(Self.parityDocument, palette: palette)
+            try write(native, to: directory.appendingPathComponent("native-\(palette.id).png"))
 
-        let cm6 = try shootCM6(Self.parityDocument)
-        try write(cm6, to: directory.appendingPathComponent("cm6.png"))
+            let cm6 = try shootCM6(Self.parityDocument, palette: palette)
+            try write(cm6, to: directory.appendingPathComponent("cm6-\(palette.id).png"))
 
-        // Neither may be blank. A uniformly-coloured image is what a surface
-        // that failed to boot produces, and it is indistinguishable from a
-        // working one in a size check.
-        XCTAssertGreaterThan(try distinctRowCount(of: native), 20,
-                             "the native surface rendered nothing")
-        XCTAssertGreaterThan(try distinctRowCount(of: cm6), 20,
-                             "the CM6 surface rendered nothing")
+            // Neither may be blank. A uniformly-coloured image is what a surface
+            // that failed to boot produces, and it is indistinguishable from a
+            // working one in a size check.
+            XCTAssertGreaterThan(distinctRowCount(of: native), 20,
+                                 "the native surface rendered nothing (\(palette.id))")
+            XCTAssertGreaterThan(distinctRowCount(of: cm6), 20,
+                                 "the CM6 surface rendered nothing (\(palette.id))")
+        }
 
         print("PARITY SHOTS \(directory.path)")
     }
@@ -194,41 +215,52 @@ final class CM6ParityShotTests: XCTestCase {
     // MARK: - the native surface
 
     @MainActor
-    private func shootNative(_ text: String) throws -> NSBitmapImageRep {
-        let hosting = NSHostingView(rootView: AnyView(
-            MarkdownEditor(text: .constant(text), tokens: TestTokens.make())))
-        hosting.frame = NSRect(x: 0, y: 0, width: 1000, height: 1600)
-        let window = NSWindow(contentRect: hosting.frame, styleMask: [.borderless],
-                              backing: .buffered, defer: false)
-        window.contentView = hosting
-        windows.append(window)
-        hosting.layoutSubtreeIfNeeded()
+    private func shootNative(_ text: String, palette: ParityPalette) throws -> NSBitmapImageRep {
         // Let the editor's own asynchronous styling passes run. The native
         // surface styles on a background actor and applies later, so a shot
         // taken immediately is of unstyled text.
-        settle(2)
-        hosting.layoutSubtreeIfNeeded()
-        let rep = try XCTUnwrap(hosting.bitmapImageRepForCachingDisplay(in: hosting.bounds))
-        hosting.cacheDisplay(in: hosting.bounds, to: rep)
-        return rep
+        try shoot(MarkdownEditor(text: .constant(text), tokens: palette.tokens),
+                  size: CGSize(width: 1000, height: 1600), palette: palette, settleFor: 2)
     }
 
     // MARK: - the CM6 surface
 
+    /// With `tokens`, the page boots through the REAL coordinator path —
+    /// document and theme handed over on `didFinish`, exactly as
+    /// `CM6EditorView.makeNSView` does — so a palette reaches the CSS
+    /// variables by the bridge Lore ships, not by a copy of it.
     @MainActor
-    private func boot(_ text: String) throws -> WKWebView {
+    private func boot(_ text: String, tokens: HostThemeTokens? = nil) throws -> WKWebView {
         let webView = WKWebView(frame: NSRect(x: 0, y: 0, width: 1000, height: 1600))
-        let window = NSWindow(contentRect: webView.frame, styleMask: [.borderless],
-                              backing: .buffered, defer: false)
+        let window = makeOffscreenWindow(webView.frame)
         window.contentView = webView
         windows.append(window)
+        var coordinator: CM6EditorView.Coordinator?
+        if let tokens {
+            let bridge = CM6EditorView.Coordinator(text: .constant(text))
+            bridge.webView = webView
+            bridge.pendingDocument = text
+            bridge.pendingTheme = (tokens, .default)
+            webView.navigationDelegate = bridge
+            // As `makeNSView` sets it: the page paints `--bg` itself.
+            webView.setValue(false, forKey: "drawsBackground")
+            coordinators.append(bridge)
+            coordinator = bridge
+        }
         let index = try XCTUnwrap(CM6EditorView.Coordinator.bundledIndexURL)
         webView.loadFileURL(index, allowingReadAccessTo: index.deletingLastPathComponent())
         try waitFor("boot") {
             ((try? self.js("typeof window.loreEditor", in: webView)) as? String) == "object"
         }
-        _ = try js("window.loreEditor.init(\(CM6EditorView.Coordinator.jsString(text)))",
-                   in: webView)
+        if let coordinator {
+            // `finishLoading` clears both once it has pushed them.
+            try waitFor("the theme bridge") {
+                coordinator.pendingTheme == nil && coordinator.pendingDocument == nil
+            }
+        } else {
+            _ = try js("window.loreEditor.init(\(CM6EditorView.Coordinator.jsString(text)))",
+                       in: webView)
+        }
         // The caret at the end, so nothing is revealed as source — the reader's
         // view of a note they have just opened and not yet clicked into.
         _ = try js("window.loreEditor.selectAt(window.loreEditor.text().length)", in: webView)
@@ -236,8 +268,8 @@ final class CM6ParityShotTests: XCTestCase {
     }
 
     @MainActor
-    private func shootCM6(_ text: String) throws -> NSBitmapImageRep {
-        let webView = try boot(text)
+    private func shootCM6(_ text: String, palette: ParityPalette) throws -> NSBitmapImageRep {
+        let webView = try boot(text, tokens: palette.tokens)
         try waitFor("the maths engine") {
             ((try? self.js("window.loreEditor.mathEngineLoaded()", in: webView)) as? Bool) == true
         }
@@ -276,39 +308,5 @@ final class CM6ParityShotTests: XCTestCase {
             RunLoop.current.run(mode: .default, before: Date().addingTimeInterval(0.02))
         }
         XCTFail("timed out waiting for \(what)")
-    }
-
-    @MainActor
-    private func settle(_ seconds: TimeInterval) {
-        let deadline = Date().addingTimeInterval(seconds)
-        while Date() < deadline {
-            RunLoop.current.run(mode: .default, before: Date().addingTimeInterval(0.02))
-        }
-    }
-
-    private func write(_ rep: NSBitmapImageRep, to url: URL) throws {
-        let png = try XCTUnwrap(rep.representation(using: .png, properties: [:]))
-        try png.write(to: url)
-    }
-
-    /// How many rows of the image differ from their neighbour.
-    ///
-    /// A cheap "did anything render" measure that a size check cannot give: a
-    /// blank surface is one colour, so every row is identical to the last, and
-    /// the count is 1 however many bytes the PNG takes.
-    private func distinctRowCount(of rep: NSBitmapImageRep) throws -> Int {
-        let width = rep.pixelsWide, height = rep.pixelsHigh
-        var previous: [Int] = []
-        var distinct = 0
-        for y in stride(from: 0, to: height, by: 4) {
-            var row: [Int] = []
-            for x in stride(from: 0, to: width, by: 16) {
-                let colour = rep.colorAt(x: x, y: y)
-                row.append(Int(((colour?.brightnessComponent ?? 0) * 255).rounded()))
-            }
-            if row != previous { distinct += 1 }
-            previous = row
-        }
-        return distinct
     }
 }

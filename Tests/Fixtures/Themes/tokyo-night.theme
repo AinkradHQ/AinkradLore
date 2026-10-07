@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "tokyoNight",
+  "name": "Tokyo Night",
+  "base": "neonBlue",
+  "palette": {
+    "background": "#15161F",
+    "surface": "#1A1B26",
+    "surfaceElevated": "#24283B",
+    "accentPrimary": "#7AA2F7",
+    "accentSecondary": "#BB9AF7",
+    "accentTertiary": "#9ECE6A",
+    "foreground": "#C0CAF5",
+    "success": "#9ECE6A",
+    "warning": "#E0AF68",
+    "danger": "#F7768E"
+  },
+  "terminal": {
+    "background": "#1A1B26",
+    "foreground": "#C0CAF5",
+    "cursor": "#7AA2F7",
+    "selection": "#3B4252",
+    "ansi": [
+      "#15161E", "#F7768E", "#9ECE6A", "#E0AF68", "#7AA2F7", "#BB9AF7", "#7DCFFF", "#A9B1D6",
+      "#414868", "#F7768E", "#9ECE6A", "#E0AF68", "#7AA2F7", "#BB9AF7", "#7DCFFF", "#C0CAF5"
+    ]
+  },
+  "host": {
+    "skyProfile": [1.1, 0.85, 1.25, 1.0, 1.0],
+    "iconColorFamily": "blue"
+  }
+}
