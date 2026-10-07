@@ -38,51 +38,14 @@ struct DocumentErrorCard: View {
     let theme: HostTheme
 
     var body: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "doc.questionmark")
-                .font(.system(size: 40))
-                .foregroundStyle(theme.tokens.foreground.opacity(0.7))
-            Text(url.lastPathComponent)
-                .font(.headline)
-                .foregroundStyle(theme.tokens.foreground)
-            Text(message)
-                .font(.subheadline)
-                .foregroundStyle(theme.tokens.foreground.opacity(0.7))
-                .multilineTextAlignment(.center)
-            Button("Reveal in Finder") {
-                NSWorkspace.shared.activateFileViewerSelecting([url])
-            }
+        AinkradEmptyState(
+            icon: "doc.questionmark", title: url.lastPathComponent, message: message,
+            actionTitle: "Reveal in Finder"
+        ) {
+            NSWorkspace.shared.activateFileViewerSelecting([url])
         }
-        .padding(32)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(theme.tokens.background)
-    }
-}
-
-/// Banner shown above the render-gated QuickLook fallback for a rich-text
-/// document whose AppKit-extracted content was empty or whitespace-only —
-/// see `RichTextEngine.makeEditor`'s `hasNoExtractableText` branch and
-/// `EmptyExtractionFallbackView`. Distinct from `DocumentErrorCard`: this is
-/// not a failure (the file DID open), so it stays a small notice rather than
-/// replacing the whole pane.
-///
-/// Fix round 1, Minor 6: the wording must not assert that anything went
-/// WRONG. `hasNoExtractableText` fires identically for a JS-built page AppKit
-/// genuinely could not read AND for a document that is simply, legitimately
-/// blank — this view cannot tell those apart, so it describes what it found
-/// (no text) rather than accusing the file of being broken.
-@MainActor
-struct EmptyExtractionNotice: View {
-    let theme: HostTheme
-
-    var body: some View {
-        Text("No text was extracted from this file.")
-            .font(.caption)
-            .foregroundStyle(theme.tokens.foreground.opacity(0.8))
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
-            .background(theme.tokens.background.opacity(0.9))
+        .environment(\.ainkradTheme, theme.tokens)
     }
 }
 
@@ -158,34 +121,33 @@ struct EmptyExtractionFallbackView: View {
         return ext == "html" || ext == "htm"
     }
 
+    /// Describes what was found (no text) rather than accusing the file of
+    /// being broken (fix round 1, Minor 6): `hasNoExtractableText` fires
+    /// identically for a JS-built page AppKit could not read AND for a
+    /// document that is legitimately blank, and this view cannot tell them
+    /// apart. The script warning is said plainly, beside the action that
+    /// carries the risk — not buried in a doc comment nobody using the app
+    /// will ever read.
+    private var message: String {
+        let found = "No text was extracted from this file."
+        return previewExecutesScript
+            ? found + "\nThis runs the file's own code and may contact the network." : found
+    }
+
     var body: some View {
         onGateAvailable?(gate)
         return Group {
             if gate.isRendered {
                 QuickLookView(url: url).background(theme.tokens.background)
             } else {
-                VStack(spacing: 12) {
-                    Spacer()
-                    Image(systemName: "doc.text.magnifyingglass")
-                        .font(.system(size: 40))
-                        .foregroundStyle(theme.tokens.foreground.opacity(0.7))
-                    EmptyExtractionNotice(theme: theme)
-                    Button("Render this page") { gate.render() }
-                        .buttonStyle(.borderedProminent)
-                    if previewExecutesScript {
-                        // Said plainly, at the point of the action that
-                        // carries the risk — not buried in a doc comment
-                        // nobody using the app will ever read.
-                        Text("This runs the file's own code and may contact the network.")
-                            .font(.caption2)
-                            .foregroundStyle(theme.tokens.foreground.opacity(0.6))
-                            .multilineTextAlignment(.center)
-                    }
-                    Spacer()
+                AinkradEmptyState(
+                    icon: "doc.text.magnifyingglass", title: url.lastPathComponent, message: message,
+                    actionTitle: "Render this page"
+                ) {
+                    gate.render()
                 }
-                .padding(32)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(theme.tokens.background)
+                .environment(\.ainkradTheme, theme.tokens)
             }
         }
     }
@@ -201,13 +163,15 @@ struct EmptyExtractionFallbackView: View {
 struct TruncationNotice: View {
     let theme: HostTheme
 
+    @Environment(\.ainkradSkin) private var skin
+
     var body: some View {
         Text("Only the first part of this document is searchable.")
             .font(.caption)
-            .foregroundStyle(theme.tokens.foreground.opacity(0.8))
+            .foregroundStyle(theme.tokens.foreground.opacity(skin.opacity.o80))
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
-            .background(theme.tokens.background.opacity(0.9))
+            .padding(.horizontal, AinkradSpacing.md)
+            .padding(.vertical, 6)  // design-lint: allow padding-literal token-gap spacing.s6
+            .background(theme.tokens.background.opacity(skin.opacity.o90))
     }
 }
