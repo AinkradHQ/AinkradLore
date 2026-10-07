@@ -3,6 +3,7 @@ import AppKit
 import SwiftUI
 import WebKit
 import XCTest
+
 @testable import LoreFeature
 
 /// E4T2: one document holding every construct Lore renders, shot in BOTH
@@ -37,58 +38,58 @@ final class CM6ParityShotTests: XCTestCase {
     /// One of everything. Ordered so the shot reads top to bottom like a
     /// checklist.
     static let parityDocument = """
-    # Heading one
+        # Heading one
 
-    ## Heading two
+        ## Heading two
 
-    ### Heading three
+        ### Heading three
 
-    Prose with **bold**, *italic*, ~~strikethrough~~, `inline code`, and a
-    hard-wrapped line so paragraph spacing is visible.
+        Prose with **bold**, *italic*, ~~strikethrough~~, `inline code`, and a
+        hard-wrapped line so paragraph spacing is visible.
 
-    A [[Wikilink]], an aliased [[Target|alias]], a [markdown link](https://x.test/p),
-    and a #tag plus #nested/tag.
+        A [[Wikilink]], an aliased [[Target|alias]], a [markdown link](https://x.test/p),
+        and a #tag plus #nested/tag.
 
-    - a bullet
-    - another
-        - nested
-            - deeper
+        - a bullet
+        - another
+            - nested
+                - deeper
 
-    1. ordered
-    2. second
+        1. ordered
+        2. second
 
-    - [ ] an open task
-    - [x] a done task
+        - [ ] an open task
+        - [x] a done task
 
-    > A plain block quote
-    > over two lines.
+        > A plain block quote
+        > over two lines.
 
-    > [!note] A callout with a title
-    > Its body.
+        > [!note] A callout with a title
+        > Its body.
 
-    > [!warning]
-    > A callout with no title.
+        > [!warning]
+        > A callout with no title.
 
-    ```swift
-    let fenced = "code block"
-    ```
+        ```swift
+        let fenced = "code block"
+        ```
 
-    | Area | Owner | Note |
-    |---|---|---|
-    | Editor | Ahmed | see [[Design Doc]] |
-    | Index | Ahmed | **unchanged** |
+        | Area | Owner | Note |
+        |---|---|---|
+        | Editor | Ahmed | see [[Design Doc]] |
+        | Index | Ahmed | **unchanged** |
 
-    Maths: inline $\\pi r^2$ and a block:
+        Maths: inline $\\pi r^2$ and a block:
 
-    $$\\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}$$
+        $$\\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}$$
 
-    ---
+        ---
 
-    A footnote reference[^1] and an unresolved embed ![[missing.png]].
+        A footnote reference[^1] and an unresolved embed ![[missing.png]].
 
-    [^1]: The footnote text.
+        [^1]: The footnote text.
 
-    """
+        """
 
     // MARK: - the two shots
 
@@ -101,8 +102,9 @@ final class CM6ParityShotTests: XCTestCase {
         } else {
             directory = URL(fileURLWithPath: NSTemporaryDirectory())
                 .appendingPathComponent("lore-parity-\(UUID().uuidString)")
-            try FileManager.default.createDirectory(at: directory,
-                                                    withIntermediateDirectories: true)
+            try FileManager.default.createDirectory(
+                at: directory,
+                withIntermediateDirectories: true)
             palettes = Array(palettes.prefix(1))
         }
 
@@ -116,10 +118,12 @@ final class CM6ParityShotTests: XCTestCase {
             // Neither may be blank. A uniformly-coloured image is what a surface
             // that failed to boot produces, and it is indistinguishable from a
             // working one in a size check.
-            XCTAssertGreaterThan(distinctRowCount(of: native), 20,
-                                 "the native surface rendered nothing (\(palette.id))")
-            XCTAssertGreaterThan(distinctRowCount(of: cm6), 20,
-                                 "the CM6 surface rendered nothing (\(palette.id))")
+            XCTAssertGreaterThan(
+                distinctRowCount(of: native), 20,
+                "the native surface rendered nothing (\(palette.id))")
+            XCTAssertGreaterThan(
+                distinctRowCount(of: cm6), 20,
+                "the CM6 surface rendered nothing (\(palette.id))")
         }
 
         print("PARITY SHOTS \(directory.path)")
@@ -145,8 +149,10 @@ final class CM6ParityShotTests: XCTestCase {
         XCTAssertEqual(try number("window.loreEditor.tableCount()"), 1)
         XCTAssertEqual(try number("document.querySelectorAll('.cm-lore-rule').length"), 1)
         XCTAssertGreaterThan(try number("document.querySelectorAll('.cm-lore-bullet').length"), 3)
-        XCTAssertGreaterThan(try number("document.querySelectorAll('.cm-lore-code, "
-                                        + ".cm-lore-code-first, .cm-lore-code-last').length"), 2)
+        XCTAssertGreaterThan(
+            try number(
+                "document.querySelectorAll('.cm-lore-code, "
+                    + ".cm-lore-code-first, .cm-lore-code-last').length"), 2)
         // Maths needs its engine, which arrives on demand.
         try waitFor("the maths engine") {
             ((try? self.js("window.loreEditor.mathEngineLoaded()", in: webView)) as? Bool) == true
@@ -156,8 +162,9 @@ final class CM6ParityShotTests: XCTestCase {
         XCTAssertEqual(try number("window.loreEditor.embedMissingTargets().length"), 1)
 
         // And the document is untouched by all of it.
-        XCTAssertEqual(try js("window.loreEditor.text()", in: webView) as? String,
-                       Self.parityDocument)
+        XCTAssertEqual(
+            try js("window.loreEditor.text()", in: webView) as? String,
+            Self.parityDocument)
     }
 
     /// The four gaps the parity shots found against the Lore that ships, each
@@ -171,12 +178,14 @@ final class CM6ParityShotTests: XCTestCase {
     func test_theFourGapsFoundByTheParityShots() throws {
         let webView = try boot(
             "# A heading\n\nProse with ~~struck~~ text and `inline code`.\n\n"
-            + "A reference[^1] here.\n\n[^1]: The note.\n\n")
+                + "A reference[^1] here.\n\n[^1]: The note.\n\n")
         func number(_ expression: String) throws -> Int {
             (try js(expression, in: webView) as? Int) ?? -1
         }
-        let shown = try js("document.querySelector('.cm-content').innerText",
-                           in: webView) as? String ?? ""
+        let shown =
+            try js(
+                "document.querySelector('.cm-content').innerText",
+                in: webView) as? String ?? ""
 
         // 1. Strikethrough. CommonMark has no such node, so `~~struck~~` kept
         //    its tildes and was never struck; GFM is enabled now.
@@ -205,11 +214,14 @@ final class CM6ParityShotTests: XCTestCase {
         let webView = try boot(
             "| A | B |\n|---|---|\n| one | two |\n\n- [ ] open\n- [x] done\n\n")
         XCTAssertEqual(try js("window.loreEditor.tableCount()", in: webView) as? Int, 1)
-        XCTAssertEqual(try js("window.loreEditor.checkboxStates()", in: webView) as? [Bool],
-                       [false, true])
-        XCTAssertEqual(try js("document.querySelectorAll('.cm-lore-bullet').length",
-                              in: webView) as? Int, 0,
-                       "a task shows its checkbox, not a bullet as well")
+        XCTAssertEqual(
+            try js("window.loreEditor.checkboxStates()", in: webView) as? [Bool],
+            [false, true])
+        XCTAssertEqual(
+            try js(
+                "document.querySelectorAll('.cm-lore-bullet').length",
+                in: webView) as? Int, 0,
+            "a task shows its checkbox, not a bullet as well")
     }
 
     // MARK: - the native surface
@@ -219,8 +231,9 @@ final class CM6ParityShotTests: XCTestCase {
         // Let the editor's own asynchronous styling passes run. The native
         // surface styles on a background actor and applies later, so a shot
         // taken immediately is of unstyled text.
-        try shoot(MarkdownEditor(text: .constant(text), tokens: palette.tokens),
-                  size: CGSize(width: 1000, height: 1600), palette: palette, settleFor: 2)
+        try shoot(
+            MarkdownEditor(text: .constant(text), tokens: palette.tokens),
+            size: CGSize(width: 1000, height: 1600), palette: palette, settleFor: 2)
     }
 
     // MARK: - the CM6 surface
@@ -258,8 +271,9 @@ final class CM6ParityShotTests: XCTestCase {
                 coordinator.pendingTheme == nil && coordinator.pendingDocument == nil
             }
         } else {
-            _ = try js("window.loreEditor.init(\(CM6EditorView.Coordinator.jsString(text)))",
-                       in: webView)
+            _ = try js(
+                "window.loreEditor.init(\(CM6EditorView.Coordinator.jsString(text)))",
+                in: webView)
         }
         // The caret at the end, so nothing is revealed as source — the reader's
         // view of a note they have just opened and not yet clicked into.
@@ -276,7 +290,10 @@ final class CM6ParityShotTests: XCTestCase {
         settle(1)
         var captured: NSImage?
         var done = false
-        webView.takeSnapshot(with: nil) { image, _ in captured = image; done = true }
+        webView.takeSnapshot(with: nil) { image, _ in
+            captured = image
+            done = true
+        }
         let deadline = Date().addingTimeInterval(20)
         while !done, Date() < deadline {
             RunLoop.current.run(mode: .default, before: Date().addingTimeInterval(0.02))
@@ -290,8 +307,14 @@ final class CM6ParityShotTests: XCTestCase {
 
     @MainActor @discardableResult
     private func js(_ source: String, in webView: WKWebView) throws -> Any? {
-        var result: Any?; var failure: Error?; var done = false
-        webView.evaluateJavaScript(source) { v, e in result = v; failure = e; done = true }
+        var result: Any?
+        var failure: Error?
+        var done = false
+        webView.evaluateJavaScript(source) { v, e in
+            result = v
+            failure = e
+            done = true
+        }
         let deadline = Date().addingTimeInterval(20)
         while !done, Date() < deadline {
             RunLoop.current.run(mode: .default, before: Date().addingTimeInterval(0.01))
