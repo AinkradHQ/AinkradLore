@@ -47,16 +47,16 @@ private struct LoreDocumentDropTarget: ViewModifier {
     let ops: SidebarOperations
     let theme: HostTheme
     @State private var targeted = false
+    @Environment(\.ainkradSkin) private var skin
 
     func body(content: Content) -> some View {
         content
             .background {
                 if targeted {
-                    ChamferShape(cut: LoreMetrics.chamfer)
-                        .fill(theme.tokens.accentSecondary.opacity(0.25))
-                        .overlay(
-                            ChamferShape(cut: LoreMetrics.chamfer)
-                                .strokeBorder(theme.tokens.accentSecondary, lineWidth: 1.5))
+                    // The kit panel, tinted: the tint is what says "drops
+                    // here", the panel is the same floating surface the rest
+                    // of the app draws.
+                    AinkradPanel { theme.tokens.accentSecondary.opacity(skin.opacity.o25) }
                 }
             }
             .onDrop(of: [.fileURL], isTargeted: $targeted) { providers in

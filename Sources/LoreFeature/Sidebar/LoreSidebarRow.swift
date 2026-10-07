@@ -160,11 +160,12 @@ private struct SearchExcerptLine: View {
 /// part of the row that ignores the host's palette.
 private struct SelectionBar: View {
     @Environment(\.ainkradTheme) private var theme
+    @Environment(\.ainkradSkin) private var skin
 
     var body: some View {
         Rectangle()
             .fill(theme.accentPrimary)
-            .frame(width: 2)
+            .frame(width: CGFloat(skin.size.s2))
             .accessibilityHidden(true)
     }
 }

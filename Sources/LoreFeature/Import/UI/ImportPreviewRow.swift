@@ -38,10 +38,10 @@ struct ImportPreviewRow: View {
         Image(systemName: isAlreadyImported || isSelected ? "checkmark.circle.fill" : "circle")
             .foregroundStyle(
                 isAlreadyImported
-                    ? theme.foreground.opacity(LoreMetrics.indicatorGlyph)
+                    ? theme.foreground.opacity(skin.opacity.o55)
                     : (isSelected
                         ? theme.accentPrimary
-                        : theme.foreground.opacity(LoreMetrics.indicatorGlyph))
+                        : theme.foreground.opacity(skin.opacity.o55))
             )
             .accessibilityLabel(
                 isAlreadyImported

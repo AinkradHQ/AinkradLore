@@ -17,6 +17,7 @@ import SwiftUI
 struct LoreShortcutsReference: View {
     let theme: HostTheme
     @Environment(\.ainkradTypography) private var typo
+    @Environment(\.ainkradSkin) private var skin
 
     var body: some View {
         VStack(alignment: .leading, spacing: AinkradSpacing.md) {
@@ -39,7 +40,7 @@ struct LoreShortcutsReference: View {
                 AinkradKbd("esc")
                 Text("Close the palette, a side panel, or the link suggestions")
                     .font(AinkradFontResolver.font(.body, typography: typo))
-                    .foregroundStyle(theme.tokens.foreground.opacity(0.85))
+                    .foregroundStyle(theme.tokens.foreground.opacity(skin.opacity.o85))
                 Spacer(minLength: 0)
             }
             HStack(spacing: AinkradSpacing.sm) {
@@ -49,14 +50,14 @@ struct LoreShortcutsReference: View {
                         + "and back"
                 )
                 .font(AinkradFontResolver.font(.body, typography: typo))
-                .foregroundStyle(theme.tokens.foreground.opacity(0.85))
+                .foregroundStyle(theme.tokens.foreground.opacity(skin.opacity.o85))
                 Spacer(minLength: 0)
             }
             HStack(spacing: AinkradSpacing.sm) {
                 AinkradIconGlyph(systemName: "number", size: 11)
                 Text("Click a #tag to filter the note list to it")
                     .font(AinkradFontResolver.font(.body, typography: typo))
-                    .foregroundStyle(theme.tokens.foreground.opacity(0.85))
+                    .foregroundStyle(theme.tokens.foreground.opacity(skin.opacity.o85))
                 Spacer(minLength: 0)
             }
         }
@@ -68,7 +69,7 @@ struct LoreShortcutsReference: View {
             AinkradIconGlyph(systemName: command.systemName, size: 11)
             Text(command.title)
                 .font(AinkradFontResolver.font(.body, typography: typo))
-                .foregroundStyle(theme.tokens.foreground.opacity(0.85))
+                .foregroundStyle(theme.tokens.foreground.opacity(skin.opacity.o85))
             Spacer(minLength: AinkradSpacing.sm)
             if let shortcut = command.shortcut {
                 AinkradKbd(shortcut.display)
@@ -77,7 +78,7 @@ struct LoreShortcutsReference: View {
                 // has to interpret.
                 Text("⌘K")
                     .font(AinkradFontResolver.font(.caption, typography: typo))
-                    .foregroundStyle(theme.tokens.foreground.opacity(LoreMetrics.tertiaryText))
+                    .foregroundStyle(theme.tokens.foreground.opacity(skin.opacity.o60))
             }
         }
         .accessibilityElement(children: .combine)

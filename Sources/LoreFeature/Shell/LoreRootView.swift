@@ -44,6 +44,7 @@ struct LoreRootView: View {
     @State private var splitFraction: CGFloat = 0.5
     @Environment(\.ainkradReduceMotion) private var reduceMotion
     @Environment(\.ainkradTypography) private var typo
+    @Environment(\.ainkradSkin) private var skin
 
     init(store: LoreStore, theme: HostTheme) {
         self.store = store
@@ -94,9 +95,14 @@ struct LoreRootView: View {
                     // `surface` went entirely unused in the app.
                     .background(theme.tokens.surface)
                     .transition(.move(edge: .leading).combined(with: .opacity))
-                SidebarResizeHandle(width: store.sidebarWidth, theme: theme) { width in
-                    store.setSidebarWidth(width)
-                }
+                PaneDivider(
+                    value: store.sidebarWidth, theme: theme,
+                    accessibilityLabel: "Resize sidebar",
+                    accessibilityValue: "\(Int(store.sidebarWidth)) points",
+                    onDrag: { start, translation in
+                        store.setSidebarWidth(SidebarResize.width(start: start, translation: translation))
+                    },
+                    onAdjust: { step in store.setSidebarWidth(store.sidebarWidth + step * 20) })
             }
             content
                 // Attached HERE, not at the root, on purpose: `loreSidebarOperations`
@@ -247,7 +253,7 @@ struct LoreRootView: View {
             if store.sidebarMode == .tree && effectiveSidebarMode == .all {
                 Text("Showing matches across all folders.")
                     .font(AinkradFontResolver.font(.caption, typography: typo))
-                    .foregroundStyle(theme.tokens.foreground.opacity(LoreMetrics.secondaryText))
+                    .foregroundStyle(theme.tokens.foreground.opacity(skin.opacity.o75))
                     .padding(.horizontal, AinkradSpacing.md)
             }
 

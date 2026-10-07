@@ -144,7 +144,7 @@ struct DocumentHeaderBar: View {
                 .foregroundStyle(
                     saveState.isAlarming
                         ? theme.tokens.accentPrimary
-                        : theme.tokens.foreground.opacity(LoreMetrics.secondaryText)
+                        : theme.tokens.foreground.opacity(skin.opacity.o75)
                 )
                 .accessibilityLabel(label)
             }

@@ -58,6 +58,8 @@ extension LoreStore {
 
         // Refuse first, mutate second.
         for session in sessions where session.isDirty {
+            // `try?`: a refused flush leaves the session dirty, and the guard
+            // below turns that into `unsavedEdits` — the refusal is surfaced.
             if !session.isReadOnly { try? session.saveNow() }
             guard !session.isDirty else {
                 throw LoreError.unsavedEdits(
@@ -111,7 +113,7 @@ extension LoreStore {
         // storing the caller's URL verbatim; that hole is closed, but the
         // ordering here is load-bearing on its own. Canonicalize before you
         // delete, never after.
-        try? coordinator.removeFromIndex(path)
+        Log.store.orNil("remove the trashed file from the index") { try coordinator.removeFromIndex(path) }
         forgetOpenMTime(path)
         // Armed only on the success path, and only when macOS told us where the
         // file went. A `nil` `resultingItemURL` (documented as possible) means
@@ -144,6 +146,8 @@ extension LoreStore {
     /// parameter rather than just nilling `lastTrash`.
     private func expireUndo(_ record: TrashUndo) {
         Task { [weak self] in
+            // `try?`: the sleep throws only on cancellation, and an
+            // expired-or-cancelled window is handled by the guard below.
             try? await Task.sleep(nanoseconds: UInt64(Self.undoWindow * 1_000_000_000))
             guard let self, self.lastTrash == record else { return }
             self.lastTrash = nil
@@ -184,8 +188,8 @@ extension LoreStore {
         // Through `EngineRegistry`, not `MarkdownEngine`: an attachment, a PDF
         // and a rich-text file are all trashable, so the restore must index
         // whatever the file actually is rather than assume markdown.
-        if let engine = try? EngineRegistry.load(undo.original) {
-            try? coordinator.indexDocument(engine, at: undo.original)
+        if let engine = Log.store.orNil("load the restored file", { try EngineRegistry.load(undo.original) }) {
+            Log.store.orNil("index the restored file") { try coordinator.indexDocument(engine, at: undo.original) }
         }
     }
 }

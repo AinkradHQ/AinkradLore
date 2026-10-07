@@ -37,10 +37,12 @@ struct LoreCommandShortcuts: ViewModifier {
             ZStack {
                 ForEach(LoreCommands.available(in: runner.context)) { command in
                     if let shortcut = command.shortcut {
-                        Button(command.title) { runner.run(command.id) }
-                            .keyboardShortcut(
-                                KeyEquivalent(shortcut.key),
-                                modifiers: shortcut.eventModifiers)
+                        Button(command.title) {  // design-lint: allow raw-control key-equivalent claim
+                            runner.run(command.id)
+                        }
+                        .keyboardShortcut(
+                            KeyEquivalent(shortcut.key),
+                            modifiers: shortcut.eventModifiers)
                     }
                 }
             }

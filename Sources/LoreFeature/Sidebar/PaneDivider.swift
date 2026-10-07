@@ -1,4 +1,5 @@
 import AinkradAppKit
+import AppKit
 import SwiftUI
 
 /// Where a sidebar drag lands. Pure, so the compounding bug that the first
@@ -11,37 +12,45 @@ enum SidebarResize {
     }
 }
 
-/// The draggable divider between the sidebar and the editor.
+/// The draggable divider between two panes — the sidebar and the editor, or
+/// the two editor panes (`SplitDivider`). One view, because the two drew the
+/// same thing and had already drifted apart once.
 ///
-/// The sidebar was a fixed 280pt, which is the wrong width for both of the
-/// cases that actually occur: a deep folder tree truncates every name, and a
-/// flat list of short titles wastes a third of a small display.
+/// ## Why nothing at rest, with a 9pt hit area
 ///
-/// ## Why a 5pt strip with a 9pt hit area
-///
-/// A divider thin enough to look like a divider is too thin to grab. The strip
-/// DRAWS at hairline width and takes its hit target from `contentShape`, which
-/// is the standard resolution — the same reason the tab close button kept a
-/// 20×20 target while drawing at 9pt.
-struct SidebarResizeHandle: View {
-    let width: CGFloat
+/// A resting hairline is a separator line, which the design bar rules out:
+/// the surfaces either side already differ, and that difference is the edge.
+/// So the strip draws NOTHING until the pointer is on it, then the
+/// `accentSecondary` line plus the resize cursor say "this drags". The hit
+/// target comes from `contentShape` — the same reason the tab close button
+/// kept a 20×20 target while drawing at 9pt — so an invisible divider is
+/// still easy to grab.
+struct PaneDivider: View {
+    /// The LIVE value being resized — a width, or a fraction.
+    let value: CGFloat
     let theme: HostTheme
-    let onChange: (CGFloat) -> Void
+    let accessibilityLabel: String
+    let accessibilityValue: String
+    /// Receives the value AT THE DRAG'S START and the translation since then.
+    let onDrag: (_ start: CGFloat, _ translation: CGFloat) -> Void
+    /// VoiceOver's increment (+1) / decrement (-1).
+    let onAdjust: (_ step: CGFloat) -> Void
 
+    @Environment(\.ainkradSkin) private var skin
     @State private var hovering = false
-    /// The width when the current drag began.
+    /// The value when the current drag began.
     ///
-    /// Load-bearing: `width` is the LIVE store value and updates as the drag
+    /// Load-bearing: `value` is the LIVE store value and updates as the drag
     /// proceeds, so applying `translation` to it on every event compounds —
-    /// the sidebar accelerates away from the pointer and the divider ends up
+    /// the pane accelerates away from the pointer and the divider ends up
     /// nowhere near the cursor. `translation` is measured from the gesture's
-    /// start, so it must be added to the width at the gesture's start.
+    /// start, so it must be added to the value at the gesture's start.
     @State private var dragStart: CGFloat?
 
     var body: some View {
         Rectangle()
-            .fill(hovering ? theme.tokens.accentSecondary : theme.tokens.foreground.opacity(0.12))
-            .frame(width: 1)
+            .fill(hovering ? theme.tokens.accentSecondary : .clear)
+            .frame(width: CGFloat(skin.size.s1))
             .frame(maxHeight: .infinity)
             .contentShape(Rectangle().inset(by: -4))
             .onHover { hovering = $0 }
@@ -55,30 +64,27 @@ struct SidebarResizeHandle: View {
             }
             .gesture(
                 DragGesture(coordinateSpace: .global)
-                    .onChanged { value in
+                    .onChanged { drag in
                         // Translation from the gesture's start, applied to the
-                        // width AT that start — see `dragStart`. Deliberately
+                        // value AT that start — see `dragStart`. Deliberately
                         // not the pointer's absolute x: the sidebar does not
                         // begin at the window's left edge in every host, so an
                         // absolute reading would snap the divider to the cursor
                         // on the first pixel of movement.
-                        let start = dragStart ?? width
-                        if dragStart == nil { dragStart = width }
-                        onChange(
-                            SidebarResize.width(
-                                start: start,
-                                translation: value.translation.width))
+                        let start = dragStart ?? value
+                        if dragStart == nil { dragStart = value }
+                        onDrag(start, drag.translation.width)
                     }
                     .onEnded { _ in dragStart = nil }
             )
-            .accessibilityLabel("Resize sidebar")
+            .accessibilityLabel(accessibilityLabel)
             // Exposed as an adjustable so VoiceOver can drive it — a
             // drag-only control is unreachable without a pointer.
-            .accessibilityValue("\(Int(width)) points")
+            .accessibilityValue(accessibilityValue)
             .accessibilityAdjustableAction { direction in
                 switch direction {
-                case .increment: onChange(width + 20)
-                case .decrement: onChange(width - 20)
+                case .increment: onAdjust(1)
+                case .decrement: onAdjust(-1)
                 @unknown default: break
                 }
             }

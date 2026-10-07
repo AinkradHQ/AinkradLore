@@ -195,7 +195,7 @@ final class SidebarOperations {
 
     /// The testable half: open `folder` as the vault, reporting any failure.
     ///
-    /// `LoreSettingsView.pickFolder` did this as `try? store.setVaultRoot(url)`
+    /// The old settings page's folder picker did this as `try? store.setVaultRoot(url)`
     /// — so a vault that could not be bookmarked or indexed left the user
     /// looking at an unchanged, empty window with nothing said. Same class of
     /// defect as the swallowed create below, on the step immediately before it.

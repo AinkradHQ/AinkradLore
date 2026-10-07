@@ -3,8 +3,7 @@ import SwiftUI
 
 /// Lore's settings as DECLARED fields, so the host draws them in the shared
 /// settings style — and puts its Appearance tab (Open as, Open in, Blur) first.
-/// `LoreSettingsView` stays as the page for hosts that predate this; the
-/// wording here is the same.
+/// This is Lore's only settings page: `makeSettingsView` is empty.
 @MainActor
 enum LoreSettingsCatalog {
     /// Why the last vault choice did not take — shown under the row until the

@@ -60,6 +60,7 @@ struct LorePalette: View {
     @State private var selection: LorePaletteItem?
     @FocusState private var fieldFocused: Bool
     @Environment(\.ainkradTypography) private var typo
+    @Environment(\.ainkradSkin) private var skin
 
     private var items: [LorePaletteItem] {
         Self.items(
@@ -72,13 +73,13 @@ struct LorePalette: View {
             // A click-off scrim. Dims the work behind without hiding it, and
             // gives the palette an unambiguous way out for anyone who reached
             // it by accident and does not know Esc closes it.
-            Color.black.opacity(0.25)
+            Color.black.opacity(skin.opacity.o25)  // design-lint: allow raw-color token-gap material.scrim
                 .ignoresSafeArea()
                 .contentShape(Rectangle())
                 .onTapGesture(perform: onDismiss)
                 .accessibilityHidden(true)
             panel
-                .padding(.top, 96)
+                .padding(.top, CGFloat(skin.size.s96))
         }
         // `.onExitCommand`, NOT a `.keyboardShortcut(.cancelAction)` button.
         //
@@ -118,11 +119,9 @@ struct LorePalette: View {
                 handlesKeyPresses: true)
         }
         .padding(AinkradSpacing.md)
-        .frame(width: 520)
-        .frame(maxHeight: 420)
-        .background(theme.tokens.surfaceElevated)
-        .clipShape(ChamferShape(cut: LoreMetrics.chamfer))
-        .shadow(color: .black.opacity(0.35), radius: 18, y: 6)
+        .frame(width: CGFloat(skin.size.s520))
+        .frame(maxHeight: CGFloat(skin.size.s420))
+        .ainkradPanel()
         .onAppear {
             fieldFocused = true
             highlight = 0

@@ -253,6 +253,8 @@ extension LoreStore {
     /// a note.
     public func syncTitleAfterFileRename(at destination: URL) {
         guard MarkdownEngine.canOpen(destination) else { return }
+        // `try?`: an unreadable file has no title to sync; the rename itself
+        // already succeeded, and the next rescan sees whatever is there.
         guard let text = try? String(contentsOf: destination, encoding: .utf8) else { return }
         var note = Frontmatter.parse(text, path: destination)
         // No frontmatter block at all: nothing is invented. See the DECISION
@@ -277,8 +279,8 @@ extension LoreStore {
         // The file is truth, the index is derived: reindex this one file
         // rather than trusting the watcher (suppressed above) or waiting for
         // the next full rescan to notice the title changed.
-        if let engine = try? EngineRegistry.load(destination) {
-            try? coordinator.indexDocument(engine, at: destination)
+        if let engine = Log.store.orNil("load the title-synced file", { try EngineRegistry.load(destination) }) {
+            Log.store.orNil("index the title-synced file") { try coordinator.indexDocument(engine, at: destination) }
         }
         // An open, CLEAN session on this file would otherwise keep showing
         // the pre-sync title until its next reload. A dirty one CANNOT be
@@ -298,7 +300,7 @@ extension LoreStore {
             if session.isDirty {
                 (session.engine as? MarkdownEngine)?.note.title = newBase
             } else {
-                try? session.resolveByReloading()
+                Log.store.orNil("reload the title-synced tab") { try session.resolveByReloading() }
             }
         }
     }

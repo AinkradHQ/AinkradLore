@@ -99,10 +99,11 @@ struct FolderTreeView: View {
     let onSelect: (IndexRow) -> Void
     let ops: SidebarOperations
     @State private var expanded: Set<String> = []
+    @Environment(\.ainkradSkin) private var skin
 
     var body: some View {
         ScrollView {
-            LazyVStack(alignment: .leading, spacing: 2) {
+            LazyVStack(alignment: .leading, spacing: 2) {  // design-lint: allow spacing-literal token-gap spacing.xxs
                 if let root = store.vaultRoot {
                     // Filtered to the browse-list rows only — `directories`
                     // is passed UNFILTERED below, so a folder holding
@@ -134,7 +135,7 @@ struct FolderTreeView: View {
                 // every folder collapsed) had no reachable New Folder.
                 if let root = store.vaultRoot {
                     Color.clear
-                        .frame(maxWidth: .infinity, minHeight: 120)
+                        .frame(maxWidth: .infinity, minHeight: CGFloat(skin.size.s120))
                         .contentShape(Rectangle())
                         .ainkradContextMenu(loreRootMenuItems(root: root, ops: ops))
                         // The empty space below the tree IS the vault root as a

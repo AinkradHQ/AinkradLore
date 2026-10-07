@@ -134,7 +134,7 @@ final class SplitPaneTests: XCTestCase {
 
     // MARK: - Divider
 
-    /// The same compounding bug `SidebarResizeHandle` documents: `translation`
+    /// The same compounding bug `PaneDivider` documents: `translation`
     /// is cumulative from where the drag began, so it must be applied to the
     /// fraction AT THE START. Applied to the live value on every event, the
     /// divider accelerates away from the pointer.
