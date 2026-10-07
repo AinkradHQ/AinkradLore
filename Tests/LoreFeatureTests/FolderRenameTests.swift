@@ -7,21 +7,12 @@ import XCTest
 @MainActor
 final class FolderRenameTests: XCTestCase {
     private func vault() throws -> (URL, LoreStore) {
-        let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("lore-folder-\(UUID())")
-        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
-        let s = LoreStore(
-            documents: FakeDocs(),
-            indexPath: root.appendingPathComponent(".idx.sqlite"))
-        try s.setVaultRootForTesting(root)
-        return (root, s)
+        try makeRenameVault(prefix: "lore-folder")
     }
 
     @discardableResult
     private func write(_ dir: URL, _ name: String, _ text: String) throws -> URL {
-        let url = dir.appendingPathComponent(name)
-        try text.write(to: url, atomically: true, encoding: .utf8)
-        return url
+        try writeRenameFixture(dir, name, text)
     }
 
     /// The headline: every document beneath the folder moves, inbound links are

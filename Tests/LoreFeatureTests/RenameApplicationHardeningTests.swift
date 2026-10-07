@@ -6,20 +6,11 @@ import XCTest
 @MainActor
 final class RenameApplicationHardeningTests: XCTestCase {
     private func vault() throws -> (URL, LoreStore) {
-        let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("lore-rename2-\(UUID())")
-        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
-        let s = LoreStore(
-            documents: FakeDocs(),
-            indexPath: root.appendingPathComponent(".idx.sqlite"))
-        try s.setVaultRootForTesting(root)
-        return (root, s)
+        try makeRenameVault(prefix: "lore-rename2")
     }
 
     private func write(_ root: URL, _ name: String, _ text: String) throws -> URL {
-        let url = root.appendingPathComponent(name)
-        try text.write(to: url, atomically: true, encoding: .utf8)
-        return url
+        try writeRenameFixture(root, name, text)
     }
 
     /// FINDING 1. A tab that is dirty AND already conflicted cannot flush: its
