@@ -48,7 +48,7 @@ extension MarkdownStyleRenderer {
     /// trade this codebase does not make.
     static func collapse(_ ranges: [Range<Int>], in storage: NSTextStorage) {
         let length = storage.length
-        let collapsedFont = NSFont.systemFont(ofSize: 0.01)
+        let collapsedFont = NSFont.systemFont(ofSize: 0.01)  // design-lint: allow font-size collapsed-marker geometry
         storage.beginEditing()
         for range in coalesce(ranges) {
             let ns = NSRange(location: range.lowerBound, length: range.count)

@@ -128,7 +128,7 @@ struct MarkdownTheme: Equatable {
         maxMeasure = settings.maxMeasure
         renderTagsAsChips = settings.renderTagsAsChips
         isDarkSurface = tokens.foreground.relativeLuminance > Self.darkSurfaceLuminance
-        bodyFont = .systemFont(ofSize: settings.bodySize)
+        bodyFont = .systemFont(ofSize: settings.bodySize)  // design-lint: allow font-size token-gap nsfont
         monoFont = .monospacedSystemFont(
             ofSize: settings.bodySize * Self.monoRatio,
             weight: .regular)

@@ -124,9 +124,10 @@ extension MarkdownStyleRenderer {
         // in Lore means "you can click this" — so every fence wore what looked
         // like a button in its corner. Obsidian's language label is small,
         // quiet and unmistakably inert; this is the same idea.
+        let labelSize = theme.bodySize * 0.85
         storage.addAttribute(
             .font,
-            value: NSFont.systemFont(ofSize: theme.bodySize * 0.85),
+            value: NSFont.systemFont(ofSize: labelSize),  // design-lint: allow font-size token-gap type.editor.label
             range: labelRange)
         storage.addAttribute(
             .foregroundColor,

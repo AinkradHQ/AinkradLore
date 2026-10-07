@@ -158,7 +158,8 @@ extension MarkdownEditor {
         context.coordinator.headingCompletions = headingCompletions
         context.coordinator.writePastedImage = writePastedImage
         context.coordinator.writeDroppedFile = writeDroppedFile
-        context.coordinator.stylingNotice = Self.addStylingNotice(to: scroll, tokens: tokens)
+        context.coordinator.stylingNotice = Self.addStylingNotice(
+            to: scroll, tokens: tokens, skin: context.coordinator.skin)
         context.coordinator.onSelectionChange = onSelectionChange
         context.coordinator.onTagClick = onTagClick
         tv.string = text
@@ -190,12 +191,13 @@ extension MarkdownEditor {
     /// document scrolls under it, and so it never becomes part of the text.
     private static func addStylingNotice(
         to scroll: NSScrollView,
-        tokens: HostThemeTokens
+        tokens: HostThemeTokens, skin: AinkradSkin
     ) -> NSTextField {
         let notice = NSTextField(
             labelWithString:
                 "Styling off — document over \(MarkdownDocumentModel.stylingHardCap / (1024 * 1024)) MB")
-        notice.font = .systemFont(ofSize: 11)
+        let captionSize = CGFloat(skin.type.roles.caption)
+        notice.font = .systemFont(ofSize: captionSize)  // design-lint: allow font-size token-gap nsfont
         notice.textColor = NSColor(tokens.accentSecondary)
         notice.isHidden = true
         notice.translatesAutoresizingMaskIntoConstraints = false
