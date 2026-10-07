@@ -56,6 +56,7 @@ public struct ImportPreviewSheet: View {
 
     @Environment(\.ainkradTheme) private var theme
     @Environment(\.ainkradTypography) private var typo
+    @Environment(\.ainkradSkin) private var skin
 
     public init(
         selection: ImportSelection, onImport: @escaping (ImportPlan) -> Void,
@@ -96,7 +97,7 @@ public struct ImportPreviewSheet: View {
             }
         }
         .padding(AinkradSpacing.lg)
-        .frame(minWidth: 620, minHeight: 460)
+        .frame(minWidth: CGFloat(skin.size.s620), minHeight: CGFloat(skin.size.s460))
         .background(theme.surface)
     }
 
