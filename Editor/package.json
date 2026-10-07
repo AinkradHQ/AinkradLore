@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "esbuild src/editor.js --bundle --format=iife --outfile=dist/editor.js --minify && npm run build:katex && npm run assets",
-    "assets": "cp node_modules/katex/dist/katex.min.css dist/ && cp node_modules/katex/dist/fonts/*.woff2 dist/ && sed -i '' 's|url(fonts/|url(|g' dist/katex.min.css",
+    "assets": "cp src/index.html dist/ && cp node_modules/katex/dist/katex.min.css dist/ && cp node_modules/katex/dist/fonts/*.woff2 dist/ && sed -i '' 's|url(fonts/|url(|g' dist/katex.min.css",
     "build:katex": "esbuild src/katex-entry.js --bundle --format=iife --outfile=dist/katex.js --minify"
   },
   "devDependencies": {

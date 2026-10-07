@@ -96,6 +96,7 @@ struct CM6EditorView: NSViewRepresentable {
         webView.setValue(false, forKey: "drawsBackground")
         coordinator.webView = webView
         coordinator.pendingDocument = text
+        coordinator.skin = context.environment.ainkradSkin
         coordinator.pendingTheme = (tokens, settings)
         coordinator.allowsTaskToggle = allowsTaskToggle
         coordinator.adopt(assetHandlerOf: webView, resolving: resolveEmbedTarget)
@@ -127,6 +128,7 @@ struct CM6EditorView: NSViewRepresentable {
     func updateNSView(_ webView: WKWebView, context: Context) {
         context.coordinator.allowsTaskToggle = allowsTaskToggle
         context.coordinator.adopt(assetHandlerOf: webView, resolving: resolveEmbedTarget)
+        context.coordinator.skin = context.environment.ainkradSkin
         context.coordinator.push(document: text)
         context.coordinator.push(tokens: tokens, settings: settings)
     }
@@ -150,6 +152,12 @@ struct CM6EditorView: NSViewRepresentable {
         /// Set before the page has loaded; applied on `didFinish`.
         var pendingDocument: String?
         var pendingTheme: (HostThemeTokens, EditorSettings)?
+        /// The environment's skin, kept in sync by `updateNSView` as the
+        /// native editor's coordinator keeps its own.
+        var skin: AinkradSkin = .standard
+        /// What the page's variables were last set from; cleared on every
+        /// load, since a fresh page has only its `:root` defaults.
+        private var lastPushedTheme: (HostThemeTokens, EditorSettings, AinkradSkin)?
         private var isLoaded = false
 
         /// The last text the EDITOR told us about.
@@ -347,26 +355,18 @@ struct CM6EditorView: NSViewRepresentable {
                 pendingTheme = (tokens, settings)
                 return
             }
-            let theme = MarkdownTheme(tokens: tokens, settings: settings)
-            // Colour stays the host's, scale stays Lore's — the same division
-            // `MarkdownTheme` already encodes for the native renderer.
-            let css: [String: String] = [
-                "--bg": Self.css(tokens.background),
-                "--fg": Self.css(tokens.foreground),
-                "--accent-primary": Self.css(tokens.accentPrimary),
-                "--surface-elevated": Self.css(tokens.surfaceElevated),
-                "--text-faint": Self.css(tokens.foreground, alpha: 0.4),
-                "--body-size": "\(theme.bodyFont.pointSize)px",
-                "--line-height": "\(theme.lineHeightMultiple)",
-                // The measure, as a real cap. `nil` means "fill the width",
-                // which in CSS is `none` rather than a very large number.
-                "--measure": theme.maxMeasure.map { "\($0)px" } ?? "none",
-                "--content-inset": "\(theme.contentInset)px",
-            ]
-            let assignments = css.map {
-                "d.style.setProperty('\($0.key)', '\($0.value)');"
-            }.joined()
-            evaluate("(() => { const d = document.documentElement; \(assignments) })()")
+            // Colour stays the host's, scale stays Lore's — see
+            // `CM6ThemeBridge`. Pushed only when an input changed:
+            // `updateNSView` runs on every keystroke, and the set is the
+            // whole skin.
+            if lastPushedTheme?.0 != tokens || lastPushedTheme?.1 != settings
+                || lastPushedTheme?.2 != skin
+            {
+                lastPushedTheme = (tokens, settings, skin)
+                let theme = MarkdownTheme(tokens: tokens, settings: settings, skin: skin)
+                evaluate(
+                    CM6ThemeBridge.pushScript(CM6ThemeBridge.cssVariables(skin: skin, theme: theme)))
+            }
             // Not everything is a CSS variable. These two change what is
             // DECORATED, not how it looks, so they have to reach the editor as
             // state and force a redraw — a setting that only takes effect on
@@ -453,6 +453,7 @@ struct CM6EditorView: NSViewRepresentable {
 
         private func finishLoading() {
             isLoaded = true
+            lastPushedTheme = nil
             if let document = pendingDocument {
                 ending = CM6LineEndings.dominant(in: document)
                 evaluate(
@@ -484,16 +485,6 @@ struct CM6EditorView: NSViewRepresentable {
                 let array = String(data: data, encoding: .utf8)
             else { return "\"\"" }
             return String(array.dropFirst().dropLast())
-        }
-
-        static func css(_ color: Color, alpha: Double = 1) -> String {
-            let ns = NSColor(color).usingColorSpace(.sRGB) ?? .textColor
-            let r = Int((ns.redComponent * 255).rounded())
-            let g = Int((ns.greenComponent * 255).rounded())
-            let b = Int((ns.blueComponent * 255).rounded())
-            return alpha >= 1
-                ? "rgb(\(r), \(g), \(b))"
-                : "rgba(\(r), \(g), \(b), \(alpha))"
         }
     }
 }
