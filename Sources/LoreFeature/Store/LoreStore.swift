@@ -168,6 +168,9 @@ final class LoreStore {
         // Settings and for its tool listing too, and neither needs any of
         // that — only a Lore view or a tool call does (`activateVaultIfNeeded`).
         pendingVaultRoot = VaultBookmark.resolve(from: documents)
+        #if DEBUG
+        if let fixture = VaultBookmark.debugFixtureVault() { pendingVaultRoot = fixture }
+        #endif
     }
 
     /// The bookmarked vault, until something actually needs it indexed.
