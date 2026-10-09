@@ -437,3 +437,14 @@ final class LoreStoreTests: XCTestCase {
         XCTAssertEqual(s.linkCompletions(matching: "bet").map(\.title), ["Beta Notes"])
     }
 }
+
+final class DebugFixtureVaultTests: XCTestCase {
+    func test_fixtureVaultArgumentResolvesOnlyAnExistingFolder() throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("fx-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        XCTAssertEqual(VaultBookmark.debugFixtureVault { _ in " \(dir.path) " }, dir.standardizedFileURL)
+        XCTAssertNil(VaultBookmark.debugFixtureVault { _ in dir.appendingPathComponent("missing").path })
+        XCTAssertNil(VaultBookmark.debugFixtureVault { _ in nil })
+    }
+}
