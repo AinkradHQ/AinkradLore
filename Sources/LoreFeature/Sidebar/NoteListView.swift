@@ -180,7 +180,7 @@ struct NoteListView: View {
                                 // documents it has not opened.
                                 .overlay {
                                     if focusedIndex == index {
-                                        ChamferShape(cut: CGFloat(skin.cut.c6))
+                                        skin.shape(cut: CGFloat(skin.cut.c6))
                                             .strokeBorder(
                                                 theme.tokens.accentPrimary,
                                                 lineWidth: 1.5)
