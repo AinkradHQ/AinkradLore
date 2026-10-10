@@ -136,12 +136,7 @@ struct LoreSpineRail: View {
         }
         .padding(AinkradSpacing.sm)
         .frame(width: CGFloat(skin.size.s240), alignment: .leading)
-        .background(theme.tokens.surfaceElevated)
-        .clipShape(skin.shape(cut: CGFloat(skin.cut.c6)))
-        .shadow(
-            color: .black.opacity(skin.opacity.o30),
-            radius: CGFloat(skin.size.s12), x: 2
-        )
+        .modifier(OutlineSurface(theme: theme))
         .transition(.opacity)
     }
 
@@ -178,5 +173,25 @@ struct LoreSpineRail: View {
     static func tickWidth(forLevel level: Int) -> CGFloat {
         let clamped = min(max(level, 1), 6)
         return 9 - CGFloat(clamped - 1) * 1.2
+    }
+}
+
+/// Neon's opaque card, or the kit's Liquid Glass panel.
+private struct OutlineSurface: ViewModifier {
+    let theme: HostTheme
+    @Environment(\.ainkradSkin) private var skin
+
+    @ViewBuilder func body(content: Content) -> some View {
+        if skin.usesNativeGlass {
+            content.ainkradPanel()
+        } else {
+            content
+                .background(theme.tokens.surfaceElevated)
+                .clipShape(skin.shape(cut: CGFloat(skin.cut.c6)))
+                .shadow(
+                    color: .black.opacity(skin.opacity.o30),
+                    radius: CGFloat(skin.size.s12), x: 2
+                )
+        }
     }
 }

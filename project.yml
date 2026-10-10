@@ -33,7 +33,11 @@ packages:
     # 43868c9: AinkradSurfaceSettings -- the shared Open as / Open in rows.
     # c465461: AinkradLaunchIntent -- the shared "open this there" payload.
     # 15b5799: PluginOverlaySize -- overlay size as a third per-app axis.
-    revision: 2f0bb8ffb982019ba93b4194f9ca7fa541fdd808
+    # fb4be6d: Glass Native (#96-#106) -- kit components draw Apple's own controls
+    #   and Liquid Glass when skin.usesNativeGlass. NOT releasable until the
+    #   installed host pins fb4be6d.
+    # aa3fc95: AinkradMenuButton keeps a custom label under Glass (#107).
+    revision: aa3fc955d523a9ec940626bddeeabd927c587737
   GRDB:
     url: https://github.com/groue/GRDB.swift
     from: "6.29.3"

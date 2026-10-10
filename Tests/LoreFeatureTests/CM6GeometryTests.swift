@@ -279,7 +279,7 @@ final class CM6GeometryTests: XCTestCase {
             .filter { $0.pathExtension == "swift" }
         XCTAssertGreaterThan(files.count, 20, "the test sources were not found")
         var offenders: [String] = []
-        for file in files {
+        for file in files where !Self.allowedWindowFiles.contains(file.lastPathComponent) {
             guard let source = try? String(contentsOf: file, encoding: .utf8) else { continue }
             for (index, line) in source.split(separator: "\n", omittingEmptySubsequences: false)
                 .enumerated()
@@ -300,6 +300,12 @@ final class CM6GeometryTests: XCTestCase {
             offenders, [],
             "these put a window on the owner's screen during a test run")
     }
+
+    /// The one exception: the Glass sweep (skipped unless its env vars are
+    /// set) must show a real window, because off-screen capture cannot draw
+    /// Liquid Glass. Its window sits at DESKTOP level, behind every other
+    /// window, takes no focus and is gone after each shot.
+    private static let allowedWindowFiles: Set<String> = ["LoreGlassSweepTests.swift"]
 
     /// The calls that put a window on the screen.
     private static let forbiddenCalls = [
