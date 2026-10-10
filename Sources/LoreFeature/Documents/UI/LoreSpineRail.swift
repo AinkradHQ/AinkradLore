@@ -137,7 +137,7 @@ struct LoreSpineRail: View {
         .padding(AinkradSpacing.sm)
         .frame(width: CGFloat(skin.size.s240), alignment: .leading)
         .background(theme.tokens.surfaceElevated)
-        .clipShape(ChamferShape(cut: CGFloat(skin.cut.c6)))
+        .clipShape(skin.shape(cut: CGFloat(skin.cut.c6)))
         .shadow(
             color: .black.opacity(skin.opacity.o30),
             radius: CGFloat(skin.size.s12), x: 2
