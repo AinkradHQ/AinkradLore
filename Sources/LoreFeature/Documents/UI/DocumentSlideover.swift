@@ -33,9 +33,24 @@ struct DocumentSlideover<Content: View>: View {
         }
         .padding(AinkradSpacing.md)
         .frame(width: Self.width)
-        .background(theme.tokens.surfaceElevated)
-        .shadow(
-            color: .black.opacity(skin.opacity.o35),
-            radius: CGFloat(skin.size.s12), x: -4, y: 0)
+        .modifier(SlideoverSurface(theme: theme))
+    }
+}
+
+/// Neon's opaque slab with a drop shadow, or the kit's Liquid Glass panel.
+private struct SlideoverSurface: ViewModifier {
+    let theme: HostTheme
+    @Environment(\.ainkradSkin) private var skin
+
+    @ViewBuilder func body(content: Content) -> some View {
+        if skin.usesNativeGlass {
+            content.ainkradPanel()
+        } else {
+            content
+                .background(theme.tokens.surfaceElevated)
+                .shadow(
+                    color: .black.opacity(skin.opacity.o35),
+                    radius: CGFloat(skin.size.s12), x: -4, y: 0)
+        }
     }
 }

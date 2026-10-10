@@ -46,6 +46,28 @@ struct DocumentActionsMenu: View {
     }
 
     private func row(_ item: AinkradMenuItem) -> some View {
+        ActionRow(item: item, theme: theme, onDismiss: onDismiss)
+    }
+}
+
+/// One menu row. A view, not a builder, so it can own its hover state.
+private struct ActionRow: View {
+    let item: AinkradMenuItem
+    let theme: HostTheme
+    let onDismiss: () -> Void
+
+    @Environment(\.ainkradTypography) private var typo
+    @Environment(\.ainkradSkin) private var skin
+    @Environment(\.ainkradStatusColors) private var statusColors
+    @State private var hovering = false
+
+    /// Destructive rows read in the accent under Neon; Liquid Glass uses the
+    /// system convention, the danger colour.
+    private var destructiveColor: Color {
+        skin.usesNativeGlass ? statusColors.danger : theme.tokens.accentPrimary
+    }
+
+    var body: some View {
         Button {  // design-lint: allow raw-control kit-gap AinkradMenuRow
             // Dismissed BEFORE the action runs: several of these open a sheet,
             // and a menu left standing over one swallows its first click.
@@ -63,16 +85,19 @@ struct DocumentActionsMenu: View {
                     AinkradKbd(shortcut)
                 }
             }
-            .foregroundStyle(
-                item.isDestructive
-                    ? theme.tokens.accentPrimary
-                    : theme.tokens.foreground
-            )
+            .foregroundStyle(item.isDestructive ? destructiveColor : theme.tokens.foreground)
             .padding(.horizontal, AinkradSpacing.sm)
             .padding(.vertical, AinkradSpacing.xs)
             .frame(maxWidth: .infinity, alignment: .leading)
+            // Liquid Glass: the menu highlight under the pointer, like a system menu.
+            .background {
+                if skin.usesNativeGlass {
+                    Color.clear.ainkradRowBackground(isSelected: false, isHovered: hovering)
+                }
+            }
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .onHover { hovering = $0 }
     }
 }

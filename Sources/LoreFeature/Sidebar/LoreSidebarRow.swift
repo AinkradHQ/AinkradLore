@@ -163,9 +163,13 @@ private struct SelectionBar: View {
     @Environment(\.ainkradSkin) private var skin
 
     var body: some View {
-        Rectangle()
-            .fill(theme.accentPrimary)
-            .frame(width: CGFloat(skin.size.s2))
-            .accessibilityHidden(true)
+        // Liquid Glass: the kit row's macOS selection (accent fill, contrasting
+        // text) already carries the second channel, and an extra bar is Neon.
+        if !skin.usesNativeGlass {
+            Rectangle()
+                .fill(theme.accentPrimary)
+                .frame(width: CGFloat(skin.size.s2))
+                .accessibilityHidden(true)
+        }
     }
 }
