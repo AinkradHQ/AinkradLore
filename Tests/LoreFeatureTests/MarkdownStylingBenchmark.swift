@@ -171,21 +171,23 @@ final class MarkdownStylingCacheTests: XCTestCase {
             resetParseCounter()
             tv.string = large
             coordinator.applyStyles()
+            // `mainThreadCount`: the off-actor parse this call launches
+            // records on a worker thread and can land before this line.
             XCTAssertEqual(
-                MarkdownParseCounter.count, 0,
+                MarkdownParseCounter.mainThreadCount, 0,
                 "a large document must not be parsed on the main actor")
             XCTAssertTrue(
                 coordinator.styleCache.describes(large),
                 "but the cache must claim currency at once, "
                     + "or every redraw re-enters this path")
 
-            let landed = expectation(description: "off-actor parse landed")
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { landed.fulfill() }
-            wait(for: [landed], timeout: 3)
-            XCTAssertEqual(MarkdownParseCounter.count, 1, "and exactly one parse, off-actor")
+            // Wait on the completion itself, not a guessed interval: under
+            // load the off-actor parse can take longer than any fixed sleep.
             XCTAssertTrue(
-                coordinator.cachedSpansForTesting.contains { $0.kind == .strong },
+                waitUntil { coordinator.cachedSpansForTesting.contains { $0.kind == .strong } },
                 "the document must end up styled")
+            XCTAssertEqual(MarkdownParseCounter.count, 1, "and exactly one parse, off-actor")
+            XCTAssertEqual(MarkdownParseCounter.mainThreadCount, 0, "none of it on the main actor")
         }
     }
 

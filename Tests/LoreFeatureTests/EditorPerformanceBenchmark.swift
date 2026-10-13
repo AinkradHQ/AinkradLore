@@ -218,15 +218,20 @@ final class EditorPerformanceBenchmark: XCTestCase {
         let (coordinator, _) = makeEditorWithoutStyling(body)
         withExtendedLifetime(coordinator) {
             resetParseCounter()
-            let started = Date()
+            // Main-thread CPU time, not wall-clock: under load the main
+            // thread is descheduled for longer than the whole budget while
+            // doing nothing wrong. CPU time only grows with work it did.
+            let started = mainThreadCPUSeconds()
             coordinator.applyStyles()
-            let elapsed = Date().timeIntervalSince(started)
+            let elapsed = mainThreadCPUSeconds() - started
+            // `mainThreadCount`, not `count`: the open path's own off-actor
+            // parse records on a worker thread and can land before this line.
             XCTAssertEqual(
-                MarkdownParseCounter.count, 0,
+                MarkdownParseCounter.mainThreadCount, 0,
                 "the open path must not parse on the main actor")
             XCTAssertLessThan(
                 elapsed, 0.2,
-                "and it must therefore return promptly — took \(elapsed)s")
+                "and it must therefore return promptly — took \(elapsed)s of CPU")
         }
     }
 
@@ -243,6 +248,12 @@ final class EditorPerformanceBenchmark: XCTestCase {
                 coordinator.cachedSpansForTesting.contains { $0.kind == .strong },
                 "the document must end up styled")
         }
+    }
+
+    private func mainThreadCPUSeconds() -> TimeInterval {
+        var now = timespec()
+        clock_gettime(CLOCK_THREAD_CPUTIME_ID, &now)
+        return TimeInterval(now.tv_sec) + TimeInterval(now.tv_nsec) / 1e9
     }
 
     private func makeEditorWithoutStyling(_ text: String)
