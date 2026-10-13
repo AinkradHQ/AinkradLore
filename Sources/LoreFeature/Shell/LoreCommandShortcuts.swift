@@ -27,6 +27,7 @@ import SwiftUI
 /// `[[`-completion popup.
 struct LoreCommandShortcuts: ViewModifier {
     let runner: LoreCommandRunner
+    @Environment(\.ainkradPaneIsFocused) private var isFocused
 
     func body(content: Content) -> some View {
         content.overlay {
@@ -35,7 +36,9 @@ struct LoreCommandShortcuts: ViewModifier {
             // the discoverable, screen-reader-navigable route to the same
             // commands — a dozen invisible buttons in the tree would be noise.
             ZStack {
-                ForEach(LoreCommands.available(in: runner.context)) { command in
+                // Only the focused pane claims keys: an unfocused one would take the
+                // chord from the pane you are working in, or from the host (FD36).
+                ForEach(isFocused ? LoreCommands.available(in: runner.context) : []) { command in
                     if let shortcut = command.shortcut {
                         Button(command.title) {  // design-lint: allow raw-control key-equivalent claim
                             runner.run(command.id)
