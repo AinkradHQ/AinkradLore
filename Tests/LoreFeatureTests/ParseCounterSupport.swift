@@ -63,4 +63,16 @@ extension XCTestCase {
         }
         MarkdownParseCounter.reset()
     }
+
+    /// Spins the run loop until `condition` holds — for off-actor work that
+    /// lands back on the main queue — and reports whether it did. The timeout
+    /// is a backstop for a loaded machine, not an expected duration.
+    func waitUntil(timeout: TimeInterval = 15, _ condition: () -> Bool) -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        while !condition() {
+            if Date() >= deadline { return false }
+            RunLoop.current.run(mode: .default, before: Date().addingTimeInterval(0.01))
+        }
+        return true
+    }
 }

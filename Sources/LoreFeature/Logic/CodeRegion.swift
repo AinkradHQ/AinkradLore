@@ -100,6 +100,7 @@ enum MarkdownParseCounter {
     private static let lock = NSLock()
     /// `nonisolated(unsafe)` with an `NSLock`: every read and write holds `lock`.
     nonisolated(unsafe) private static var stored = 0
+    nonisolated(unsafe) private static var storedOnMain = 0
 
     static var count: Int {
         lock.lock()
@@ -107,15 +108,30 @@ enum MarkdownParseCounter {
         return stored
     }
 
+    /// Only the parses that ran ON THE MAIN THREAD — what the "does not parse
+    /// on the main actor" guards actually claim. `count` cannot answer that:
+    /// the very open path under test launches an off-actor parse, and that
+    /// increment can land between `applyStyles()` returning and the assertion
+    /// reading it (more often on a loaded machine), reading 1 for a main actor
+    /// that never parsed.
+    static var mainThreadCount: Int {
+        lock.lock()
+        defer { lock.unlock() }
+        return storedOnMain
+    }
+
     static func reset() {
         lock.lock()
         defer { lock.unlock() }
         stored = 0
+        storedOnMain = 0
     }
 
     static func record() {
+        let onMain = Thread.isMainThread
         lock.lock()
         defer { lock.unlock() }
         stored += 1
+        if onMain { storedOnMain += 1 }
     }
 }

@@ -287,18 +287,34 @@ final class CM6ParityShotTests: XCTestCase {
         try waitFor("the maths engine") {
             ((try? self.js("window.loreEditor.mathEngineLoaded()", in: webView)) as? Bool) == true
         }
-        settle(1)
+        // Readiness, not a fixed settle: fonts in and the document in the
+        // DOM. A fixed second was not enough on a loaded machine.
+        try waitFor("fonts and the rendered document") {
+            ((try? self.js(
+                "document.fonts.status === 'loaded' && "
+                    + "(document.querySelector('.cm-content')?.childElementCount ?? 0) > 0",
+                in: webView)) as? Bool) == true
+        }
+        // Bounded retry: under heavy load the web process can miss a snapshot
+        // (nil image) even once the page is ready. A surface that never
+        // paints still fails here, and the blank-image check still runs.
         var captured: NSImage?
-        var done = false
-        webView.takeSnapshot(with: nil) { image, _ in
-            captured = image
-            done = true
+        var lastError: Error?
+        for _ in 0..<3 where captured == nil {
+            var done = false
+            webView.takeSnapshot(with: nil) { image, error in
+                captured = image
+                lastError = error
+                done = true
+            }
+            let deadline = Date().addingTimeInterval(20)
+            while !done, Date() < deadline {
+                RunLoop.current.run(mode: .default, before: Date().addingTimeInterval(0.02))
+            }
         }
-        let deadline = Date().addingTimeInterval(20)
-        while !done, Date() < deadline {
-            RunLoop.current.run(mode: .default, before: Date().addingTimeInterval(0.02))
-        }
-        let image = try XCTUnwrap(captured, "takeSnapshot produced nothing")
+        let image = try XCTUnwrap(
+            captured,
+            "takeSnapshot produced nothing after 3 attempts: \(String(describing: lastError))")
         let tiff = try XCTUnwrap(image.tiffRepresentation)
         return try XCTUnwrap(NSBitmapImageRep(data: tiff))
     }
