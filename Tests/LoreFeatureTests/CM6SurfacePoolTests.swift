@@ -28,46 +28,31 @@ final class CM6SurfacePoolTests: XCTestCase {
         return CM6EditorSurfacePool.shared
     }
 
-    /// Wait until the machine's WebContent process set stops changing, then
-    /// return it.
+    /// The pid of the WebContent process serving `view`, 0 before it has one.
     ///
-    /// The measurement below attributes processes by pid DIFF against a
-    /// snapshot, so anything that appears AFTER the snapshot is counted as this
-    /// test's — including a process another test's web view was still starting
-    /// when the snapshot was taken. Three more web-view suites were added to
-    /// this target during M10 E2–E4, and the test began failing in the full run
-    /// with two processes and 92 MB while passing in isolation at one and
-    /// 40.7 MB. The pool was not at fault; the measurement was.
-    ///
-    /// Waiting for stillness rather than sleeping a fixed time: the neighbours'
-    /// teardown is not on a schedule this test knows.
+    /// Attribution by IDENTITY. This test used to diff the machine's
+    /// WebContent pids before and after, which counted every process any other
+    /// app (the daily host, Safari, Mail) or a neighbouring test happened to
+    /// start meanwhile — it failed on a busy machine with the pool untouched.
+    /// `_webProcessIdentifier` is WebKit SPI, read by KVC in a test only.
+    /// A FAILURE, not a skip, if the SPI goes away: a skip would silently
+    /// retire the guard.
     @MainActor
-    private func settledProcesses(timeout: TimeInterval = 8) -> [Int32: Double] {
-        var previous = Self.webContentProcesses()
-        var stableSince = Date()
-        let deadline = Date().addingTimeInterval(timeout)
-        while Date() < deadline {
-            RunLoop.current.run(mode: .default, before: Date().addingTimeInterval(0.2))
-            let current = Self.webContentProcesses()
-            if Set(current.keys) == Set(previous.keys) {
-                // Half a second of an unchanged pid set is enough: a starting
-                // process registers well inside that.
-                if Date().timeIntervalSince(stableSince) > 0.5 { return current }
-            } else {
-                stableSince = Date()
-            }
-            previous = current
+    private static func contentProcess(of view: WKWebView) -> Int32 {
+        let key = "_webProcessIdentifier"
+        guard view.responds(to: NSSelectorFromString(key)) else {
+            XCTFail("WebKit no longer exposes \(key); re-attribute the process")
+            return 0
         }
-        return previous
+        return (view.value(forKey: key) as? NSNumber)?.int32Value ?? 0
     }
 
     /// Every WebContent process, by pid and resident MB.
     ///
-    /// Attributed by pid DIFF, not by parent: WebKit does not launch content
-    /// processes as children of the process that opened the web view, so
-    /// `ppid` matching finds nothing (measured). Other WebKit apps on the
-    /// machine have their own, so a name filter alone would report their
-    /// memory as ours.
+    /// Only ever indexed by a pid from `contentProcess(of:)`: WebKit does not
+    /// launch content processes as children of the process that opened the
+    /// web view, so `ppid` matching finds nothing (measured), and other WebKit
+    /// apps on the machine have their own.
     private static func webContentProcesses() -> [Int32: Double] {
         let task = Process()
         task.executableURL = URL(fileURLWithPath: "/bin/ps")
@@ -113,11 +98,10 @@ final class CM6SurfacePoolTests: XCTestCase {
     /// And the process count follows, which is the claim that matters.
     @MainActor
     func test_openingTenNotesDoesNotGrowTheProcessCount() throws {
-        let before = settledProcesses()
         let pool = freshPool()
         let index = try XCTUnwrap(CM6EditorView.Coordinator.bundledIndexURL)
 
-        var peakOurs = 0
+        var ours: Set<Int32> = []
         for _ in 0..<10 {
             let (view, isPreloaded) = pool.acquire { _ in }
             if !isPreloaded {
@@ -132,20 +116,20 @@ final class CM6SurfacePoolTests: XCTestCase {
                     allowingReadAccessTo: index.deletingLastPathComponent())
                 settle(3)
             }
-            peakOurs = max(
-                peakOurs,
-                Self.webContentProcesses().filter { before[$0.key] == nil }.count)
+            let pid = Self.contentProcess(of: view)
+            XCTAssertGreaterThan(pid, 0, "a loaded surface must have a content process")
+            ours.insert(pid)
             pool.release(view, handlerName: "lore")
         }
 
-        let ours = Self.webContentProcesses().filter { before[$0.key] == nil }
-        let total = ours.values.reduce(0, +)
+        let resident = Self.webContentProcesses()
+        let total = ours.compactMap { resident[$0] }.reduce(0, +)
         print(
             String(
-                format: "POOL notes=10 surfaces=%d peakProcs=%d procs=%d rss=%.1fMB",
-                pool.created, peakOurs, ours.count, total))
+                format: "POOL notes=10 surfaces=%d procs=%d rss=%.1fMB",
+                pool.created, ours.count, total))
         XCTAssertLessThanOrEqual(
-            peakOurs, 1,
+            ours.count, 1,
             "ten notes must not open ten content processes")
         XCTAssertLessThan(
             total, 60,
