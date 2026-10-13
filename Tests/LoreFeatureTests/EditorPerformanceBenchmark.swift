@@ -240,13 +240,12 @@ final class EditorPerformanceBenchmark: XCTestCase {
         let (coordinator, tv) = makeEditorWithoutStyling("# Heading\n\n**bold**\n")
         withExtendedLifetime(coordinator) {
             coordinator.applyStyles()
-            let settled = expectation(description: "off-actor open parse landed")
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { settled.fulfill() }
-            wait(for: [settled], timeout: 2)
-            XCTAssertTrue(coordinator.styleCache.describes(tv.string))
+            // Wait on the styled result, not a fixed 0.6 s: under load the
+            // off-actor parse can land later than any guessed interval.
             XCTAssertTrue(
-                coordinator.cachedSpansForTesting.contains { $0.kind == .strong },
+                waitUntil { coordinator.cachedSpansForTesting.contains { $0.kind == .strong } },
                 "the document must end up styled")
+            XCTAssertTrue(coordinator.styleCache.describes(tv.string))
         }
     }
 
