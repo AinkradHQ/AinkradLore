@@ -46,7 +46,9 @@ packages:
     # 20fb3db: kit parity batch 6 (#118) for the Forge mockups; additive, abi-check clean.
     # ba44099: Citadel kit (#119-#122): chart family, AinkradToolCard, AinkradChatBubble, palette.accentViolet
     #   (theme format 3), 10 Citadel components, AinkradAgentFigure; additive, abi-check clean.
-    revision: ba4409908cadd0d8a163c656d691a9b3ec2975c0
+    # 141d5b8: Citadel kit options (#123) — card rimTint, tone stacked bars, nav counts, banner action,
+    #   sentence-case stat labels; additive, abi-check clean.
+    revision: 141d5b80468a5aa43e688c2716e1cc715b17564f
   GRDB:
     url: https://github.com/groue/GRDB.swift
     from: "6.29.3"
