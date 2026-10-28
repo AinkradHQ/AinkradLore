@@ -8,7 +8,7 @@ export DEVELOPER_DIR
 # plugin instead, and the difference is invisible unless you check the process's
 # mappings with `vmmap` — which is how M9 spent four milestones believing it had
 # verified a load it had not.
-DEV_PLUGINS := $(HOME)/Library/Application Support/com.ainkrad.app/Cache/DevPlugins
+DEV_PLUGINS ?= $(HOME)/Library/Application Support/com.ainkrad.app/Cache/DevPlugins
 # The Dev Host is a SEPARATE app with its own bundle identifier, so it reads a
 # different directory. `sideload` alone can never reach it — that is why the
 # plugin went three milestones without once being loaded by a host.
@@ -48,6 +48,8 @@ build: lint generate ; xcodebuild -scheme LorePlugin -configuration Debug -deriv
 # (LorePlugin.bundle/LorePlugin.bundle) and leaves the old binary in place,
 # which looks like a sideload that did nothing.
 sideload: build
+	@case "$(DEV_PLUGINS)" in "$(HOME)/Library/Application Support/"*) \
+		[ "$(CONFIRM_DAILY)" = 1 ] || { echo "refusing: DEV_PLUGINS is the daily app's folder (set DEV_PLUGINS=<fixture>/DevPlugins or CONFIRM_DAILY=1)"; exit 1; };; esac
 	mkdir -p "$(DEV_PLUGINS)"
 	ditto build/Build/Products/Debug/LorePlugin.bundle "$(DEV_PLUGINS)/LorePlugin.bundle"
 	@shasum -a 1 "$(DEV_PLUGINS)/LorePlugin.bundle/Contents/MacOS/LorePlugin" \
